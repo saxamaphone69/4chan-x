@@ -4,7 +4,7 @@ Header =
 
     menuButton = $.el 'span',
       className: 'menu-button'
-    $.extend menuButton, <%= html('<i></i>') %>
+    $.extend menuButton, <%= html('<i class="fa fa-angle-down"></i>') %>
 
     box = UI.checkbox
 
