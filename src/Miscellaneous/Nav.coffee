@@ -11,10 +11,10 @@ Nav =
     span = $.el 'span',
       id: 'navlinks'
     prev = $.el 'a',
-      textContent: '▲'
+      class: 'fa fa-arrow-up'
       href: 'javascript:;'
     next = $.el 'a',
-      textContent: '▼'
+      class: 'fa fa-arrow-down'
       href: 'javascript:;'
 
     $.on prev, 'click', @prev
