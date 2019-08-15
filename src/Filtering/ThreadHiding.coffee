@@ -117,8 +117,8 @@ ThreadHiding =
     hide: ->
       makeStub = $('input', @parentNode).checked
       {thread} = ThreadHiding.menu
-      ThreadHiding.hide thread, makeStub
-      ThreadHiding.saveHiddenState thread, makeStub
+      ThreadHiding.hide thread, @label, makeStub
+      ThreadHiding.saveHiddenState thread, @label, makeStub
       $.event 'CloseMenu'
 
     show: ->
@@ -180,7 +180,7 @@ ThreadHiding =
     if thread.isHidden
       ThreadHiding.show thread
     else
-      ThreadHiding.hide thread
+      ThreadHiding.hide thread, 'Manually hidden'
     ThreadHiding.saveHiddenState thread
 
   hide: (thread, makeStub=Conf['Stubs']) ->

@@ -188,8 +188,8 @@ PostHiding =
     PostHiding[(if post.isHidden then 'show' else 'hide')] post
     PostHiding.saveHiddenState post, post.isHidden
 
-  hide: (post, label, makeStub=Conf['Stubs'], hideRecursively=Conf['Recursive Hiding']) ->
-    @labels.push label unless label in @labels
+  hide: (post, makeStub=Conf['Stubs'], hideRecursively=Conf['Recursive Hiding']) ->
+    post.labels.push label unless label in post.labels
     return if post.isHidden
     post.isHidden = true
 

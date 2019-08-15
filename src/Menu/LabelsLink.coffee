@@ -3,25 +3,16 @@ LabelsLink =
     return unless g.VIEW in ['index', 'thread'] and Conf['Menu']
 
     div = $.el 'div',
-      className: 'labels-link'
       textContent: 'Labels'
 
-    entry =
+    Menu.menu.addEntry
       el: div
       order: 117
-      open: ({@labels}) ->
+      open: (post) ->
+        return false unless post.labels.length
+        for label in post.labels
+          createSubEntry: (label) ->
+            el: $.el 'div'
+            textContent: label
         true
-
-    Menu.menu.addEntry entry
-###
-      subEntries: [
-        for label in @labels
-          entry.subEntries.push @createSubEntry label
-      ]
-
-    Menu.menu.addEntry entry
-
-    createSubEntry: (label) ->
-      el = $.el 'a',
-        textContent: label
-###
+      subEntries: []
