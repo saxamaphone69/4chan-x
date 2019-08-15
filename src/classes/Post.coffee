@@ -52,8 +52,10 @@ class Post
     @parseQuotes()
     @parseFiles()
 
-    @isDead   = false
-    @isHidden = false
+    @labels     = []
+    @highlights = []
+    @isDead     = false
+    @isHidden   = false
 
     @clones = []
     <% if (readJSON('/.tests_enabled')) { %>

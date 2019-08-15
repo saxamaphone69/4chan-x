@@ -121,15 +121,16 @@ PostHiding =
       thisPost = $('input[name=thisPost]', parent).checked
       replies  = $('input[name=replies]',  parent).checked
       makeStub = $('input[name=makeStub]', parent).checked
+      label    = 'Manually hidden'
       {post}   = PostHiding.menu
       if thisPost
-        PostHiding.hide post, makeStub, replies
+        PostHiding.hide post, label, makeStub, replies
       else if replies
-        Recursive.apply PostHiding.hide, post, makeStub, true
-        Recursive.add   PostHiding.hide, post, makeStub, true
+        Recursive.apply PostHiding.hide, post, label, makeStub, true
+        Recursive.add   PostHiding.hide, post, label, makeStub, true
       else
         return
-      PostHiding.saveHiddenState post, true, thisPost, makeStub, replies
+      PostHiding.saveHiddenState post, true, thisPost, label, makeStub, replies
       $.event 'CloseMenu'
 
     show: ->
