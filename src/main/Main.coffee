@@ -606,6 +606,7 @@ Main =
     ['Reveal Spoilers',           RemoveSpoilers]
     ['Resurrect Quotes',          Quotify]
     ['Filter',                    Filter]
+    ['Filter Labels Link',        FilterLabelsLink]
     ['Thread Hiding Buttons',     ThreadHiding]
     ['Reply Hiding Buttons',      PostHiding]
     ['Recursive',                 Recursive]

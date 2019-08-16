@@ -213,6 +213,10 @@ Header =
       ''
     indexOptions = indexOptions.join('/')
 
+    if /{/.test t
+      span = $.el 'span'
+      return span
+
     if /^toggle-all/.test t
       a = $.el 'a',
         className: 'show-board-list-button'

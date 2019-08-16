@@ -212,6 +212,10 @@ Config =
         true
         'Show stubs of hidden threads / replies.'
       ]
+      'Filter Labels Link': [
+        true
+        'Add a menu entry for positive matches to filters.'
+      ]
 
     'Images and Videos':
       'Image Expansion': [
