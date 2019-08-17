@@ -125,13 +125,13 @@ PostHiding =
       label    = 'Manually hidden'
       {post}   = PostHiding.menu
       if thisPost
-        PostHiding.hide post, label, makeStub, replies
+        PostHiding.hide post, post.label, makeStub, replies
       else if replies
-        Recursive.apply PostHiding.hide, post, label, makeStub, true
-        Recursive.add   PostHiding.hide, post, label, makeStub, true
+        Recursive.apply PostHiding.hide, post, post.label, makeStub, true
+        Recursive.add   PostHiding.hide, post, post.label, makeStub, true
       else
         return
-      PostHiding.saveHiddenState post, true, thisPost, label, makeStub, replies
+      PostHiding.saveHiddenState post, true, thisPost, post.label, makeStub, replies
       $.event 'CloseMenu'
 
     show: ->
@@ -185,16 +185,21 @@ PostHiding =
 
   toggle: ->
     post = Get.postFromNode @
-    PostHiding[(if post.isHidden then 'show' else 'hide')] post
+    if post.isHidden
+      PostHiding.show post
+    else
+      PostHiding.hide post
+      #post.label = 'Manually hidden'
+    # PostHiding[(if post.isHidden then 'show' else 'hide')] post
     PostHiding.saveHiddenState post, post.isHidden
 
-  hide: (post, makeStub=Conf['Stubs'], hideRecursively=Conf['Recursive Hiding']) ->
+  hide: (post, label, makeStub=Conf['Stubs'], hideRecursively=Conf['Recursive Hiding']) ->
     post.labels.push label unless label in post.labels
     return if post.isHidden
     post.isHidden = true
 
     if hideRecursively
-      label = "Recursively hidden for quoting No.#{@}"
+      label = "Recursively hidden for quoting No.#{post.postID}"
       Recursive.apply PostHiding.hide, post, label, makeStub, true
       Recursive.add   PostHiding.hide, post, label, makeStub, true
 

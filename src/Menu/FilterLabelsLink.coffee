@@ -2,25 +2,38 @@ FilterLabelsLink =
   init: ->
     return unless g.VIEW in ['index', 'thread'] and Conf['Menu'] and Conf['Filter Labels Link']
 
-    a = $.el 'a',
-      className: 'not'
-      href: 'javascript:;'
-      textContent: 'NO Copy Text'
-    $.on a, 'click', FilterLabelsLink.copy
-
-    Menu.menu.addEntry
-      el: a
+    div = $.el 'div',
+      className: 'labels-link'
+      textContent: 'Labels'
+    
+    entry = 
+      el: div
       order: 117
       open: (post) ->
-        FilterLabelsLink.text = (post.origin or post).commentOrig()
+        return false unless post.labels.length
+        @subEntries.length = 0
+        #console.log('outside: ', post, post.labels)
+        for label in post.labels
+          #console.log(label)
+          @subEntries.push el: $.el 'div', textContent: label
         true
+      subEntries: []
 
-  copy: ->
-    el = $.el 'textarea',
-      className: 'hey',
-      value: FilterLabelsLink.text
-    $.add d.body, el
-    el.select()
-    try
-      d.execCommand 'copy'
-    $.rm el
+    Menu.menu.addEntry entry
+###
+Labels =
+  init: ->
+    return if !Conf['Menu']
+
+     $.event 'AddMenuEntry',
+      type: 'post'
+      el: $.el 'div', textContent: 'Labels'
+      order: 60
+      open: ({labels}, addSubEntry) ->
+        return false unless labels.length
+        @subEntries.length = 0
+        for label in labels
+          addSubEntry el: $.el 'div', textContent: label
+        true
+      subEntries: []
+###
