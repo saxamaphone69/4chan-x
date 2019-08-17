@@ -160,6 +160,7 @@ Filter =
     if hide
       if @isReply
         PostHiding.hide @, stub
+        #@labels = 'Hidden by filtering the #{Filter.key}: #{Filter.match} #{Config.filter.key}'
       else
         ThreadHiding.hide @thread, stub
     else

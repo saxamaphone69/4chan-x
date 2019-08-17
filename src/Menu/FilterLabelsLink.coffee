@@ -15,7 +15,7 @@ FilterLabelsLink =
         #console.log('outside: ', post, post.labels)
         for label in post.labels
           #console.log(label)
-          @subEntries.push el: $.el 'div', textContent: label
+          @subEntries.push el: $.el 'div', className: 'entry', textContent: label
         true
       subEntries: []
 
