@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### XT v2.2.4 (2023-12-19)
+
+- Fixed Index, Archive and Catalog navbar links no longer bold on blue boards:
+  [ccd0/4chan-x\#3424](https://github.com/ccd0/4chan-x/issues/3424).
+
 ### XT v2.2.3 (2023-11-08)
 
 - Fixed error when "Force Noscript Captcha" is enabled.

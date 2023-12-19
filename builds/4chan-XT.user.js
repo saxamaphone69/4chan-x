@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      XT 2.2.3
+// @version      XT 2.2.4
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "XT 2.2.3",
-    "date": "2023-11-08T16:25:49.335Z"
+    "version": "XT 2.2.4",
+    "date": "2023-12-19T16:07:36.274Z"
   };
 
   var meta = {
@@ -4935,7 +4935,8 @@ https://*.hcaptcha.com
     },
 
     domain(board) {
-      return `boards.${BoardConfig.isSFW(board) ? '4channel' : '4chan'}.org`;
+      // return `boards.${BoardConfig.isSFW(board) ? '4channel' : '4chan'}.org`;
+      return 'boards.4chan.org';
     },
 
     isArchived(board) {
@@ -5720,7 +5721,7 @@ https://*.hcaptcha.com
             }
           }
         }
-        return ThreadWatcher$1.update(g.SITE.ID, Unread.thread.board.ID, Unread.thread.ID, {
+        return ThreadWatcher.update(g.SITE.ID, Unread.thread.board.ID, Unread.thread.ID, {
           last: Unread.thread.lastPost,
           isDead: Unread.thread.isDead,
           isArchived: Unread.thread.isArchived,
@@ -6027,7 +6028,7 @@ https://*.hcaptcha.com
       });
       $$1.rm(UnreadIndex.hr[thread.fullID]);
       thread.nodes.root.classList.remove('unread-thread');
-      return ThreadWatcher$1.update(g.SITE.ID, thread.board.ID, thread.ID, {
+      return ThreadWatcher.update(g.SITE.ID, thread.board.ID, thread.ID, {
         last: thread.lastPost,
         unread: 0,
         quotingYou: 0
@@ -6931,7 +6932,6 @@ https://*.hcaptcha.com
       }
     }
   };
-  var ThreadWatcher$1 = ThreadWatcher;
 
   /*
    * This file has the code for the jsx to { innerHTML: "safe string" }
@@ -8501,7 +8501,7 @@ https://*.hcaptcha.com
       // Sticky threads
       Index.sortOnTop(obj => obj.isSticky);
       // Highlighted threads
-      Index.sortOnTop(obj => obj.isOnTop || (Conf['Pin Watched Threads'] && ThreadWatcher$1.isWatchedRaw(obj.boardID, obj.threadID)));
+      Index.sortOnTop(obj => obj.isOnTop || (Conf['Pin Watched Threads'] && ThreadWatcher.isWatchedRaw(obj.boardID, obj.threadID)));
       // Non-hidden threads
       if (Conf['Anchor Hidden Threads']) { return Index.sortOnTop(obj => !Index.isHidden(obj.threadID)); }
     },
@@ -17878,16 +17878,16 @@ vp-replace
           }
           break;
         case Conf['Watch']:
-          if (!ThreadWatcher$1.enabled || !thread) { return; }
-          ThreadWatcher$1.toggle(thread);
+          if (!ThreadWatcher.enabled || !thread) { return; }
+          ThreadWatcher.toggle(thread);
           break;
         case Conf['Update thread watcher']:
-          if (!ThreadWatcher$1.enabled) { return; }
-          ThreadWatcher$1.buttonFetchAll();
+          if (!ThreadWatcher.enabled) { return; }
+          ThreadWatcher.buttonFetchAll();
           break;
         case Conf['Toggle thread watcher']:
-          if (!ThreadWatcher$1.enabled) { return; }
-          ThreadWatcher$1.toggleWatcher();
+          if (!ThreadWatcher.enabled) { return; }
+          ThreadWatcher.toggleWatcher();
           break;
         case Conf['Toggle threading']:
           if (!QuoteThreading.ready) { return; }
@@ -20980,6 +20980,8 @@ vp-replace
    * DS207: Consider shorter variations of null checks
    * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
    */
+  // loosely follows the jquery api:
+  // http://api.jquery.com/
   // not chainable
   const $ = (selector, root = document.body) => root.querySelector(selector);
   $.id = id => d$1.getElementById(id);
@@ -26960,7 +26962,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     initReady() {
       if (g.SITE.is404?.()) {
         if (g.VIEW === 'thread') {
-          ThreadWatcher$1.set404(g.BOARD.ID, g.THREADID, function() {
+          ThreadWatcher.set404(g.BOARD.ID, g.THREADID, function() {
             if (Conf['404 Redirect']) {
               return Redirect$1.navigate('thread', {
                 boardID:  g.BOARD.ID,
@@ -27422,8 +27424,8 @@ User agent: ${navigator.userAgent}\
       ['Quote Threading',           QuoteThreading],
       ['Thread Stats',              ThreadStats],
       ['Thread Updater',            ThreadUpdater],
-      ['Thread Watcher',            ThreadWatcher$1],
-      ['Thread Watcher (Menu)',     ThreadWatcher$1.menu],
+      ['Thread Watcher',            ThreadWatcher],
+      ['Thread Watcher (Menu)',     ThreadWatcher.menu],
       ['Mark New IPs',              MarkNewIPs],
       ['Index Navigation',          Nav],
       ['Keybinds',                  Keybinds],
