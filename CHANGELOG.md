@@ -3,6 +3,16 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### XT v2.2.5 (2023-12-21)
+
+- Fixed posts scrolling under the header when navigated to by the id.
+  [#10](https://github.com/TuxedoTako/4chan-xt/issues/10)
+  - Now `scroll-margin-top` is used, which needed `overflow: clip;` instead of `:hidden`, which is why the minimum
+    chrome version is bumped to 90.
+- Disabled automatic retry when captcha failed. [ccd0/4chan-x\#3134](https://github.com/ccd0/4chan-x/issues/3134),
+  [ccd0/4chan-x\#3424](https://github.com/ccd0/4chan-x/issues/3157).
+  - I think. I honestly had trouble reproducing this issue.
+
 ### XT v2.2.4 (2023-12-19)
 
 - Fixed Index, Archive and Catalog navbar links no longer bold on blue boards:

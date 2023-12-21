@@ -987,13 +987,16 @@ var QR = {
     if (err) {
       let m;
       QR.errorCount = (QR.errorCount || 0) + 1;
-      if (/captcha|verification/i.test(err.textContent) || connErr) {
+      if (/captcha|verification/i.test(err.textContent)) {
         // Remove the obnoxious 4chan Pass ad.
         if (/mistyped/i.test(err.textContent)) {
           err = 'You mistyped the CAPTCHA, or the CAPTCHA malfunctioned.';
         } else if (/expired/i.test(err.textContent)) {
           err = 'This CAPTCHA is no longer valid because it has expired.';
         }
+        // Do not auto post with a wrong captcha.
+        QR.cooldown.auto = false;
+      } else if (connErr) {
         if (QR.errorCount >= 5) {
           // Too many posting errors can ban you. Stop autoposting after 5 errors.
           QR.cooldown.auto = false;

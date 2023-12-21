@@ -1,6 +1,6 @@
 {
   "name": "4chan XT",
-  "version": "XT 2.2.4",
+  "version": "XT 2.2.5",
   "manifest_version": 2,
   "description": "4chan XT is a script that adds various features to anonymous imageboards.",
   "icons": {
@@ -65,7 +65,7 @@
     "persistent": false
   },
   "homepage_url": "https://github.com/TuxedoTako/4chan-xt",
-  "minimum_chrome_version": "80",
+  "minimum_chrome_version": "90",
   "permissions": [
     "*://*.4chan.org/*",
     "*://*.4channel.org/*",

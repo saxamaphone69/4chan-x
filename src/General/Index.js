@@ -633,7 +633,6 @@ var Index = {
     if (threads || mode || page || order) { Index.buildIndex(); }
     if (threads || page) { Index.setPage(); }
     if (scroll && !hash) { Index.scrollToIndex(); }
-    if (hash) { Header.hashScroll(); }
     return Index.changed = {};
   },
 

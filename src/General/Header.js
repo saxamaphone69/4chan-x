@@ -111,7 +111,6 @@ var Header = {
           {el: editCustomNav}
       ]});
 
-    $.on(window, 'load popstate', Header.hashScroll);
     $.on(d, 'CreateNotification', this.createNotification);
 
     this.setBoardList();
@@ -533,23 +532,6 @@ var Header = {
     Settings.open('Advanced');
     const settings = $.id('fourchanx-settings');
     return $('[name=boardnav]', settings).focus();
-  },
-
-  hashScroll(e) {
-    let hash;
-    if (e) {
-      // Don't scroll when navigating to an already visited state.
-      if (e.state) { return; }
-      if (!history.state) { history.replaceState({}, ''); }
-    }
-
-    if (hash = location.hash.slice(1)) {
-      let el;
-      ReplyPruning.showIfHidden(hash);
-      if (el = $.id(hash)) {
-        return $.queueTask(() => Header.scrollTo(el));
-      }
-    }
   },
 
   scrollTo(root, down, needed) {

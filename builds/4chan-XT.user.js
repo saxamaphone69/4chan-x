@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      XT 2.2.4
+// @version      XT 2.2.5
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "XT 2.2.4",
-    "date": "2023-12-19T16:07:36.274Z"
+    "version": "XT 2.2.5",
+    "date": "2023-12-21T18:17:58.599Z"
   };
 
   var meta = {
@@ -291,7 +291,7 @@
     "GM.xmlHttpRequest"
    ],
    "min": {
-    "chrome": "80",
+    "chrome": "90",
     "firefox": "74",
     "greasemonkey": "1.14"
    }
@@ -8058,7 +8058,6 @@ https://*.hcaptcha.com
       if (threads || mode || page || order) { Index.buildIndex(); }
       if (threads || page) { Index.setPage(); }
       if (scroll && !hash) { Index.scrollToIndex(); }
-      if (hash) { Header$1.hashScroll(); }
       return Index.changed = {};
     },
 
@@ -12317,6 +12316,13 @@ a:only-of-type > .remove {
 
 .spin {
   animation:spin 2s infinite linear;
+}
+
+/* To not scroll posts behind the header */
+div.post {
+  overflow: -moz-hidden-unscrollable;
+  overflow: clip;
+  scroll-margin-top: 30px;
 }
 `;
 
@@ -19574,13 +19580,16 @@ vp-replace
       if (err) {
         let m;
         QR.errorCount = (QR.errorCount || 0) + 1;
-        if (/captcha|verification/i.test(err.textContent) || connErr) {
+        if (/captcha|verification/i.test(err.textContent)) {
           // Remove the obnoxious 4chan Pass ad.
           if (/mistyped/i.test(err.textContent)) {
             err = 'You mistyped the CAPTCHA, or the CAPTCHA malfunctioned.';
           } else if (/expired/i.test(err.textContent)) {
             err = 'This CAPTCHA is no longer valid because it has expired.';
           }
+          // Do not auto post with a wrong captcha.
+          QR.cooldown.auto = false;
+        } else if (connErr) {
           if (QR.errorCount >= 5) {
             // Too many posting errors can ban you. Stop autoposting after 5 errors.
             QR.cooldown.auto = false;
@@ -22960,7 +22969,6 @@ vp-replace
             {el: editCustomNav}
         ]});
 
-      $$1.on(window, 'load popstate', Header.hashScroll);
       $$1.on(d$1, 'CreateNotification', this.createNotification);
 
       this.setBoardList();
@@ -23382,23 +23390,6 @@ vp-replace
       Settings.open('Advanced');
       const settings = $$1.id('fourchanx-settings');
       return $$1('[name=boardnav]', settings).focus();
-    },
-
-    hashScroll(e) {
-      let hash;
-      if (e) {
-        // Don't scroll when navigating to an already visited state.
-        if (e.state) { return; }
-        if (!history.state) { history.replaceState({}, ''); }
-      }
-
-      if (hash = location.hash.slice(1)) {
-        let el;
-        ReplyPruning.showIfHidden(hash);
-        if (el = $$1.id(hash)) {
-          return $$1.queueTask(() => Header.scrollTo(el));
-        }
-      }
     },
 
     scrollTo(root, down, needed) {

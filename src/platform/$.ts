@@ -396,7 +396,7 @@ $.el = function (tag: string, properties?: Record<string, any>, properties2?: Re
   return el;
 };
 
-$.on = function (el: Element, events: string, handler: (event: Event) => void) {
+$.on = function (el: EventTarget, events: string, handler: (event: Event) => void) {
   for (var event of events.split(' ')) {
     el.addEventListener(event, handler, false);
   }

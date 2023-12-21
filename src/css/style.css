@@ -2498,3 +2498,10 @@ a:only-of-type > .remove {
 .spin {
   animation:spin 2s infinite linear;
 }
+
+/* To not scroll posts behind the header */
+div.post {
+  overflow: -moz-hidden-unscrollable;
+  overflow: clip;
+  scroll-margin-top: 30px;
+}
