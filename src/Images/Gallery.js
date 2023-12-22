@@ -29,12 +29,12 @@ var Gallery = {
     const el = $.el('a', {
       href: 'javascript:;',
       title: 'Gallery',
-      textContent: '🖼︎',
+      textContent: 'Gallery',
     });
 
     $.on(el, 'click', this.cb.toggle);
 
-    Header.addShortcut('gallery', el, 530);
+    Header.addShortcut('gallery', el, 530, '🖼︎');
 
     return Callbacks.Post.push({
       name: 'Gallery',

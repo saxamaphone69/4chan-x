@@ -3,6 +3,10 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### XT v2.2.6 (2023-12-22)
+
+- Fixed header shortcuts with text instead of icons. [#12](https://github.com/TuxedoTako/4chan-xt/issues/12)
+
 ### XT v2.2.5 (2023-12-21)
 
 - Fixed posts scrolling under the header when navigated to by the id.

@@ -36,7 +36,7 @@ var ThreadWatcher = {
 
     this.shortcut = (sc = $.el('a', {
       id:          'watcher-link',
-      textContent: '👁︎',
+      textContent: 'Watcher',
       title:       'Thread Watcher',
       href:        'javascript:;',
     }
@@ -77,7 +77,7 @@ var ThreadWatcher = {
       this.dialog.hidden = true;
     }
 
-    Header.addShortcut('watcher', sc, 510);
+    Header.addShortcut('watcher', sc, 510, '👁︎');
 
     ThreadWatcher.initLastModified();
     ThreadWatcher.fetchAuto();

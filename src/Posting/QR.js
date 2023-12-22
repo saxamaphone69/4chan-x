@@ -63,12 +63,11 @@ var QR = {
     });
 
     this.shortcut = (sc = $.el('a', {
-      className: 'disabled',
-      textContent: '↩',
+      className: 'disabled bolder-icon bigger-icon',
+      textContent: 'Quick Reply',
       title: 'Quick Reply',
-      href: 'javascript:;'
-    }
-    ));
+      href: 'javascript:;',
+    }));
     $.on(sc, 'click', function() {
       if (!QR.postingIsEnabled) { return; }
       if (Conf['Persistent QR'] || !QR.nodes || QR.nodes.el.hidden) {
@@ -79,7 +78,7 @@ var QR = {
       }
     });
 
-    return Header.addShortcut('qr', sc, 540);
+    return Header.addShortcut('qr', sc, 540, '↩');
   },
 
   initReady() {

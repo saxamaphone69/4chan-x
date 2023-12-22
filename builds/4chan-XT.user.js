@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      XT 2.2.5
+// @version      XT 2.2.6
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "XT 2.2.5",
-    "date": "2023-12-21T18:17:58.599Z"
+    "version": "XT 2.2.6",
+    "date": "2023-12-22T18:55:40.219"
   };
 
   var meta = {
@@ -3441,12 +3441,12 @@ https://*.hcaptcha.com
           }
           this.EAI = $$1.el('a', {
               className: 'expand-all-shortcut',
-              textContent: '➕︎',
+              textContent: 'Expand All Images',
               title: 'Expand All Images',
               href: 'javascript:;'
           });
           $$1.on(this.EAI, 'click', this.cb.toggleAll);
-          Header$1.addShortcut('expand-all', this.EAI, 520);
+          Header$1.addShortcut('expand-all', this.EAI, 520, '➕︎');
           $$1.on(d$1, 'scroll visibilitychange', this.cb.playVideos);
           this.videoControls = $$1.el('span', { className: 'video-controls' });
           $$1.extend(this.videoControls, { innerHTML: " <a href=\"javascript:;\" title=\"You can also contract the video by dragging it to the left.\">contract</a>" });
@@ -6052,7 +6052,7 @@ https://*.hcaptcha.com
 
       this.shortcut = (sc = $$1.el('a', {
         id:          'watcher-link',
-        textContent: '👁︎',
+        textContent: 'Watcher',
         title:       'Thread Watcher',
         href:        'javascript:;',
       }
@@ -6093,7 +6093,7 @@ https://*.hcaptcha.com
         this.dialog.hidden = true;
       }
 
-      Header$1.addShortcut('watcher', sc, 510);
+      Header$1.addShortcut('watcher', sc, 510, '👁︎');
 
       ThreadWatcher.initLastModified();
       ThreadWatcher.fetchAuto();
@@ -7508,11 +7508,11 @@ https://*.hcaptcha.com
       this.button = $$1.el('a', {
         title: 'Refresh',
         href: 'javascript:;',
-        textContent: '🗘'
-      }
-      );
+        textContent: 'Refresh',
+        className: 'bigger-icon',
+      });
       $$1.on(this.button, 'click', () => Index.update());
-      Header$1.addShortcut('index-refresh', this.button, 590);
+      Header$1.addShortcut('index-refresh', this.button, 590, '🗘');
 
       // Header "Index Navigation" submenu
       const entries = [];
@@ -10219,6 +10219,20 @@ audio.controls-added {
 .current,
 :root.sw-yotsuba div#boardNavDesktopFoot a.current {
   font-weight: bold;
+}
+:root.shortcut-icons #header-bar .icon-shortcut {
+  font-size: 0;
+}
+:root.shortcut-icons #header-bar .icon-shortcut a::before {
+  content: var(--icon);
+  font-size: 16px;
+  line-height: 12px;
+}
+:root.shortcut-icons #header-bar .icon-shortcut a.bolder-icon::before {
+  font-weight: 1000;
+}
+:root.shortcut-icons #header-bar .icon-shortcut a.bigger-icon::before {
+  font-size: 20px;
 }
 @media (min-width: 1300px) {
   :root.sw-yotsuba.fixed:not(.centered-links) #header-bar {
@@ -15173,12 +15187,12 @@ $\
           // 4chan X settings link
           const link = $$1.el('a', {
               className: 'settings-link',
-              textContent: '🔧︎',
+              textContent: 'Settings',
               title: `${meta.name} Settings`,
               href: 'javascript:;'
           });
           $$1.on(link, 'click', Settings.open);
-          Header$1.addShortcut('settings', link, 820);
+          Header$1.addShortcut('settings', link, 820, '🔧︎');
           const add = this.addSection;
           add('Main', this.main);
           add('Filter', this.filter);
@@ -16563,12 +16577,12 @@ vp-replace
       const el = $$1.el('a', {
         href: 'javascript:;',
         title: 'Gallery',
-        textContent: '🖼︎',
+        textContent: 'Gallery',
       });
 
       $$1.on(el, 'click', this.cb.toggle);
 
-      Header$1.addShortcut('gallery', el, 530);
+      Header$1.addShortcut('gallery', el, 530, '🖼︎');
 
       return Callbacks.Post.push({
         name: 'Gallery',
@@ -18656,12 +18670,11 @@ vp-replace
       });
 
       this.shortcut = (sc = $$1.el('a', {
-        className: 'disabled',
-        textContent: '↩',
+        className: 'disabled bolder-icon bigger-icon',
+        textContent: 'Quick Reply',
         title: 'Quick Reply',
-        href: 'javascript:;'
-      }
-      ));
+        href: 'javascript:;',
+      }));
       $$1.on(sc, 'click', function() {
         if (!QR.postingIsEnabled) { return; }
         if (Conf['Persistent QR'] || !QR.nodes || QR.nodes.el.hidden) {
@@ -18672,7 +18685,7 @@ vp-replace
         }
       });
 
-      return Header$1.addShortcut('qr', sc, 540);
+      return Header$1.addShortcut('qr', sc, 540, '↩');
     },
 
     initReady() {
@@ -22877,649 +22890,602 @@ vp-replace
    * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
    */
   var Header = {
-    init() {
-      $$1.onExists(doc$1, 'body', () => {
-        if (!Main$1.isThisPageLegit()) { return; }
-        $$1.add(this.bar, [this.noticesRoot, this.toggle]);
-        $$1.prepend(d$1.body, this.bar);
-        $$1.add(d$1.body, Header.hover);
-        return this.setBarPosition(Conf['Bottom Header']);
-    });
-
-      this.menu = new UI.Menu('header');
-
-      const menuButton = $$1.el('span',
-        {className: 'menu-button'});
-      $$1.extend(menuButton, {innerHTML: "<i></i>"});
-
-      const box = UI.checkbox;
-
-      const barFixedToggler     = box('Fixed Header',               'Fixed Header');
-      const headerToggler       = box('Header auto-hide',           'Auto-hide header');
-      const scrollHeaderToggler = box('Header auto-hide on scroll', 'Auto-hide header on scroll');
-      const barPositionToggler  = box('Bottom Header',              'Bottom header');
-      const linkJustifyToggler  = box('Centered links',             'Centered links');
-      const customNavToggler    = box('Custom Board Navigation',    'Custom board navigation');
-      const footerToggler       = box('Bottom Board List',          'Hide bottom board list');
-      const shortcutToggler     = box('Shortcut Icons',             'Shortcut Icons');
-      const editCustomNav = $$1.el('a', {
-        textContent: 'Edit custom board navigation',
-        href: 'javascript:;'
-      }
-      );
-
-      this.barFixedToggler     = barFixedToggler.firstElementChild;
-      this.scrollHeaderToggler = scrollHeaderToggler.firstElementChild;
-      this.barPositionToggler  = barPositionToggler.firstElementChild;
-      this.linkJustifyToggler  = linkJustifyToggler.firstElementChild;
-      this.headerToggler       = headerToggler.firstElementChild;
-      this.footerToggler       = footerToggler.firstElementChild;
-      this.shortcutToggler     = shortcutToggler.firstElementChild;
-      this.customNavToggler    = customNavToggler.firstElementChild;
-
-      $$1.on(menuButton,           'click',  this.menuToggle);
-      $$1.on(this.headerToggler,       'change', this.toggleBarVisibility);
-      $$1.on(this.barFixedToggler,     'change', this.toggleBarFixed);
-      $$1.on(this.barPositionToggler,  'change', this.toggleBarPosition);
-      $$1.on(this.scrollHeaderToggler, 'change', this.toggleHideBarOnScroll);
-      $$1.on(this.linkJustifyToggler,  'change', this.toggleLinkJustify);
-      $$1.on(this.footerToggler,       'change', this.toggleFooterVisibility);
-      $$1.on(this.shortcutToggler,     'change', this.toggleShortcutIcons);
-      $$1.on(this.customNavToggler,    'change', this.toggleCustomNav);
-      $$1.on(editCustomNav,        'click',  this.editCustomNav);
-
-      this.setBarFixed(Conf['Fixed Header']);
-      this.setHideBarOnScroll(Conf['Header auto-hide on scroll']);
-      this.setBarVisibility(Conf['Header auto-hide']);
-      this.setLinkJustify(Conf['Centered links']);
-      this.setShortcutIcons(Conf['Shortcut Icons']);
-      this.setFooterVisibility(Conf['Bottom Board List']);
-
-      $$1.sync('Fixed Header',               this.setBarFixed);
-      $$1.sync('Header auto-hide on scroll', this.setHideBarOnScroll);
-      $$1.sync('Bottom Header',              this.setBarPosition);
-      $$1.sync('Shortcut Icons',             this.setShortcutIcons);
-      $$1.sync('Header auto-hide',           this.setBarVisibility);
-      $$1.sync('Centered links',             this.setLinkJustify);
-      $$1.sync('Bottom Board List',          this.setFooterVisibility);
-
-      this.addShortcut('menu', menuButton, 900);
-
-      this.menu.addEntry({
-        el: $$1.el('span',
-          {textContent: 'Header'}),
-        order: 107,
-        subEntries: [
-            {el: barFixedToggler}
-          ,
-            {el: headerToggler}
-          ,
-            {el: scrollHeaderToggler}
-          ,
-            {el: barPositionToggler}
-          ,
-            {el: linkJustifyToggler}
-          ,
-            {el: footerToggler}
-          ,
-            {el: shortcutToggler}
-          ,
-            {el: customNavToggler}
-          ,
-            {el: editCustomNav}
-        ]});
-
-      $$1.on(d$1, 'CreateNotification', this.createNotification);
-
-      this.setBoardList();
-
-      $$1.onExists(doc$1, `${g.SITE.selectors.boardList} + *`, Header.generateFullBoardList);
-
-      Main$1.ready(function() {
-        let footer;
-        if ((g.SITE.software === 'yotsuba') && !(footer = $$1.id('boardNavDesktopFoot'))) {
-          let absbot;
-          if (!(absbot = $$1.id('absbot'))) { return; }
-          footer = $$1.id('boardNavDesktop').cloneNode(true);
-          footer.id = 'boardNavDesktopFoot';
-          $$1('#navtopright',        footer).id = 'navbotright';
-          $$1('#settingsWindowLink', footer).id = 'settingsWindowLinkBot';
-          $$1.before(absbot, footer);
-          $$1.global(() => window.cloneTopNav = function() {});
-        }
-        if (Header.bottomBoardList = $$1(g.SITE.selectors.boardListBottom)) {
-          for (var a of $$('a', Header.bottomBoardList)) {
-            if ((a.hostname === location.hostname) && (a.pathname.split('/')[1] === g.BOARD.ID)) { a.className = 'current'; }
+      init() {
+          $$1.onExists(doc$1, 'body', () => {
+              if (!Main$1.isThisPageLegit()) {
+                  return;
+              }
+              $$1.add(this.bar, [this.noticesRoot, this.toggle]);
+              $$1.prepend(d$1.body, this.bar);
+              $$1.add(d$1.body, Header.hover);
+              return this.setBarPosition(Conf['Bottom Header']);
+          });
+          this.menu = new UI.Menu('header');
+          const menuButton = $$1.el('span', { className: 'menu-button' });
+          $$1.extend(menuButton, { innerHTML: "<i></i>" });
+          const box = UI.checkbox;
+          const barFixedToggler = box('Fixed Header', 'Fixed Header');
+          const headerToggler = box('Header auto-hide', 'Auto-hide header');
+          const scrollHeaderToggler = box('Header auto-hide on scroll', 'Auto-hide header on scroll');
+          const barPositionToggler = box('Bottom Header', 'Bottom header');
+          const linkJustifyToggler = box('Centered links', 'Centered links');
+          const customNavToggler = box('Custom Board Navigation', 'Custom board navigation');
+          const footerToggler = box('Bottom Board List', 'Hide bottom board list');
+          const shortcutToggler = box('Shortcut Icons', 'Shortcut Icons');
+          const editCustomNav = $$1.el('a', {
+              textContent: 'Edit custom board navigation',
+              href: 'javascript:;'
+          });
+          this.barFixedToggler = barFixedToggler.firstElementChild;
+          this.scrollHeaderToggler = scrollHeaderToggler.firstElementChild;
+          this.barPositionToggler = barPositionToggler.firstElementChild;
+          this.linkJustifyToggler = linkJustifyToggler.firstElementChild;
+          this.headerToggler = headerToggler.firstElementChild;
+          this.footerToggler = footerToggler.firstElementChild;
+          this.shortcutToggler = shortcutToggler.firstElementChild;
+          this.customNavToggler = customNavToggler.firstElementChild;
+          $$1.on(menuButton, 'click', this.menuToggle);
+          $$1.on(this.headerToggler, 'change', this.toggleBarVisibility);
+          $$1.on(this.barFixedToggler, 'change', this.toggleBarFixed);
+          $$1.on(this.barPositionToggler, 'change', this.toggleBarPosition);
+          $$1.on(this.scrollHeaderToggler, 'change', this.toggleHideBarOnScroll);
+          $$1.on(this.linkJustifyToggler, 'change', this.toggleLinkJustify);
+          $$1.on(this.footerToggler, 'change', this.toggleFooterVisibility);
+          $$1.on(this.shortcutToggler, 'change', this.toggleShortcutIcons);
+          $$1.on(this.customNavToggler, 'change', this.toggleCustomNav);
+          $$1.on(editCustomNav, 'click', this.editCustomNav);
+          this.setBarFixed(Conf['Fixed Header']);
+          this.setHideBarOnScroll(Conf['Header auto-hide on scroll']);
+          this.setBarVisibility(Conf['Header auto-hide']);
+          this.setLinkJustify(Conf['Centered links']);
+          this.setShortcutIcons(Conf['Shortcut Icons']);
+          this.setFooterVisibility(Conf['Bottom Board List']);
+          $$1.sync('Fixed Header', this.setBarFixed);
+          $$1.sync('Header auto-hide on scroll', this.setHideBarOnScroll);
+          $$1.sync('Bottom Header', this.setBarPosition);
+          $$1.sync('Shortcut Icons', this.setShortcutIcons);
+          $$1.sync('Header auto-hide', this.setBarVisibility);
+          $$1.sync('Centered links', this.setLinkJustify);
+          $$1.sync('Bottom Board List', this.setFooterVisibility);
+          this.addShortcut('menu', menuButton, 900);
+          this.menu.addEntry({
+              el: $$1.el('span', { textContent: 'Header' }),
+              order: 107,
+              subEntries: [
+                  { el: barFixedToggler },
+                  { el: headerToggler },
+                  { el: scrollHeaderToggler },
+                  { el: barPositionToggler },
+                  { el: linkJustifyToggler },
+                  { el: footerToggler },
+                  { el: shortcutToggler },
+                  { el: customNavToggler },
+                  { el: editCustomNav }
+              ]
+          });
+          $$1.on(d$1, 'CreateNotification', this.createNotification);
+          this.setBoardList();
+          $$1.onExists(doc$1, `${g.SITE.selectors.boardList} + *`, Header.generateFullBoardList);
+          Main$1.ready(function () {
+              let footer;
+              if ((g.SITE.software === 'yotsuba') && !(footer = $$1.id('boardNavDesktopFoot'))) {
+                  let absbot;
+                  if (!(absbot = $$1.id('absbot'))) {
+                      return;
+                  }
+                  footer = $$1.id('boardNavDesktop').cloneNode(true);
+                  footer.id = 'boardNavDesktopFoot';
+                  $$1('#navtopright', footer).id = 'navbotright';
+                  $$1('#settingsWindowLink', footer).id = 'settingsWindowLinkBot';
+                  $$1.before(absbot, footer);
+                  $$1.global(() => window.cloneTopNav = function () { });
+              }
+              if (Header.bottomBoardList = $$1(g.SITE.selectors.boardListBottom)) {
+                  for (var a of $$('a', Header.bottomBoardList)) {
+                      if ((a.hostname === location.hostname) && (a.pathname.split('/')[1] === g.BOARD.ID)) {
+                          a.className = 'current';
+                      }
+                  }
+                  return CatalogLinks.setLinks(Header.bottomBoardList);
+              }
+          });
+          if ((g.SITE.software === 'yotsuba') && ((g.VIEW === 'catalog') || !Conf['Disable Native Extension'])) {
+              const cs = $$1.el('a', { href: 'javascript:;' });
+              if (g.VIEW === 'catalog') {
+                  cs.title = (cs.textContent = 'Catalog Settings');
+                  this.addShortcut('native', cs, 810, '🕮︎');
+              }
+              else {
+                  cs.title = (cs.textContent = '4chan Settings');
+                  cs.className = 'native-settings';
+                  this.addShortcut('native', cs, 810);
+              }
+              $$1.on(cs, 'click', () => $$1.id('settingsWindowLink').click());
           }
-          return CatalogLinks.setLinks(Header.bottomBoardList);
-        }
-      });
-
-      if ((g.SITE.software === 'yotsuba') && ((g.VIEW === 'catalog') || !Conf['Disable Native Extension'])) {
-        const cs = $$1.el('a', {href: 'javascript:;'});
-        if (g.VIEW === 'catalog') {
-          cs.title = (cs.textContent = 'Catalog Settings');
-          cs.textContent = '🕮︎';
-        } else {
-          cs.title = (cs.textContent = '4chan Settings');
-          cs.className = 'native-settings';
-        }
-        $$1.on(cs, 'click', () => $$1.id('settingsWindowLink').click());
-        this.addShortcut('native', cs, 810);
-      }
-
-      return this.enableDesktopNotifications();
-    },
-
-    bar: $$1.el('div',
-      {id: 'header-bar'}),
-
-    noticesRoot: $$1.el('div',
-      {id: 'notifications'}),
-
-    shortcuts: $$1.el('span',
-      {id: 'shortcuts'}),
-
-    hover: $$1.el('div',
-      {id: 'hoverUI'}),
-
-    toggle: $$1.el('div',
-      {id: 'scroll-marker'}),
-
-    setBoardList() {
-      let boardList;
-      Header.boardList = (boardList = $$1.el('span',
-        {id: 'board-list'}));
-      $$1.extend(boardList, {innerHTML: "<span id=\"custom-board-list\"></span><span id=\"full-board-list\" hidden><span class=\"hide-board-list-container brackets-wrap\"><a href=\"javascript:;\" class=\"hide-board-list-button\">&nbsp;-&nbsp;</a></span> <span class=\"boardList\"></span></span>"});
-
-      const btn = $$1('.hide-board-list-button', boardList);
-      $$1.on(btn, 'click', Header.toggleBoardList);
-
-      $$1.prepend(Header.bar, [Header.boardList, Header.shortcuts]);
-
-      Header.setCustomNav(Conf['Custom Board Navigation']);
-      Header.generateBoardList(Conf['boardnav']);
-
-      $$1.sync('Custom Board Navigation', Header.setCustomNav);
-      return $$1.sync('boardnav', Header.generateBoardList);
-    },
-
-    generateFullBoardList() {
-      let nodes;
-      if (g.SITE.transformBoardList) {
-        nodes = g.SITE.transformBoardList();
-      } else {
-        nodes = [...$$1(g.SITE.selectors.boardList).cloneNode(true).childNodes];
-      }
-      const fullBoardList = $$1('.boardList', Header.boardList);
-      $$1.add(fullBoardList, nodes);
-      for (var a of $$('a', fullBoardList)) {
-        if ((a.hostname === location.hostname) && (a.pathname.split('/')[1] === g.BOARD.ID)) { a.className = 'current'; }
-      }
-      return CatalogLinks.setLinks(fullBoardList);
-    },
-
-    generateBoardList(boardnav) {
-      const list = $$1('#custom-board-list', Header.boardList);
-      $$1.rmAll(list);
-      if (!boardnav) { return; }
-      boardnav = boardnav.replace(/(\r\n|\n|\r)/g, ' ');
-      const re = /[\w@]+(-(all|title|replace|full|index|catalog|archive|expired|nt|(mode|sort|text):"[^"]+"(,"[^"]+")?))*|[^\w@]+/g;
-      const nodes = (boardnav.match(re).map((t) => Header.mapCustomNavigation(t)));
-      $$1.add(list, nodes);
-      return CatalogLinks.setLinks(list);
-    },
-
-    mapCustomNavigation(t) {
-      let a, href, m, url;
-      if (/^[^\w@]/.test(t)) {
-        return $$1.tn(t);
-      }
-
-      let text = (url = null);
-      t = t.replace(/-text:"([^"]+)"(?:,"([^"]+)")?/g, function(m0, m1, m2) {
-        text = m1;
-        url  = m2;
-        return '';
-      });
-
-      let indexOptions = [];
-      t = t.replace(/-(?:mode|sort):"([^"]+)"/g, function(m0, m1) {
-        indexOptions.push(m1.toLowerCase().replace(/\ /g, '-'));
-        return '';
-      });
-      indexOptions = indexOptions.join('/');
-
-      if (/^toggle-all/.test(t)) {
-        a = $$1.el('a', {
-          className: 'show-board-list-button',
-          textContent: text || '+',
-          href: 'javascript:;'
-        }
-        );
-        $$1.on(a, 'click', Header.toggleBoardList);
-        return a;
-      }
-
-      if (/^external/.test(t)) {
-        a = $$1.el('a', {
-          href: url || 'javascript:;',
-          textContent: text || '+',
-          className: 'external'
-        }
-        );
-        if (/-nt/.test(t)) {
-          a.target = '_blank';
-          a.rel = 'noopener';
-        }
-        return a;
-      }
-
-      let boardID = t.split('-')[0];
-      if (boardID === 'current') {
-        if (['boards.4chan.org', 'boards.4channel.org'].includes(location.hostname)) {
-          boardID = g.BOARD.ID;
-        } else {
-          a = $$1.el('a', {
-            href: `/${g.BOARD.ID}/`,
-            textContent: text || decodeURIComponent(g.BOARD.ID),
-            className: 'current'
+          return this.enableDesktopNotifications();
+      },
+      bar: $$1.el('div', { id: 'header-bar' }),
+      noticesRoot: $$1.el('div', { id: 'notifications' }),
+      shortcuts: $$1.el('span', { id: 'shortcuts' }),
+      hover: $$1.el('div', { id: 'hoverUI' }),
+      toggle: $$1.el('div', { id: 'scroll-marker' }),
+      setBoardList() {
+          let boardList;
+          Header.boardList = (boardList = $$1.el('span', { id: 'board-list' }));
+          $$1.extend(boardList, { innerHTML: "<span id=\"custom-board-list\"></span><span id=\"full-board-list\" hidden><span class=\"hide-board-list-container brackets-wrap\"><a href=\"javascript:;\" class=\"hide-board-list-button\">&nbsp;-&nbsp;</a></span> <span class=\"boardList\"></span></span>" });
+          const btn = $$1('.hide-board-list-button', boardList);
+          $$1.on(btn, 'click', Header.toggleBoardList);
+          $$1.prepend(Header.bar, [Header.boardList, Header.shortcuts]);
+          Header.setCustomNav(Conf['Custom Board Navigation']);
+          Header.generateBoardList(Conf['boardnav']);
+          $$1.sync('Custom Board Navigation', Header.setCustomNav);
+          return $$1.sync('boardnav', Header.generateBoardList);
+      },
+      generateFullBoardList() {
+          let nodes;
+          if (g.SITE.transformBoardList) {
+              nodes = g.SITE.transformBoardList();
           }
-          );
+          else {
+              nodes = [...$$1(g.SITE.selectors.boardList).cloneNode(true).childNodes];
+          }
+          const fullBoardList = $$1('.boardList', Header.boardList);
+          $$1.add(fullBoardList, nodes);
+          for (var a of $$('a', fullBoardList)) {
+              if ((a.hostname === location.hostname) && (a.pathname.split('/')[1] === g.BOARD.ID)) {
+                  a.className = 'current';
+              }
+          }
+          return CatalogLinks.setLinks(fullBoardList);
+      },
+      generateBoardList(boardnav) {
+          const list = $$1('#custom-board-list', Header.boardList);
+          $$1.rmAll(list);
+          if (!boardnav) {
+              return;
+          }
+          boardnav = boardnav.replace(/(\r\n|\n|\r)/g, ' ');
+          const re = /[\w@]+(-(all|title|replace|full|index|catalog|archive|expired|nt|(mode|sort|text):"[^"]+"(,"[^"]+")?))*|[^\w@]+/g;
+          const nodes = (boardnav.match(re).map((t) => Header.mapCustomNavigation(t)));
+          $$1.add(list, nodes);
+          return CatalogLinks.setLinks(list);
+      },
+      mapCustomNavigation(t) {
+          let a, href, m, url;
+          if (/^[^\w@]/.test(t)) {
+              return $$1.tn(t);
+          }
+          let text = (url = null);
+          t = t.replace(/-text:"([^"]+)"(?:,"([^"]+)")?/g, function (m0, m1, m2) {
+              text = m1;
+              url = m2;
+              return '';
+          });
+          let indexOptions = [];
+          t = t.replace(/-(?:mode|sort):"([^"]+)"/g, function (m0, m1) {
+              indexOptions.push(m1.toLowerCase().replace(/\ /g, '-'));
+              return '';
+          });
+          indexOptions = indexOptions.join('/');
+          if (/^toggle-all/.test(t)) {
+              a = $$1.el('a', {
+                  className: 'show-board-list-button',
+                  textContent: text || '+',
+                  href: 'javascript:;'
+              });
+              $$1.on(a, 'click', Header.toggleBoardList);
+              return a;
+          }
+          if (/^external/.test(t)) {
+              a = $$1.el('a', {
+                  href: url || 'javascript:;',
+                  textContent: text || '+',
+                  className: 'external'
+              });
+              if (/-nt/.test(t)) {
+                  a.target = '_blank';
+                  a.rel = 'noopener';
+              }
+              return a;
+          }
+          let boardID = t.split('-')[0];
+          if (boardID === 'current') {
+              if (['boards.4chan.org', 'boards.4channel.org'].includes(location.hostname)) {
+                  boardID = g.BOARD.ID;
+              }
+              else {
+                  a = $$1.el('a', {
+                      href: `/${g.BOARD.ID}/`,
+                      textContent: text || decodeURIComponent(g.BOARD.ID),
+                      className: 'current'
+                  });
+                  if (/-nt/.test(t)) {
+                      a.target = '_blank';
+                      a.rel = 'noopener';
+                  }
+                  if (/-index/.test(t)) {
+                      a.dataset.only = 'index';
+                  }
+                  else if (/-catalog/.test(t)) {
+                      a.dataset.only = 'catalog';
+                      a.href += 'catalog.html';
+                  }
+                  else if (/-(archive|expired)/.test(t)) {
+                      a = a.firstChild; // Its text node.
+                  }
+                  return a;
+              }
+          }
+          a = (function () {
+              let urlV;
+              if (boardID === '@') {
+                  return $$1.el('a', {
+                      href: 'https://twitter.com/4chan',
+                      title: '4chan Twitter',
+                      textContent: '@'
+                  });
+              }
+              a = $$1.el('a', {
+                  href: `//${BoardConfig.domain(boardID)}/${boardID}/`,
+                  textContent: boardID,
+                  title: BoardConfig.title(boardID)
+              });
+              if (['catalog', 'archive'].includes(g.VIEW) && (urlV = Get$1.url(g.VIEW, { siteID: '4chan.org', boardID }))) {
+                  a.href = urlV;
+              }
+              if ((a.hostname === location.hostname) && (boardID === g.BOARD.ID)) {
+                  a.className = 'current';
+              }
+              return a;
+          })();
+          a.textContent = /-title/.test(t) || (/-replace/.test(t) && (a.hostname === location.hostname) && (boardID === g.BOARD.ID)) ?
+              a.title || a.textContent
+              : /-full/.test(t) ?
+                  (`/${boardID}/`) + (a.title ? ` - ${a.title}` : '')
+                  :
+                      text || boardID;
+          if (m = t.match(/-(index|catalog)/)) {
+              const urlIC = CatalogLinks[m[1]]({ siteID: '4chan.org', boardID });
+              if (urlIC) {
+                  a.dataset.only = m[1];
+                  a.href = urlIC;
+                  if (m[1] === 'catalog') {
+                      $$1.addClass(a, 'catalog');
+                  }
+              }
+              else {
+                  return a.firstChild; // Its text node.
+              }
+          }
+          if (Conf['JSON Index'] && indexOptions) {
+              a.dataset.indexOptions = indexOptions;
+              if (['boards.4chan.org', 'boards.4channel.org'].includes(a.hostname) && (a.pathname.split('/')[2] === '')) {
+                  a.href += (a.hash ? '/' : '#') + indexOptions;
+              }
+          }
+          if (/-archive/.test(t)) {
+              if (href = Redirect$1.to('board', { boardID })) {
+                  a.href = href;
+              }
+              else {
+                  return a.firstChild; // Its text node.
+              }
+          }
+          if (/-expired/.test(t)) {
+              if (BoardConfig.isArchived(boardID)) {
+                  a.href = `//${BoardConfig.domain(boardID)}/${boardID}/archive`;
+              }
+              else {
+                  return a.firstChild; // Its text node.
+              }
+          }
           if (/-nt/.test(t)) {
-            a.target = '_blank';
-            a.rel = 'noopener';
+              a.target = '_blank';
+              a.rel = 'noopener';
           }
-          if (/-index/.test(t)) {
-            a.dataset.only = 'index';
-          } else if (/-catalog/.test(t)) {
-            a.dataset.only = 'catalog';
-            a.href += 'catalog.html';
-          } else if (/-(archive|expired)/.test(t)) {
-            a = a.firstChild; // Its text node.
+          if (boardID === '@') {
+              $$1.addClass(a, 'navSmall');
           }
           return a;
-        }
-      }
-
-      a = (function() {
-        let urlV;
-        if (boardID === '@') {
-          return $$1.el('a', {
-            href: 'https://twitter.com/4chan',
-            title: '4chan Twitter',
-            textContent: '@'
+      },
+      toggleBoardList() {
+          const { bar } = Header;
+          const custom = $$1('#custom-board-list', bar);
+          const full = $$1('#full-board-list', bar);
+          const showBoardList = !full.hidden;
+          custom.hidden = !showBoardList;
+          return full.hidden = showBoardList;
+      },
+      setLinkJustify(centered) {
+          Header.linkJustifyToggler.checked = centered;
+          if (centered) {
+              return $$1.addClass(doc$1, 'centered-links');
           }
-          );
-        }
-
-        a = $$1.el('a', {
-          href: `//${BoardConfig.domain(boardID)}/${boardID}/`,
-          textContent: boardID,
-          title: BoardConfig.title(boardID)
-        }
-        );
-        if (['catalog', 'archive'].includes(g.VIEW) && (urlV = Get$1.url(g.VIEW, {siteID: '4chan.org', boardID}))) {
-          a.href = urlV;
-        }
-        if ((a.hostname === location.hostname) && (boardID === g.BOARD.ID)) { a.className = 'current'; }
-        return a;
-      })();
-
-      a.textContent = /-title/.test(t) || (/-replace/.test(t) && (a.hostname === location.hostname) && (boardID === g.BOARD.ID)) ?
-        a.title || a.textContent
-      : /-full/.test(t) ?
-        (`/${boardID}/`) + (a.title ? ` - ${a.title}` : '')
-      :
-        text || boardID;
-
-      if (m = t.match(/-(index|catalog)/)) {
-        const urlIC = CatalogLinks[m[1]]({siteID: '4chan.org', boardID});
-        if (urlIC) {
-          a.dataset.only = m[1];
-          a.href = urlIC;
-          if (m[1] === 'catalog') { $$1.addClass(a, 'catalog'); }
-        } else {
-          return a.firstChild; // Its text node.
-        }
-      }
-
-      if (Conf['JSON Index'] && indexOptions) {
-        a.dataset.indexOptions = indexOptions;
-        if (['boards.4chan.org', 'boards.4channel.org'].includes(a.hostname) && (a.pathname.split('/')[2] === '')) {
-          a.href += (a.hash ? '/' : '#') + indexOptions;
-        }
-      }
-
-      if (/-archive/.test(t)) {
-        if (href = Redirect$1.to('board', {boardID})) {
-          a.href = href;
-        } else {
-          return a.firstChild; // Its text node.
-        }
-      }
-
-      if (/-expired/.test(t)) {
-        if (BoardConfig.isArchived(boardID)) {
-          a.href = `//${BoardConfig.domain(boardID)}/${boardID}/archive`;
-        } else {
-          return a.firstChild; // Its text node.
-        }
-      }
-
-      if (/-nt/.test(t)) {
-        a.target = '_blank';
-        a.rel = 'noopener';
-      }
-
-      if (boardID === '@') { $$1.addClass(a, 'navSmall'); }
-      return a;
-    },
-
-    toggleBoardList() {
-      const {bar}  = Header;
-      const custom = $$1('#custom-board-list', bar);
-      const full   = $$1('#full-board-list',   bar);
-      const showBoardList = !full.hidden;
-      custom.hidden = !showBoardList;
-      return full.hidden   =  showBoardList;
-    },
-
-    setLinkJustify(centered) {
-      Header.linkJustifyToggler.checked = centered;
-      if (centered) {
-        return $$1.addClass(doc$1, 'centered-links');
-      } else {
-        return $$1.rmClass(doc$1, 'centered-links');
-      }
-    },
-
-    toggleLinkJustify() {
-      $$1.event('CloseMenu');
-      const centered = this.nodeName === 'INPUT' ?
-        this.checked : undefined;
-      Header.setLinkJustify(centered);
-      return $$1.set('Centered links', centered);
-    },
-
-    setBarFixed(fixed) {
-      Header.barFixedToggler.checked = fixed;
-      if (fixed) {
-        $$1.addClass(doc$1, 'fixed');
-        return $$1.addClass(Header.bar, 'dialog');
-      } else {
-        $$1.rmClass(doc$1, 'fixed');
-        return $$1.rmClass(Header.bar, 'dialog');
-      }
-    },
-
-    toggleBarFixed() {
-      $$1.event('CloseMenu');
-
-      Header.setBarFixed(this.checked);
-
-      Conf['Fixed Header'] = this.checked;
-      return $$1.set('Fixed Header',  this.checked);
-    },
-
-    setShortcutIcons(show) {
-      Header.shortcutToggler.checked = show;
-      if (show) {
-        return $$1.addClass(doc$1, 'shortcut-icons');
-      } else {
-        return $$1.rmClass(doc$1, 'shortcut-icons');
-      }
-    },
-
-    toggleShortcutIcons() {
-      $$1.event('CloseMenu');
-
-      Header.setShortcutIcons(this.checked);
-
-      Conf['Shortcut Icons'] = this.checked;
-      return $$1.set('Shortcut Icons',  this.checked);
-    },
-
-    setBarVisibility(hide) {
-      Header.headerToggler.checked = hide;
-      $$1.event('CloseMenu');
-      (hide ? $$1.addClass : $$1.rmClass)(Header.bar, 'autohide');
-      return (hide ? $$1.addClass : $$1.rmClass)(doc$1, 'autohide');
-    },
-
-    toggleBarVisibility() {
-      const hide = this.nodeName === 'INPUT' ?
-        this.checked
-      :
-        !$$1.hasClass(Header.bar, 'autohide');
-
-      Conf['Header auto-hide'] = hide;
-      $$1.set('Header auto-hide', hide);
-      Header.setBarVisibility(hide);
-      const message = `The header bar will ${hide ?
-      'automatically hide itself.'
-    :
-      'remain visible.'}`;
-      return new Notice('info', message, 2);
-    },
-
-    setHideBarOnScroll(hide) {
-      Header.scrollHeaderToggler.checked = hide;
-      if (hide) {
-        $$1.on(window, 'scroll', Header.hideBarOnScroll);
-        return;
-      }
-      $$1.off(window, 'scroll', Header.hideBarOnScroll);
-      $$1.rmClass(Header.bar, 'scroll');
-      return Header.bar.classList.toggle('autohide', Conf['Header auto-hide']);
-    },
-
-    toggleHideBarOnScroll() {
-      const hide = this.checked;
-      $$1.cb.checked.call(this);
-      return Header.setHideBarOnScroll(hide);
-    },
-
-    hideBarOnScroll() {
-      const offsetY = window.pageYOffset;
-      if (offsetY > (Header.previousOffset || 0)) {
-        $$1.addClass(Header.bar, 'autohide', 'scroll');
-      } else {
-        $$1.rmClass(Header.bar,  'autohide', 'scroll');
-      }
-      return Header.previousOffset = offsetY;
-    },
-
-    setBarPosition(bottom) {
-      if (Header.barPositionToggler) Header.barPositionToggler.checked = bottom;
-      $$1.event('CloseMenu');
-      const args = bottom ? [
-        'bottom-header',
-        'top-header',
-        'after'
-      ] : [
-        'top-header',
-        'bottom-header',
-        'add'
-      ];
-
-      $$1.addClass(doc$1, args[0]);
-      $$1.rmClass(doc$1, args[1]);
-      return $$1[args[2]](Header.bar, Header.noticesRoot);
-    },
-
-    toggleBarPosition() {
-      $$1.cb.checked.call(this);
-      return Header.setBarPosition(this.checked);
-    },
-
-    setFooterVisibility(hide) {
-      Header.footerToggler.checked = hide;
-      return doc$1.classList.toggle('hide-bottom-board-list', hide);
-    },
-
-    toggleFooterVisibility() {
-      $$1.event('CloseMenu');
-      const hide = this.nodeName === 'INPUT' ?
-        this.checked
-      :
-        $$1.hasClass(doc$1, 'hide-bottom-board-list');
-      Header.setFooterVisibility(hide);
-      $$1.set('Bottom Board List', hide);
-      const message = hide ?
-        'The bottom navigation will now be hidden.'
-      :
-        'The bottom navigation will remain visible.';
-      return new Notice('info', message, 2);
-    },
-
-    setCustomNav(show) {
-      Header.customNavToggler.checked = show;
-      const cust = $$1('#custom-board-list', Header.bar);
-      const full = $$1('#full-board-list',   Header.bar);
-      const btn = $$1('.hide-board-list-container', full);
-      return [cust.hidden, full.hidden, btn.hidden] = show ? [false, true, false] : [true, false, true];
-    },
-
-    toggleCustomNav() {
-      $$1.cb.checked.call(this);
-      return Header.setCustomNav(this.checked);
-    },
-
-    editCustomNav() {
-      Settings.open('Advanced');
-      const settings = $$1.id('fourchanx-settings');
-      return $$1('[name=boardnav]', settings).focus();
-    },
-
-    scrollTo(root, down, needed) {
-      let height, x;
-      if (!root.offsetParent) { return; } // hidden or fixed
-      if (down) {
-        x = Header.getBottomOf(root);
-        if (Conf['Fixed Header'] && Conf['Header auto-hide on scroll'] && Conf['Bottom header']) {
-          ({height} = Header.bar.getBoundingClientRect());
-          if (x <= 0) {
-            if (!Header.isHidden()) { x += height; }
-          } else {
-            if  (Header.isHidden()) { x -= height; }
+          else {
+              return $$1.rmClass(doc$1, 'centered-links');
           }
-        }
-        if (!needed || (x < 0)) { return window.scrollBy(0, -x); }
-      } else {
-        x = Header.getTopOf(root);
-        if (Conf['Fixed Header'] && Conf['Header auto-hide on scroll'] && !Conf['Bottom header']) {
-          ({height} = Header.bar.getBoundingClientRect());
-          if (x >= 0) {
-            if (!Header.isHidden()) { x += height; }
-          } else {
-            if  (Header.isHidden()) { x -= height; }
+      },
+      toggleLinkJustify() {
+          $$1.event('CloseMenu');
+          const centered = this.nodeName === 'INPUT' ?
+              this.checked : undefined;
+          Header.setLinkJustify(centered);
+          return $$1.set('Centered links', centered);
+      },
+      setBarFixed(fixed) {
+          Header.barFixedToggler.checked = fixed;
+          if (fixed) {
+              $$1.addClass(doc$1, 'fixed');
+              return $$1.addClass(Header.bar, 'dialog');
           }
-        }
-        if (!needed || (x < 0)) { return window.scrollBy(0,  x); }
+          else {
+              $$1.rmClass(doc$1, 'fixed');
+              return $$1.rmClass(Header.bar, 'dialog');
+          }
+      },
+      toggleBarFixed() {
+          $$1.event('CloseMenu');
+          Header.setBarFixed(this.checked);
+          Conf['Fixed Header'] = this.checked;
+          return $$1.set('Fixed Header', this.checked);
+      },
+      setShortcutIcons(show) {
+          Header.shortcutToggler.checked = show;
+          if (show) {
+              return $$1.addClass(doc$1, 'shortcut-icons');
+          }
+          else {
+              return $$1.rmClass(doc$1, 'shortcut-icons');
+          }
+      },
+      toggleShortcutIcons() {
+          $$1.event('CloseMenu');
+          Header.setShortcutIcons(this.checked);
+          Conf['Shortcut Icons'] = this.checked;
+          return $$1.set('Shortcut Icons', this.checked);
+      },
+      setBarVisibility(hide) {
+          Header.headerToggler.checked = hide;
+          $$1.event('CloseMenu');
+          (hide ? $$1.addClass : $$1.rmClass)(Header.bar, 'autohide');
+          return (hide ? $$1.addClass : $$1.rmClass)(doc$1, 'autohide');
+      },
+      toggleBarVisibility() {
+          const hide = this.nodeName === 'INPUT' ?
+              this.checked
+              :
+                  !$$1.hasClass(Header.bar, 'autohide');
+          Conf['Header auto-hide'] = hide;
+          $$1.set('Header auto-hide', hide);
+          Header.setBarVisibility(hide);
+          const message = `The header bar will ${hide ?
+            'automatically hide itself.'
+            :
+                'remain visible.'}`;
+          return new Notice('info', message, 2);
+      },
+      setHideBarOnScroll(hide) {
+          Header.scrollHeaderToggler.checked = hide;
+          if (hide) {
+              $$1.on(window, 'scroll', Header.hideBarOnScroll);
+              return;
+          }
+          $$1.off(window, 'scroll', Header.hideBarOnScroll);
+          $$1.rmClass(Header.bar, 'scroll');
+          return Header.bar.classList.toggle('autohide', Conf['Header auto-hide']);
+      },
+      toggleHideBarOnScroll() {
+          const hide = this.checked;
+          $$1.cb.checked.call(this);
+          return Header.setHideBarOnScroll(hide);
+      },
+      hideBarOnScroll() {
+          const offsetY = window.pageYOffset;
+          if (offsetY > (Header.previousOffset || 0)) {
+              $$1.addClass(Header.bar, 'autohide', 'scroll');
+          }
+          else {
+              $$1.rmClass(Header.bar, 'autohide', 'scroll');
+          }
+          return Header.previousOffset = offsetY;
+      },
+      setBarPosition(bottom) {
+          if (Header.barPositionToggler)
+              Header.barPositionToggler.checked = bottom;
+          $$1.event('CloseMenu');
+          const args = bottom ? [
+              'bottom-header',
+              'top-header',
+              'after'
+          ] : [
+              'top-header',
+              'bottom-header',
+              'add'
+          ];
+          $$1.addClass(doc$1, args[0]);
+          $$1.rmClass(doc$1, args[1]);
+          return $$1[args[2]](Header.bar, Header.noticesRoot);
+      },
+      toggleBarPosition() {
+          $$1.cb.checked.call(this);
+          return Header.setBarPosition(this.checked);
+      },
+      setFooterVisibility(hide) {
+          Header.footerToggler.checked = hide;
+          return doc$1.classList.toggle('hide-bottom-board-list', hide);
+      },
+      toggleFooterVisibility() {
+          $$1.event('CloseMenu');
+          const hide = this.nodeName === 'INPUT' ?
+              this.checked
+              :
+                  $$1.hasClass(doc$1, 'hide-bottom-board-list');
+          Header.setFooterVisibility(hide);
+          $$1.set('Bottom Board List', hide);
+          const message = hide ?
+              'The bottom navigation will now be hidden.'
+              :
+                  'The bottom navigation will remain visible.';
+          return new Notice('info', message, 2);
+      },
+      setCustomNav(show) {
+          Header.customNavToggler.checked = show;
+          const cust = $$1('#custom-board-list', Header.bar);
+          const full = $$1('#full-board-list', Header.bar);
+          const btn = $$1('.hide-board-list-container', full);
+          return [cust.hidden, full.hidden, btn.hidden] = show ? [false, true, false] : [true, false, true];
+      },
+      toggleCustomNav() {
+          $$1.cb.checked.call(this);
+          return Header.setCustomNav(this.checked);
+      },
+      editCustomNav() {
+          Settings.open('Advanced');
+          const settings = $$1.id('fourchanx-settings');
+          return $$1('[name=boardnav]', settings).focus();
+      },
+      scrollTo(root, down, needed) {
+          let height, x;
+          if (!root.offsetParent) {
+              return;
+          } // hidden or fixed
+          if (down) {
+              x = Header.getBottomOf(root);
+              if (Conf['Fixed Header'] && Conf['Header auto-hide on scroll'] && Conf['Bottom header']) {
+                  ({ height } = Header.bar.getBoundingClientRect());
+                  if (x <= 0) {
+                      if (!Header.isHidden()) {
+                          x += height;
+                      }
+                  }
+                  else {
+                      if (Header.isHidden()) {
+                          x -= height;
+                      }
+                  }
+              }
+              if (!needed || (x < 0)) {
+                  return window.scrollBy(0, -x);
+              }
+          }
+          else {
+              x = Header.getTopOf(root);
+              if (Conf['Fixed Header'] && Conf['Header auto-hide on scroll'] && !Conf['Bottom header']) {
+                  ({ height } = Header.bar.getBoundingClientRect());
+                  if (x >= 0) {
+                      if (!Header.isHidden()) {
+                          x += height;
+                      }
+                  }
+                  else {
+                      if (Header.isHidden()) {
+                          x -= height;
+                      }
+                  }
+              }
+              if (!needed || (x < 0)) {
+                  return window.scrollBy(0, x);
+              }
+          }
+      },
+      scrollToIfNeeded(root, down) {
+          return Header.scrollTo(root, down, true);
+      },
+      getTopOf(root) {
+          let { top } = root.getBoundingClientRect();
+          if (Conf['Fixed Header'] && !Conf['Bottom Header']) {
+              const headRect = Header.toggle.getBoundingClientRect();
+              top -= headRect.top + headRect.height;
+          }
+          return top;
+      },
+      getBottomOf(root) {
+          const { clientHeight } = doc$1;
+          let bottom = clientHeight - root.getBoundingClientRect().bottom;
+          if (Conf['Fixed Header'] && Conf['Bottom Header']) {
+              const headRect = Header.toggle.getBoundingClientRect();
+              bottom -= (clientHeight - headRect.bottom) + headRect.height;
+          }
+          return bottom;
+      },
+      isNodeVisible(node) {
+          if (d$1.hidden || !doc$1.contains(node)) {
+              return false;
+          }
+          const { height } = node.getBoundingClientRect();
+          return ((Header.getTopOf(node) + height) >= 0) && ((Header.getBottomOf(node) + height) >= 0);
+      },
+      isHidden() {
+          const { top } = Header.bar.getBoundingClientRect();
+          if (Conf['Bottom header']) {
+              return top === doc$1.clientHeight;
+          }
+          else {
+              return top < 0;
+          }
+      },
+      addShortcut(id, el, index, icon) {
+          const shortcut = $$1.el('span', {
+              id: `shortcut-${id}`,
+              className: 'shortcut brackets-wrap'
+          });
+          if (icon) {
+              shortcut.style.setProperty('--icon', `"${icon}"`);
+              shortcut.classList.add('icon-shortcut');
+          }
+          $$1.add(shortcut, el);
+          shortcut.dataset.index = index.toString();
+          for (var item of $$('[data-index]', Header.shortcuts)) {
+              if (+item.dataset.index > +index) {
+                  $$1.before(item, shortcut);
+                  return;
+              }
+          }
+          return $$1.add(Header.shortcuts, shortcut);
+      },
+      rmShortcut(el) {
+          return $$1.rm(el.parentElement);
+      },
+      menuToggle(e) {
+          return Header.menu.toggle(e, this, g);
+      },
+      createNotification(e) {
+          const { type, content, lifetime } = e.detail;
+          return new Notice(type, content, lifetime);
+      },
+      areNotificationsEnabled: false,
+      enableDesktopNotifications() {
+          let notice;
+          if (!window.Notification || !Conf['Desktop Notifications']) {
+              return;
+          }
+          switch (Notification.permission) {
+              case 'granted':
+                  Header.areNotificationsEnabled = true;
+                  return;
+              case 'denied':
+                  // requestPermission doesn't work if status is 'denied',
+                  // but it'll still work if status is 'default'.
+                  return;
+          }
+          const el = $$1.el('span', { innerHTML: `${meta.name} needs your permission to show desktop notifications. ` +
+                  `[<a href=\"${meta.faq}#why-is-4chan-x-asking-for-permission-to-show-desktop-notifications\" target=\"_blank\">FAQ</a>]` +
+                  `<br><button>Authorize</button> or <button>Disable</button>`
+          });
+          const [authorize, disable] = $$('button', el);
+          $$1.on(authorize, 'click', () => Notification.requestPermission(function (status) {
+              Header.areNotificationsEnabled = status === 'granted';
+              if (status === 'default') {
+                  return;
+              }
+              return notice.close();
+          }));
+          $$1.on(disable, 'click', function () {
+              $$1.set('Desktop Notifications', false);
+              return notice.close();
+          });
+          return notice = new Notice('info', el);
       }
-    },
-
-    scrollToIfNeeded(root, down) {
-      return Header.scrollTo(root, down, true);
-    },
-
-    getTopOf(root) {
-      let {top} = root.getBoundingClientRect();
-      if (Conf['Fixed Header'] && !Conf['Bottom Header']) {
-        const headRect = Header.toggle.getBoundingClientRect();
-        top     -= headRect.top + headRect.height;
-      }
-      return top;
-    },
-
-    getBottomOf(root) {
-      const {clientHeight} = doc$1;
-      let bottom = clientHeight - root.getBoundingClientRect().bottom;
-      if (Conf['Fixed Header'] && Conf['Bottom Header']) {
-        const headRect = Header.toggle.getBoundingClientRect();
-        bottom  -= (clientHeight - headRect.bottom) + headRect.height;
-      }
-      return bottom;
-    },
-
-    isNodeVisible(node) {
-      if (d$1.hidden || !doc$1.contains(node)) { return false; }
-      const {height} = node.getBoundingClientRect();
-      return ((Header.getTopOf(node) + height) >= 0) && ((Header.getBottomOf(node) + height) >= 0);
-    },
-
-    isHidden() {
-      const {top} = Header.bar.getBoundingClientRect();
-      if (Conf['Bottom header']) {
-        return top === doc$1.clientHeight;
-      } else {
-        return top < 0;
-      }
-    },
-
-    addShortcut(id, el, index) {
-      const shortcut = $$1.el('span', {
-        id: `shortcut-${id}`,
-        className: 'shortcut brackets-wrap'
-      }
-      );
-      $$1.add(shortcut, el);
-      shortcut.dataset.index = index;
-      for (var item of $$('[data-index]', Header.shortcuts)) {
-        if (+item.dataset.index > +index) {
-          $$1.before(item, shortcut);
-          return;
-        }
-      }
-      return $$1.add(Header.shortcuts, shortcut);
-    },
-
-    rmShortcut(el) {
-      return $$1.rm(el.parentElement);
-    },
-
-    menuToggle(e) {
-      return Header.menu.toggle(e, this, g);
-    },
-
-    createNotification(e) {
-      const {type, content, lifetime} = e.detail;
-      return new Notice(type, content, lifetime);
-    },
-
-    areNotificationsEnabled: false,
-    enableDesktopNotifications() {
-      let notice;
-      if (!window.Notification || !Conf['Desktop Notifications']) { return; }
-      switch (Notification.permission) {
-        case 'granted':
-          Header.areNotificationsEnabled = true;
-          return;
-        case 'denied':
-          // requestPermission doesn't work if status is 'denied',
-          // but it'll still work if status is 'default'.
-          return;
-      }
-
-      const el = $$1.el('span',
-        {innerHTML:
-          `${meta.name} needs your permission to show desktop notifications. ` +
-          `[<a href=\"${meta.faq}#why-is-4chan-x-asking-for-permission-to-show-desktop-notifications\" target=\"_blank\">FAQ</a>]` +
-          `<br><button>Authorize</button> or <button>Disable</button>`
-      });
-      const [authorize, disable] = $$('button', el);
-      $$1.on(authorize, 'click', () => Notification.requestPermission(function(status) {
-        Header.areNotificationsEnabled = status === 'granted';
-        if (status === 'default') { return; }
-        return notice.close();
-      }));
-      $$1.on(disable, 'click', function() {
-        $$1.set('Desktop Notifications', false);
-        return notice.close();
-      });
-      return notice = new Notice('info', el);
-    }
   };
   var Header$1 = Header;
 
@@ -24097,13 +24063,12 @@ vp-replace
       const el = $$1.el('a', {
         href: 'javascript:;',
         title: 'Prefetch Images',
-        innerHTML: '🗲︎'
-      }
-      );
+        innerHTML: 'Prefetch',
+      });
 
       $$1.on(el, 'click', this.toggle);
 
-      return Header$1.addShortcut('prefetch', el, 525);
+      return Header$1.addShortcut('prefetch', el, 525, '🗲︎');
     },
 
     node() {

@@ -38,14 +38,14 @@ var Settings = {
     // 4chan X settings link
     const link = $.el('a', {
       className:   'settings-link',
-      textContent: '🔧︎',
+      textContent: 'Settings',
       title:       `${meta.name} Settings`,
       href:        'javascript:;'
     }
     );
     $.on(link, 'click', Settings.open);
 
-    Header.addShortcut('settings', link, 820);
+    Header.addShortcut('settings', link, 820, '🔧︎');
 
     const add = this.addSection;
 

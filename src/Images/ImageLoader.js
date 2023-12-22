@@ -34,13 +34,12 @@ var ImageLoader = {
     const el = $.el('a', {
       href: 'javascript:;',
       title: 'Prefetch Images',
-      innerHTML: '🗲︎'
-    }
-    );
+      innerHTML: 'Prefetch',
+    });
 
     $.on(el, 'click', this.toggle);
 
-    return Header.addShortcut('prefetch', el, 525);
+    return Header.addShortcut('prefetch', el, 525, '🗲︎');
   },
 
   node() {

@@ -401,6 +401,20 @@ audio.controls-added {
 :root.sw-yotsuba div#boardNavDesktopFoot a.current {
   font-weight: bold;
 }
+:root.shortcut-icons #header-bar .icon-shortcut {
+  font-size: 0;
+}
+:root.shortcut-icons #header-bar .icon-shortcut a::before {
+  content: var(--icon);
+  font-size: 16px;
+  line-height: 12px;
+}
+:root.shortcut-icons #header-bar .icon-shortcut a.bolder-icon::before {
+  font-weight: 1000;
+}
+:root.shortcut-icons #header-bar .icon-shortcut a.bigger-icon::before {
+  font-size: 20px;
+}
 @media (min-width: 1300px) {
   :root.sw-yotsuba.fixed:not(.centered-links) #header-bar {
     white-space: nowrap;

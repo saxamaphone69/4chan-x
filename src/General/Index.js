@@ -83,11 +83,11 @@ var Index = {
     this.button = $.el('a', {
       title: 'Refresh',
       href: 'javascript:;',
-      textContent: '🗘'
-    }
-    );
+      textContent: 'Refresh',
+      className: 'bigger-icon',
+    });
     $.on(this.button, 'click', () => Index.update());
-    Header.addShortcut('index-refresh', this.button, 590);
+    Header.addShortcut('index-refresh', this.button, 590, '🗘');
 
     // Header "Index Navigation" submenu
     const entries = [];

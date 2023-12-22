@@ -141,13 +141,13 @@ var Header = {
       const cs = $.el('a', {href: 'javascript:;'});
       if (g.VIEW === 'catalog') {
         cs.title = (cs.textContent = 'Catalog Settings');
-        cs.textContent = '🕮︎';
+        this.addShortcut('native', cs, 810, '🕮︎');
       } else {
         cs.title = (cs.textContent = '4chan Settings');
         cs.className = 'native-settings';
+        this.addShortcut('native', cs, 810);
       }
       $.on(cs, 'click', () => $.id('settingsWindowLink').click());
-      this.addShortcut('native', cs, 810);
     }
 
     return this.enableDesktopNotifications();
@@ -600,14 +600,17 @@ var Header = {
     }
   },
 
-  addShortcut(id, el, index) {
+  addShortcut(id: string, el: HTMLElement, index: number, icon?: string) {
     const shortcut = $.el('span', {
       id: `shortcut-${id}`,
       className: 'shortcut brackets-wrap'
+    });
+    if (icon) {
+      shortcut.style.setProperty('--icon', `"${icon}"`);
+      shortcut.classList.add('icon-shortcut');
     }
-    );
     $.add(shortcut, el);
-    shortcut.dataset.index = index;
+    shortcut.dataset.index = index.toString();
     for (var item of $$('[data-index]', Header.shortcuts)) {
       if (+item.dataset.index > +index) {
         $.before(item, shortcut);

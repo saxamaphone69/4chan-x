@@ -23,14 +23,14 @@ var ImageExpand = {
 
     this.EAI = $.el('a', {
       className: 'expand-all-shortcut',
-      textContent: '➕︎',
+      textContent: 'Expand All Images',
       title: 'Expand All Images',
       href: 'javascript:;'
     }
     );
 
     $.on(this.EAI, 'click', this.cb.toggleAll);
-    Header.addShortcut('expand-all', this.EAI, 520);
+    Header.addShortcut('expand-all', this.EAI, 520, '➕︎');
     $.on(d, 'scroll visibilitychange', this.cb.playVideos);
     this.videoControls = $.el('span', {className: 'video-controls'});
     $.extend(this.videoControls, {innerHTML: " <a href=\"javascript:;\" title=\"You can also contract the video by dragging it to the left.\">contract</a>"});
