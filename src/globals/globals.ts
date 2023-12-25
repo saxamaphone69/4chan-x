@@ -42,6 +42,7 @@ export const Conf = Object.create(null);
 
 export const g: {
   VERSION:   string,
+  VERSION_DATE: Date,
   NAMESPACE: string,
   sites:     (typeof SWTinyboard)[],
   boardID?:  string,
@@ -55,6 +56,7 @@ export const g: {
   VIEW?:     string,
 } = {
   VERSION:   version.version,
+  VERSION_DATE: new Date(version.date),
   NAMESPACE: meta.name,
   sites:     Object.create(null),
   boards:    Object.create(null)

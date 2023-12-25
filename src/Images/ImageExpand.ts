@@ -99,12 +99,14 @@ var ImageExpand = {
       if (ImageExpand.on = $.hasClass(ImageExpand.EAI, 'expand-all-shortcut')) {
         ImageExpand.EAI.className   = 'contract-all-shortcut';
         ImageExpand.EAI.title       = 'Contract All Images';
-        ImageExpand.EAI.textContent = '➖︎';
+        ImageExpand.EAI.textContent = 'Contract All Images';
+        ImageExpand.EAI.style.setProperty('--icon', '"➖︎"');
         func = ImageExpand.expand;
       } else {
         ImageExpand.EAI.className   = 'expand-all-shortcut';
         ImageExpand.EAI.title       = 'Expand All Images';
-        ImageExpand.EAI.textContent = '➕︎';
+        ImageExpand.EAI.textContent = 'Expand All Images';
+        ImageExpand.EAI.style.setProperty('--icon', '"➕︎"');
         func = ImageExpand.contract;
       }
 

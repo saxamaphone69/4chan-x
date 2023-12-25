@@ -127,7 +127,7 @@ $.ajax = (function() {
           let fd, r;
           const {url, timeout, responseType, withCredentials, type, onprogress, form, headers, id} = e.detail;
           window.FCX.requests[id] = (r = new XMLHttpRequest());
-          r.open(type, url, true);
+          r.open(type || 'GET', url, true);
           const object = headers || {};
           for (var key in object) {
             var value = object[key];
@@ -145,8 +145,11 @@ $.ajax = (function() {
           }
           r.onloadend = function() {
             delete window.FCX.requests[id];
-            const {status, statusText, response} = this;
-            const responseHeaderString = this.getAllResponseHeaders();
+            let {status, statusText, response} = this;
+            const responseHeaderString: string = this.getAllResponseHeaders();
+            if (typeof response === 'string' && responseHeaderString.match(/content-type: application\/json/i)) {
+              response = JSON.parse(response);
+            }
             const detail = {status, statusText, response, responseHeaderString, id};
             return document.dispatchEvent(new CustomEvent('4chanXAjaxLoadend', {bubbles: true, detail}));
           };
@@ -502,7 +505,13 @@ $.queueTask = (function() {
   };
 })();
 
-$.global = function(fn, data) {
+/**
+ * Runs a function on the page instead of the user script or extension context.
+ * @param fn The function to run. Will be passed as a string, thus losing access to the closure it was defined in.
+ * @param data Data to pass to the function. Will be passed as `this`.
+ * @returns The data.
+ */
+$.global = function<T extends (Record<string, string> | undefined)>(fn: (this: T) => void, data?: T) {
   if (doc) {
     const script = $.el('script',
       {textContent: `(${fn}).call(document.currentScript.dataset);`});

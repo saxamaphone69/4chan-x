@@ -80,8 +80,8 @@
   'use strict';
 
   var version = {
-    "version": "XT 2.2.6",
-    "date": "2023-12-22T18:55:40.219"
+    "version": "2.3.0",
+    "date": "2023-12-25T11:55:24.012Z"
   };
 
   var meta = {
@@ -187,6 +187,7 @@
   const Conf = Object.create(null);
   const g = {
       VERSION: version.version,
+      VERSION_DATE: new Date(version.date),
       NAMESPACE: meta.name,
       sites: Object.create(null),
       boards: Object.create(null)
@@ -3405,13 +3406,15 @@ https://*.hcaptcha.com
               if (ImageExpand.on = $$1.hasClass(ImageExpand.EAI, 'expand-all-shortcut')) {
                   ImageExpand.EAI.className = 'contract-all-shortcut';
                   ImageExpand.EAI.title = 'Contract All Images';
-                  ImageExpand.EAI.textContent = '➖︎';
+                  ImageExpand.EAI.textContent = 'Contract All Images';
+                  ImageExpand.EAI.style.setProperty('--icon', '"➖︎"');
                   func = ImageExpand.expand;
               }
               else {
                   ImageExpand.EAI.className = 'expand-all-shortcut';
                   ImageExpand.EAI.title = 'Expand All Images';
-                  ImageExpand.EAI.textContent = '➕︎';
+                  ImageExpand.EAI.textContent = 'Expand All Images';
+                  ImageExpand.EAI.style.setProperty('--icon', '"➕︎"');
                   func = ImageExpand.contract;
               }
               return g.posts.forEach(function (post) {
@@ -21011,7 +21014,7 @@ vp-replace
                       let fd, r;
                       const { url, timeout, responseType, withCredentials, type, onprogress, form, headers, id } = e.detail;
                       window.FCX.requests[id] = (r = new XMLHttpRequest());
-                      r.open(type, url, true);
+                      r.open(type || 'GET', url, true);
                       const object = headers || {};
                       for (var key in object) {
                           var value = object[key];
@@ -21029,8 +21032,11 @@ vp-replace
                       }
                       r.onloadend = function () {
                           delete window.FCX.requests[id];
-                          const { status, statusText, response } = this;
+                          let { status, statusText, response } = this;
                           const responseHeaderString = this.getAllResponseHeaders();
+                          if (typeof response === 'string' && responseHeaderString.match(/content-type: application\/json/i)) {
+                              response = JSON.parse(response);
+                          }
                           const detail = { status, statusText, response, responseHeaderString, id };
                           return document.dispatchEvent(new CustomEvent('4chanXAjaxLoadend', { bubbles: true, detail }));
                       };
@@ -21385,6 +21391,12 @@ vp-replace
           Promise.resolve().then(execTask);
       };
   })();
+  /**
+   * Runs a function on the page instead of the user script or extension context.
+   * @param fn The function to run. Will be passed as a string, thus losing access to the closure it was defined in.
+   * @param data Data to pass to the function. Will be passed as `this`.
+   * @returns The data.
+   */
   $.global = function (fn, data) {
       if (doc$1) {
           const script = $.el('script', { textContent: `(${fn}).call(document.currentScript.dataset);` });
@@ -26451,9 +26463,27 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       // Detect multiple copies of 4chan X
       if (doc$1 && $$1.hasClass(doc$1, 'fourchan-x')) { return; }
       $$1.asap(docSet, function() {
-        $$1.addClass(doc$1, 'fourchan-x', 'seaweedchan');
+        $$1.addClass(doc$1, 'fourchan-xt', 'fourchan-x', 'seaweedchan');
         if ($$1.engine) { return $$1.addClass(doc$1, `ua-${$$1.engine}`); }
       });
+      try {
+        $$1.global(
+          function () {
+            const date = +this.buildDate;
+            Object.defineProperty(window, 'fourchanXT', {
+              value: Object.freeze({
+                version: this.version,
+                // Getter to prevent mutations.
+                get buildDate() { return new Date(date) },
+              }),
+              writable: false,
+            });
+          },
+          { version: g.VERSION, buildDate: g.VERSION_DATE.getTime().toString() },
+        );
+      } catch (e) {
+        console.error(e);
+      }
       $$1.on(d$1, '4chanXInitFinished', function() {
         if (Main.expectInitFinished) {
           return delete Main.expectInitFinished;

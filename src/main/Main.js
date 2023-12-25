@@ -121,9 +121,27 @@ var Main = {
     // Detect multiple copies of 4chan X
     if (doc && $.hasClass(doc, 'fourchan-x')) { return; }
     $.asap(docSet, function() {
-      $.addClass(doc, 'fourchan-x', 'seaweedchan');
+      $.addClass(doc, 'fourchan-xt', 'fourchan-x', 'seaweedchan');
       if ($.engine) { return $.addClass(doc, `ua-${$.engine}`); }
     });
+    try {
+      $.global(
+        function () {
+          const date = +this.buildDate;
+          Object.defineProperty(window, 'fourchanXT', {
+            value: Object.freeze({
+              version: this.version,
+              // Getter to prevent mutations.
+              get buildDate() { return new Date(date) },
+            }),
+            writable: false,
+          });
+        },
+        { version: g.VERSION, buildDate: g.VERSION_DATE.getTime().toString() },
+      );
+    } catch (e) {
+      console.error(e);
+    }
     $.on(d, '4chanXInitFinished', function() {
       if (Main.expectInitFinished) {
         return delete Main.expectInitFinished;

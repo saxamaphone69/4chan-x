@@ -3,6 +3,16 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+
+### v2.3.0 (2023-12-25) (Merry Christmas)
+
+- Added `.fourchan-xt` class. [#11](https://github.com/TuxedoTako/4chan-xt/issues/11)
+- Added `window.fourchanXT` with the version number in `version` and a `buildDate` `Date` object.
+- Version number is no longer prefixed with "XT ", and will now follow major.minor.bugfix.
+- Fixed "Expand All Images" shortcut in the header. [#13](https://github.com/TuxedoTako/4chan-xt/issues/13)
+- Ran the chrome extension version, and fixed a problem with the ajax function. How long has that been down? I use the
+  extension version myself.
+
 ### XT v2.2.6 (2023-12-22)
 
 - Fixed header shortcuts with text instead of icons. [#12](https://github.com/TuxedoTako/4chan-xt/issues/12)
