@@ -3,6 +3,10 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.3.1 (2023-12-26)
+
+- Fixed classes on capcode. [#14](https://github.com/TuxedoTako/4chan-xt/issues/14)
+- Fixed default FAQ link in the header. [#15](https://github.com/TuxedoTako/4chan-xt/issues/15)
 
 ### v2.3.0 (2023-12-25) (Merry Christmas)
 

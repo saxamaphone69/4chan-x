@@ -1,9 +1,8 @@
 import Redirect from "../Archive/Redirect";
 import Notice from "../classes/Notice";
-import { Conf, d, doc, g } from "../globals/globals";
+import { Conf, d, doc, E, g } from "../globals/globals";
 import Main from "../main/Main";
 import CatalogLinks from "../Miscellaneous/CatalogLinks";
-import ReplyPruning from "../Monitoring/ReplyPruning";
 import $ from "../platform/$";
 import $$ from "../platform/$$";
 import BoardConfig from "./BoardConfig";
@@ -653,7 +652,7 @@ var Header = {
     const el = $.el('span',
       {innerHTML:
         `${meta.name} needs your permission to show desktop notifications. ` +
-        `[<a href=\"${meta.faq}#why-is-4chan-x-asking-for-permission-to-show-desktop-notifications\" target=\"_blank\">FAQ</a>]` +
+        `[<a href=\"${E(meta.upstreamFaq)}#why-is-4chan-x-asking-for-permission-to-show-desktop-notifications\" target=\"_blank\">FAQ</a>]` +
         `<br><button>Authorize</button> or <button>Disable</button>`
     });
     const [authorize, disable] = $$('button', el);

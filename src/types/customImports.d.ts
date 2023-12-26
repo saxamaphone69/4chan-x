@@ -14,6 +14,7 @@ declare module '*/package.json' {
     "downloads": string,
     "oldVersions": string,
     "faq": string,
+    "upstreamFaq": string,
     "captchaFAQ": string,
     "cssGuide": string,
     "license": string,

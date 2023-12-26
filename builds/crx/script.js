@@ -80,8 +80,8 @@
   'use strict';
 
   var version = {
-    "version": "2.3.0",
-    "date": "2023-12-25T11:55:24.012Z"
+    "version": "2.3.1",
+    "date": "2023-12-26T12:38:40.524Z"
   };
 
   var meta = {
@@ -91,7 +91,8 @@
    "page": "https://github.com/TuxedoTako/4chan-xt",
    "downloads": "https://github.com/TuxedoTako/4chan-xt/releases",
    "oldVersions": "https://raw.githubusercontent.com/ccd0/4chan-x/",
-   "faq": "https://github.com/ccd0/4chan-x/wiki/Frequently-Asked-Questions",
+   "faq": "https://github.com/TuxedoTako/4chan-xt/wiki/Frequently-Asked-Questions",
+   "upstreamFaq": "https://github.com/ccd0/4chan-x/wiki/Frequently-Asked-Questions",
    "captchaFAQ": "https://github.com/ccd0/4chan-x/wiki/Captcha-FAQ",
    "cssGuide": "https://github.com/ccd0/4chan-x/wiki/Styling-Guide",
    "license": "https://github.com/TuxedoTako/4chan-xt/blob/project-XT/LICENSE",
@@ -216,12 +217,12 @@
       };
       return output;
   })();
-  const d$1 = document;
-  const doc$1 = d$1.documentElement;
+  const d = document;
+  const doc = d.documentElement;
   const c = console;
   const docSet = function () {
       // return (doc = d.documentElement);
-      return doc$1;
+      return doc;
   };
 
   /*
@@ -1158,7 +1159,7 @@ http://eye.swfchan.com/search/?q=%name;types:swf
 current-catalog-text:"Catalog"
 current-expired-text:"Expired"
 current-archive-text:"Archive"]
-[external-text:"FAQ","${meta.name}"]\
+[external-text:"FAQ","${meta.faq}"]\
 `,
 
     QR: {
@@ -1651,7 +1652,7 @@ https://*.hcaptcha.com
 
   var Favicon = {
     init() {
-      return $$1.asap((() => d$1.head && (Favicon.el = $$1('link[rel="shortcut icon"]', d$1.head))), Favicon.initAsap);
+      return $$1.asap((() => d.head && (Favicon.el = $$1('link[rel="shortcut icon"]', d.head))), Favicon.initAsap);
     },
 
     set(status) {
@@ -1659,7 +1660,7 @@ https://*.hcaptcha.com
       if (Favicon.el) {
         Favicon.el.href = Favicon[status];
         // `favicon.href = href` doesn't work on Firefox.
-        return $$1.add(d$1.head, Favicon.el);
+        return $$1.add(d.head, Favicon.el);
       }
     },
 
@@ -1754,11 +1755,11 @@ https://*.hcaptcha.com
     logo: `data:image/png;base64,${empty}`,
   };
 
-  const $$ = (selector, root = d$1.body) => Array.from(root.querySelectorAll(selector));
+  const $$ = (selector, root = d.body) => Array.from(root.querySelectorAll(selector));
 
   const CaptchaReplace = {
     init() {
-      if ((g.SITE.software !== 'yotsuba') || (d$1.cookie.indexOf('pass_enabled=1') >= 0)) { return; }
+      if ((g.SITE.software !== 'yotsuba') || (d.cookie.indexOf('pass_enabled=1') >= 0)) { return; }
 
       if (Conf['Force Noscript Captcha'] && Main$1.jsEnabled) {
         $$1.ready(this.noscript);
@@ -1767,9 +1768,9 @@ https://*.hcaptcha.com
 
       if (Conf['captchaLanguage'].trim()) {
         if (['boards.4chan.org', 'boards.4channel.org'].includes(location.hostname)) {
-          $$1.onExists(doc$1, '#captchaFormPart', node => $$1.onExists(node, 'iframe[src^="https://www.google.com/recaptcha/"]', this.iframe));
+          $$1.onExists(doc, '#captchaFormPart', node => $$1.onExists(node, 'iframe[src^="https://www.google.com/recaptcha/"]', this.iframe));
         } else {
-          $$1.onExists(doc$1, 'iframe[src^="https://www.google.com/recaptcha/"]', this.iframe);
+          $$1.onExists(doc, 'iframe[src^="https://www.google.com/recaptcha/"]', this.iframe);
         }
       }
     },
@@ -1811,7 +1812,7 @@ https://*.hcaptcha.com
    */
   const CaptchaT = {
     init() {
-      if (d$1.cookie.indexOf('pass_enabled=1') >= 0) { return; }
+      if (d.cookie.indexOf('pass_enabled=1') >= 0) { return; }
       if (!(this.isEnabled = !!$$1('#t-root') || !$$1.id('postForm'))) { return; }
 
       const root = $$1.el('div', {className: 'captcha-root'});
@@ -1977,10 +1978,10 @@ https://*.hcaptcha.com
       // Chrome also fires the onChanged callback on the current tab,
       // so we only start syncing when we're ready.
       var init = () => {
-        $$1.off(d$1, '4chanXInitFinished', init);
+        $$1.off(d, '4chanXInitFinished', init);
         return this.sync = sync;
       };
-      $$1.on(d$1, '4chanXInitFinished', init);
+      $$1.on(d, '4chanXInitFinished', init);
     }
 
     initData(data) {
@@ -2412,7 +2413,7 @@ https://*.hcaptcha.com
         this.onFocus = this.onFocus.bind(this);
         this.addEntry = this.addEntry.bind(this);
         this.type = type;
-        $$1.on(d$1, 'AddMenuEntry', ({detail}) => {
+        $$1.on(d, 'AddMenuEntry', ({detail}) => {
           if (detail.type !== this.type) { return; }
           delete detail.open;
           return this.addEntry(detail);
@@ -2463,8 +2464,8 @@ https://*.hcaptcha.com
 
         $$1.addClass(lastToggledButton, 'active');
 
-        $$1.on(d$1, 'click CloseMenu', this.close);
-        $$1.on(d$1, 'scroll', this.setPosition);
+        $$1.on(d, 'click CloseMenu', this.close);
+        $$1.on(d, 'scroll', this.setPosition);
         $$1.on(window, 'resize', this.setPosition);
         $$1.after(button, menu);
 
@@ -2484,8 +2485,8 @@ https://*.hcaptcha.com
         const bRect   = lastToggledButton.getBoundingClientRect();
         window.scrollY + bRect.top;
         window.scrollX + bRect.left;
-        const cHeight = doc$1.clientHeight;
-        const cWidth  = doc$1.clientWidth;
+        const cHeight = doc.clientHeight;
+        const cWidth  = doc.clientWidth;
         const [top, bottom] = (bRect.top + bRect.height + mRect.height) < cHeight ?
           [`${bRect.bottom}px`, '']
         :
@@ -2532,8 +2533,8 @@ https://*.hcaptcha.com
         $$1.rmClass(lastToggledButton, 'active');
         currentMenu       = null;
         lastToggledButton = null;
-        $$1.off(d$1, 'click scroll CloseMenu', this.close);
-        $$1.off(d$1, 'scroll', this.setPosition);
+        $$1.off(d, 'click scroll CloseMenu', this.close);
+        $$1.off(d, 'scroll', this.setPosition);
         return $$1.off(window, 'resize', this.setPosition);
       }
 
@@ -2610,8 +2611,8 @@ https://*.hcaptcha.com
         if (!(submenu = $$1('.submenu', entry))) { return; }
         const sRect   = submenu.getBoundingClientRect();
         const eRect   = entry.getBoundingClientRect();
-        const cHeight = doc$1.clientHeight;
-        const cWidth  = doc$1.clientWidth;
+        const cHeight = doc.clientHeight;
+        const cWidth  = doc.clientWidth;
         const [top, bottom] = (eRect.top + sRect.height) < cHeight ?
           ['0px', 'auto']
         :
@@ -2659,8 +2660,8 @@ https://*.hcaptcha.com
     // distance from pointer to el edge is constant; calculate it here.
     const el = $$1.x('ancestor::div[contains(@class,"dialog")][1]', this);
     const rect = el.getBoundingClientRect();
-    const screenHeight = doc$1.clientHeight;
-    const screenWidth  = doc$1.clientWidth;
+    const screenHeight = doc.clientHeight;
+    const screenWidth  = doc.clientWidth;
     const o = {
       id:     el.id,
       style:  el.style,
@@ -2684,13 +2685,13 @@ https://*.hcaptcha.com
       o.identifier = e.identifier;
       o.move = touchmove.bind(o);
       o.up   = touchend.bind(o);
-      $$1.on(d$1, 'touchmove', o.move);
-      return $$1.on(d$1, 'touchend touchcancel', o.up);
+      $$1.on(d, 'touchmove', o.move);
+      return $$1.on(d, 'touchend touchcancel', o.up);
     } else { // mousedown
       o.move = drag.bind(o);
       o.up   = dragend.bind(o);
-      $$1.on(d$1, 'mousemove', o.move);
-      return $$1.on(d$1, 'mouseup',   o.up);
+      $$1.on(d, 'mousemove', o.move);
+      return $$1.on(d, 'mouseup',   o.up);
     }
   };
 
@@ -2750,11 +2751,11 @@ https://*.hcaptcha.com
 
   var dragend = function () {
     if (this.isTouching) {
-      $$1.off(d$1, 'touchmove', this.move);
-      $$1.off(d$1, 'touchend touchcancel', this.up);
+      $$1.off(d, 'touchmove', this.move);
+      $$1.off(d, 'touchend touchcancel', this.up);
     } else { // mouseup
-      $$1.off(d$1, 'mousemove', this.move);
-      $$1.off(d$1, 'mouseup',   this.up);
+      $$1.off(d, 'mousemove', this.move);
+      $$1.off(d, 'mouseup',   this.up);
     }
     return $$1.set(`${this.id}.position`, this.style.cssText);
   };
@@ -2769,8 +2770,8 @@ https://*.hcaptcha.com
       cb,
       endEvents,
       latestEvent,
-      clientHeight: doc$1.clientHeight,
-      clientWidth:  doc$1.clientWidth,
+      clientHeight: doc.clientHeight,
+      clientWidth:  doc.clientWidth,
       height,
       width,
       noRemove,
@@ -2787,13 +2788,13 @@ https://*.hcaptcha.com
 
     $$1.on(root, endEvents,   o.hoverend);
     if ($$1.x('ancestor::div[contains(@class,"inline")][1]', root)) {
-      $$1.on(d$1,    'keydown',   o.hoverend);
+      $$1.on(d,    'keydown',   o.hoverend);
     }
     $$1.on(root, 'mousemove', o.hover);
 
     // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=674955
     o.workaround = function(e) { if (!root.contains(e.target)) { return o.hoverend(e); } };
-    return $$1.on(doc$1,  'mousemove', o.workaround);
+    return $$1.on(doc,  'mousemove', o.workaround);
   };
 
   hoverstart.padding = 25;
@@ -2826,10 +2827,10 @@ https://*.hcaptcha.com
     if (((e.type === 'keydown') && (e.keyCode !== 13)) || (e.target.nodeName === "TEXTAREA")) { return; }
     if (!this.noRemove) { $$1.rm(this.el); }
     $$1.off(this.root, this.endEvents,  this.hoverend);
-    $$1.off(d$1,     'keydown',   this.hoverend);
+    $$1.off(d,     'keydown',   this.hoverend);
     $$1.off(this.root, 'mousemove', this.hover);
     // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=674955
-    $$1.off(doc$1,   'mousemove', this.workaround);
+    $$1.off(doc,   'mousemove', this.workaround);
     if (this.cb) { return this.cb.call(this); }
   };
 
@@ -2884,10 +2885,10 @@ https://*.hcaptcha.com
 
       $$1.add(span, [prev, $$1.tn(' '), next]);
       var append = function() {
-        $$1.off(d$1, '4chanXInitFinished', append);
-        return $$1.add(d$1.body, span);
+        $$1.off(d, '4chanXInitFinished', append);
+        return $$1.add(d.body, span);
       };
-      return $$1.on(d$1, '4chanXInitFinished', append);
+      return $$1.on(d, '4chanXInitFinished', append);
     },
 
     prev() {
@@ -2900,7 +2901,7 @@ https://*.hcaptcha.com
 
     next() {
       if (g.VIEW === 'thread') {
-        return window.scrollTo(0, d$1.body.scrollHeight);
+        return window.scrollTo(0, d.body.scrollHeight);
       } else {
         return Nav.scroll(+1);
       }
@@ -2908,7 +2909,7 @@ https://*.hcaptcha.com
 
     getThread() {
       if (g.VIEW === 'thread') { return g.threads.get(`${g.BOARD}.${g.THREADID}`).nodes.root; }
-      if ($$1.hasClass(doc$1, 'catalog-mode')) { return; }
+      if ($$1.hasClass(doc, 'catalog-mode')) { return; }
       for (var threadRoot of $$(g.SITE.selectors.thread)) {
         var thread = Get$1.threadFromRoot(threadRoot);
         if (thread.isHidden && !thread.stub) { continue; }
@@ -2920,7 +2921,7 @@ https://*.hcaptcha.com
 
     scroll(delta) {
       let next;
-      d$1.activeElement?.blur();
+      d.activeElement?.blur();
       let thread = Nav.getThread();
       if (!thread) { return; }
       const axis = delta === +1 ?
@@ -2935,25 +2936,25 @@ https://*.hcaptcha.com
         if (((delta === +1) && (top < 5)) || ((delta === -1) && (top > -5))) { thread = next; }
       }
       // Add extra space to the end of the page if necessary so that all threads can be selected by keybinds.
-      const extra = (Header$1.getTopOf(thread) + doc$1.clientHeight) - d$1.body.getBoundingClientRect().bottom;
-      if (extra > 0) { d$1.body.style.marginBottom = `${extra}px`; }
+      const extra = (Header$1.getTopOf(thread) + doc.clientHeight) - d.body.getBoundingClientRect().bottom;
+      if (extra > 0) { d.body.style.marginBottom = `${extra}px`; }
 
       Header$1.scrollTo(thread);
 
       if ((extra > 0) && !Nav.haveExtra) {
         Nav.haveExtra = true;
-        return $$1.on(d$1, 'scroll', Nav.removeExtra);
+        return $$1.on(d, 'scroll', Nav.removeExtra);
       }
     },
 
     removeExtra() {
-      const extra = doc$1.clientHeight - d$1.body.getBoundingClientRect().bottom;
+      const extra = doc.clientHeight - d.body.getBoundingClientRect().bottom;
       if (extra > 0) {
-        return d$1.body.style.marginBottom = `${extra}px`;
+        return d.body.style.marginBottom = `${extra}px`;
       } else {
-        d$1.body.style.marginBottom = '';
+        d.body.style.marginBottom = '';
         delete Nav.haveExtra;
-        return $$1.off(d$1, 'scroll', Nav.removeExtra);
+        return $$1.off(d, 'scroll', Nav.removeExtra);
       }
     }
   };
@@ -3258,7 +3259,7 @@ https://*.hcaptcha.com
             hidden: true
           }
           );
-          $$1.add(d$1.body, a);
+          $$1.add(d.body, a);
           a.click();
           return $$1.rm(a);
         } else {
@@ -3335,7 +3336,7 @@ https://*.hcaptcha.com
           });
           $$1.on(this.EAI, 'click', this.cb.toggleAll);
           Header$1.addShortcut('expand-all', this.EAI, 520, '➕︎');
-          $$1.on(d$1, 'scroll visibilitychange', this.cb.playVideos);
+          $$1.on(d, 'scroll visibilitychange', this.cb.playVideos);
           this.videoControls = $$1.el('span', { className: 'video-controls' });
           $$1.extend(this.videoControls, { innerHTML: " <a href=\"javascript:;\" title=\"You can also contract the video by dragging it to the left.\">contract</a>" });
           return Callbacks.Post.push({
@@ -3391,7 +3392,7 @@ https://*.hcaptcha.com
               const threadRoot = Nav.getThread();
               const toggle = function (post) {
                   const { file } = post;
-                  if (!file || (!file.isImage && !file.isVideo) || !doc$1.contains(post.nodes.root)) {
+                  if (!file || (!file.isImage && !file.isVideo) || !doc.contains(post.nodes.root)) {
                       return;
                   }
                   if (ImageExpand.on &&
@@ -3444,7 +3445,7 @@ https://*.hcaptcha.com
               });
           },
           setFitness() {
-              return $$1[this.checked ? 'addClass' : 'rmClass'](doc$1, this.name.toLowerCase().replace(/\s+/g, '-'));
+              return $$1[this.checked ? 'addClass' : 'rmClass'](doc, this.name.toLowerCase().replace(/\s+/g, '-'));
           }
       },
       toggle(post) {
@@ -3472,7 +3473,7 @@ https://*.hcaptcha.com
           if (el = file.fullImage) {
               const top = Header$1.getTopOf(el);
               bottom = top + el.getBoundingClientRect().height;
-              oldHeight = d$1.body.clientHeight;
+              oldHeight = d.body.clientHeight;
               ({ scrollY } = window);
           }
           $$1.rmClass(post.nodes.root, 'expanded-image');
@@ -3486,10 +3487,10 @@ https://*.hcaptcha.com
           if (!el) {
               return;
           }
-          if (doc$1.contains(el)) {
+          if (doc.contains(el)) {
               if (bottom <= 0) {
                   // For images entirely above us, scroll to remain in place.
-                  window.scrollBy(0, ((scrollY - window.scrollY) + d$1.body.clientHeight) - oldHeight);
+                  window.scrollBy(0, ((scrollY - window.scrollY) + d.body.clientHeight) - oldHeight);
               }
               else {
                   // For images not above us that would be moved above us, scroll to the thumbnail.
@@ -3614,20 +3615,20 @@ https://*.hcaptcha.com
               return;
           } // contracted before the image loaded
           const bottom = Header$1.getTopOf(file.thumb) + file.thumb.getBoundingClientRect().height;
-          const oldHeight = d$1.body.clientHeight;
+          const oldHeight = d.body.clientHeight;
           const { scrollY } = window;
           $$1.addClass(post.nodes.root, 'expanded-image');
           $$1.rmClass(file.thumb, 'expanding');
           file.isExpanded = true;
           delete file.isExpanding;
           // Scroll to keep our place in the thread when images are expanded above us.
-          if (doc$1.contains(post.nodes.root) && (bottom <= 0)) {
-              window.scrollBy(0, ((scrollY - window.scrollY) + d$1.body.clientHeight) - oldHeight);
+          if (doc.contains(post.nodes.root) && (bottom <= 0)) {
+              window.scrollBy(0, ((scrollY - window.scrollY) + d.body.clientHeight) - oldHeight);
           }
           // Scroll to display full image.
           if (file.scrollIntoView) {
               delete file.scrollIntoView;
-              const imageBottom = Math.min(doc$1.clientHeight - file.fullImage.getBoundingClientRect().bottom - 25, Header$1.getBottomOf(file.fullImage));
+              const imageBottom = Math.min(doc.clientHeight - file.fullImage.getBoundingClientRect().bottom - 25, Header$1.getBottomOf(file.fullImage));
               if (imageBottom < 0) {
                   window.scrollBy(0, Math.min(-imageBottom, Header$1.getTopOf(file.fullImage)));
               }
@@ -3643,8 +3644,8 @@ https://*.hcaptcha.com
               return;
           }
           fullImage.controls = false;
-          $$1.asap((() => doc$1.contains(fullImage)), function () {
-              if (!d$1.hidden && Header$1.isNodeVisible(fullImage)) {
+          $$1.asap((() => doc.contains(fullImage)), function () {
+              if (!d.hidden && Header$1.isNodeVisible(fullImage)) {
                   return fullImage.play();
               }
               else {
@@ -4292,7 +4293,7 @@ https://*.hcaptcha.com
       if (!['index', 'thread'].includes(g.VIEW) || (!Conf['Reply Hiding Buttons'] && !(Conf['Menu'] && Conf['Reply Hiding Link']))) { return; }
 
       if (Conf['Reply Hiding Buttons']) {
-        $$1.addClass(doc$1, "reply-hide");
+        $$1.addClass(doc, "reply-hide");
       }
 
       this.db = new DataBoard('hiddenPosts');
@@ -4584,7 +4585,7 @@ https://*.hcaptcha.com
         Index$1.enabled
       ) {
         this.flush();
-        $$1.on(d$1, 'visibilitychange PostsInserted', this.flush);
+        $$1.on(d, 'visibilitychange PostsInserted', this.flush);
       }
 
       if (Conf['Relative Post Dates']) {
@@ -4668,7 +4669,7 @@ https://*.hcaptcha.com
     stale: [],
     flush() {
       // No point in changing the dates until the user sees them.
-      if (d$1.hidden) { return; }
+      if (d.hidden) { return; }
 
       const now = new Date();
       for (var data of RelativeDates.stale) { RelativeDates.update(data, now); }
@@ -4730,7 +4731,7 @@ https://*.hcaptcha.com
     markStale(data) {
       if (RelativeDates.stale.includes(data)) { return; } // We can call RelativeDates.update() multiple times.
       if (data instanceof Post && !g.posts.get(data.fullID)) { return; } // collected post.
-      if (data instanceof Element && !doc$1.contains(data)) { return; } // removed catalog reply.
+      if (data instanceof Element && !doc.contains(data)) { return; } // removed catalog reply.
       return RelativeDates.stale.push(data);
     }
   };
@@ -4871,7 +4872,7 @@ https://*.hcaptcha.com
               thread_global: 300 // inter-board thread cooldown
           };
           // Pass users have reduced cooldowns.
-          if (d$1.cookie.indexOf('pass_enabled=1') >= 0) {
+          if (d.cookie.indexOf('pass_enabled=1') >= 0) {
               for (var key of ['reply', 'image']) {
                   c[key] = Math.ceil(c[key] / 2);
               }
@@ -4887,7 +4888,7 @@ https://*.hcaptcha.com
    */
   const PostRedirect = {
     init() {
-      return $$1.on(d$1, 'QRPostSuccessful', e => {
+      return $$1.on(d, 'QRPostSuccessful', e => {
         if (!e.detail.redirect) { return; }
         this.event = e;
         this.delays = 0;
@@ -5023,7 +5024,7 @@ https://*.hcaptcha.com
 
       this.db = new DataBoard('yourPosts');
       $$1.sync('Remember Your Posts', enabled => Conf['Remember Your Posts'] = enabled);
-      $$1.on(d$1, 'QRPostSuccessful', function(e) {
+      $$1.on(d, 'QRPostSuccessful', function(e) {
         const cb = PostRedirect.delay();
         return $$1.get('Remember Your Posts', Conf['Remember Your Posts'], function(items) {
           if (!items['Remember Your Posts']) { return; }
@@ -5035,11 +5036,11 @@ https://*.hcaptcha.com
       if (!['index', 'thread', 'archive'].includes(g.VIEW)) { return; }
 
       if (Conf['Highlight Own Posts']) {
-        $$1.addClass(doc$1, 'highlight-own');
+        $$1.addClass(doc, 'highlight-own');
       }
 
       if (Conf['Highlight Posts Quoting You']) {
-        $$1.addClass(doc$1, 'highlight-you');
+        $$1.addClass(doc, 'highlight-you');
       }
 
       if (Conf['Comment Expansion']) {
@@ -5139,7 +5140,7 @@ https://*.hcaptcha.com
         const {highlight} = g.SITE.classes;
         if (highlighted = $$1(`.${highlight}`)) { $$1.rmClass(highlighted, highlight); }
 
-        if (!QuoteYou.lastRead || !doc$1.contains(QuoteYou.lastRead) || !$$1.hasClass(QuoteYou.lastRead, 'quotesYou')) {
+        if (!QuoteYou.lastRead || !doc.contains(QuoteYou.lastRead) || !$$1.hasClass(QuoteYou.lastRead, 'quotesYou')) {
           if (!(post = (QuoteYou.lastRead = $$1('.quotesYou')))) {
             new Notice('warning', 'No posts are currently quoting you, loser.', 20);
             return;
@@ -5337,16 +5338,16 @@ https://*.hcaptcha.com
 
     node() {
       Unread.thread = this;
-      Unread.title  = d$1.title;
+      Unread.title  = d.title;
       Unread.lastReadPost = Unread.db?.get({
         boardID: this.board.ID,
         threadID: this.ID
       }) || 0;
       Unread.readCount = 0;
       for (var ID of this.posts.keys) { if (+ID <= Unread.lastReadPost) { Unread.readCount++; } }
-      $$1.one(d$1, '4chanXInitFinished', Unread.ready);
-      $$1.on(d$1, 'PostsInserted',      Unread.onUpdate);
-      $$1.on(d$1, 'ThreadUpdate',       function(e) { if (e.detail[404]) { return Unread.update(); } });
+      $$1.one(d, '4chanXInitFinished', Unread.ready);
+      $$1.on(d, 'PostsInserted',      Unread.onUpdate);
+      $$1.on(d, 'ThreadUpdate',       function(e) { if (e.detail[404]) { return Unread.update(); } });
       const resetLink = $$1.el('a', {
         href: 'javascript:;',
         className: 'unread-reset',
@@ -5365,8 +5366,8 @@ https://*.hcaptcha.com
       Unread.setLine(true);
       Unread.read();
       Unread.update();
-      $$1.on(d$1, 'scroll visibilitychange', Unread.read);
-      if (Conf['Unread Line']) { return $$1.on(d$1, 'visibilitychange',        Unread.setLine); }
+      $$1.on(d, 'scroll visibilitychange', Unread.read);
+      if (Conf['Unread Line']) { return $$1.on(d, 'visibilitychange',        Unread.setLine); }
     },
 
     positionPrev() {
@@ -5500,7 +5501,7 @@ https://*.hcaptcha.com
         Unread.saveLastReadPost();
       }
 
-      if (d$1.hidden || !Unread.posts.size) { return; }
+      if (d.hidden || !Unread.posts.size) { return; }
 
       let count = 0;
       while (Unread.position) {
@@ -5549,7 +5550,7 @@ https://*.hcaptcha.com
 
     setLine(force) {
       if (!Conf['Unread Line']) { return; }
-      if (Unread.hr.hidden || d$1.hidden || (force === true)) {
+      if (Unread.hr.hidden || d.hidden || (force === true)) {
         const oldPosition = Unread.linePosition;
         if (Unread.linePosition = Unread.positionPrev()) {
           if (Unread.linePosition !== oldPosition) {
@@ -5575,7 +5576,7 @@ https://*.hcaptcha.com
           Unread.title.replace('-', (Unread.thread.isArchived ? '- Archived -' : '- 404 -'))
         :
           Unread.title;
-        d$1.title = `${titleQuotingYou}${titleCount}${titleDead}`;
+        d.title = `${titleQuotingYou}${titleCount}${titleDead}`;
       }
 
       Unread.saveThreadWatcherCount();
@@ -5633,7 +5634,7 @@ https://*.hcaptcha.com
     init() {
       if (!((g.VIEW === 'index') && Conf['Thread Expansion'])) { return; }
       if (Conf['JSON Index']) {
-        return $$1.on(d$1, 'IndexRefreshInternal', this.onIndexRefresh);
+        return $$1.on(d, 'IndexRefreshInternal', this.onIndexRefresh);
       } else {
         return Callbacks.Thread.push({
           name: 'Expand Thread',
@@ -5662,7 +5663,7 @@ https://*.hcaptcha.com
         delete ExpandThread.statuses[threadID];
       }
 
-      if (!refresh) { return $$1.off(d$1, 'IndexRefreshInternal', this.onIndexRefresh); }
+      if (!refresh) { return $$1.off(d, 'IndexRefreshInternal', this.onIndexRefresh); }
     },
 
     onIndexRefresh() {
@@ -5803,8 +5804,8 @@ https://*.hcaptcha.com
         cb:   this.node
       });
 
-      $$1.on(d$1, 'IndexRefreshInternal', this.onIndexRefresh);
-      return $$1.on(d$1, 'PostsInserted PostsRemoved', this.onPostsInserted);
+      $$1.on(d, 'IndexRefreshInternal', this.onIndexRefresh);
+      return $$1.on(d, 'PostsInserted PostsRemoved', this.onPostsInserted);
     },
 
     node() {
@@ -5958,25 +5959,25 @@ https://*.hcaptcha.com
       this.unreaddb = Unread.db || UnreadIndex.db || new DataBoard('lastReadPosts');
       this.unreadEnabled = Conf['Remember Last Read Post'];
 
-      $$1.on(d$1, 'QRPostSuccessful',   this.cb.post);
+      $$1.on(d, 'QRPostSuccessful',   this.cb.post);
       $$1.on(sc, 'click', this.toggleWatcher);
       $$1.on(this.refreshButton, 'click', this.buttonFetchAll);
       $$1.on(this.closeButton, 'click', this.toggleWatcher);
 
       this.menu.addHeaderMenuEntry();
-      $$1.onExists(doc$1, 'body', this.addDialog);
+      $$1.onExists(doc, 'body', this.addDialog);
 
       switch (g.VIEW) {
         case 'index':
-          $$1.on(d$1, 'IndexUpdate', this.cb.onIndexUpdate);
+          $$1.on(d, 'IndexUpdate', this.cb.onIndexUpdate);
           break;
         case 'thread':
-          $$1.on(d$1, 'ThreadUpdate', this.cb.onThreadRefresh);
+          $$1.on(d, 'ThreadUpdate', this.cb.onThreadRefresh);
           break;
       }
 
       if (Conf['Fixed Thread Watcher']) {
-        $$1.addClass(doc$1, 'fixed-watcher');
+        $$1.addClass(doc, 'fixed-watcher');
       }
       if (!Conf['Persistent Thread Watcher']) {
         $$1.addClass(ThreadWatcher.shortcut, 'disabled');
@@ -6078,7 +6079,7 @@ https://*.hcaptcha.com
     addDialog() {
       if (!Main$1.isThisPageLegit()) { return; }
       ThreadWatcher.build();
-      return $$1.prepend(d$1.body, ThreadWatcher.dialog);
+      return $$1.prepend(d.body, ThreadWatcher.dialog);
     },
 
     toggleWatcher() {
@@ -6249,7 +6250,7 @@ https://*.hcaptcha.com
       const {db} = ThreadWatcher;
       const interval = Conf['Show Page'] || (ThreadWatcher.unreadEnabled && Conf['Show Unread Count']) ? 5 * MINUTE : 2 * HOUR;
       const now = Date.now();
-      if ((now - interval >= ((middle = db.data.lastChecked || 0)) || middle > now) && !d$1.hidden && !!d$1.hasFocus()) {
+      if ((now - interval >= ((middle = db.data.lastChecked || 0)) || middle > now) && !d.hidden && !!d.hasFocus()) {
         ThreadWatcher.fetchAllStatus(interval);
       }
       return ThreadWatcher.timeout = setTimeout(ThreadWatcher.fetchAuto, interval);
@@ -7056,7 +7057,7 @@ https://*.hcaptcha.com
                   rel: 'stylesheet',
                   href: `//s.4cdn.org/css/flags.${cssVersion}.css`
               });
-              $$1.add(d$1.head, Fetcher.flagCSS);
+              $$1.add(d.head, Fetcher.flagCSS);
           }
           $$1.rmAll(this.root);
           $$1.add(this.root, nodes.root);
@@ -7208,7 +7209,7 @@ https://*.hcaptcha.com
       if (!Conf['Quote Previewing']) { return; }
 
       if (g.VIEW === 'archive') {
-        $$1.on(d$1, 'mouseover', function(e) {
+        $$1.on(d, 'mouseover', function(e) {
           if ((e.target.nodeName === 'A') && $$1.hasClass(e.target, 'quotelink')) {
             return QuotePreview.mouseover.call(e.target, e);
           }
@@ -7235,7 +7236,7 @@ https://*.hcaptcha.com
 
     mouseover(e) {
       let origin;
-      if (($$1.hasClass(this, 'inlined') && !$$1.hasClass(doc$1, 'catalog-mode')) || !d$1.contains(this)) { return; }
+      if (($$1.hasClass(this, 'inlined') && !$$1.hasClass(doc, 'catalog-mode')) || !d.contains(this)) { return; }
 
       const {boardID, threadID, postID} = Get$1.postDataFromLink(this);
 
@@ -7360,8 +7361,8 @@ https://*.hcaptcha.com
       if (g.VIEW !== 'index') { return; }
 
       // For IndexRefresh events
-      $$1.one(d$1, '4chanXInitFinished', this.cb.initFinished);
-      $$1.on(d$1, 'PostsInserted', this.cb.postsInserted);
+      $$1.one(d, '4chanXInitFinished', this.cb.initFinished);
+      $$1.on(d, 'PostsInserted', this.cb.postsInserted);
 
       if (!this.enabledOn(g.BOARD)) { return; }
 
@@ -7389,10 +7390,10 @@ https://*.hcaptcha.com
       this.currentPage = this.getCurrentPage();
       this.processHash();
 
-      $$1.addClass(doc$1, 'index-loading', `${Conf['Index Mode'].replace(/\ /g, '-')}-mode`);
+      $$1.addClass(doc, 'index-loading', `${Conf['Index Mode'].replace(/\ /g, '-')}-mode`);
       $$1.on(window, 'popstate', this.cb.popstate);
-      $$1.on(d$1, 'scroll', this.scroll);
-      $$1.on(d$1, 'SortIndex', this.cb.resort);
+      $$1.on(d, 'scroll', this.scroll);
+      $$1.on(d, 'SortIndex', this.cb.resort);
 
       // Header refresh button
       this.button = $$1.el('a', {
@@ -7429,7 +7430,7 @@ https://*.hcaptcha.com
           return $$1.event('change', null, input);
         }
       };
-      $$1.on(d$1, 'OpenSettings', () => $$1.on($$1.id('fourchanx-settings'), 'change', watchSettings));
+      $$1.on(d, 'OpenSettings', () => $$1.on($$1.id('fourchanx-settings'), 'change', watchSettings));
 
       const sortEntry = UI.checkbox('Per-Board Sort Type', 'Per-board sort type', (typeof Conf['Index Sort'] === 'object'));
       sortEntry.title = 'Set the sorting order of each board independently.';
@@ -7503,9 +7504,9 @@ https://*.hcaptcha.com
 
       this.update(true);
 
-      $$1.onExists(doc$1, 'title + *', () => d$1.title = d$1.title.replace(/\ -\ Page\ \d+/, ''));
+      $$1.onExists(doc, 'title + *', () => d.title = d.title.replace(/\ -\ Page\ \d+/, ''));
 
-      $$1.onExists(doc$1, '.board > .thread > .postContainer, .board + *', function() {
+      $$1.onExists(doc, '.board > .thread > .postContainer, .board + *', function() {
         let el;
         g.SITE.Build.hat = $$1('.board > .thread > img:first-child');
         if (g.SITE.Build.hat) {
@@ -7514,7 +7515,7 @@ https://*.hcaptcha.com
               return $$1.prepend(thread.nodes.root, g.SITE.Build.hat.cloneNode(false));
             }
           });
-          $$1.addClass(doc$1, 'hats-enabled');
+          $$1.addClass(doc, 'hats-enabled');
           $$1.addStyle(`.catalog-thread::after {background-image: url(${g.SITE.Build.hat.src});}`);
         }
 
@@ -7531,7 +7532,7 @@ https://*.hcaptcha.com
         // - Combine the two and you get a download canceller!
         //   Does not work on Firefox unfortunately. bugzil.la/939713
         try {
-          d$1.implementation.createDocument(null, null, null).appendChild(board);
+          d.implementation.createDocument(null, null, null).appendChild(board);
         } catch (error) {}
 
         for (el of $$('.navLinks')) { $$1.rm(el); }
@@ -7548,12 +7549,12 @@ https://*.hcaptcha.com
         if (pagelist = $$1('.pagelist')) {
           $$1.replace(pagelist, Index.pagelist);
         }
-        return $$1.rmClass(doc$1, 'index-loading');
+        return $$1.rmClass(doc, 'index-loading');
       });
     },
 
     scroll() {
-      if (Index.req || !Index.liveThreadData || (Conf['Index Mode'] !== 'infinite') || (window.scrollY <= (doc$1.scrollHeight - (300 + window.innerHeight)))) { return; }
+      if (Index.req || !Index.liveThreadData || (Conf['Index Mode'] !== 'infinite') || (window.scrollY <= (doc.scrollHeight - (300 + window.innerHeight)))) { return; }
       if (Index.pageNum == null) { Index.pageNum = Index.currentPage; } // Avoid having to pushState to keep track of the current page
 
       const pageNum = ++Index.pageNum;
@@ -7648,7 +7649,7 @@ https://*.hcaptcha.com
         if (!Index.initFinishedFired) { return; }
         let n = 0;
         g.posts.forEach(function(post) {
-          if (!post.isFetchedQuote && !post.indexRefreshSeen && doc$1.contains(post.nodes.root)) {
+          if (!post.isFetchedQuote && !post.indexRefreshSeen && doc.contains(post.nodes.root)) {
             post.indexRefreshSeen = true;
             return n++;
           }
@@ -7722,11 +7723,11 @@ https://*.hcaptcha.com
       },
 
       hover() {
-        return doc$1.classList.toggle('catalog-hover-expand', Conf['Catalog Hover Expand']);
+        return doc.classList.toggle('catalog-hover-expand', Conf['Catalog Hover Expand']);
       },
 
       hoverToggle(e) {
-        if (Conf['Catalog Hover Toggle'] && $$1.hasClass(doc$1, 'catalog-mode') && !$$1.modifiedClick(e) && !$$1.x('ancestor-or-self::a', e.target)) {
+        if (Conf['Catalog Hover Toggle'] && $$1.hasClass(doc, 'catalog-mode') && !$$1.modifiedClick(e) && !$$1.x('ancestor-or-self::a', e.target)) {
           let thread;
           const input = Index.inputs['Catalog Hover Expand'];
           input.checked = !input.checked;
@@ -7780,7 +7781,7 @@ https://*.hcaptcha.com
       },
 
       catalogReplies() {
-        if (Conf['Show Replies'] && $$1.hasClass(doc$1, 'catalog-hover-expand') && !this.catalogView.nodes.replies) {
+        if (Conf['Show Replies'] && $$1.hasClass(doc, 'catalog-hover-expand') && !this.catalogView.nodes.replies) {
           return Index.buildCatalogReplies(this);
         }
       },
@@ -7788,9 +7789,9 @@ https://*.hcaptcha.com
       hoverAdjust() {
         // Prevent hovered catalog threads from going offscreen.
         let x;
-        if (!$$1.hasClass(doc$1, 'catalog-hover-expand')) { return; }
+        if (!$$1.hasClass(doc, 'catalog-hover-expand')) { return; }
         const rect = this.post.getBoundingClientRect();
-        if (x = $$1.minmax(0, -rect.left, doc$1.clientWidth - rect.right)) {
+        if (x = $$1.minmax(0, -rect.left, doc.clientWidth - rect.right)) {
           const {style} = this.post;
           style.left = `${x}px`;
           style.right = `${-x}px`;
@@ -7953,7 +7954,7 @@ https://*.hcaptcha.com
 
     setupMode() {
       for (var mode of ['paged', 'infinite', 'all pages', 'catalog']) {
-        $$1[mode === Conf['Index Mode'] ? 'addClass' : 'rmClass'](doc$1, `${mode.replace(/\ /g, '-')}-mode`);
+        $$1[mode === Conf['Index Mode'] ? 'addClass' : 'rmClass'](doc, `${mode.replace(/\ /g, '-')}-mode`);
       }
       Index.selectMode.value = Conf['Index Mode'];
       Index.cb.size();
@@ -8070,7 +8071,7 @@ https://*.hcaptcha.com
       }
 
       // Hard refresh in case of incomplete page load.
-      if (!firstTime && (d$1.readyState !== 'loading') && !$$1('.board + *')) {
+      if (!firstTime && (d.readyState !== 'loading') && !$$1('.board + *')) {
         location.reload();
         return;
       }
@@ -8555,9 +8556,9 @@ https://*.hcaptcha.com
       this.db = new DataBoard('hiddenThreads');
       if (g.VIEW === 'catalog') { return this.catalogWatch(); }
       this.catalogSet(g.BOARD);
-      $$1.on(d$1, 'IndexRefreshInternal', this.onIndexRefresh);
+      $$1.on(d, 'IndexRefreshInternal', this.onIndexRefresh);
       if (Conf['Thread Hiding Buttons']) {
-        $$1.addClass(doc$1, 'thread-hide');
+        $$1.addClass(doc, 'thread-hide');
       }
       return Callbacks.Post.push({
         name: 'Thread Hiding',
@@ -12786,7 +12787,7 @@ div.post {
     ],
 
     detect() {
-      for (var script of $$('script:not([src])', d$1.head)) {
+      for (var script of $$('script:not([src])', d.head)) {
         var m;
         if (m = script.textContent.match(/\bvar configRoot=(".*?")/)) {
           var properties = dict();
@@ -13083,7 +13084,7 @@ $\
         if (hd = $$1.id('hd')) {
           return $$1.after(hd, msg);
         } else {
-          return $$1.prepend(d$1.body, msg);
+          return $$1.prepend(d.body, msg);
         }
       });
     }
@@ -13118,7 +13119,7 @@ $\
       new MutationObserver(function() {
         Report.fit('iframe[src^="https://www.google.com/recaptcha/api2/frame"]');
         return Report.fit('body');
-      }).observe(d$1.body, {
+      }).observe(d.body, {
         childList:  true,
         attributes: true,
         subtree:    true
@@ -13226,7 +13227,7 @@ $\
         if (fieldset) {
           $$1.before(fieldset, line);
         } else {
-          $$1.add(d$1.body, line);
+          $$1.add(d.body, line);
         }
       }
     }
@@ -13244,7 +13245,7 @@ $\
     },
 
     ready() {
-      if (d$1.title !== 'Post successful!') { return; }
+      if (d.title !== 'Post successful!') { return; }
 
       let [_, threadID, postID] = $$1('h1').nextSibling.textContent.match(/thread:(\d+),no:(\d+)/);
       postID   = +postID;
@@ -13261,7 +13262,7 @@ $\
   };
 
   function generatePostInfoHtml(ID, o, subject, capcode, email, name, tripcode, pass, capcodeLC, capcodePlural, staticPath, gifIcon, capcodeDescription, uniqueID, flag, flagCode, flagCodeTroll, dateUTC, dateText, postLink, quoteLink, boardID, threadID) {
-      const nameHtml = [h("span", { class: `name${capcode ? ' ' + capcode : ''}` }, name)];
+      const nameHtml = [h("span", { class: `name${capcode ? ' capcode' : ''}` }, name)];
       if (tripcode)
           nameHtml.push(' ', h("span", { class: "postertrip" }, tripcode));
       if (pass)
@@ -13275,7 +13276,7 @@ $\
       if (!(boardID === "f" && !o.isReply || capcodeDescription))
           nameBlockContent.push(' ');
       if (capcodeDescription) {
-          nameBlockContent.push(h("img", { src: `${staticPath}${capcodeLC}icon${gifIcon}`, alt: `${capcode} Icon}`, title: `This user is ${capcodeDescription}.`, class: "identityIcon retina" }));
+          nameBlockContent.push(h("img", { src: `${staticPath}${capcodeLC}icon${gifIcon}`, alt: `${capcode} Icon`, title: `This user is ${capcodeDescription}.`, class: "identityIcon retina" }));
           if (uniqueID && !capcode) {
               nameBlockContent.push(h("span", { class: `posteruid id_${uniqueID}` },
                   "(ID: ",
@@ -13328,7 +13329,7 @@ $\
           h("input", { type: "checkbox", name: ID, value: "delete" }),
           ' ',
           ...((!o.isReply || boardID === "f" || subject) ? [h("span", { class: "subject" }, subject), ' '] : []),
-          h("span", { class: `nameBlock${capcode || ''}` }, ...nameBlockContent),
+          h("span", { class: `nameBlock${capcode ? ` capcode${capcode}` : ''}` }, ...nameBlockContent),
           ' ',
           h("span", { class: "dateTime", "data-utc": dateUTC }, dateText),
           ' ',
@@ -13521,13 +13522,13 @@ $\
       isThisPageLegit() {
           // not 404 error page or similar.
           return ['boards.4chan.org', 'boards.4channel.org'].includes(location.hostname) &&
-              d$1.doctype &&
-              !$$1('link[href*="favicon-status.ico"]', d$1.head) &&
-              !['4chan - Temporarily Offline', '4chan - Error', '504 Gateway Time-out', 'MathJax Equation Source'].includes(d$1.title);
+              d.doctype &&
+              !$$1('link[href*="favicon-status.ico"]', d.head) &&
+              !['4chan - Temporarily Offline', '4chan - Error', '504 Gateway Time-out', 'MathJax Equation Source'].includes(d.title);
       },
       is404() {
           // XXX Sometimes threads don't 404 but are left over as stubs containing one garbage reply post.
-          return ['4chan - Temporarily Offline', '4chan - 404 Not Found'].includes(d$1.title) || ((g.VIEW === 'thread') && $$1('.board') && !$$1('.opContainer'));
+          return ['4chan - Temporarily Offline', '4chan - 404 Not Found'].includes(d.title) || ((g.VIEW === 'thread') && $$1('.board') && !$$1('.opContainer'));
       },
       isIncomplete() {
           return ['index', 'thread'].includes(g.VIEW) && !$$1('.board + *');
@@ -13549,7 +13550,7 @@ $\
                       PassMessage.init();
                   }
                   else {
-                      $$1.onExists(doc$1, 'body', () => $$1.addStyle(CSS.www));
+                      $$1.onExists(doc, 'body', () => $$1.addStyle(CSS.www));
                       Captcha.replace.init();
                   }
                   return;
@@ -13579,7 +13580,7 @@ $\
           }
       },
       scriptData() {
-          for (var script of $$('script:not([src])', d$1.head)) {
+          for (var script of $$('script:not([src])', d.head)) {
               if (/\bcooldowns *=/.test(script.textContent)) {
                   return script.textContent;
               }
@@ -14362,8 +14363,8 @@ $\
 
       $$1.on(ReplyPruning.inputs.enabled, 'change', ReplyPruning.update);
       $$1.on(ReplyPruning.inputs.replies, 'change', ReplyPruning.update);
-      $$1.on(d$1, 'ThreadUpdate', ReplyPruning.updateCount);
-      $$1.on(d$1, 'ThreadUpdate', ReplyPruning.update);
+      $$1.on(d, 'ThreadUpdate', ReplyPruning.updateCount);
+      $$1.on(d, 'ThreadUpdate', ReplyPruning.update);
 
       return ReplyPruning.update();
     },
@@ -14385,7 +14386,7 @@ $\
         0;
 
       // Record position from bottom of document
-      const oldPos = d$1.body.clientHeight - window.scrollY;
+      const oldPos = d.body.clientHeight - window.scrollY;
 
       const {posts} = ReplyPruning.thread;
 
@@ -14423,7 +14424,7 @@ $\
 
       // Maintain position in thread when posts are added/removed above
       if ((hidden1 !== hidden2) && ((boardTop = Header$1.getTopOf($$1('.board'))) < 0)) {
-        return window.scrollBy(0, Math.max(d$1.body.clientHeight - oldPos, window.scrollY + boardTop) - window.scrollY);
+        return window.scrollBy(0, Math.max(d.body.clientHeight - oldPos, window.scrollY + boardTop) - window.scrollY);
       }
     }
   };
@@ -14457,7 +14458,7 @@ $\
       $$1.on(this.input, 'change', this.setEnabled);
       $$1.on(this.input, 'change', this.rethread);
       $$1.on(this.threadNewLink.firstElementChild, 'click', this.rethread);
-      $$1.on(d$1, '4chanXInitFinished', () => { return this.ready = true; });
+      $$1.on(d, '4chanXInitFinished', () => { return this.ready = true; });
 
       Header$1.menu.addEntry(this.entry = {
         el:    this.controls,
@@ -14662,8 +14663,8 @@ $\
           }
           else {
               this.dialog = (sc = UI.dialog('updater', { innerHTML: '<div class="move"></div><span id="update-status" class="empty"></span><span id="update-timer" class="empty" title="Update now"></span>' }));
-              $$1.addClass(doc$1, 'float');
-              $$1.ready(() => $$1.add(d$1.body, sc));
+              $$1.addClass(doc, 'float');
+              $$1.ready(() => $$1.add(d.body, sc));
           }
           this.checkPostCount = 0;
           this.timer = $$1('#update-timer', sc);
@@ -14724,8 +14725,8 @@ $\
               }
           });
           ThreadUpdater.cb.interval.call($$1.el('input', { value: Conf['Interval'] }));
-          $$1.on(d$1, 'QRPostSuccessful', ThreadUpdater.cb.checkpost);
-          $$1.on(d$1, 'visibilitychange', ThreadUpdater.cb.visibility);
+          $$1.on(d, 'QRPostSuccessful', ThreadUpdater.cb.checkpost);
+          $$1.on(d, 'visibilitychange', ThreadUpdater.cb.visibility);
           return ThreadUpdater.setInterval();
       },
       /*
@@ -14756,7 +14757,7 @@ $\
               return ThreadUpdater.setInterval();
           },
           visibility() {
-              if (d$1.hidden) {
+              if (d.hidden) {
                   return;
               }
               // Reset the counter when we focus this tab.
@@ -14769,7 +14770,7 @@ $\
               return ThreadUpdater.scrollBG = Conf['Scroll BG'] ?
                   () => true
                   :
-                      () => !d$1.hidden;
+                      () => !d.hidden;
           },
           interval(e) {
               let val = parseInt(this.value, 10);
@@ -14865,7 +14866,7 @@ $\
           const { interval } = ThreadUpdater;
           if (Conf['Optional Increase']) {
               // Lower the max refresh rate limit on visible tabs.
-              const limit = d$1.hidden ? 10 : 5;
+              const limit = d.hidden ? 10 : 5;
               const j = Math.min(ThreadUpdater.outdateCount, limit);
               // 1 second to 100, 30 to 300.
               const cur = (Math.floor(interval * 0.1) || 1) * j * j;
@@ -15011,7 +15012,7 @@ $\
               const unreadCount = Unread.posts?.size;
               const unreadQYCount = Unread.postsQuotingYou?.size;
               Main$1.callbackNodes('Post', posts);
-              if (d$1.hidden || !d$1.hasFocus()) {
+              if (d.hidden || !d.hasFocus()) {
                   if (Conf['Beep Quoting You'] && (Unread.postsQuotingYou?.size > unreadQYCount)) {
                       ThreadUpdater.playBeep();
                       if (Conf['Beep']) {
@@ -15023,7 +15024,7 @@ $\
                   }
               }
               const scroll = Conf['Auto Scroll'] && ThreadUpdater.scrollBG() &&
-                  ((ThreadUpdater.root.getBoundingClientRect().bottom - doc$1.clientHeight) < 25);
+                  ((ThreadUpdater.root.getBoundingClientRect().bottom - doc.clientHeight) < 25);
               let firstPost = null;
               for (post of posts) {
                   if (!QuoteThreading.insert(post)) {
@@ -15036,7 +15037,7 @@ $\
               $$1.event('PostsInserted', null, ThreadUpdater.root);
               if (scroll) {
                   if (Conf['Bottom Scroll']) {
-                      window.scrollTo(0, d$1.body.clientHeight);
+                      window.scrollTo(0, d.body.clientHeight);
                   }
                   else {
                       if (firstPost) {
@@ -15089,8 +15090,8 @@ $\
           add('Sauce', this.sauce);
           add('Advanced', this.advanced);
           add('Keybinds', this.keybinds);
-          $$1.on(d$1, 'AddSettingsSection', Settings.addSection);
-          $$1.on(d$1, 'OpenSettings', e => Settings.open(e.detail));
+          $$1.on(d, 'AddSettingsSection', Settings.addSection);
+          $$1.on(d, 'OpenSettings', e => Settings.open(e.detail));
           if ((g.SITE.software === 'yotsuba') && Conf['Disable Native Extension']) {
               if ($$1.hasStorage) {
                   // Run in page context to handle case where 4chan X has localStorage access but not the page.
@@ -15147,12 +15148,12 @@ $\
           $$1.on(window, 'beforeunload', Settings.close);
           $$1.on(dialog, 'click', () => {
               // Do not close when the mouse ends up outside the modal when selecting text in an input.
-              if (d$1.activeElement?.tagName === 'INPUT' || d$1.activeElement?.tagName === 'TEXTAREA')
+              if (d.activeElement?.tagName === 'INPUT' || d.activeElement?.tagName === 'TEXTAREA')
                   return;
               Settings.close();
           });
           $$1.on(dialog.firstElementChild, 'click', e => e.stopPropagation());
-          $$1.add(d$1.body, dialog);
+          $$1.add(d.body, dialog);
           return $$1.event('OpenSettings', null, dialog);
       },
       close() {
@@ -15160,7 +15161,7 @@ $\
               return;
           }
           // Unfocus current field to trigger change event.
-          d$1.activeElement?.blur();
+          d.activeElement?.blur();
           $$1.rm(Settings.dialog);
           return delete Settings.dialog;
       },
@@ -15198,7 +15199,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
               }
           },
           ads(cb) {
-              return $$1.onExists(doc$1, '.adg-rects > .desktop', ad => $$1.onExists(ad, 'iframe', function () {
+              return $$1.onExists(doc, '.adg-rects > .desktop', ad => $$1.onExists(ad, 'iframe', function () {
                   const url = Redirect$1.to('thread', { boardID: 'qa', threadID: 362590 });
                   return cb($$1.el('li', h(hFragment, null,
                       "To protect yourself from ",
@@ -15828,6 +15829,11 @@ vp-replace
                   }
               }
           }
+          if (compareString < '00002.00003.00001.00000') {
+              if (data['boardnav']) {
+                  set('boardnav', data['boardnav'].replace('[external-text:"FAQ","4chan XT"]', '[external-text:"FAQ","https://github.com/TuxedoTako/4chan-xt/wiki/Frequently-Asked-Questions"]'));
+              }
+          }
           return changes;
       },
       loadSettings(data, cb) {
@@ -16248,7 +16254,7 @@ vp-replace
 
     set(type, enabled) {
       this.enabled[type] = (this.nodes[type].checked = enabled);
-      return $$1[`${enabled ? 'add' : 'rm'}Class`](doc$1, `${type}Tyme`);
+      return $$1[`${enabled ? 'add' : 'rm'}Class`](doc, `${type}Tyme`);
     },
 
     toggle(type) {
@@ -16292,7 +16298,7 @@ vp-replace
     init() {
       let link;
       if (!['index', 'thread'].includes(g.VIEW) || !Conf['Sauce']) { return; }
-      $$1.addClass(doc$1, 'show-sauce');
+      $$1.addClass(doc, 'show-sauce');
 
       const links = [];
       for (link of Conf['sauces'].split('\n')) {
@@ -16506,9 +16512,9 @@ vp-replace
       const {cb} = Gallery;
 
       if (Conf['Fullscreen Gallery']) {
-        $$1.one(d$1, 'fullscreenchange mozfullscreenchange webkitfullscreenchange', () => $$1.on(d$1, 'fullscreenchange mozfullscreenchange webkitfullscreenchange', cb.close));
-        doc$1.mozRequestFullScreen?.();
-        doc$1.webkitRequestFullScreen?.(Element.ALLOW_KEYBOARD_INPUT);
+        $$1.one(d, 'fullscreenchange mozfullscreenchange webkitfullscreenchange', () => $$1.on(d, 'fullscreenchange mozfullscreenchange webkitfullscreenchange', cb.close));
+        doc.mozRequestFullScreen?.();
+        doc.webkitRequestFullScreen?.(Element.ALLOW_KEYBOARD_INPUT);
       }
 
       Gallery.images  = [];
@@ -16556,8 +16562,8 @@ vp-replace
         nodes.menu.addEntry(entry);
       }
 
-      $$1.on(d$1, 'keydown', cb.keybinds);
-      if (Conf['Keybinds']) { $$1.off(d$1, 'keydown', Keybinds.keydown); }
+      $$1.on(d, 'keydown', cb.keybinds);
+      if (Conf['Keybinds']) { $$1.off(d, 'keydown', Keybinds.keydown); }
 
       $$1.on(window, 'resize', Gallery.cb.setHeight);
 
@@ -16577,9 +16583,9 @@ vp-replace
           }
         }
       }
-      $$1.addClass(doc$1, 'gallery-open');
+      $$1.addClass(doc, 'gallery-open');
 
-      $$1.add(d$1.body, dialog);
+      $$1.add(d.body, dialog);
 
       nodes.thumbs.scrollTop = 0;
       nodes.current.parentElement.scrollTop = 0;
@@ -16588,7 +16594,7 @@ vp-replace
       if (!thumb) { thumb = Gallery.images[Gallery.images.length-1]; }
       if (thumb) { Gallery.open(thumb); }
 
-      doc$1.style.overflow = 'hidden';
+      doc.style.overflow = 'hidden';
       return nodes.total.textContent = Gallery.images.length;
     },
 
@@ -16664,7 +16670,7 @@ vp-replace
         if (Conf['Show Controls']) { ImageCommon.addControls(file); }
       }
 
-      doc$1.classList.toggle('gal-pdf', file.nodeName === 'IFRAME');
+      doc.classList.toggle('gal-pdf', file.nodeName === 'IFRAME');
       Gallery.cb.setHeight();
       nodes.count.textContent = +thumb.dataset.id + 1;
       nodes.name.download     = (nodes.name.textContent = thumb.title);
@@ -16860,24 +16866,24 @@ vp-replace
         $$1.off(Gallery.nodes.current, 'error', Gallery.error);
         ImageCommon.pause(Gallery.nodes.current);
         $$1.rm(Gallery.nodes.el);
-        $$1.rmClass(doc$1, 'gallery-open');
+        $$1.rmClass(doc, 'gallery-open');
         if (Conf['Fullscreen Gallery']) {
-          $$1.off(d$1, 'fullscreenchange mozfullscreenchange webkitfullscreenchange', Gallery.cb.close);
-          d$1.mozCancelFullScreen?.();
-          d$1.webkitExitFullscreen?.();
+          $$1.off(d, 'fullscreenchange mozfullscreenchange webkitfullscreenchange', Gallery.cb.close);
+          d.mozCancelFullScreen?.();
+          d.webkitExitFullscreen?.();
         }
         delete Gallery.nodes;
         delete Gallery.fileIDs;
-        doc$1.style.overflow = '';
+        doc.style.overflow = '';
 
-        $$1.off(d$1, 'keydown', Gallery.cb.keybinds);
-        if (Conf['Keybinds']) { $$1.on(d$1, 'keydown', Keybinds.keydown); }
+        $$1.off(d, 'keydown', Gallery.cb.keybinds);
+        if (Conf['Keybinds']) { $$1.on(d, 'keydown', Keybinds.keydown); }
         $$1.off(window, 'resize', Gallery.cb.setHeight);
         return clearTimeout(Gallery.timeoutID);
       },
 
       setFitness() {
-        return (this.checked ? $$1.addClass : $$1.rmClass)(doc$1, `gal-${this.name.toLowerCase().replace(/\s+/g, '-')}`);
+        return (this.checked ? $$1.addClass : $$1.rmClass)(doc, `gal-${this.name.toLowerCase().replace(/\s+/g, '-')}`);
       },
 
       setHeight: debounce(100, function () {
@@ -16888,7 +16894,7 @@ vp-replace
         if (Conf['Stretch to Fit'] && (dim = g.posts.get(current.dataset.post)?.files[+current.dataset.file].dimensions)) {
           const [width, height] = dim.split('x');
           let containerWidth = frame.clientWidth;
-          let containerHeight = doc$1.clientHeight - 25;
+          let containerHeight = doc.clientHeight - 25;
           if (((current.dataRotate || 0) % 180) === 90) {
             [containerWidth, containerHeight] = [containerHeight, containerWidth];
           }
@@ -16900,7 +16906,7 @@ vp-replace
         }
 
         if (((current.dataRotate || 0) % 180) === 90) {
-          style.maxWidth  = Conf['Fit Height'] ? `${doc$1.clientHeight - 25}px` : 'none';
+          style.maxWidth  = Conf['Fit Height'] ? `${doc.clientHeight - 25}px` : 'none';
           style.maxHeight = Conf['Fit Width']  ? `${frame.clientWidth}px`     : 'none';
           margin = (current.clientWidth - current.clientHeight)/2;
           return style.margin = `${margin}px ${-margin}px`;
@@ -16980,8 +16986,8 @@ vp-replace
         this.dialog = UI.dialog('embedding',
           { innerHTML: EmbeddingPage });
         this.media = $$1('#media-embed', this.dialog);
-        $$1.one(d$1, '4chanXInitFinished', this.ready);
-        $$1.on(d$1, 'IndexRefreshInternal', () => g.posts.forEach(function(post) {
+        $$1.one(d, '4chanXInitFinished', this.ready);
+        $$1.on(d, 'IndexRefreshInternal', () => g.posts.forEach(function(post) {
           for (post of [post, ...post.clones]) {
             for (var embed of post.nodes.embedlinks) {
               Embedding.cb.catalogRemove.call(embed);
@@ -16990,7 +16996,7 @@ vp-replace
         }));
       }
       if (Conf['Link Title']) {
-        return $$1.on(d$1, '4chanXInitFinished PostsInserted', function() {
+        return $$1.on(d, '4chanXInitFinished PostsInserted', function() {
           for (var key in Embedding.types) {
             var service = Embedding.types[key];
             if (service.title?.batchSize) {
@@ -17068,7 +17074,7 @@ vp-replace
       post.nodes.embedlinks.push(embed);
 
       if (Conf['Auto-embed'] && !Conf['Floating Embeds'] && !post.isFetchedQuote) {
-        if ($$1.hasClass(doc$1, 'catalog-mode')) {
+        if ($$1.hasClass(doc, 'catalog-mode')) {
           return $$1.addClass(embed, 'embed-removed');
         } else {
           return Embedding.cb.toggle.call(embed);
@@ -17082,9 +17088,9 @@ vp-replace
       $$1.on($$1('.close', Embedding.dialog), 'click',     Embedding.closeFloat);
       $$1.on($$1('.move',  Embedding.dialog), 'mousedown', Embedding.dragEmbed);
       $$1.on($$1('.jump',  Embedding.dialog), 'click', function() {
-        if (doc$1.contains(Embedding.lastEmbed)) { return Header$1.scrollTo(Embedding.lastEmbed); }
+        if (doc.contains(Embedding.lastEmbed)) { return Header$1.scrollTo(Embedding.lastEmbed); }
       });
-      return $$1.add(d$1.body, Embedding.dialog);
+      return $$1.add(d.body, Embedding.dialog);
     },
 
     closeFloat() {
@@ -17097,12 +17103,12 @@ vp-replace
       // only webkit can handle a blocking div
       const {style} = Embedding.media;
       if (Embedding.dragEmbed.mouseup) {
-        $$1.off(d$1, 'mouseup', Embedding.dragEmbed);
+        $$1.off(d, 'mouseup', Embedding.dragEmbed);
         Embedding.dragEmbed.mouseup = false;
         style.pointerEvents = '';
         return;
       }
-      $$1.on(d$1, 'mouseup', Embedding.dragEmbed);
+      $$1.on(d, 'mouseup', Embedding.dragEmbed);
       Embedding.dragEmbed.mouseup = true;
       return style.pointerEvents = 'none';
     },
@@ -17164,7 +17170,7 @@ vp-replace
     cb: {
       click(e) {
         e.preventDefault();
-        if (!$$1.hasClass(this, 'embedded') && (Conf['Floating Embeds'] || $$1.hasClass(doc$1, 'catalog-mode'))) {
+        if (!$$1.hasClass(this, 'embedded') && (Conf['Floating Embeds'] || $$1.hasClass(doc, 'catalog-mode'))) {
           let div;
           if (!(div = Embedding.media.firstChild)) { return; }
           $$1.replace(div, Embedding.cb.embed(this));
@@ -17200,7 +17206,7 @@ vp-replace
       },
 
       catalogRemove() {
-        const isCatalog = $$1.hasClass(doc$1, 'catalog-mode');
+        const isCatalog = $$1.hasClass(doc, 'catalog-mode');
         if ((isCatalog && $$1.hasClass(this, 'embedded')) || (!isCatalog && $$1.hasClass(this, 'embed-removed'))) {
           Embedding.cb.toggle.call(this);
           return $$1.toggleClass(this, 'embed-removed');
@@ -17554,7 +17560,7 @@ vp-replace
           var onMessage = function(e) {
             if ((e.source === el.contentWindow) && (e.origin === 'https://twitframe.com')) {
               $$1.off(window, 'message', onMessage);
-              return (cont || el).style.height = `${+$$1.minmax(e.data.height, 250, 0.8 * doc$1.clientHeight)}px`;
+              return (cont || el).style.height = `${+$$1.minmax(e.data.height, 250, 0.8 * doc.clientHeight)}px`;
             }
           };
           $$1.on(window, 'message', onMessage);
@@ -17668,13 +17674,13 @@ vp-replace
       }
 
       var init = function() {
-        $$1.off(d$1, '4chanXInitFinished', init);
-        $$1.on(d$1, 'keydown', Keybinds.keydown);
+        $$1.off(d, '4chanXInitFinished', init);
+        $$1.on(d, 'keydown', Keybinds.keydown);
         for (var node of $$('[accesskey]')) {
           node.removeAttribute('accesskey');
         }
       };
-      return $$1.on(d$1, '4chanXInitFinished', init);
+      return $$1.on(d, '4chanXInitFinished', init);
     },
 
     sync(key, hotkey) {
@@ -18105,10 +18111,10 @@ vp-replace
   const Captcha = {
     Cache: {
       init() {
-        $$1.on(d$1, 'SaveCaptcha', e => {
+        $$1.on(d, 'SaveCaptcha', e => {
           return this.saveAPI(e.detail);
         });
-        return $$1.on(d$1, 'NoCaptcha', e => {
+        return $$1.on(d, 'NoCaptcha', e => {
           return this.noCaptcha(e.detail);
         });
       },
@@ -18157,7 +18163,7 @@ vp-replace
       },
 
       haveCookie() {
-        return /\b_ct=/.test(d$1.cookie) && (QR.posts[0].thread !== 'new');
+        return /\b_ct=/.test(d.cookie) && (QR.posts[0].thread !== 'new');
       },
 
       getOne() {
@@ -18206,7 +18212,7 @@ vp-replace
         if (cb = this.submitCB) {
           if (!this.haveCookie() || detail?.error) {
             QR.error(detail?.error || 'Failed to retrieve captcha.');
-            QR.captcha.setup(d$1.activeElement === QR.nodes.status);
+            QR.captcha.setup(d.activeElement === QR.nodes.status);
           }
           delete this.submitCB;
           cb();
@@ -18256,7 +18262,7 @@ vp-replace
       lifetime: 2 * MINUTE,
 
       init() {
-        if (d$1.cookie.indexOf('pass_enabled=1') >= 0) { return; }
+        if (d.cookie.indexOf('pass_enabled=1') >= 0) { return; }
         if (!(this.isEnabled = !!$$1('#g-recaptcha, #captcha-forced-noscript') || !$$1.id('postForm'))) { return; }
 
         if (this.noscript = Conf['Force Noscript Captcha'] || !Main$1.jsEnabled) {
@@ -18264,7 +18270,7 @@ vp-replace
         }
 
         Captcha.cache.init();
-        $$1.on(d$1, 'CaptchaCount', this.count.bind(this));
+        $$1.on(d, 'CaptchaCount', this.count.bind(this));
 
         const root = $$1.el('div', { className: 'captcha-root' });
         $$1.extend(root, {
@@ -18308,7 +18314,7 @@ vp-replace
         return $$1.queueTask(() => {
           const needed = Captcha.cache.needed();
           if (needed && !this.prevNeeded) {
-            this.setup(QR.cooldown.auto && (d$1.activeElement === QR.nodes.status));
+            this.setup(QR.cooldown.auto && (d.activeElement === QR.nodes.status));
           }
           return this.prevNeeded = needed;
         });
@@ -18340,7 +18346,7 @@ vp-replace
           // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=1226835
           $$1.queueTask(() => {
             let iframe;
-            if (this.nodes.container && (d$1.activeElement === this.nodes.counter) && (iframe = $$1('iframe[src^="https://www.google.com/recaptcha/"]', this.nodes.container))) {
+            if (this.nodes.container && (d.activeElement === this.nodes.counter) && (iframe = $$1('iframe[src^="https://www.google.com/recaptcha/"]', this.nodes.container))) {
               iframe.focus();
               return QR.focus();
             }
@@ -18424,7 +18430,7 @@ vp-replace
         $$1.addClass(QR.nodes.el, 'captcha-open');
         this.fixQRPosition();
         $$1.on(iframe, 'load', this.fixQRPosition);
-        if (d$1.activeElement === this.nodes.counter) { iframe.focus(); }
+        if (d.activeElement === this.nodes.counter) { iframe.focus(); }
         // XXX Make sure scroll on space prevention (see src/css/style.css) doesn't cause scrolling of div
         if (['blink', 'edge'].includes($$1.engine) && (needle = iframe.parentNode, $$('#qr .captcha-container > div > div:first-of-type').includes(needle))) {
           return $$1.on(iframe.parentNode, 'scroll', function () { return this.scrollTop = 0; });
@@ -18466,7 +18472,7 @@ vp-replace
           timeout: Date.now() + this.lifetime
         });
 
-        const focus = (d$1.activeElement?.nodeName === 'IFRAME') && /https?:\/\/www\.google\.com\/recaptcha\//.test(d$1.activeElement.src);
+        const focus = (d.activeElement?.nodeName === 'IFRAME') && /https?:\/\/www\.google\.com\/recaptcha\//.test(d.activeElement.src);
         if (Captcha.cache.needed()) {
           if (focus) {
             if (QR.cooldown.auto || Conf['Post on Captcha Completion']) {
@@ -18552,7 +18558,7 @@ vp-replace
 
       this.posts = [];
 
-      $$1.on(d$1, '4chanXInitFinished', () => BoardConfig.ready(QR.initReady));
+      $$1.on(d, '4chanXInitFinished', () => BoardConfig.ready(QR.initReady));
 
       Callbacks.Post.push({
         name: 'Quick Reply',
@@ -18633,17 +18639,17 @@ vp-replace
         if (navLinksBot = $$1('.navLinksBot')) { $$1.prepend(navLinksBot, linkBot); }
       }
 
-      $$1.on(d$1, 'QRGetFile',          QR.getFile);
-      $$1.on(d$1, 'QRDrawFile',         QR.drawFile);
-      $$1.on(d$1, 'QRSetFile',          QR.setFile);
+      $$1.on(d, 'QRGetFile',          QR.getFile);
+      $$1.on(d, 'QRDrawFile',         QR.drawFile);
+      $$1.on(d, 'QRSetFile',          QR.setFile);
 
-      $$1.on(d$1, 'paste',              QR.paste);
-      $$1.on(d$1, 'dragover',           QR.dragOver);
-      $$1.on(d$1, 'drop',               QR.dropFile);
-      $$1.on(d$1, 'dragstart dragend',  QR.drag);
+      $$1.on(d, 'paste',              QR.paste);
+      $$1.on(d, 'dragover',           QR.dragOver);
+      $$1.on(d, 'drop',               QR.dropFile);
+      $$1.on(d, 'dragstart dragend',  QR.drag);
 
-      $$1.on(d$1, 'IndexRefreshInternal', QR.generatePostableThreadsList);
-      $$1.on(d$1, 'ThreadUpdate', QR.statusCheck);
+      $$1.on(d, 'IndexRefreshInternal', QR.generatePostableThreadsList);
+      $$1.on(d, 'ThreadUpdate', QR.statusCheck);
 
       if (!Conf['Persistent QR']) { return; }
       QR.open();
@@ -18707,7 +18713,7 @@ vp-replace
     focus() {
       return $$1.queueTask(function() {
         if (!QR.inBubble()) {
-          QR.hasFocus = d$1.activeElement && QR.nodes.el.contains(d$1.activeElement);
+          QR.hasFocus = d.activeElement && QR.nodes.el.contains(d.activeElement);
           return QR.nodes.el.classList.toggle('focus', QR.hasFocus);
         }
       });
@@ -18715,7 +18721,7 @@ vp-replace
 
     inBubble() {
       const bubbles = $$('iframe[src^="https://www.google.com/recaptcha/api2/frame"]');
-      return bubbles.includes(d$1.activeElement) || bubbles.some(el => (getComputedStyle(el).visibility !== 'hidden') && (el.getBoundingClientRect().bottom > 0));
+      return bubbles.includes(d.activeElement) || bubbles.some(el => (getComputedStyle(el).visibility !== 'hidden') && (el.getBoundingClientRect().bottom > 0));
     },
 
     hide() {
@@ -18738,7 +18744,7 @@ vp-replace
     },
 
     blur() {
-      if (QR.nodes.el.contains(d$1.activeElement)) { return d$1.activeElement.blur(); }
+      if (QR.nodes.el.contains(d.activeElement)) { return d.activeElement.blur(); }
     },
 
     toggleSJIS(e) {
@@ -18793,8 +18799,8 @@ vp-replace
       const notice = new Notice('warning', el);
       QR.notifications.push(notice);
       if (!Header$1.areNotificationsEnabled) {
-        if (d$1.hidden && !QR.cooldown.auto) { return alert(el.textContent); }
-      } else if (d$1.hidden || !(focusOverride || d$1.hasFocus())) {
+        if (d.hidden && !QR.cooldown.auto) { return alert(el.textContent); }
+      } else if (d.hidden || !(focusOverride || d.hasFocus())) {
         const notif = new Notification(el.textContent, {
           body: el.textContent,
           icon: Favicon.logo
@@ -18818,7 +18824,7 @@ vp-replace
       return $$1.el('span',
         { innerHTML:
           'Connection error while posting. ' +
-          '[<a href="' + meta.faq + '#connection-errors" target="_blank">More info</a>]'
+          '[<a href="' + E(meta.upstreamFaq) + '#connection-errors" target="_blank">More info</a>]'
         }
       );
     },
@@ -18871,7 +18877,7 @@ vp-replace
       let range;
       e?.preventDefault();
       if (!QR.postingIsEnabled) { return; }
-      const sel  = d$1.getSelection();
+      const sel  = d.getSelection();
       const post = Get$1.postFromNode(this);
       const {root} = post.nodes;
       const postRange = new Range();
@@ -18971,7 +18977,7 @@ vp-replace
       const div = $$1.el('div');
       $$1.extend(div, {
         innerHTML:
-          'Could not open file. [<a href="' + E(meta.faq) + '#error-reading-metadata" target="_blank">More info</a>]'
+          'Could not open file. [<a href="' + E(meta.upstreamFaq) + '#error-reading-metadata" target="_blank">More info</a>]'
       });
       return QR.error(div);
     },
@@ -18987,8 +18993,8 @@ vp-replace
     drag(e) {
       // Let it drag anything from the page.
       const toggle = e.type === 'dragstart' ? $$1.off : $$1.on;
-      toggle(d$1, 'dragover', QR.dragOver);
-      return toggle(d$1, 'drop',     QR.dropFile);
+      toggle(d, 'dragover', QR.dragOver);
+      return toggle(d, 'drop',     QR.dropFile);
     },
 
     dragOver(e) {
@@ -19079,7 +19085,7 @@ vp-replace
         QR.handleFile(file, files.length);
       }
       if (files.length !== 1) { $$1.addClass(QR.nodes.el, 'dump'); }
-      if ((d$1.activeElement === QR.nodes.fileButton) && $$1.hasClass(QR.nodes.fileSubmit, 'has-file')) {
+      if ((d.activeElement === QR.nodes.fileButton) && $$1.hasClass(QR.nodes.fileSubmit, 'has-file')) {
         return QR.nodes.filename.focus();
       }
     },
@@ -19214,7 +19220,7 @@ vp-replace
       window.addEventListener('focus', QR.focus, true);
       window.addEventListener('blur',  QR.focus, true);
       // We don't receive blur events from captcha iframe.
-      $$1.on(d$1, 'click', QR.focus);
+      $$1.on(d, 'click', QR.focus);
 
       // XXX Workaround for image pasting in Firefox, obsolete as of v50.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=906420
@@ -19250,7 +19256,7 @@ vp-replace
       QR.cooldown.setup();
       QR.captcha.init();
 
-      $$1.add(d$1.body, dialog);
+      $$1.add(d.body, dialog);
       QR.captcha.setup();
       QR.oekaki.setup();
 
@@ -19344,14 +19350,14 @@ vp-replace
         if (!err) { err = 'Original comment required.'; }
       }
 
-      if (QR.captcha.isEnabled && !((QR.captcha === Captcha.v2) && /\b_ct=/.test(d$1.cookie) && threadID) && !(err && !force)) {
+      if (QR.captcha.isEnabled && !((QR.captcha === Captcha.v2) && /\b_ct=/.test(d.cookie) && threadID) && !(err && !force)) {
         captcha = QR.captcha.getOne(!!threadID);
         if (QR.captcha === Captcha.v2) {
           if (!captcha) { captcha = Captcha.cache.request(!!threadID); }
         }
         if (!captcha) {
           err = 'No valid captcha.';
-          QR.captcha.setup(!QR.cooldown.auto || (d$1.activeElement === QR.nodes.status));
+          QR.captcha.setup(!QR.cooldown.auto || (d.activeElement === QR.nodes.status));
         }
       }
 
@@ -19519,7 +19525,7 @@ vp-replace
         } else { // stop auto-posting
           QR.cooldown.auto = false;
         }
-        QR.captcha.setup(QR.cooldown.auto && [QR.nodes.status, d$1.body].includes(d$1.activeElement));
+        QR.captcha.setup(QR.cooldown.auto && [QR.nodes.status, d.body].includes(d.activeElement));
         QR.status();
         QR.error(err);
         return;
@@ -19551,7 +19557,7 @@ vp-replace
 
       if (postsCount) {
         post.rm();
-        QR.captcha.setup(d$1.activeElement === QR.nodes.status);
+        QR.captcha.setup(d.activeElement === QR.nodes.status);
       } else if (Conf['Persistent QR']) {
         post.rm();
         if (Conf['Auto Hide QR']) {
@@ -19949,7 +19955,7 @@ vp-replace
       },
 
       load(cb) {
-        if ($$1('script[src^="//s.4cdn.org/js/tegaki"]', d$1.head)) {
+        if ($$1('script[src^="//s.4cdn.org/js/tegaki"]', d.head)) {
           return cb();
         } else {
           const style = $$1.el('link', {
@@ -19965,7 +19971,7 @@ vp-replace
           };
           $$1.on(style, 'load', onload);
           $$1.on(script, 'load', onload);
-          return $$1.add(d$1.head, [style, script]);
+          return $$1.add(d.head, [style, script]);
         }
       },
 
@@ -20113,7 +20119,7 @@ vp-replace
         let m;
         if (QR.persona.pwd != null) {
           return QR.persona.pwd;
-        } else if (m = d$1.cookie.match(/4chan_pass=([^;]+)/)) {
+        } else if (m = d.cookie.match(/4chan_pass=([^;]+)/)) {
           return decodeURIComponent(m[1]);
         } else {
           return '';
@@ -20364,7 +20370,7 @@ vp-replace
           var post = QR.posts[i];
           if ((errors = post.errors)) {
             for (var error of errors) {
-              if (doc$1.contains(error)) {
+              if (doc.contains(error)) {
                 post.rm();
                 break;
               }
@@ -20399,7 +20405,7 @@ vp-replace
       dismissErrors(test = () => true) {
         if (this.errors) {
           for (var error of this.errors) {
-            if (doc$1.contains(error) && test(error)) {
+            if (doc.contains(error) && test(error)) {
               error.parentNode.previousElementSibling.click();
             }
           }
@@ -20461,7 +20467,7 @@ vp-replace
         var onerror = () => {
           $$1.off(el, event, onload);
           $$1.off(el, 'error', onerror);
-          this.fileError(`Corrupt ${isVideo ? 'video' : 'image'} or error reading metadata.`, meta.faq + '#error-reading-metadata');
+          this.fileError(`Corrupt ${isVideo ? 'video' : 'image'} or error reading metadata.`, meta.upstreamFaq + '#error-reading-metadata');
           URL.revokeObjectURL(el.src);
           // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=1021289
           this.nodes.el.removeAttribute('data-height');
@@ -20896,17 +20902,17 @@ vp-replace
   // http://api.jquery.com/
   // not chainable
   const $ = (selector, root = document.body) => root.querySelector(selector);
-  $.id = id => d$1.getElementById(id);
+  $.id = id => d.getElementById(id);
   $.ready = function (fc) {
-      if (d$1.readyState !== 'loading') {
+      if (d.readyState !== 'loading') {
           $.queueTask(fc);
           return;
       }
       var cb = function () {
-          $.off(d$1, 'DOMContentLoaded', cb);
+          $.off(d, 'DOMContentLoaded', cb);
           return fc();
       };
-      return $.on(d$1, 'DOMContentLoaded', cb);
+      return $.on(d, 'DOMContentLoaded', cb);
   };
   $.formData = function (form) {
       if (form instanceof HTMLFormElement) {
@@ -21065,14 +21071,14 @@ vp-replace
                       return r.abort();
                   }, false);
               });
-              $.on(d$1, '4chanXAjaxProgress', function (e) {
+              $.on(d, '4chanXAjaxProgress', function (e) {
                   let req;
                   if (!(req = requests[e.detail.id])) {
                       return;
                   }
                   return req.upload.onprogress.call(req.upload, e.detail);
               });
-              return $.on(d$1, '4chanXAjaxLoadend', function (e) {
+              return $.on(d, '4chanXAjaxLoadend', function (e) {
                   let req;
                   if (!(req = requests[e.detail.id])) {
                       return;
@@ -21213,7 +21219,7 @@ vp-replace
       if (id != null) {
           style.id = id;
       }
-      $.onExists(doc$1, test, () => $.add(d$1.head, style));
+      $.onExists(doc, test, () => $.add(d.head, style));
       return style;
   };
   $.addCSP = function (policy) {
@@ -21221,29 +21227,29 @@ vp-replace
           httpEquiv: 'Content-Security-Policy',
           content: policy
       });
-      if (d$1.head) {
-          $.add(d$1.head, meta);
+      if (d.head) {
+          $.add(d.head, meta);
           return $.rm(meta);
       }
       else {
-          const head = $.add((doc$1 || d$1), $.el('head'));
+          const head = $.add((doc || d), $.el('head'));
           $.add(head, meta);
           return $.rm(head);
       }
   };
   $.x = function (path, root) {
       if (!root) {
-          root = d$1.body;
+          root = d.body;
       }
       // XPathResult.ANY_UNORDERED_NODE_TYPE === 8
-      return d$1.evaluate(path, root, null, 8, null).singleNodeValue;
+      return d.evaluate(path, root, null, 8, null).singleNodeValue;
   };
   $.X = function (path, root) {
       if (!root) {
-          root = d$1.body;
+          root = d.body;
       }
       // XPathResult.ORDERED_NODE_SNAPSHOT_TYPE === 7
-      return d$1.evaluate(path, root, null, 7, null);
+      return d.evaluate(path, root, null, 7, null);
   };
   $.addClass = function (el, ...classNames) {
       for (var className of classNames) {
@@ -21260,8 +21266,8 @@ vp-replace
   $.rm = el => el?.remove();
   $.rmAll = root => // https://gist.github.com/MayhemYDG/8646194
    root.textContent = null;
-  $.tn = s => d$1.createTextNode(s);
-  $.frag = () => d$1.createDocumentFragment();
+  $.tn = s => d.createTextNode(s);
+  $.frag = () => d.createDocumentFragment();
   $.nodes = function (nodes) {
       if (!(nodes instanceof Array)) {
           return nodes;
@@ -21278,7 +21284,7 @@ vp-replace
   $.before = (root, el) => root.parentNode.insertBefore($.nodes(el), root);
   $.replace = (root, el) => root.parentNode.replaceChild($.nodes(el), root);
   $.el = function (tag, properties, properties2) {
-      const el = d$1.createElement(tag);
+      const el = d.createElement(tag);
       if (properties) {
           $.extend(el, properties);
       }
@@ -21304,10 +21310,10 @@ vp-replace
       };
       return $.on(el, events, cb);
   };
-  $.event = function (event, detail, root = d$1) {
+  $.event = function (event, detail, root = d) {
       if (!globalThis.chrome?.extension) {
           if ((detail != null) && (typeof cloneInto === 'function')) {
-              detail = cloneInto(detail, d$1.defaultView);
+              detail = cloneInto(detail, d.defaultView);
           }
       }
       return root.dispatchEvent(new CustomEvent(event, { bubbles: true, cancelable: true, detail }));
@@ -21340,7 +21346,7 @@ vp-replace
                       return obj;
                   }
               };
-              return $.event = (event, detail, root = d$1) => root.dispatchEvent(new CustomEvent(event, { bubbles: true, cancelable: true, detail: clone(detail) }));
+              return $.event = (event, detail, root = d) => root.dispatchEvent(new CustomEvent(event, { bubbles: true, cancelable: true, detail: clone(detail) }));
           }
       })();
   }
@@ -21398,12 +21404,12 @@ vp-replace
    * @returns The data.
    */
   $.global = function (fn, data) {
-      if (doc$1) {
+      if (doc) {
           const script = $.el('script', { textContent: `(${fn}).call(document.currentScript.dataset);` });
           if (data) {
               $.extend(script.dataset, data);
           }
-          $.add((d$1.head || doc$1), script);
+          $.add((d.head || doc), script);
           $.rm(script);
           return script.dataset;
       }
@@ -22022,7 +22028,7 @@ vp-replace
               return;
           }
           if (!Conf['Filtered Backlinks']) {
-              $$1.addClass(doc$1, 'hide-backlinks');
+              $$1.addClass(doc, 'hide-backlinks');
           }
           for (var key in Config.filter) {
               for (var line of Conf[key].split('\n')) {
@@ -22559,7 +22565,7 @@ vp-replace
         this.set(hostname);
         cb();
       }
-      return $$1.onExists(doc$1, 'body', () => {
+      return $$1.onExists(doc, 'body', () => {
         for (var software in SW) {
           var changes;
           if (changes = SW[software].detect?.()) {
@@ -22790,13 +22796,13 @@ vp-replace
    */
   var Header = {
       init() {
-          $$1.onExists(doc$1, 'body', () => {
+          $$1.onExists(doc, 'body', () => {
               if (!Main$1.isThisPageLegit()) {
                   return;
               }
               $$1.add(this.bar, [this.noticesRoot, this.toggle]);
-              $$1.prepend(d$1.body, this.bar);
-              $$1.add(d$1.body, Header.hover);
+              $$1.prepend(d.body, this.bar);
+              $$1.add(d.body, Header.hover);
               return this.setBarPosition(Conf['Bottom Header']);
           });
           this.menu = new UI.Menu('header');
@@ -22862,9 +22868,9 @@ vp-replace
                   { el: editCustomNav }
               ]
           });
-          $$1.on(d$1, 'CreateNotification', this.createNotification);
+          $$1.on(d, 'CreateNotification', this.createNotification);
           this.setBoardList();
-          $$1.onExists(doc$1, `${g.SITE.selectors.boardList} + *`, Header.generateFullBoardList);
+          $$1.onExists(doc, `${g.SITE.selectors.boardList} + *`, Header.generateFullBoardList);
           Main$1.ready(function () {
               let footer;
               if ((g.SITE.software === 'yotsuba') && !(footer = $$1.id('boardNavDesktopFoot'))) {
@@ -23098,10 +23104,10 @@ vp-replace
       setLinkJustify(centered) {
           Header.linkJustifyToggler.checked = centered;
           if (centered) {
-              return $$1.addClass(doc$1, 'centered-links');
+              return $$1.addClass(doc, 'centered-links');
           }
           else {
-              return $$1.rmClass(doc$1, 'centered-links');
+              return $$1.rmClass(doc, 'centered-links');
           }
       },
       toggleLinkJustify() {
@@ -23114,11 +23120,11 @@ vp-replace
       setBarFixed(fixed) {
           Header.barFixedToggler.checked = fixed;
           if (fixed) {
-              $$1.addClass(doc$1, 'fixed');
+              $$1.addClass(doc, 'fixed');
               return $$1.addClass(Header.bar, 'dialog');
           }
           else {
-              $$1.rmClass(doc$1, 'fixed');
+              $$1.rmClass(doc, 'fixed');
               return $$1.rmClass(Header.bar, 'dialog');
           }
       },
@@ -23131,10 +23137,10 @@ vp-replace
       setShortcutIcons(show) {
           Header.shortcutToggler.checked = show;
           if (show) {
-              return $$1.addClass(doc$1, 'shortcut-icons');
+              return $$1.addClass(doc, 'shortcut-icons');
           }
           else {
-              return $$1.rmClass(doc$1, 'shortcut-icons');
+              return $$1.rmClass(doc, 'shortcut-icons');
           }
       },
       toggleShortcutIcons() {
@@ -23147,7 +23153,7 @@ vp-replace
           Header.headerToggler.checked = hide;
           $$1.event('CloseMenu');
           (hide ? $$1.addClass : $$1.rmClass)(Header.bar, 'autohide');
-          return (hide ? $$1.addClass : $$1.rmClass)(doc$1, 'autohide');
+          return (hide ? $$1.addClass : $$1.rmClass)(doc, 'autohide');
       },
       toggleBarVisibility() {
           const hide = this.nodeName === 'INPUT' ?
@@ -23201,8 +23207,8 @@ vp-replace
               'bottom-header',
               'add'
           ];
-          $$1.addClass(doc$1, args[0]);
-          $$1.rmClass(doc$1, args[1]);
+          $$1.addClass(doc, args[0]);
+          $$1.rmClass(doc, args[1]);
           return $$1[args[2]](Header.bar, Header.noticesRoot);
       },
       toggleBarPosition() {
@@ -23211,14 +23217,14 @@ vp-replace
       },
       setFooterVisibility(hide) {
           Header.footerToggler.checked = hide;
-          return doc$1.classList.toggle('hide-bottom-board-list', hide);
+          return doc.classList.toggle('hide-bottom-board-list', hide);
       },
       toggleFooterVisibility() {
           $$1.event('CloseMenu');
           const hide = this.nodeName === 'INPUT' ?
               this.checked
               :
-                  $$1.hasClass(doc$1, 'hide-bottom-board-list');
+                  $$1.hasClass(doc, 'hide-bottom-board-list');
           Header.setFooterVisibility(hide);
           $$1.set('Bottom Board List', hide);
           const message = hide ?
@@ -23299,7 +23305,7 @@ vp-replace
           return top;
       },
       getBottomOf(root) {
-          const { clientHeight } = doc$1;
+          const { clientHeight } = doc;
           let bottom = clientHeight - root.getBoundingClientRect().bottom;
           if (Conf['Fixed Header'] && Conf['Bottom Header']) {
               const headRect = Header.toggle.getBoundingClientRect();
@@ -23308,7 +23314,7 @@ vp-replace
           return bottom;
       },
       isNodeVisible(node) {
-          if (d$1.hidden || !doc$1.contains(node)) {
+          if (d.hidden || !doc.contains(node)) {
               return false;
           }
           const { height } = node.getBoundingClientRect();
@@ -23317,7 +23323,7 @@ vp-replace
       isHidden() {
           const { top } = Header.bar.getBoundingClientRect();
           if (Conf['Bottom header']) {
-              return top === doc$1.clientHeight;
+              return top === doc.clientHeight;
           }
           else {
               return top < 0;
@@ -23368,7 +23374,7 @@ vp-replace
                   return;
           }
           const el = $$1.el('span', { innerHTML: `${meta.name} needs your permission to show desktop notifications. ` +
-                  `[<a href=\"${meta.faq}#why-is-4chan-x-asking-for-permission-to-show-desktop-notifications\" target=\"_blank\">FAQ</a>]` +
+                  `[<a href=\"${E(meta.upstreamFaq)}#why-is-4chan-x-asking-for-permission-to-show-desktop-notifications\" target=\"_blank\">FAQ</a>]` +
                   `<br><button>Authorize</button> or <button>Disable</button>`
           });
           const [authorize, disable] = $$('button', el);
@@ -23418,11 +23424,11 @@ vp-replace
 
     add() {
       if (this.closed) { return; }
-      if (d$1.hidden) {
-        $$1.on(d$1, 'visibilitychange', this.add);
+      if (d.hidden) {
+        $$1.on(d, 'visibilitychange', this.add);
         return;
       }
-      $$1.off(d$1, 'visibilitychange', this.add);
+      $$1.off(d, 'visibilitychange', this.add);
       $$1.add(Header$1.noticesRoot, this.el);
       this.el.clientHeight; // force reflow
       this.el.style.opacity = 1;
@@ -23431,7 +23437,7 @@ vp-replace
 
     close() {
       this.closed = true;
-      $$1.off(d$1, 'visibilitychange', this.add);
+      $$1.off(d, 'visibilitychange', this.add);
       $$1.rm(this.el);
       return this.onclose?.();
     }
@@ -23823,7 +23829,7 @@ vp-replace
   const Anonymize = {
     init() {
       if (!Conf['Anonymize']) { return; }
-      return $$1.addClass(doc$1, 'anonymize');
+      return $$1.addClass(doc, 'anonymize');
     }
   };
 
@@ -23862,7 +23868,7 @@ vp-replace
 
     mouseover(post, file) { return function(e) {
       let el, height, width;
-      if (!doc$1.contains(this)) { return; }
+      if (!doc.contains(this)) { return; }
       const {isVideo} = file;
       if (file.isExpanding || file.isExpanded || g.SITE.isThumbExpanded?.(file)) { return; }
       const error = ImageHover.error(post, file);
@@ -23893,8 +23899,8 @@ vp-replace
       }
       if (file.dimensions) {
         [width, height] = file.dimensions.split('x').map((x) => +x);
-        const maxWidth = doc$1.clientWidth;
-        const maxHeight = doc$1.clientHeight - UI.hover.padding;
+        const maxWidth = doc.clientWidth;
+        const maxHeight = doc.clientHeight - UI.hover.padding;
         const scale = Math.min(1, maxWidth / width, maxHeight / height);
         width *= scale;
         height *= scale;
@@ -23947,14 +23953,14 @@ vp-replace
         cb:   this.node
       });
 
-      $$1.on(d$1, 'PostsInserted', function() {
+      $$1.on(d, 'PostsInserted', function() {
         if (ImageLoader.prefetchEnabled || replace) {
           return g.posts.forEach(ImageLoader.prefetchAll);
         }
       });
 
       if (Conf['Replace WEBM']) {
-        $$1.on(d$1, 'scroll visibilitychange 4chanXInitFinished PostsInserted', this.playVideos);
+        $$1.on(d, 'scroll visibilitychange 4chanXInitFinished PostsInserted', this.playVideos);
       }
 
       if (!Conf['Image Prefetching'] || !['index', 'thread'].includes(g.VIEW)) { return; }
@@ -24010,8 +24016,8 @@ vp-replace
       }
       const replace = Conf[`Replace ${type}`] && !/spoiler/.test(thumb.src || thumb.dataset.src);
       if (!replace && !ImageLoader.prefetchEnabled) { return; }
-      if ($$1.hasClass(doc$1, 'catalog-mode')) { return; }
-      if (![post, ...post.clones].some(clone => doc$1.contains(clone.nodes.root))) { return; }
+      if ($$1.hasClass(doc, 'catalog-mode')) { return; }
+      if (![post, ...post.clones].some(clone => doc.contains(clone.nodes.root))) { return; }
       file.isPrefetched = true;
       if (file.videoThumb) {
         for (clone of post.clones) { clone.file.thumb.preload = 'auto'; }
@@ -24113,7 +24119,7 @@ vp-replace
           if (title == null) { $$1.addClass(this.parentNode, 'not-found'); }
           $$1.before(this, output);
           this.parentNode.tabIndex = 0;
-          if (d$1.activeElement === this) { this.parentNode.focus(); }
+          if (d.activeElement === this) { this.parentNode.focus(); }
           return this.tabIndex = -1;
         } else {
           $$1.addClass(this.parentNode, 'error');
@@ -24501,10 +24507,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         value: CopyTextLink.text
       }
       );
-      $$1.add(d$1.body, el);
+      $$1.add(d.body, el);
       el.select();
       try {
-        d$1.execCommand('copy');
+        d.execCommand('copy');
       } catch (error) {}
       return $$1.rm(el);
     }
@@ -24742,7 +24748,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         order: 10,
         open(post) {
           ReportLink.url = `//sys.${location.hostname.split('.')[1]}.org/${post.board}/imgboard.php?mode=report&no=${post}`;
-          if (d$1.cookie.indexOf('pass_enabled=1') >= 0) {
+          if (d.cookie.indexOf('pass_enabled=1') >= 0) {
             ReportLink.dims = 'width=350,height=275';
           } else {
             ReportLink.dims = 'width=400,height=550';
@@ -24768,8 +24774,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
   var AntiAutoplay = {
     init() {
       if (!Conf['Disable Autoplaying Sounds']) { return; }
-      $$1.addClass(doc$1, 'anti-autoplay');
-      for (var audio of $$('audio[autoplay]', doc$1)) { this.stop(audio); }
+      $$1.addClass(doc, 'anti-autoplay');
+      for (var audio of $$('audio[autoplay]', doc)) { this.stop(audio); }
       window.addEventListener('loadstart', (e => this.stop(e.target)), true);
       Callbacks.Post.push({
         name: 'Disable Autoplaying Sounds',
@@ -24819,7 +24825,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         this.db = new DataBoard('customTitles', null, true);
       }
 
-      $$1.asap((() => d$1.body), () => $$1.asap((() => $$1('hr')), Banner.ready));
+      $$1.asap((() => d.body), () => $$1.asap((() => $$1('hr')), Banner.ready));
 
       // Let 4chan's JS load the banner if enabled; otherwise, load it ourselves.
       if (g.BOARD.ID !== 'f') {
@@ -24861,7 +24867,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         Unread.title = title;
         return Unread.update();
       } else {
-        return d$1.title = title;
+        return d.title = title;
       }
     },
 
@@ -25063,11 +25069,11 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         this.nodes.comment.normalize();
       }
       var cb = () => {
-        if (!doc$1.contains(this.nodes.comment)) { return; }
-        $$1.off(d$1, 'PostsInserted', cb);
+        if (!doc.contains(this.nodes.comment)) { return; }
+        $$1.off(d, 'PostsInserted', cb);
         return $$1.event('mathjax', null, this.nodes.comment);
       };
-      $$1.on(d$1, 'PostsInserted', cb);
+      $$1.on(d, 'PostsInserted', cb);
       return cb();
     }
   };
@@ -25367,7 +25373,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       if ((g.SITE.software === 'yotsuba') && (g.BOARD.ID === 'qa')) {
         const announcement = {innerHTML: "Stay in touch with your <a href=\"https://www.4chan-x.net/qa_friends.html\" target=\"_blank\" rel=\"noopener\">/qa/ friends</a>!"};
         el = $$1.el('div', {className: 'fcx-announcement'}, announcement);
-        $$1.onExists(doc$1, '.boardBanner', banner => $$1.after(banner, el));
+        $$1.onExists(doc, '.boardBanner', banner => $$1.after(banner, el));
       }
       if ('samachan.org' in Conf['siteProperties'] && !Conf['PSAseen'].includes('samachan')) {
         el = $$1.el('span',
@@ -25388,10 +25394,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
   var PSAHiding = {
     init() {
       if (!Conf['Announcement Hiding'] || !g.SITE.selectors.psa) { return; }
-      $$1.addClass(doc$1, 'hide-announcement');
-      $$1.onExists(doc$1, g.SITE.selectors.psa, this.setup);
+      $$1.addClass(doc, 'hide-announcement');
+      $$1.onExists(doc, g.SITE.selectors.psa, this.setup);
       return $$1.ready(function() {
-        if (!$$1(g.SITE.selectors.psa)) { return $$1.rmClass(doc$1, 'hide-announcement'); }
+        if (!$$1(g.SITE.selectors.psa)) { return $$1.rmClass(doc, 'hide-announcement'); }
       });
     },
 
@@ -25432,7 +25438,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       }
 
       PSAHiding.sync(Conf['hiddenPSAList']);
-      $$1.rmClass(doc$1, 'hide-announcement');
+      $$1.rmClass(doc, 'hide-announcement');
 
       return $$1.sync('hiddenPSAList', PSAHiding.sync);
     },
@@ -25475,7 +25481,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
   var RemoveSpoilers = {
     init() {
       if (Conf['Reveal Spoilers']) {
-        $$1.addClass(doc$1, 'reveal-spoilers');
+        $$1.addClass(doc, 'reveal-spoilers');
       }
 
       if (!Conf['Remove Spoilers']) { return; }
@@ -25593,7 +25599,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     node() {
       MarkNewIPs.ipCount = this.ipCount;
       MarkNewIPs.postCount = this.posts.keys.length;
-      return $$1.on(d$1, 'ThreadUpdate', MarkNewIPs.onUpdate);
+      return $$1.on(d, 'ThreadUpdate', MarkNewIPs.onUpdate);
     },
 
     onUpdate(e) {
@@ -25674,8 +25680,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       } else {
         this.dialog = (sc = UI.dialog('thread-stats',
           {innerHTML: "<div class=\"move\" title=\"" + E(statsTitle) + "\">" + (statsHTML).innerHTML + "</div>"}));
-        $$1.addClass(doc$1, 'float');
-        $$1.ready(() => $$1.add(d$1.body, sc));
+        $$1.addClass(doc, 'float');
+        $$1.ready(() => $$1.add(d.body, sc));
       }
 
       this.postCountEl = $$1('#post-count', sc);
@@ -25696,8 +25702,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       ThreadStats.count();
       ThreadStats.update();
       ThreadStats.fetchPage();
-      $$1.on(d$1, 'PostsInserted', () => $$1.queueTask(ThreadStats.onPostsInserted));
-      return $$1.on(d$1, 'ThreadUpdate', ThreadStats.onUpdate);
+      $$1.on(d, 'PostsInserted', () => $$1.queueTask(ThreadStats.onPostsInserted));
+      return $$1.on(d, 'ThreadUpdate', ThreadStats.onUpdate);
     },
 
     count() {
@@ -25887,7 +25893,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
 
       const {boardID, threadID, postID} = Get$1.postDataFromLink(this);
       if (Conf['Inline Cross-thread Quotes Only'] && (g.VIEW === 'thread') && g.posts.get(`${boardID}.${postID}`)?.nodes.root.offsetParent) { return; } // exists and not hidden
-      if ($$1.hasClass(doc$1, 'catalog-mode')) { return; }
+      if ($$1.hasClass(doc, 'catalog-mode')) { return; }
 
       e.preventDefault();
       const quoter = Get$1.postFromNode(this);
@@ -26006,7 +26012,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       // Add a class to differentiate when backlinks are at
       // the top (default) or bottom of a post
       if (this.bottomBacklinks = Conf['Bottom Backlinks']) {
-        $$1.addClass(doc$1, 'bottom-backlinks');
+        $$1.addClass(doc, 'bottom-backlinks');
       }
 
       Callbacks.Post.push({
@@ -26209,7 +26215,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     init() {
       if (!['index', 'thread'].includes(g.VIEW) || !Conf['Resurrect Quotes']) { return; }
 
-      $$1.addClass(doc$1, 'resurrect-quotes');
+      $$1.addClass(doc, 'resurrect-quotes');
 
       if (Conf['Comment Expansion']) {
         ExpandComment.callbacks.push(this.node);
@@ -26461,10 +26467,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       } catch (error1) {}
 
       // Detect multiple copies of 4chan X
-      if (doc$1 && $$1.hasClass(doc$1, 'fourchan-x')) { return; }
+      if (doc && $$1.hasClass(doc, 'fourchan-x')) { return; }
       $$1.asap(docSet, function() {
-        $$1.addClass(doc$1, 'fourchan-xt', 'fourchan-x', 'seaweedchan');
-        if ($$1.engine) { return $$1.addClass(doc$1, `ua-${$$1.engine}`); }
+        $$1.addClass(doc, 'fourchan-xt', 'fourchan-x', 'seaweedchan');
+        if ($$1.engine) { return $$1.addClass(doc, `ua-${$$1.engine}`); }
       });
       try {
         $$1.global(
@@ -26484,25 +26490,25 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       } catch (e) {
         console.error(e);
       }
-      $$1.on(d$1, '4chanXInitFinished', function() {
+      $$1.on(d, '4chanXInitFinished', function() {
         if (Main.expectInitFinished) {
           return delete Main.expectInitFinished;
         } else {
           new Notice('error', 'Error: Multiple copies of 4chan X are enabled.');
-          return $$1.addClass(doc$1, 'tainted');
+          return $$1.addClass(doc, 'tainted');
         }
       });
 
       // Detect "mounted" event from Kissu
       var mountedCB = function() {
-        d$1.removeEventListener('mounted', mountedCB, true);
+        d.removeEventListener('mounted', mountedCB, true);
         Main.isMounted = true;
         return Main.mountedCBs.map((cb) =>
           (() => { try {
             return cb();
           } catch (error2) {} })());
       };
-      d$1.addEventListener('mounted', mountedCB, true);
+      d.addEventListener('mounted', mountedCB, true);
 
       // Flatten default values from Config into Conf
       var flatten = function(parent, obj) {
@@ -26531,7 +26537,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
             return fromCharCode0.apply(this, arguments);
           };
         });
-        $$1.asap(docSet, () => $$1.onExists(doc$1, 'iframe[srcdoc]', $$1.rm));
+        $$1.asap(docSet, () => $$1.onExists(doc, 'iframe[srcdoc]', $$1.rm));
       }
 
       flatten(null, Config);
@@ -26567,7 +26573,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         /\.4chan(?:nel)?\.org$/.test(location.hostname) &&
         !SW.yotsuba.regexp.pass.test(location.href) &&
         !SW.yotsuba.regexp.captcha.test(location.href) &&
-        !$$('script:not([src])', d$1).filter(s => /this\[/.test(s.textContent)).length
+        !$$('script:not([src])', d).filter(s => /this\[/.test(s.textContent)).length
       ) {
         ($$1.getSync || $$1.get)({'jsWhitelist': Conf['jsWhitelist']}, ({jsWhitelist}) => $$1.addCSP(`script-src ${jsWhitelist.replace(/^#.*$/mg, '').replace(/[\s;]+/g, ' ').trim()}`));
       }
@@ -26651,7 +26657,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       $$1.global(function() {
         document.documentElement.classList.add('js-enabled');
         return window.FCX = {};});
-      Main.jsEnabled = $$1.hasClass(doc$1, 'js-enabled');
+      Main.jsEnabled = $$1.hasClass(doc, 'js-enabled');
 
       // XXX https://bugs.chromium.org/p/chromium/issues/detail?id=920638
       $$1.ajaxPageInit?.();
@@ -26665,7 +26671,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       }
 
       if (g.VIEW === 'file') {
-        $$1.asap((() => d$1.readyState !== 'loading'), function() {
+        $$1.asap((() => d.readyState !== 'loading'), function() {
           let video;
           if ((g.SITE.software === 'yotsuba') && Conf['404 Redirect'] && g.SITE.is404?.()) {
             const pathname = location.pathname.split(/\/+/);
@@ -26692,7 +26698,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       g.posts   = new SimpleDict();
 
       // set up CSS when <head> is completely loaded
-      $$1.onExists(doc$1, 'body', Main.initStyle);
+      $$1.onExists(doc, 'body', Main.initStyle);
 
       // c.time 'All initializations'
       for (var [name, feature] of Main.features) {
@@ -26719,27 +26725,27 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       if (!Main.isThisPageLegit()) { return; }
 
       // disable the mobile layout
-      const mobileLink = $$1('link[href*=mobile]', d$1.head);
+      const mobileLink = $$1('link[href*=mobile]', d.head);
       if (mobileLink) mobileLink.disabled = true;
-      doc$1.dataset.host = location.host;
-      $$1.addClass(doc$1, `sw-${g.SITE.software}`);
-      $$1.addClass(doc$1, g.VIEW === 'thread' ? 'thread-view' : g.VIEW);
-      $$1.onExists(doc$1, '.ad-cnt, .adg-rects > .desktop', ad => $$1.onExists(ad, 'img, iframe', () => $$1.addClass(doc$1, 'ads-loaded')));
-      if (Conf['Autohiding Scrollbar']) { $$1.addClass(doc$1, 'autohiding-scrollbar'); }
+      doc.dataset.host = location.host;
+      $$1.addClass(doc, `sw-${g.SITE.software}`);
+      $$1.addClass(doc, g.VIEW === 'thread' ? 'thread-view' : g.VIEW);
+      $$1.onExists(doc, '.ad-cnt, .adg-rects > .desktop', ad => $$1.onExists(ad, 'img, iframe', () => $$1.addClass(doc, 'ads-loaded')));
+      if (Conf['Autohiding Scrollbar']) { $$1.addClass(doc, 'autohiding-scrollbar'); }
       $$1.ready(function() {
-        if ((d$1.body.clientHeight > doc$1.clientHeight) && ((window.innerWidth === doc$1.clientWidth) !== Conf['Autohiding Scrollbar'])) {
+        if ((d.body.clientHeight > doc.clientHeight) && ((window.innerWidth === doc.clientWidth) !== Conf['Autohiding Scrollbar'])) {
           Conf['Autohiding Scrollbar'] = !Conf['Autohiding Scrollbar'];
           $$1.set('Autohiding Scrollbar', Conf['Autohiding Scrollbar']);
-          return $$1.toggleClass(doc$1, 'autohiding-scrollbar');
+          return $$1.toggleClass(doc, 'autohiding-scrollbar');
         }
       });
       $$1.addStyle(CSS.sub(CSS.boards), 'fourchanx-css');
       Main.bgColorStyle = $$1.el('style', {id: 'fourchanx-bgcolor-css'});
 
       let keyboard = false;
-      $$1.on(d$1, 'mousedown', () => keyboard = false);
-      $$1.on(d$1, 'keydown', function(e) { if (e.keyCode === 9) { return keyboard = true; } }); // tab
-      window.addEventListener('focus', (() => doc$1.classList.toggle('keyboard-focus', keyboard)), true);
+      $$1.on(d, 'mousedown', () => keyboard = false);
+      $$1.on(d, 'keydown', function(e) { if (e.keyCode === 9) { return keyboard = true; } }); // tab
+      window.addEventListener('focus', (() => doc.classList.toggle('keyboard-focus', keyboard)), true);
 
       return Main.setClass();
     },
@@ -26752,7 +26758,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         if (mainStyleSheet = $$1.id('base-css')) {
           style = mainStyleSheet.href.match(/catalog_(\w+)/)?.[1].replace('_new', '').replace(/_+/g, '-');
           if (knownStyles.includes(style)) {
-            $$1.addClass(doc$1, style);
+            $$1.addClass(doc, style);
             return;
           }
         }
@@ -26763,7 +26769,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       const setStyle = function() {
         // Use preconfigured CSS for 4chan's default themes.
         if (g.SITE.software === 'yotsuba') {
-          $$1.rmClass(doc$1, style);
+          $$1.rmClass(doc, style);
           style = null;
           for (var styleSheet of styleSheets) {
             if (styleSheet.href === mainStyleSheet?.href) {
@@ -26774,7 +26780,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
             }
           }
           if (style) {
-            $$1.addClass(doc$1, style);
+            $$1.addClass(doc, style);
             $$1.rm(Main.bgColorStyle);
             return;
           }
@@ -26784,13 +26790,13 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         const div = g.SITE.bgColoredEl();
         div.style.position = 'absolute';
         div.style.visibility = 'hidden';
-        $$1.add(d$1.body, div);
+        $$1.add(d.body, div);
         let bgColor = window.getComputedStyle(div).backgroundColor;
         $$1.rm(div);
         const rgb = bgColor.match(/[\d.]+/g);
         // Use body background if reply background is transparent
         if (!/^rgb\(/.test(bgColor)) {
-          const s = window.getComputedStyle(d$1.body);
+          const s = window.getComputedStyle(d.body);
           bgColor = `${s.backgroundColor} ${s.backgroundImage} ${s.backgroundRepeat} ${s.backgroundPosition}`;
         }
         let css = `\
@@ -26812,10 +26818,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         return $$1.after($$1.id('fourchanx-css'), Main.bgColorStyle);
       };
 
-      $$1.onExists(d$1.head, g.SITE.selectors.styleSheet, function(el) {
+      $$1.onExists(d.head, g.SITE.selectors.styleSheet, function(el) {
         mainStyleSheet = el;
         if (g.SITE.software === 'yotsuba') {
-          styleSheets = $$('link[rel="alternate stylesheet"]', d$1.head);
+          styleSheets = $$('link[rel="alternate stylesheet"]', d.head);
         }
         new MutationObserver(setStyle).observe(mainStyleSheet, {
           attributes: true,
@@ -26825,7 +26831,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         return setStyle();
       });
       if (!mainStyleSheet) {
-        for (var styleSheet of $$('link[rel="stylesheet"]', d$1.head)) {
+        for (var styleSheet of $$('link[rel="stylesheet"]', d.head)) {
           $$1.on(styleSheet, 'load', setStyle);
         }
         return setStyle();
@@ -26994,7 +27000,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         }
         var anyRemoved = false;
         for (var el of record.removedNodes) {
-          if ((Get$1.postFromRoot(el)?.nodes.root === el) && !doc$1.contains(el)) {
+          if ((Get$1.postFromRoot(el)?.nodes.root === el) && !doc.contains(el)) {
             anyRemoved = true;
             break;
           }
@@ -27106,19 +27112,20 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     handleErrors(errors) {
       // Detect conflicts with 4chan X v2
       let error;
-      if (d$1.body && $$1.hasClass(d$1.body, 'fourchan_x') && !$$1.hasClass(doc$1, 'tainted')) {
+      if (d.body && $$1.hasClass(d.body, 'fourchan_x') && !$$1.hasClass(doc, 'tainted')) {
         new Notice('error', 'Error: Multiple copies of 4chan X are enabled.');
-        $$1.addClass(doc$1, 'tainted');
+        $$1.addClass(doc, 'tainted');
       }
 
       // Detect conflicts with native extension
-      if (g.SITE.testNativeExtension && !$$1.hasClass(doc$1, 'tainted')) {
+      if (g.SITE.testNativeExtension && !$$1.hasClass(doc, 'tainted')) {
         const {enabled} = g.SITE.testNativeExtension();
         if (enabled) {
-          $$1.addClass(doc$1, 'tainted');
+          $$1.addClass(doc, 'tainted');
           if (Conf['Disable Native Extension'] && !Main.isFirstRun) {
             const msg = $$1.el('div',
-              { innerHTML: 'Failed to disable the native extension. You may need to <a href="' + E(meta.faq) + '#blocking-native-extension" target="_blank">block it</a>.' });
+              { innerHTML: 'Failed to disable the native extension. You may need to <a href="' + E(meta.upstreamFaq) +
+                '#blocking-native-extension" target="_blank">block it</a>.' });
             new Notice('error', msg);
           }
         }

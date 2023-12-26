@@ -3,7 +3,7 @@ import $ from "../platform/$";
 import ReportPage from './Report/ArchiveReport.html';
 import CSS from "../css/CSS";
 import Captcha from "../Posting/Captcha";
-import { Conf, d, g } from "../globals/globals";
+import { Conf, d, doc, g } from "../globals/globals";
 
 /*
  * decaffeinate suggestions:

@@ -1,5 +1,5 @@
 import Callbacks from "../classes/Callbacks";
-import { Conf, doc } from "../globals/globals";
+import { Conf, d, doc } from "../globals/globals";
 import $ from "../platform/$";
 import $$ from "../platform/$$";
 

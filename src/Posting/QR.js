@@ -321,7 +321,7 @@ var QR = {
     return $.el('span',
       { innerHTML:
         'Connection error while posting. ' +
-        '[<a href="' + meta.faq + '#connection-errors" target="_blank">More info</a>]'
+        '[<a href="' + E(meta.upstreamFaq) + '#connection-errors" target="_blank">More info</a>]'
       }
     );
   },
@@ -474,7 +474,7 @@ var QR = {
     const div = $.el('div');
     $.extend(div, {
       innerHTML:
-        'Could not open file. [<a href="' + E(meta.faq) + '#error-reading-metadata" target="_blank">More info</a>]'
+        'Could not open file. [<a href="' + E(meta.upstreamFaq) + '#error-reading-metadata" target="_blank">More info</a>]'
     });
     return QR.error(div);
   },
@@ -1964,7 +1964,7 @@ var QR = {
       var onerror = () => {
         $.off(el, event, onload);
         $.off(el, 'error', onerror);
-        this.fileError(`Corrupt ${isVideo ? 'video' : 'image'} or error reading metadata.`, meta.faq + '#error-reading-metadata');
+        this.fileError(`Corrupt ${isVideo ? 'video' : 'image'} or error reading metadata.`, meta.upstreamFaq + '#error-reading-metadata');
         URL.revokeObjectURL(el.src);
         // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=1021289
         this.nodes.el.removeAttribute('data-height');

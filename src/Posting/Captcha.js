@@ -6,7 +6,7 @@ import Main from "../main/Main";
 import Keybinds from "../Miscellaneous/Keybinds";
 import $$ from "../platform/$$";
 import QR from "./QR";
-import { Conf, d } from "../globals/globals";
+import { Conf, d, doc } from "../globals/globals";
 import { MINUTE, SECOND } from "../platform/helpers";
 
 const Captcha = {

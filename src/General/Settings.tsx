@@ -809,6 +809,14 @@ vp-replace
         }
       }
     }
+    if (compareString < '00002.00003.00001.00000') {
+      if (data['boardnav']) {
+        set('boardnav', data['boardnav'].replace(
+          '[external-text:"FAQ","4chan XT"]',
+          '[external-text:"FAQ","https://github.com/TuxedoTako/4chan-xt/wiki/Frequently-Asked-Questions"]',
+        ));
+      }
+    }
     return changes;
   },
 

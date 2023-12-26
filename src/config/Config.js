@@ -866,7 +866,7 @@ http://eye.swfchan.com/search/?q=%name;types:swf
 current-catalog-text:"Catalog"
 current-expired-text:"Expired"
 current-archive-text:"Archive"]
-[external-text:"FAQ","${meta.name}"]\
+[external-text:"FAQ","${meta.faq}"]\
 `,
 
   QR: {

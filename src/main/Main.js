@@ -782,7 +782,8 @@ var Main = {
         $.addClass(doc, 'tainted');
         if (Conf['Disable Native Extension'] && !Main.isFirstRun) {
           const msg = $.el('div',
-            { innerHTML: 'Failed to disable the native extension. You may need to <a href="' + E(meta.faq) + '#blocking-native-extension" target="_blank">block it</a>.' });
+            { innerHTML: 'Failed to disable the native extension. You may need to <a href="' + E(meta.upstreamFaq) +
+              '#blocking-native-extension" target="_blank">block it</a>.' });
           new Notice('error', msg);
         }
       }
