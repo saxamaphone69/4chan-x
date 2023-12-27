@@ -813,7 +813,7 @@ vp-replace
       if (data['boardnav']) {
         set('boardnav', data['boardnav'].replace(
           '[external-text:"FAQ","4chan XT"]',
-          '[external-text:"FAQ","https://github.com/TuxedoTako/4chan-xt/wiki/Frequently-Asked-Questions"]',
+          `[external-text:"FAQ","${meta.faq}"]`
         ));
       }
     }
@@ -821,7 +821,8 @@ vp-replace
   },
 
   loadSettings(data, cb) {
-    if (data.version.split('.')[0] === '2') { // https://github.com/loadletter/4chan-x
+    // https://github.com/loadletter/4chan-x has differently named settings.
+    if (data.version.startsWith('2.') && "Disable 4chan's extension" in data.Conf) {
       data = Settings.convertFrom.loadletter(data);
     } else if (data.version !== g.VERSION) {
       Settings.upgrade(data.Conf, data.version);

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.3.1
+// @version      2.3.2
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.3.1",
-    "date": "2023-12-26T12:38:40.524Z"
+    "version": "2.3.2",
+    "date": "2023-12-27T10:56:56.977Z"
   };
 
   var meta = {
@@ -15944,13 +15944,14 @@ vp-replace
           }
           if (compareString < '00002.00003.00001.00000') {
               if (data['boardnav']) {
-                  set('boardnav', data['boardnav'].replace('[external-text:"FAQ","4chan XT"]', '[external-text:"FAQ","https://github.com/TuxedoTako/4chan-xt/wiki/Frequently-Asked-Questions"]'));
+                  set('boardnav', data['boardnav'].replace('[external-text:"FAQ","4chan XT"]', `[external-text:"FAQ","${meta.faq}"]`));
               }
           }
           return changes;
       },
       loadSettings(data, cb) {
-          if (data.version.split('.')[0] === '2') { // https://github.com/loadletter/4chan-x
+          // https://github.com/loadletter/4chan-x has differently named settings.
+          if (data.version.startsWith('2.') && "Disable 4chan's extension" in data.Conf) {
               data = Settings.convertFrom.loadletter(data);
           }
           else if (data.version !== g.VERSION) {
