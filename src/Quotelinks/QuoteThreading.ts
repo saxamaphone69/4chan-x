@@ -1,4 +1,5 @@
 import Callbacks from "../classes/Callbacks";
+import type Post from "../classes/Post";
 import RandomAccessList from "../classes/RandomAccessList";
 import Header from "../General/Header";
 import { Conf, d, g } from "../globals/globals";
@@ -7,11 +8,6 @@ import Unread from "../Monitoring/Unread";
 import $ from "../platform/$";
 import { dict } from "../platform/helpers";
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 /*
   <3 aeosynth
 */
@@ -36,7 +32,7 @@ var QuoteThreading = {
     $.on(this.input, 'change', this.setEnabled);
     $.on(this.input, 'change', this.rethread);
     $.on(this.threadNewLink.firstElementChild, 'click', this.rethread);
-    $.on(d, '4chanXInitFinished', () => { return this.ready = true; });
+    $.on(d, '4chanXInitFinished', () => { this.ready = true; });
 
     Header.menu.addEntry(this.entry = {
       el:    this.controls,
@@ -49,7 +45,7 @@ var QuoteThreading = {
       cb:   this.setThread
     });
 
-    return Callbacks.Post.push({
+    Callbacks.Post.push({
       name: 'Quote Threading',
       cb:   this.node
     });
@@ -58,15 +54,16 @@ var QuoteThreading = {
   parent:   dict(),
   children: dict(),
   inserted: dict(),
+  lastID: 0,
 
   toggleThreading() {
-    return this.setThreadingState(!Conf['Thread Quotes']);
+    this.setThreadingState(!Conf['Thread Quotes']);
   },
 
   setThreadingState(enabled) {
     this.input.checked = enabled;
     this.setEnabled.call(this.input);
-    return this.rethread.call(this.input);
+    this.rethread.call(this.input);
   },
 
   setEnabled() {
@@ -78,20 +75,45 @@ var QuoteThreading = {
         $.event('change', null, other);
       }
     }
-    return $.cb.checked.call(this);
+    $.cb.checked.call(this);
   },
 
   setThread() {
     QuoteThreading.thread = this;
-    return $.asap((() => !Conf['Thread Updater'] || $('.navLinksBot > .updatelink')), function() {
+    $.asap((() => !Conf['Thread Updater'] || $('.navLinksBot > .updatelink')), function() {
       let navLinksBot;
-      if (navLinksBot = $('.navLinksBot')) { return $.add(navLinksBot, [$.tn(' '), QuoteThreading.threadNewLink]); }
+      if (navLinksBot = $('.navLinksBot')) { $.add(navLinksBot, [$.tn(' '), QuoteThreading.threadNewLink]); }
     });
   },
 
-  node() {
+  /**
+   * @param retroactive Whether the function is ran retroactively on posts connected to one restored from an archive.
+   * If it's not passed, a post that isn't the newest post triggers this function is called again with parent and child
+   * posts to insert it in the thread.
+   */
+  node(this: Post, retroactive = false) {
     let parent;
     if (this.isFetchedQuote || this.isClone || !this.isReply) { return; }
+
+    if (!retroactive) {
+      if (this.ID < QuoteThreading.lastID) {
+        // Post was inserted from archive, it might be higher up in a chain
+        for (const backLink of this.nodes.backlinks) {
+          const [, board, number] = backLink.href.match(/\/([a-z]+)\/thread\/\d+#p(\d+)$/);
+          QuoteThreading.node.call(g.posts.get(`${board}.${number}`), true);
+        }
+
+        if (this.quotes.length) {
+          QuoteThreading.shouldReThread();
+          for (var quote of this.quotes) {
+            const parent = g.posts.get(quote);
+            if (parent) QuoteThreading.node.call(parent, true);
+          }
+        }
+      } else {
+        QuoteThreading.lastID = this.ID;
+      }
+    }
 
     const parents = new Set();
     let lastParent = null;
@@ -104,7 +126,7 @@ var QuoteThreading = {
       }
     }
 
-    if (!lastParent) { return; }
+    if (!lastParent) return;
 
     let ancestor = lastParent;
     while ((ancestor = QuoteThreading.parent[ancestor.fullID])) {
@@ -112,7 +134,7 @@ var QuoteThreading = {
     }
 
     if (parents.size === 1) {
-      return QuoteThreading.parent[this.fullID] = lastParent;
+      QuoteThreading.parent[this.fullID] = lastParent;
     }
   },
 
@@ -172,6 +194,9 @@ var QuoteThreading = {
     if (!parent.nodes.threadContainer) {
       parent.nodes.threadContainer = threadContainer;
       $.addClass(parent.nodes.root, 'threadOP');
+      // Put in the post if it isn't in the dom already. This happens with posts restored from the archive.
+      // I'm not sure where if this is the right place to do that.
+      if (!d.contains(parent.nodes.root)) $.add(parent.thread.nodes.root, parent.nodes.root);
       $.after(parent.nodes.root, threadContainer);
     }
 
@@ -199,7 +224,7 @@ var QuoteThreading = {
           delete QuoteThreading.children[post.fullID];
           $.rmClass(post.nodes.root, 'threadOP');
           $.rm(post.nodes.threadContainer);
-          return delete post.nodes.threadContainer;
+          delete post.nodes.threadContainer;
         }
       });
       $.add(thread.nodes.root, nodes);
@@ -209,7 +234,19 @@ var QuoteThreading = {
     Unread.updatePosition();
     Unread.setLine(true);
     Unread.read();
-    return Unread.update();
-  }
+    Unread.update();
+  },
+
+  rethreadQueued: false,
+
+  /** When a post from the archive has an existing child post, the threading has to be re-run. */
+  shouldReThread() {
+    if (this.rethreadQueued) return;
+    Promise.resolve().then(() => {
+      this.rethread();
+      this.rethreadQueued = false
+    });
+    this.rethreadQueued = true;
+  },
 };
 export default QuoteThreading;

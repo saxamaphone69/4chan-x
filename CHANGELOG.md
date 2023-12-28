@@ -3,6 +3,10 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### Unreleased
+
+- Improved interaction between restoring from the archive and reply threading.
+  - Known issue: parents from threads get put at the end instead of the correct place.
 
 ### v2.3.2 (2023-12-27)
 
@@ -103,5 +107,7 @@ some other changes as well. These changes aren't in the upstream PR.
   build in 4chan X that rely on them, and I only tested on windows.
 - For even smaller user script size, there is a minified version available
 - https://github.com/ccd0/4chan-x/pull/3352, fix for https://github.com/ccd0/4chan-x/issues/3349 was ported
+
+## Original 4chan X changelog
 
 For the original changelog, see [original 4chan X CHANGELOG.md](./original%204chan%20X%20CHANGELOG.md).

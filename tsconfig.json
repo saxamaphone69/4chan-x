@@ -17,6 +17,7 @@
     ],
     "lib": [
       "DOM",
+      "DOM.Iterable",
       "ES2020"
     ],
     // needs to be in the deepest dir used as target in the rollup build

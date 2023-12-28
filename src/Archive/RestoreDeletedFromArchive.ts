@@ -23,19 +23,13 @@ const RestoreDeletedFromArchive = {
           const key = `${g.boardID}.${postID}`
           if (!g.posts.keys.includes(key)) {
             const postIdNr = +postID;
-            let indexOfNext = g.posts.keys.findIndex(key => +(key.split('.')[1]) > postIdNr);
-            if (indexOfNext === -1) {
-              indexOfNext = g.posts.keys.length;
-            };
             const newPost = parseArchivePost(raw);
-            newPost.kill()
-            g.posts.push(key, newPost);
-            // move key to right position
-            g.posts.keys.pop();
-            g.posts.keys.splice(indexOfNext, 0, key);
+            const newPostIndex = g.posts.insert(key, newPost, key => +(key.split('.')[1]) < postIdNr);
+            newPost.resurrect();
+            newPost.markAsFromArchive();
 
             if (!QuoteThreading.insert(newPost)) {
-              g.posts.get(g.posts.keys[indexOfNext - 1]).root.insertAdjacentElement('afterend', newPost.root);
+              g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', newPost.root);
             }
 
             ++nrRestored;

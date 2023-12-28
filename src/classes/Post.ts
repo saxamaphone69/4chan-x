@@ -160,10 +160,16 @@ export default class Post {
       for (var clone of this.clones) { clone.origin = this; }
     }
 
-    if (!this.isFetchedQuote && (this.ID > this.thread.lastPost)) { this.thread.lastPost = this.ID; }
-    this.board.posts.push(this.ID, this);
-    this.thread.posts.push(this.ID, this);
-    g.posts.push(this.fullID, this);
+    if (!this.isFetchedQuote && (this.ID > this.thread.lastPost)) {
+      this.thread.lastPost = this.ID;
+      this.board.posts.push(this.ID, this);
+      this.thread.posts.push(this.ID, this);
+      g.posts.push(this.fullID, this);
+    } else {
+      this.board.posts.insert(this.ID, this);
+      this.thread.posts.insert(this.ID, this);
+      g.posts.insert(this.fullID, this, key => +(key.split('.')[1]) < this.ID);
+    }
 
     this.isFetchedQuote = false;
     this.isClone = false;
@@ -380,6 +386,20 @@ export default class Post {
     }
   }
 
+  markAsFromArchive() {
+    let strong = $('strong.warning', this.nodes.info);
+    if (!strong) {
+      strong = $.el('strong', { className: 'warning' });
+      $.after($('input', this.nodes.info), strong);
+    }
+    strong.textContent = '[Deleted, restored from external archive]';
+
+    if (this.isClone) { return; }
+    for (var clone of this.clones) {
+      clone.markAsFromArchive();
+    }
+  }
+
   // XXX Workaround for 4chan's racing condition
   // giving us false-positive dead posts.
   resurrect() {
@@ -399,11 +419,12 @@ export default class Post {
       clone.resurrect();
     }
 
-    for (var quotelink of Get.allQuotelinksLinkingTo(this)) {
+    for (var quotelink of Get.allQuotelinksLinkingTo(this) as HTMLAnchorElement[]) {
       if ($.hasClass(quotelink, 'deadlink')) {
         $.rm($('.qmark-dead', quotelink));
         $.rmClass(quotelink, 'deadlink');
       }
+      quotelink.href = `#p${this.ID}`;
     }
   }
 

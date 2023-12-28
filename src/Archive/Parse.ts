@@ -168,7 +168,8 @@ export const parseArchivePost = (data: RawArchivePost) => {
   const thread = g.threads.get(`${o.boardID}.${o.threadID}`) ||
     new Thread(o.threadID, board);
   const post = new Post(g.SITE.Build.post(o), thread, board, { isFetchedQuote: true });
-  post.kill();
+  post.resurrect();
+  post.markAsFromArchive();
   if (post.file) { post.file.thumbURL = o.file.thumbURL; }
   Main.callbackNodes('Post', [post]);
   return post;
