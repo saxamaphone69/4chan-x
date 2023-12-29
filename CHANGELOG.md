@@ -6,6 +6,7 @@ in XT.
 ### Unreleased
 
 - Added as "Link Title in the catalog" setting a workaround for [ccd0/4chan-x#3427](https://github.com/ccd0/4chan-x/issues/3427).
+- Restored span around ➕︎ and ➖︎ icons in the index for user styles. [#17](https://github.com/TuxedoTako/4chan-xt/issues/17).
 
 ### v2.3.2 (2023-12-27)
 

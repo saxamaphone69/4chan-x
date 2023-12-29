@@ -198,9 +198,8 @@ var ThreadHiding = {
     const a = $.el('a', {
       className: `${type}-thread-button`,
       href:      'javascript:;'
-    }
-    );
-    $.extend(a, {textContent: type === "hide" ? '➖︎' : '➕︎' });
+    });
+    $.add(a, $.el('span', { textContent: type === 'hide' ? '➖︎' : '➕︎' }));
     a.dataset.fullID = thread.fullID;
     $.on(a, 'click', ThreadHiding.toggle);
     return a;
