@@ -36,10 +36,9 @@ var Embedding = {
         }
       }));
     }
-    if (Conf['Link Title']) {
-      return $.on(d, '4chanXInitFinished PostsInserted', function() {
-        for (var key in Embedding.types) {
-          var service = Embedding.types[key];
+    if (Embedding.shouldFetchTitles()) {
+      $.on(d, '4chanXInitFinished PostsInserted', function() {
+        for (const service of Object.values(Embedding.types)) {
           if (service.title?.batchSize) {
             Embedding.flushTitles(service.title);
           }
@@ -79,7 +78,7 @@ var Embedding = {
     if (data = Embedding.services(link)) {
       data.post = post;
       if (Conf['Embedding'] && (g.VIEW !== 'archive')) { Embedding.embed(data); }
-      if (Conf['Link Title']) { Embedding.title(data); }
+      if (Embedding.shouldFetchTitles()) Embedding.title(data);
       if (Conf['Cover Preview'] && (g.VIEW !== 'archive')) { return Embedding.preview(data); }
     }
   },
@@ -697,6 +696,12 @@ var Embedding = {
         height: 360
       }
     }
-  ]
+  ],
+
+  shouldFetchTitles() {
+    if(!Conf['Link Title']) return false;
+    if (Conf['Link Title in the catalog']) return true;
+    return g.VIEW !== 'catalog' && !(g.VIEW === 'index' && Conf['Index Mode'] === 'catalog');
+  },
 };
 export default Embedding;
