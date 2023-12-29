@@ -26,7 +26,6 @@ export default class SimpleDict<T> {
    */
   insert(key: string | number, data: T, compare: (lastKey: string, key: string | number) => boolean): number;
   insert(key: string | number, data: T, compare = (lastKey: string, key: string | number) => (+lastKey) < (+key)): number {
-    console.log(key, data);
     const length = this.keys.length
     if (this[key] || !length || compare(this.lastKey(), key)) {
       this.push(key, data);

@@ -160,15 +160,16 @@ export default class Post {
       for (var clone of this.clones) { clone.origin = this; }
     }
 
-    if (!this.isFetchedQuote && (this.ID > this.thread.lastPost)) {
-      this.thread.lastPost = this.ID;
-      this.board.posts.push(this.ID, this);
-      this.thread.posts.push(this.ID, this);
-      g.posts.push(this.fullID, this);
-    } else {
+    if (!this.isFetchedQuote && (this.ID > this.thread.lastPost)) { this.thread.lastPost = this.ID; }
+
+    if (this.ID < this.thread.lastPost && g.VIEW === 'thread') {
       this.board.posts.insert(this.ID, this);
       this.thread.posts.insert(this.ID, this);
       g.posts.insert(this.fullID, this, key => +(key.split('.')[1]) < this.ID);
+    } else {
+      this.board.posts.push(this.ID, this);
+      this.thread.posts.push(this.ID, this);
+      g.posts.push(this.fullID, this);
     }
 
     this.isFetchedQuote = false;
