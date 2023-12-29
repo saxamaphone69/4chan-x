@@ -161,6 +161,13 @@ const Config = {
         'Replace the link of a supported site with its actual title.',
         1
       ],
+      'Link Title in the catalog': [
+        false,
+        'Replace the link of a supported site with its actual title in the catalog too. ' +
+          'This is a separate settings because /vt/ had some many embeds it lagged Violentmonkey on chromium ' +
+          '<a href="https://github.com/ccd0/4chan-x/issues/3427" target="_blank" rel="noopener">(4chan-x#3427)</a>.',
+        2
+      ],
       'Cover Preview': [
         true,
         'Show preview of supported links on hover.',

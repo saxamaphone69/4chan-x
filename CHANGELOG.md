@@ -3,6 +3,9 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### Unreleased
+
+- Added as "Link Title in the catalog" setting a workaround for [ccd0/4chan-x#3427](https://github.com/ccd0/4chan-x/issues/3427).
 
 ### v2.3.2 (2023-12-27)
 
