@@ -80,8 +80,8 @@
   'use strict';
 
   var version = {
-    "version": "2.3.2",
-    "date": "2023-12-27T10:56:56.977Z"
+    "version": "2.3.3",
+    "date": "2023-12-30T09:55:57.211Z"
   };
 
   var meta = {
@@ -453,6 +453,13 @@ div.boardTitle {
           true,
           'Replace the link of a supported site with its actual title.',
           1
+        ],
+        'Link Title in the catalog': [
+          false,
+          'Replace the link of a supported site with its actual title in the catalog too. ' +
+            'This is a separate settings because /vt/ had some many embeds it lagged Violentmonkey on chromium ' +
+            '<a href="https://github.com/ccd0/4chan-x/issues/3427" target="_blank" rel="noopener">(4chan-x#3427)</a>.',
+          2
         ],
         'Cover Preview': [
           true,
@@ -2191,11 +2198,6 @@ https://*.hcaptcha.com
   }
   DataBoard.initClass();
 
-  /*
-   * decaffeinate suggestions:
-   * DS102: Remove unnecessary code created because of implicit returns
-   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
-   */
   class SimpleDict {
       constructor() {
           this.keys = [];
@@ -2205,14 +2207,39 @@ https://*.hcaptcha.com
           if (!this[key]) {
               this.keys.push(key);
           }
-          return this[key] = data;
+          this[key] = data;
+      }
+      insert(key, data, compare = (lastKey, key) => (+lastKey) < (+key)) {
+          const keyString = key.toString();
+          if (keyString in this) {
+              this[keyString] = data;
+              return this.keys.indexOf(keyString);
+          }
+          const length = this.keys.length;
+          if (!length || compare(this.lastKey(), key)) {
+              this.push(key, data);
+              return length;
+          }
+          let indexOfNext = this.keys.findIndex(k => !compare(k, key));
+          if (indexOfNext === -1) {
+              this.push(key, data);
+          }
+          else {
+              this[keyString] = data;
+              this.keys.splice(indexOfNext, 0, keyString);
+          }
+          return indexOfNext;
+      }
+      insertAt(key, index, data) {
+          this[key] = data;
+          this.keys.splice(index, 0, key);
       }
       rm(key) {
           let i;
           key = `${key}`;
           if ((i = this.keys.indexOf(key)) !== -1) {
               this.keys.splice(i, 1);
-              return delete this[key];
+              delete this[key];
           }
       }
       forEach(fn) {
@@ -2227,6 +2254,12 @@ https://*.hcaptcha.com
           else {
               return $$1.getOwn(this, key);
           }
+      }
+      lastKey() {
+          return this.keys[this.keys.length - 1];
+      }
+      last() {
+          return this.keys.length ? this[this.keys.length - 1] : undefined;
       }
   }
 
@@ -3820,9 +3853,16 @@ https://*.hcaptcha.com
           if (!this.isFetchedQuote && (this.ID > this.thread.lastPost)) {
               this.thread.lastPost = this.ID;
           }
-          this.board.posts.push(this.ID, this);
-          this.thread.posts.push(this.ID, this);
-          g.posts.push(this.fullID, this);
+          if (this.ID < this.thread.lastPost && g.VIEW === 'thread') {
+              this.board.posts.insert(this.ID, this);
+              this.thread.posts.insert(this.ID, this);
+              g.posts.insert(this.fullID, this, key => +(key.split('.')[1]) < this.ID);
+          }
+          else {
+              this.board.posts.push(this.ID, this);
+              this.thread.posts.push(this.ID, this);
+              g.posts.push(this.fullID, this);
+          }
           this.isFetchedQuote = false;
           this.isClone = false;
       }
@@ -4021,6 +4061,20 @@ https://*.hcaptcha.com
               }
           }
       }
+      markAsFromArchive() {
+          let strong = $$1('strong.warning', this.nodes.info);
+          if (!strong) {
+              strong = $$1.el('strong', { className: 'warning' });
+              $$1.after($$1('input', this.nodes.info), strong);
+          }
+          strong.textContent = '[Deleted, restored from external archive]';
+          if (this.isClone) {
+              return;
+          }
+          for (var clone of this.clones) {
+              clone.markAsFromArchive();
+          }
+      }
       // XXX Workaround for 4chan's racing condition
       // giving us false-positive dead posts.
       resurrect() {
@@ -4046,6 +4100,7 @@ https://*.hcaptcha.com
                   $$1.rm($$1('.qmark-dead', quotelink));
                   $$1.rmClass(quotelink, 'deadlink');
               }
+              quotelink.href = `#p${this.ID}`;
           }
       }
       collect() {
@@ -6981,12 +7036,422 @@ https://*.hcaptcha.com
       const thread = g.threads.get(`${o.boardID}.${o.threadID}`) ||
           new Thread(o.threadID, board);
       const post = new Post(g.SITE.Build.post(o), thread, board, { isFetchedQuote: true });
-      post.kill();
+      post.resurrect();
+      post.markAsFromArchive();
       if (post.file) {
           post.file.thumbURL = o.file.thumbURL;
       }
       Main$1.callbackNodes('Post', [post]);
       return post;
+  };
+
+  /*
+   * decaffeinate suggestions:
+   * DS102: Remove unnecessary code created because of implicit returns
+   * DS104: Avoid inline assignments
+   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
+   */
+  var ReplyPruning = {
+    init() {
+      if ((g.VIEW !== 'thread') || !Conf['Reply Pruning']) { return; }
+
+      this.container = $$1.frag();
+
+      this.summary = $$1.el('span', {
+        hidden:    true,
+        className: 'summary'
+      }
+      );
+      this.summary.style.cursor = 'pointer';
+      $$1.on(this.summary, 'click', () => {
+        this.inputs.enabled.checked = !this.inputs.enabled.checked;
+        return $$1.event('change', null, this.inputs.enabled);
+      });
+
+      const label = UI.checkbox('Prune Replies', 'Show Last', Conf['Prune All Threads']);
+      const el = $$1.el('span',
+        {title: 'Maximum number of replies to show.'}
+      ,
+        {innerHTML: " <input type=\"number\" name=\"Max Replies\" min=\"0\" step=\"1\" value=\"" + E(Conf["Max Replies"]) + "\" class=\"field\">"});
+      $$1.prepend(el, label);
+
+      this.inputs = {
+        enabled: label.firstElementChild,
+        replies: el.lastElementChild
+      };
+
+      this.setEnabled.call(this.inputs.enabled);
+      $$1.on(this.inputs.enabled, 'change', this.setEnabled);
+      $$1.on(this.inputs.replies, 'change', $$1.cb.value);
+
+      Header$1.menu.addEntry({
+        el,
+        order: 190
+      });
+
+      return Callbacks.Thread.push({
+        name: 'Reply Pruning',
+        cb:   this.node
+      });
+    },
+
+    position: 0,
+    hidden: 0,
+    hiddenFiles: 0,
+    total: 0,
+    totalFiles: 0,
+
+    setEnabled() {
+      const other = QuoteThreading.input;
+      if (this.checked && other?.checked) {
+        other.checked = false;
+        $$1.event('change', null, other);
+      }
+      return ReplyPruning.active = this.checked;
+    },
+
+    showIfHidden(id) {
+      if (ReplyPruning.container && $$1(`#${id}`, ReplyPruning.container)) {
+        ReplyPruning.inputs.enabled.checked = false;
+        return $$1.event('change', null, ReplyPruning.inputs.enabled);
+      }
+    },
+
+    node() {
+      let middle;
+      ReplyPruning.thread = this;
+
+      if (this.isSticky) {
+        ReplyPruning.active = (ReplyPruning.inputs.enabled.checked = true);
+        if (QuoteThreading.input) {
+          // Disable Quote Threading for this thread but don't save the setting.
+          Conf['Thread Quotes'] = (QuoteThreading.input.checked = false);
+        }
+      }
+
+      this.posts.forEach(function(post) {
+        if (post.isReply) {
+          ReplyPruning.total++;
+          if (post.file) { return ReplyPruning.totalFiles++; }
+        }
+      });
+
+      // If we're linked to a post that we would hide, don't hide the posts in the first place.
+      if (
+        ReplyPruning.active &&
+        /^#p\d+$/.test(location.hash) &&
+        (1 <= (middle = this.posts.keys.indexOf(location.hash.slice(2))) && middle < 1 + Math.max(ReplyPruning.total - +Conf["Max Replies"], 0))
+      ) {
+        ReplyPruning.active = (ReplyPruning.inputs.enabled.checked = false);
+      }
+
+      $$1.after(this.OP.nodes.root, ReplyPruning.summary);
+
+      $$1.on(ReplyPruning.inputs.enabled, 'change', ReplyPruning.update);
+      $$1.on(ReplyPruning.inputs.replies, 'change', ReplyPruning.update);
+      $$1.on(d, 'ThreadUpdate', ReplyPruning.updateCount);
+      $$1.on(d, 'ThreadUpdate', ReplyPruning.update);
+
+      return ReplyPruning.update();
+    },
+
+    updateCount(e) {
+      if (e.detail[404]) { return; }
+      for (var fullID of e.detail.newPosts) {
+        ReplyPruning.total++;
+        if (g.posts.get(fullID).file) { ReplyPruning.totalFiles++; }
+      }
+    },
+
+    update() {
+      let boardTop, node, post;
+      const hidden1 = ReplyPruning.hidden;
+      const hidden2 = ReplyPruning.active ?
+        Math.max(ReplyPruning.total - +Conf["Max Replies"], 0)
+      :
+        0;
+
+      // Record position from bottom of document
+      const oldPos = d.body.clientHeight - window.scrollY;
+
+      const {posts} = ReplyPruning.thread;
+
+      if (ReplyPruning.hidden < hidden2) {
+        while ((ReplyPruning.hidden < hidden2) && (ReplyPruning.position < posts.keys.length)) {
+          post = posts.get(posts.keys[ReplyPruning.position++]);
+          if (post.isReply && !post.isFetchedQuote) {
+            while ((node = ReplyPruning.summary.nextSibling) && (node !== post.nodes.root)) { $$1.add(ReplyPruning.container, node); }
+            $$1.add(ReplyPruning.container, post.nodes.root);
+            ReplyPruning.hidden++;
+            if (post.file) { ReplyPruning.hiddenFiles++; }
+          }
+        }
+
+      } else if (ReplyPruning.hidden > hidden2) {
+        const frag = $$1.frag();
+        while ((ReplyPruning.hidden > hidden2) && (ReplyPruning.position > 0)) {
+          post = posts.get(posts.keys[--ReplyPruning.position]);
+          if (post.isReply && !post.isFetchedQuote) {
+            while ((node = ReplyPruning.container.lastChild) && (node !== post.nodes.root)) { $$1.prepend(frag, node); }
+            $$1.prepend(frag, post.nodes.root);
+            ReplyPruning.hidden--;
+            if (post.file) { ReplyPruning.hiddenFiles--; }
+          }
+        }
+        $$1.after(ReplyPruning.summary, frag);
+        $$1.event('PostsInserted', null, ReplyPruning.summary.parentNode);
+      }
+
+      ReplyPruning.summary.textContent = ReplyPruning.active ?
+        g.SITE.Build.summaryText('+', ReplyPruning.hidden, ReplyPruning.hiddenFiles)
+      :
+        g.SITE.Build.summaryText('-', ReplyPruning.total, ReplyPruning.totalFiles);
+      ReplyPruning.summary.hidden = (ReplyPruning.total <= +Conf["Max Replies"]);
+
+      // Maintain position in thread when posts are added/removed above
+      if ((hidden1 !== hidden2) && ((boardTop = Header$1.getTopOf($$1('.board'))) < 0)) {
+        return window.scrollBy(0, Math.max(d.body.clientHeight - oldPos, window.scrollY + boardTop) - window.scrollY);
+      }
+    }
+  };
+
+  /*
+    <3 aeosynth
+  */
+  var QuoteThreading = {
+      init() {
+          if (!Conf['Quote Threading'] || (g.VIEW !== 'thread')) {
+              return;
+          }
+          this.controls = $$1.el('label', { innerHTML: "<input id=\"threadingControl\" name=\"Thread Quotes\" type=\"checkbox\"> Threading" });
+          this.threadNewLink = $$1.el('span', {
+              className: 'brackets-wrap threadnewlink',
+              hidden: true
+          });
+          $$1.extend(this.threadNewLink, { innerHTML: "<a href=\"javascript:;\">Thread New Posts</a>" });
+          this.input = $$1('input', this.controls);
+          this.input.checked = Conf['Thread Quotes'];
+          $$1.on(this.input, 'change', this.setEnabled);
+          $$1.on(this.input, 'change', this.rethread);
+          $$1.on(this.threadNewLink.firstElementChild, 'click', this.rethread);
+          $$1.on(d, '4chanXInitFinished', () => { this.ready = true; });
+          Header$1.menu.addEntry(this.entry = {
+              el: this.controls,
+              order: 99
+          });
+          Callbacks.Thread.push({
+              name: 'Quote Threading',
+              cb: this.setThread
+          });
+          Callbacks.Post.push({
+              name: 'Quote Threading',
+              cb: this.node
+          });
+      },
+      parent: dict(),
+      children: dict(),
+      inserted: dict(),
+      lastID: 0,
+      toggleThreading() {
+          this.setThreadingState(!Conf['Thread Quotes']);
+      },
+      setThreadingState(enabled) {
+          this.input.checked = enabled;
+          this.setEnabled.call(this.input);
+          this.rethread.call(this.input);
+      },
+      setEnabled() {
+          if (this.checked) {
+              $$1.set('Prune All Threads', false);
+              const other = ReplyPruning.inputs?.enabled;
+              if (other?.checked) {
+                  other.checked = false;
+                  $$1.event('change', null, other);
+              }
+          }
+          $$1.cb.checked.call(this);
+      },
+      setThread() {
+          QuoteThreading.thread = this;
+          $$1.asap((() => !Conf['Thread Updater'] || $$1('.navLinksBot > .updatelink')), function () {
+              let navLinksBot;
+              if (navLinksBot = $$1('.navLinksBot')) {
+                  $$1.add(navLinksBot, [$$1.tn(' '), QuoteThreading.threadNewLink]);
+              }
+          });
+      },
+      /**
+       * @param retroactive Whether the function is ran retroactively on posts connected to one restored from an archive.
+       * If it's not passed, a post that isn't the newest post triggers this function is called again with parent and child
+       * posts to insert it in the thread.
+       */
+      node(retroactive = false) {
+          let parent;
+          if (this.isFetchedQuote || this.isClone || !this.isReply) {
+              return;
+          }
+          if (!retroactive) {
+              if (this.ID < QuoteThreading.lastID) {
+                  // Post was inserted from archive, it might be higher up in a chain
+                  for (const backLink of this.nodes.backlinks) {
+                      const [, board, number] = backLink.href.match(/\/([a-z]+)\/thread\/\d+#p(\d+)$/);
+                      QuoteThreading.node.call(g.posts.get(`${board}.${number}`), true);
+                  }
+                  if (this.quotes.length) {
+                      // Rethread to put the children in the right place.
+                      QuoteThreading.shouldReThread();
+                      for (var quote of this.quotes) {
+                          const parent = g.posts.get(quote);
+                          if (parent)
+                              QuoteThreading.node.call(parent, true);
+                      }
+                  }
+              }
+              else {
+                  QuoteThreading.lastID = this.ID;
+              }
+          }
+          const parents = new Set();
+          let lastParent = null;
+          for (var quote of this.quotes) {
+              if ((parent = g.posts.get(quote))) {
+                  if (!parent.isFetchedQuote && parent.isReply && (parent.ID < this.ID)) {
+                      parents.add(parent.ID);
+                      if (!lastParent || (parent.ID > lastParent.ID)) {
+                          lastParent = parent;
+                      }
+                  }
+              }
+          }
+          if (!lastParent)
+              return;
+          let ancestor = lastParent;
+          while ((ancestor = QuoteThreading.parent[ancestor.fullID])) {
+              parents.delete(ancestor.ID);
+          }
+          if (parents.size === 1) {
+              QuoteThreading.parent[this.fullID] = lastParent;
+          }
+      },
+      descendants(post) {
+          let children;
+          let posts = [post];
+          if (children = QuoteThreading.children[post.fullID]) {
+              for (var child of children) {
+                  posts = posts.concat(QuoteThreading.descendants(child));
+              }
+          }
+          return posts;
+      },
+      insert(post) {
+          let parent, x;
+          if (!(Conf['Thread Quotes'] &&
+              (parent = QuoteThreading.parent[post.fullID]) &&
+              !QuoteThreading.inserted[post.fullID])) {
+              return false;
+          }
+          const descendants = QuoteThreading.descendants(post);
+          if (!Unread.posts.has(parent.ID)) {
+              if ((function () { for (var x of descendants) {
+                  if (Unread.posts.has(x.ID)) {
+                      return true;
+                  }
+              } })()) {
+                  QuoteThreading.threadNewLink.hidden = false;
+                  return false;
+              }
+          }
+          const { order } = Unread;
+          const children = (QuoteThreading.children[parent.fullID] || (QuoteThreading.children[parent.fullID] = []));
+          const threadContainer = parent.nodes.threadContainer || $$1.el('div', { className: 'threadContainer' });
+          const nodes = [post.nodes.root];
+          if (post.nodes.threadContainer) {
+              nodes.push(post.nodes.threadContainer);
+          }
+          let i = children.length;
+          for (let j = children.length - 1; j >= 0; j--) {
+              var child = children[j];
+              if (child.ID >= post.ID) {
+                  i--;
+              }
+          }
+          if (i !== children.length) {
+              const next = children[i];
+              for (x of descendants) {
+                  order.before(order[next.ID], order[x.ID]);
+              }
+              children.splice(i, 0, post);
+              $$1.before(next.nodes.root, nodes);
+          }
+          else {
+              let prev2;
+              let prev = parent;
+              while ((prev2 = QuoteThreading.children[prev.fullID]) && prev2.length) {
+                  prev = prev2[prev2.length - 1];
+              }
+              for (let k = descendants.length - 1; k >= 0; k--) {
+                  x = descendants[k];
+                  order.after(order[prev.ID], order[x.ID]);
+              }
+              children.push(post);
+              $$1.add(threadContainer, nodes);
+          }
+          QuoteThreading.inserted[post.fullID] = true;
+          if (!parent.nodes.threadContainer) {
+              parent.nodes.threadContainer = threadContainer;
+              $$1.addClass(parent.nodes.root, 'threadOP');
+              $$1.after(parent.nodes.root, threadContainer);
+          }
+          return true;
+      },
+      rethread() {
+          if (!QuoteThreading.ready) {
+              return;
+          }
+          const { thread } = QuoteThreading;
+          const { posts } = thread;
+          QuoteThreading.threadNewLink.hidden = true;
+          if (Conf['Thread Quotes']) {
+              posts.forEach(QuoteThreading.insert);
+          }
+          else {
+              const nodes = [];
+              Unread.order = new RandomAccessList();
+              QuoteThreading.inserted = dict();
+              posts.forEach(function (post) {
+                  if (post.isFetchedQuote) {
+                      return;
+                  }
+                  Unread.order.push(post);
+                  if (post.isReply) {
+                      nodes.push(post.nodes.root);
+                  }
+                  if (QuoteThreading.children[post.fullID]) {
+                      delete QuoteThreading.children[post.fullID];
+                      $$1.rmClass(post.nodes.root, 'threadOP');
+                      $$1.rm(post.nodes.threadContainer);
+                      delete post.nodes.threadContainer;
+                  }
+              });
+              $$1.add(thread.nodes.root, nodes);
+          }
+          Unread.position = Unread.order.first;
+          Unread.updatePosition();
+          Unread.setLine(true);
+          Unread.read();
+          Unread.update();
+      },
+      rethreadQueued: false,
+      /** When a post from the archive has an existing child post, the threading has to be re-run. */
+      shouldReThread() {
+          if (this.rethreadQueued || !Conf['Thread Quotes'])
+              return;
+          Promise.resolve().then(() => {
+              this.rethread();
+              this.rethreadQueued = false;
+          });
+          this.rethreadQueued = true;
+      },
   };
 
   /*
@@ -7172,6 +7637,15 @@ https://*.hcaptcha.com
           }
           this.threadID = +data.thread_num;
           post = parseArchivePost(data);
+          const postIdNr = +post.ID;
+          const newPostIndex = g.posts.insert(`${g.boardID}.${post.ID}`, post, key => +(key.split('.')[1]) < postIdNr);
+          if (Conf['Thread Quotes']) {
+              post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
+          }
+          else {
+              g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
+          }
+          QuoteThreading.insert(data);
           return this.insert(post);
       }
   }
@@ -8733,9 +9207,8 @@ https://*.hcaptcha.com
       const a = $$1.el('a', {
         className: `${type}-thread-button`,
         href:      'javascript:;'
-      }
-      );
-      $$1.extend(a, {textContent: type === "hide" ? '➖︎' : '➕︎' });
+      });
+      $$1.add(a, $$1.el('span', { textContent: type === 'hide' ? '➖︎' : '➕︎' }));
       a.dataset.fullID = thread.fullID;
       $$1.on(a, 'click', ThreadHiding.toggle);
       return a;
@@ -14262,382 +14735,6 @@ $\
   /*
    * decaffeinate suggestions:
    * DS102: Remove unnecessary code created because of implicit returns
-   * DS104: Avoid inline assignments
-   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
-   */
-  var ReplyPruning = {
-    init() {
-      if ((g.VIEW !== 'thread') || !Conf['Reply Pruning']) { return; }
-
-      this.container = $$1.frag();
-
-      this.summary = $$1.el('span', {
-        hidden:    true,
-        className: 'summary'
-      }
-      );
-      this.summary.style.cursor = 'pointer';
-      $$1.on(this.summary, 'click', () => {
-        this.inputs.enabled.checked = !this.inputs.enabled.checked;
-        return $$1.event('change', null, this.inputs.enabled);
-      });
-
-      const label = UI.checkbox('Prune Replies', 'Show Last', Conf['Prune All Threads']);
-      const el = $$1.el('span',
-        {title: 'Maximum number of replies to show.'}
-      ,
-        {innerHTML: " <input type=\"number\" name=\"Max Replies\" min=\"0\" step=\"1\" value=\"" + E(Conf["Max Replies"]) + "\" class=\"field\">"});
-      $$1.prepend(el, label);
-
-      this.inputs = {
-        enabled: label.firstElementChild,
-        replies: el.lastElementChild
-      };
-
-      this.setEnabled.call(this.inputs.enabled);
-      $$1.on(this.inputs.enabled, 'change', this.setEnabled);
-      $$1.on(this.inputs.replies, 'change', $$1.cb.value);
-
-      Header$1.menu.addEntry({
-        el,
-        order: 190
-      });
-
-      return Callbacks.Thread.push({
-        name: 'Reply Pruning',
-        cb:   this.node
-      });
-    },
-
-    position: 0,
-    hidden: 0,
-    hiddenFiles: 0,
-    total: 0,
-    totalFiles: 0,
-
-    setEnabled() {
-      const other = QuoteThreading.input;
-      if (this.checked && other?.checked) {
-        other.checked = false;
-        $$1.event('change', null, other);
-      }
-      return ReplyPruning.active = this.checked;
-    },
-
-    showIfHidden(id) {
-      if (ReplyPruning.container && $$1(`#${id}`, ReplyPruning.container)) {
-        ReplyPruning.inputs.enabled.checked = false;
-        return $$1.event('change', null, ReplyPruning.inputs.enabled);
-      }
-    },
-
-    node() {
-      let middle;
-      ReplyPruning.thread = this;
-
-      if (this.isSticky) {
-        ReplyPruning.active = (ReplyPruning.inputs.enabled.checked = true);
-        if (QuoteThreading.input) {
-          // Disable Quote Threading for this thread but don't save the setting.
-          Conf['Thread Quotes'] = (QuoteThreading.input.checked = false);
-        }
-      }
-
-      this.posts.forEach(function(post) {
-        if (post.isReply) {
-          ReplyPruning.total++;
-          if (post.file) { return ReplyPruning.totalFiles++; }
-        }
-      });
-
-      // If we're linked to a post that we would hide, don't hide the posts in the first place.
-      if (
-        ReplyPruning.active &&
-        /^#p\d+$/.test(location.hash) &&
-        (1 <= (middle = this.posts.keys.indexOf(location.hash.slice(2))) && middle < 1 + Math.max(ReplyPruning.total - +Conf["Max Replies"], 0))
-      ) {
-        ReplyPruning.active = (ReplyPruning.inputs.enabled.checked = false);
-      }
-
-      $$1.after(this.OP.nodes.root, ReplyPruning.summary);
-
-      $$1.on(ReplyPruning.inputs.enabled, 'change', ReplyPruning.update);
-      $$1.on(ReplyPruning.inputs.replies, 'change', ReplyPruning.update);
-      $$1.on(d, 'ThreadUpdate', ReplyPruning.updateCount);
-      $$1.on(d, 'ThreadUpdate', ReplyPruning.update);
-
-      return ReplyPruning.update();
-    },
-
-    updateCount(e) {
-      if (e.detail[404]) { return; }
-      for (var fullID of e.detail.newPosts) {
-        ReplyPruning.total++;
-        if (g.posts.get(fullID).file) { ReplyPruning.totalFiles++; }
-      }
-    },
-
-    update() {
-      let boardTop, node, post;
-      const hidden1 = ReplyPruning.hidden;
-      const hidden2 = ReplyPruning.active ?
-        Math.max(ReplyPruning.total - +Conf["Max Replies"], 0)
-      :
-        0;
-
-      // Record position from bottom of document
-      const oldPos = d.body.clientHeight - window.scrollY;
-
-      const {posts} = ReplyPruning.thread;
-
-      if (ReplyPruning.hidden < hidden2) {
-        while ((ReplyPruning.hidden < hidden2) && (ReplyPruning.position < posts.keys.length)) {
-          post = posts.get(posts.keys[ReplyPruning.position++]);
-          if (post.isReply && !post.isFetchedQuote) {
-            while ((node = ReplyPruning.summary.nextSibling) && (node !== post.nodes.root)) { $$1.add(ReplyPruning.container, node); }
-            $$1.add(ReplyPruning.container, post.nodes.root);
-            ReplyPruning.hidden++;
-            if (post.file) { ReplyPruning.hiddenFiles++; }
-          }
-        }
-
-      } else if (ReplyPruning.hidden > hidden2) {
-        const frag = $$1.frag();
-        while ((ReplyPruning.hidden > hidden2) && (ReplyPruning.position > 0)) {
-          post = posts.get(posts.keys[--ReplyPruning.position]);
-          if (post.isReply && !post.isFetchedQuote) {
-            while ((node = ReplyPruning.container.lastChild) && (node !== post.nodes.root)) { $$1.prepend(frag, node); }
-            $$1.prepend(frag, post.nodes.root);
-            ReplyPruning.hidden--;
-            if (post.file) { ReplyPruning.hiddenFiles--; }
-          }
-        }
-        $$1.after(ReplyPruning.summary, frag);
-        $$1.event('PostsInserted', null, ReplyPruning.summary.parentNode);
-      }
-
-      ReplyPruning.summary.textContent = ReplyPruning.active ?
-        g.SITE.Build.summaryText('+', ReplyPruning.hidden, ReplyPruning.hiddenFiles)
-      :
-        g.SITE.Build.summaryText('-', ReplyPruning.total, ReplyPruning.totalFiles);
-      ReplyPruning.summary.hidden = (ReplyPruning.total <= +Conf["Max Replies"]);
-
-      // Maintain position in thread when posts are added/removed above
-      if ((hidden1 !== hidden2) && ((boardTop = Header$1.getTopOf($$1('.board'))) < 0)) {
-        return window.scrollBy(0, Math.max(d.body.clientHeight - oldPos, window.scrollY + boardTop) - window.scrollY);
-      }
-    }
-  };
-
-  /*
-   * decaffeinate suggestions:
-   * DS102: Remove unnecessary code created because of implicit returns
-   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
-   */
-  /*
-    <3 aeosynth
-  */
-
-  var QuoteThreading = {
-    init() {
-      if (!Conf['Quote Threading'] || (g.VIEW !== 'thread')) { return; }
-
-      this.controls = $$1.el('label',
-        {innerHTML: "<input id=\"threadingControl\" name=\"Thread Quotes\" type=\"checkbox\"> Threading"});
-
-      this.threadNewLink = $$1.el('span', {
-        className: 'brackets-wrap threadnewlink',
-        hidden: true
-      }
-      );
-      $$1.extend(this.threadNewLink, {innerHTML: "<a href=\"javascript:;\">Thread New Posts</a>"});
-
-      this.input = $$1('input', this.controls);
-      this.input.checked = Conf['Thread Quotes'];
-
-      $$1.on(this.input, 'change', this.setEnabled);
-      $$1.on(this.input, 'change', this.rethread);
-      $$1.on(this.threadNewLink.firstElementChild, 'click', this.rethread);
-      $$1.on(d, '4chanXInitFinished', () => { return this.ready = true; });
-
-      Header$1.menu.addEntry(this.entry = {
-        el:    this.controls,
-        order: 99
-      }
-      );
-
-      Callbacks.Thread.push({
-        name: 'Quote Threading',
-        cb:   this.setThread
-      });
-
-      return Callbacks.Post.push({
-        name: 'Quote Threading',
-        cb:   this.node
-      });
-    },
-
-    parent:   dict(),
-    children: dict(),
-    inserted: dict(),
-
-    toggleThreading() {
-      return this.setThreadingState(!Conf['Thread Quotes']);
-    },
-
-    setThreadingState(enabled) {
-      this.input.checked = enabled;
-      this.setEnabled.call(this.input);
-      return this.rethread.call(this.input);
-    },
-
-    setEnabled() {
-      if (this.checked) {
-        $$1.set('Prune All Threads', false);
-        const other = ReplyPruning.inputs?.enabled;
-        if (other?.checked) {
-          other.checked = false;
-          $$1.event('change', null, other);
-        }
-      }
-      return $$1.cb.checked.call(this);
-    },
-
-    setThread() {
-      QuoteThreading.thread = this;
-      return $$1.asap((() => !Conf['Thread Updater'] || $$1('.navLinksBot > .updatelink')), function() {
-        let navLinksBot;
-        if (navLinksBot = $$1('.navLinksBot')) { return $$1.add(navLinksBot, [$$1.tn(' '), QuoteThreading.threadNewLink]); }
-      });
-    },
-
-    node() {
-      let parent;
-      if (this.isFetchedQuote || this.isClone || !this.isReply) { return; }
-
-      const parents = new Set();
-      let lastParent = null;
-      for (var quote of this.quotes) {
-        if ((parent = g.posts.get(quote))) {
-          if (!parent.isFetchedQuote && parent.isReply && (parent.ID < this.ID)) {
-            parents.add(parent.ID);
-            if (!lastParent || (parent.ID > lastParent.ID)) { lastParent = parent; }
-          }
-        }
-      }
-
-      if (!lastParent) { return; }
-
-      let ancestor = lastParent;
-      while ((ancestor = QuoteThreading.parent[ancestor.fullID])) {
-        parents.delete(ancestor.ID);
-      }
-
-      if (parents.size === 1) {
-        return QuoteThreading.parent[this.fullID] = lastParent;
-      }
-    },
-
-    descendants(post) {
-      let children;
-      let posts = [post];
-      if (children = QuoteThreading.children[post.fullID]) {
-        for (var child of children) {
-          posts = posts.concat(QuoteThreading.descendants(child));
-        }
-      }
-      return posts;
-    },
-
-    insert(post) {
-      let parent, x;
-      if (!(
-        Conf['Thread Quotes'] &&
-        (parent = QuoteThreading.parent[post.fullID]) &&
-        !QuoteThreading.inserted[post.fullID]
-      )) { return false; }
-
-      const descendants = QuoteThreading.descendants(post);
-      if (!Unread.posts.has(parent.ID)) {
-        if ((function() { for (var x of descendants) { if (Unread.posts.has(x.ID)) { return true; } } })()) {
-          QuoteThreading.threadNewLink.hidden = false;
-          return false;
-        }
-      }
-
-      const {order} = Unread;
-      const children = (QuoteThreading.children[parent.fullID] || (QuoteThreading.children[parent.fullID] = []));
-      const threadContainer = parent.nodes.threadContainer || $$1.el('div', {className: 'threadContainer'});
-      const nodes = [post.nodes.root];
-      if (post.nodes.threadContainer) { nodes.push(post.nodes.threadContainer); }
-
-      let i = children.length;
-      for (let j = children.length - 1; j >= 0; j--) { var child = children[j]; if (child.ID >= post.ID) { i--; } }
-      if (i !== children.length) {
-        const next = children[i];
-        for (x of descendants) { order.before(order[next.ID], order[x.ID]); }
-        children.splice(i, 0, post);
-        $$1.before(next.nodes.root, nodes);
-      } else {
-        let prev2;
-        let prev = parent;
-        while ((prev2 = QuoteThreading.children[prev.fullID]) && prev2.length) {
-          prev = prev2[prev2.length-1];
-        }
-        for (let k = descendants.length - 1; k >= 0; k--) { x = descendants[k]; order.after(order[prev.ID], order[x.ID]); }
-        children.push(post);
-        $$1.add(threadContainer, nodes);
-      }
-
-      QuoteThreading.inserted[post.fullID] = true;
-
-      if (!parent.nodes.threadContainer) {
-        parent.nodes.threadContainer = threadContainer;
-        $$1.addClass(parent.nodes.root, 'threadOP');
-        $$1.after(parent.nodes.root, threadContainer);
-      }
-
-      return true;
-    },
-
-    rethread() {
-      if (!QuoteThreading.ready) { return; }
-      const {thread} = QuoteThreading;
-      const {posts} = thread;
-
-      QuoteThreading.threadNewLink.hidden = true;
-
-      if (Conf['Thread Quotes']) {
-        posts.forEach(QuoteThreading.insert);
-      } else {
-        const nodes = [];
-        Unread.order = new RandomAccessList();
-        QuoteThreading.inserted = dict();
-        posts.forEach(function(post) {
-          if (post.isFetchedQuote) { return; }
-          Unread.order.push(post);
-          if (post.isReply) { nodes.push(post.nodes.root); }
-          if (QuoteThreading.children[post.fullID]) {
-            delete QuoteThreading.children[post.fullID];
-            $$1.rmClass(post.nodes.root, 'threadOP');
-            $$1.rm(post.nodes.threadContainer);
-            return delete post.nodes.threadContainer;
-          }
-        });
-        $$1.add(thread.nodes.root, nodes);
-      }
-
-      Unread.position = Unread.order.first;
-      Unread.updatePosition();
-      Unread.setLine(true);
-      Unread.read();
-      return Unread.update();
-    }
-  };
-
-  /*
-   * decaffeinate suggestions:
-   * DS102: Remove unnecessary code created because of implicit returns
    * DS201: Simplify complex destructure assignments
    * DS207: Consider shorter variations of null checks
    * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
@@ -16996,10 +17093,9 @@ vp-replace
           }
         }));
       }
-      if (Conf['Link Title']) {
-        return $$1.on(d, '4chanXInitFinished PostsInserted', function() {
-          for (var key in Embedding.types) {
-            var service = Embedding.types[key];
+      if (Embedding.shouldFetchTitles()) {
+        $$1.on(d, '4chanXInitFinished PostsInserted', function() {
+          for (const service of Object.values(Embedding.types)) {
             if (service.title?.batchSize) {
               Embedding.flushTitles(service.title);
             }
@@ -17039,7 +17135,7 @@ vp-replace
       if (data = Embedding.services(link)) {
         data.post = post;
         if (Conf['Embedding'] && (g.VIEW !== 'archive')) { Embedding.embed(data); }
-        if (Conf['Link Title']) { Embedding.title(data); }
+        if (Embedding.shouldFetchTitles()) Embedding.title(data);
         if (Conf['Cover Preview'] && (g.VIEW !== 'archive')) { return Embedding.preview(data); }
       }
     },
@@ -17656,7 +17752,13 @@ vp-replace
           height: 360
         }
       }
-    ]
+    ],
+
+    shouldFetchTitles() {
+      if(!Conf['Link Title']) return false;
+      if (Conf['Link Title in the catalog']) return true;
+      return g.VIEW !== 'catalog' && !(g.VIEW === 'index' && Conf['Index Mode'] === 'catalog');
+    },
   };
 
   /*
@@ -26392,19 +26494,17 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
                       const key = `${g.boardID}.${postID}`;
                       if (!g.posts.keys.includes(key)) {
                           const postIdNr = +postID;
-                          let indexOfNext = g.posts.keys.findIndex(key => +(key.split('.')[1]) > postIdNr);
-                          if (indexOfNext === -1) {
-                              indexOfNext = g.posts.keys.length;
-                          }
                           const newPost = parseArchivePost(raw);
-                          newPost.kill();
-                          g.posts.push(key, newPost);
-                          // move key to right position
-                          g.posts.keys.pop();
-                          g.posts.keys.splice(indexOfNext, 0, key);
-                          if (!QuoteThreading.insert(newPost)) {
-                              g.posts.get(g.posts.keys[indexOfNext - 1]).root.insertAdjacentElement('afterend', newPost.root);
+                          const newPostIndex = g.posts.insert(key, newPost, key => +(key.split('.')[1]) < postIdNr);
+                          newPost.resurrect();
+                          newPost.markAsFromArchive();
+                          if (Conf['Thread Quotes']) {
+                              newPost.thread.nodes.root.insertAdjacentElement('beforeend', newPost.root);
                           }
+                          else {
+                              g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', newPost.root);
+                          }
+                          QuoteThreading.insert(newPost);
                           ++nrRestored;
                       }
                   }
