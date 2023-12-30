@@ -104,6 +104,7 @@ var QuoteThreading = {
         }
 
         if (this.quotes.length) {
+          // Rethread to put the children in the right place.
           QuoteThreading.shouldReThread();
           for (var quote of this.quotes) {
             const parent = g.posts.get(quote);
@@ -194,9 +195,6 @@ var QuoteThreading = {
     if (!parent.nodes.threadContainer) {
       parent.nodes.threadContainer = threadContainer;
       $.addClass(parent.nodes.root, 'threadOP');
-      // Put in the post if it isn't in the dom already. This happens with posts restored from the archive.
-      // I'm not sure where if this is the right place to do that.
-      if (!d.contains(parent.nodes.root)) $.add(parent.thread.nodes.root, parent.nodes.root);
       $.after(parent.nodes.root, threadContainer);
     }
 
@@ -241,7 +239,7 @@ var QuoteThreading = {
 
   /** When a post from the archive has an existing child post, the threading has to be re-run. */
   shouldReThread() {
-    if (this.rethreadQueued) return;
+    if (this.rethreadQueued || !Conf['Thread Quotes']) return;
     Promise.resolve().then(() => {
       this.rethread();
       this.rethreadQueued = false

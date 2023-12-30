@@ -28,9 +28,13 @@ const RestoreDeletedFromArchive = {
             newPost.resurrect();
             newPost.markAsFromArchive();
 
-            if (!QuoteThreading.insert(newPost)) {
+            if (Conf['Thread Quotes']) {
+              newPost.thread.nodes.root.insertAdjacentElement('beforeend', newPost.root);
+            } else {
               g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', newPost.root);
             }
+
+            QuoteThreading.insert(newPost);
 
             ++nrRestored;
           }

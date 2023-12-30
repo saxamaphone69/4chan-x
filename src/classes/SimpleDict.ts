@@ -26,17 +26,24 @@ export default class SimpleDict<T> {
    */
   insert(key: string | number, data: T, compare: (lastKey: string, key: string | number) => boolean): number;
   insert(key: string | number, data: T, compare = (lastKey: string, key: string | number) => (+lastKey) < (+key)): number {
+    const keyString = key.toString();
+    if (keyString in this) {
+      this[keyString] = data;
+      return this.keys.indexOf(keyString);
+    }
+
     const length = this.keys.length
-    if (this[key] || !length || compare(this.lastKey(), key)) {
+    if (!length || compare(this.lastKey(), key)) {
       this.push(key, data);
       return length;
     }
+
     let indexOfNext = this.keys.findIndex(k => !compare(k, key));
     if (indexOfNext === -1) {
       this.push(key, data);
     } else {
-      this[key] = data;
-      this.keys.splice(indexOfNext, 0, key.toString());
+      this[keyString] = data;
+      this.keys.splice(indexOfNext, 0, keyString);
     }
     return indexOfNext;
   }
