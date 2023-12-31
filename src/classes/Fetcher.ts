@@ -228,16 +228,18 @@ export default class Fetcher {
 
     this.threadID = +data.thread_num;
     post = parseArchivePost(data);
-    const postIdNr = +post.ID;
-    const newPostIndex = g.posts.insert(`${g.boardID}.${post.ID}`, post, key => +(key.split('.')[1]) < postIdNr);
+    if (post.threadID === g.threadID && g.VIEW === 'thread') {
+      const postIdNr = +post.ID;
+      const newPostIndex = g.posts.insert(`${g.boardID}.${post.ID}`, post, key => +(key.split('.')[1]) < postIdNr);
 
-    if (Conf['Thread Quotes']) {
-      post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
-    } else {
-      g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
+      if (Conf['Thread Quotes']) {
+        post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
+      } else {
+        g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
+      }
+
+      QuoteThreading.insert(data);
     }
-
-    QuoteThreading.insert(data);
     return this.insert(post);
   }
 }

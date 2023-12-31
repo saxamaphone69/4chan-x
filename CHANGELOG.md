@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.3.4 (2023-12-31)
+
+- Fixed previewing posts from external archives inserting posts from other threads into the current thread.
+  [#18](https://github.com/TuxedoTako/4chan-xt/issues/18)
+
 ### v2.3.3 (2023-12-30)
 
 - Improved interaction between restoring from the archive and reply threading.

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.3.3
+// @version      2.3.4
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.3.3",
-    "date": "2023-12-30T09:55:57.211Z"
+    "version": "2.3.4",
+    "date": "2023-12-31T13:00:38.603Z"
   };
 
   var meta = {
@@ -7750,15 +7750,17 @@ https://*.hcaptcha.com
           }
           this.threadID = +data.thread_num;
           post = parseArchivePost(data);
-          const postIdNr = +post.ID;
-          const newPostIndex = g.posts.insert(`${g.boardID}.${post.ID}`, post, key => +(key.split('.')[1]) < postIdNr);
-          if (Conf['Thread Quotes']) {
-              post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
+          if (post.threadID === g.threadID && g.VIEW === 'thread') {
+              const postIdNr = +post.ID;
+              const newPostIndex = g.posts.insert(`${g.boardID}.${post.ID}`, post, key => +(key.split('.')[1]) < postIdNr);
+              if (Conf['Thread Quotes']) {
+                  post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
+              }
+              else {
+                  g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
+              }
+              QuoteThreading.insert(data);
           }
-          else {
-              g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
-          }
-          QuoteThreading.insert(data);
           return this.insert(post);
       }
   }
