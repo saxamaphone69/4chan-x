@@ -28,13 +28,13 @@ export default function generatePostInfoHtml(
         class="identityIcon retina"
       />
     );
-    if (uniqueID && !capcode) {
-      nameBlockContent.push(
-        <span class={`posteruid id_${uniqueID}`}>
-          (ID: <span class="hand" title="Highlight posts by this ID">${uniqueID}</span>)
-        </span>
-      )
-    }
+  }
+  if (uniqueID && !capcode) {
+    nameBlockContent.push(
+      <span class={`posteruid id_${uniqueID}`}>
+        (ID: <span class="hand" title="Highlight posts by this ID">{uniqueID}</span>)
+      </span>
+    )
   }
   if (flagCode) nameBlockContent.push(' ', <span title={flag} class={`flag flag-${flagCode.toLowerCase()}`} />);
   if (flagCodeTroll) nameBlockContent.push(' ', <span title={flag} class={`bfl bfl-${flagCodeTroll.toLowerCase()}`} />);
@@ -69,9 +69,10 @@ export default function generatePostInfoHtml(
     )
   }
   if (!o.isReply && g.VIEW === "index") {
-    // \u00A0 is nbsp
-    postNumContent.push(' \u00A0 ')
-    postNumContent.push(<span>[<a href={`/${boardID}/thread/${threadID}`} class="replylink">Reply</a>]</span>)
+    postNumContent.push(
+      ' \u00A0 ', // \u00A0 is nbsp
+      <span>[<a href={`/${boardID}/thread/${threadID}`} class="replylink">Reply</a>]</span>,
+    );
   }
 
   return <div class="postInfo desktop" id={`pi${ID}`}>

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.3.4
+// @version      2.3.5
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.3.4",
-    "date": "2023-12-31T13:00:38.603Z"
+    "version": "2.3.5",
+    "date": "2024-01-09T16:23:35.141Z"
   };
 
   var meta = {
@@ -13865,14 +13865,12 @@ $\
           nameBlockContent.push(' ');
       if (capcodeDescription) {
           nameBlockContent.push(h("img", { src: `${staticPath}${capcodeLC}icon${gifIcon}`, alt: `${capcode} Icon`, title: `This user is ${capcodeDescription}.`, class: "identityIcon retina" }));
-          if (uniqueID && !capcode) {
-              nameBlockContent.push(h("span", { class: `posteruid id_${uniqueID}` },
-                  "(ID: ",
-                  h("span", { class: "hand", title: "Highlight posts by this ID" },
-                      "$",
-                      uniqueID),
-                  ")"));
-          }
+      }
+      if (uniqueID && !capcode) {
+          nameBlockContent.push(h("span", { class: `posteruid id_${uniqueID}` },
+              "(ID: ",
+              h("span", { class: "hand", title: "Highlight posts by this ID" }, uniqueID),
+              ")"));
       }
       if (flagCode)
           nameBlockContent.push(' ', h("span", { title: flag, class: `flag flag-${flagCode.toLowerCase()}` }));
@@ -13906,9 +13904,8 @@ $\
           postNumContent.push(' ', h("img", { src: `${staticPath}archived${gifIcon}`, alt: "Archived", title: "Archived", class: "archivedIcon retina" }));
       }
       if (!o.isReply && g.VIEW === "index") {
-          // \u00A0 is nbsp
-          postNumContent.push(' \u00A0 ');
-          postNumContent.push(h("span", null,
+          postNumContent.push(' \u00A0 ', // \u00A0 is nbsp
+          h("span", null,
               "[",
               h("a", { href: `/${boardID}/thread/${threadID}`, class: "replylink" }, "Reply"),
               "]"));

@@ -3,6 +3,10 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.3.5 (2023-01-09)
+
+- Fixed user poster IDs not appearing on new posts. [#20](https://github.com/TuxedoTako/4chan-xt/issues/20)
+
 ### v2.3.4 (2023-12-31)
 
 - Fixed previewing posts from external archives inserting posts from other threads into the current thread.
