@@ -3,6 +3,10 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### Unreleased
+
+- Reworded 'Link Title in the catalog' setting's description.
+
 ### v2.3.5 (2023-01-09)
 
 - Fixed user poster IDs not appearing on new posts. [#20](https://github.com/TuxedoTako/4chan-xt/issues/20)
