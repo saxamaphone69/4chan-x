@@ -67,15 +67,6 @@ const Config = {
         true,
         'Localize and format timestamps.'
       ],
-      'Relative Post Dates': [
-        true,
-        'Display dates like "3 minutes ago". Tooltip shows the timestamp.'
-      ],
-      'Relative Date Title': [
-        true,
-        'Show Relative Post Date only when hovering over dates.',
-        1
-      ],
       'Comment Expansion': [
         true,
         'Expand comments that are too long to display on the index. Not applicable with JSON Index.'
@@ -902,6 +893,7 @@ https://*.hcaptcha.com
 
   time: '%m/%d/%y(%a)%H:%M:%S',
   timeLocale: '',
+  RelativeTime: 'Hover',
 
   backlink: '>>%id',
 

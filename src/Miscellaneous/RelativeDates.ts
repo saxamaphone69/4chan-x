@@ -16,14 +16,17 @@ var RelativeDates = {
 
   init() {
     if (
-      (['index', 'thread', 'archive'].includes(g.VIEW) && Conf['Relative Post Dates'] && !Conf['Relative Date Title']) ||
+      (
+        ['index', 'thread', 'archive'].includes(g.VIEW) &&
+        ['Show', 'Both', 'BothRelativeFirst'].includes(Conf.RelativeTime)
+      ) ||
       Index.enabled
     ) {
       this.flush();
       $.on(d, 'visibilitychange PostsInserted', this.flush);
     }
 
-    if (Conf['Relative Post Dates']) {
+    if (Conf.RelativeTime !== 'No') {
       return Callbacks.Post.push({
         name: 'Relative Post Dates',
         cb:   this.node
@@ -34,7 +37,7 @@ var RelativeDates = {
   node() {
     if (!this.info.date) { return; }
     const dateEl = this.nodes.date;
-    if (Conf['Relative Date Title']) {
+    if (Conf.RelativeTime === 'Hover') {
       $.on(dateEl, 'mouseover', () => RelativeDates.hover(this));
       return;
     }
@@ -43,13 +46,15 @@ var RelativeDates = {
     // Show original absolute time as tooltip so users can still know exact times
     // Since "Time Formatting" runs its `node` before us, the title tooltip will
     // pick up the user-formatted time instead of 4chan time when enabled.
-    dateEl.title = dateEl.textContent;
+    if (Conf.RelativeTime === 'Show') {
+      dateEl.title = dateEl.textContent;
+    }
 
     return RelativeDates.update(this);
   },
 
-  // diff is milliseconds from now.
-  relative(diff, now, date, abbrev) {
+  /** @param diff is milliseconds from now. */
+  relative(diff: number, now: Date, date: Date, abbrev: boolean): string {
     let number;
     let unit = (() => {
       if ((number = (diff / DAY)) >= 1) {
@@ -102,6 +107,7 @@ var RelativeDates = {
   // Each individual dateTime element will add its update() function to the stale list
   // when it is to be called.
   stale: [],
+  timeout: undefined as undefined | number,
   flush() {
     // No point in changing the dates until the user sees them.
     if (d.hidden) { return; }
@@ -112,7 +118,7 @@ var RelativeDates = {
 
     // Reset automatic flush.
     clearTimeout(RelativeDates.timeout);
-    return RelativeDates.timeout = setTimeout(RelativeDates.flush, RelativeDates.INTERVAL);
+    RelativeDates.timeout = setTimeout(RelativeDates.flush, RelativeDates.INTERVAL);
   },
 
   hover(post) {
@@ -121,13 +127,29 @@ var RelativeDates = {
     } = post.info;
     const now  = new Date();
     const diff = now - date;
-    return post.nodes.date.title = RelativeDates.relative(diff, now, date);
+    post.nodes.date.title = RelativeDates.relative(diff, now, date);
+  },
+
+  updateNode(node: HTMLElement, relative: string) {
+    switch (Conf.RelativeTime) {
+      case 'Show':
+        node.textContent = relative;
+        break;
+      case 'Both':
+      case 'BothRelativeFirst':
+        let full = node.dataset.fullTime;
+        if (!full) {
+          full = node.textContent;
+          node.dataset.fullTime = full;
+        }
+        node.textContent = Conf.RelativeTime === 'Both' ? `${full}, ${relative}` : `${relative}, ${full}`;
+    }
   },
 
   // `update()`, when called from `flush()`, updates the elements,
   // and re-calls `setOwnTimeout()` to re-add `data` to the stale list later.
-  update(data, now) {
-    let abbrev, date;
+  update(data: Post | HTMLElement, now: Date) {
+    let abbrev: boolean, date: Date;
     const isPost = data instanceof Post;
     if (isPost) {
       ({
@@ -143,12 +165,12 @@ var RelativeDates = {
     const relative = RelativeDates.relative(diff, now, date, abbrev);
     if (isPost) {
       for (var singlePost of [data].concat(data.clones)) {
-        singlePost.nodes.date.firstChild.textContent = relative;
+        RelativeDates.updateNode(singlePost.nodes.date, relative);
       }
     } else {
-      data.firstChild.textContent = relative;
+      RelativeDates.updateNode(data, relative);
     }
-    return RelativeDates.setOwnTimeout(diff, data);
+    RelativeDates.setOwnTimeout(diff, data);
   },
 
   setOwnTimeout(diff, data) {
@@ -160,14 +182,14 @@ var RelativeDates = {
       HOUR - ((diff + (HOUR / 2)) % HOUR)
     :
       DAY - ((diff + (DAY / 2)) % DAY);
-    return setTimeout(RelativeDates.markStale, delay, data);
+    setTimeout(RelativeDates.markStale, delay, data);
   },
 
   markStale(data) {
     if (RelativeDates.stale.includes(data)) { return; } // We can call RelativeDates.update() multiple times.
     if (data instanceof Post && !g.posts.get(data.fullID)) { return; } // collected post.
     if (data instanceof Element && !doc.contains(data)) { return; } // removed catalog reply.
-    return RelativeDates.stale.push(data);
+    RelativeDates.stale.push(data);
   }
 };
 export default RelativeDates;

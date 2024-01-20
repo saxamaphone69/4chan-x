@@ -817,6 +817,9 @@ vp-replace
         ));
       }
     }
+    if (compareString < '00002.00003.00006.00000') {
+      set('RelativeTime', data['Relative Post Dates'] ? (data['Relative Date Title'] ? 'Hover' : 'Show') : 'No');
+    }
     return changes;
   },
 

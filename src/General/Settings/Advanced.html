@@ -72,7 +72,10 @@
 </fieldset>
 
 <fieldset>
-  <legend>Time Formatting <span class="warning" data-feature="Time Formatting">is disabled.</span></legend>
+  <legend>
+    Time Formatting
+    <span class="warning" data-feature="Time Formatting">is disabled, relative time setting still applies.</span>
+  </legend>
   <div><input name="time" class="field" spellcheck="false">: <span class="time-preview"></span></div>
   <div>Supported <a href="http://man7.org/linux/man-pages/man1/date.1.html" target="_blank">format specifiers</a>:</div>
   <div>Day: <code>%a</code>, <code>%A</code>, <code>%d</code>, <code>%e</code></div>
@@ -83,6 +86,15 @@
   <div>Second: <code>%S</code></div>
   <div>Literal <code>%</code>: <code>%%</code></div>
   <div><a href="https://www.w3.org/International/articles/language-tags/" target="_blank">Language tag</a>: <input name="timeLocale" class="field" spellcheck="false"> (needs page reload)</div>
+  <div>Relative time, like "3 minutes ago":
+    <select name="RelativeTime">
+      <option value="No">Disabled</option>
+      <option value="Hover">Show when hovering on the date</option>
+      <option value="Show">Show relative time, and time and date on hover</option>
+      <option value="Both">Show both timestamp and relative date</option>
+      <option value="BothRelativeFirst">Show both relative date and timestamp</option>
+    </select>
+  </div>
 </fieldset>
 
 <fieldset>

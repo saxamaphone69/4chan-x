@@ -6,6 +6,8 @@ in XT.
 ### Unreleased
 
 - Reworded 'Link Title in the catalog' setting's description.
+- Relative times and full time stamps are no longer mutually exclusive. Setting was moved to the Time Formatting section
+  of the advanced settings because the other settings because the Main settings only supports boolean settings.
 
 ### v2.3.5 (2023-01-09)
 
