@@ -52,7 +52,7 @@ var RelativeDates = {
   relative(diff: number, now: Date, date: Date, abbrev: boolean): string {
     let number: number;
     let unit: string;
-    if ((number = (diff / DAY)) >= 1) {
+        if ((number = (diff / DAY)) >= 1) {
       const years = now.getFullYear() - date.getFullYear();
       let months = now.getMonth() - date.getMonth();
       const days = now.getDate() - date.getDate();
@@ -122,22 +122,6 @@ var RelativeDates = {
     post.nodes.date.title = RelativeDates.relative(diff, now, date);
   },
 
-  updateNode(node: HTMLElement, relative: string) {
-    switch (Conf.RelativeTime) {
-      case 'Show':
-        node.textContent = relative;
-        break;
-      case 'Both':
-      case 'BothRelativeFirst':
-        let full = node.dataset.fullTime;
-        if (!full) {
-          full = node.textContent;
-          node.dataset.fullTime = full;
-        }
-        node.textContent = Conf.RelativeTime === 'Both' ? `${full}, ${relative}` : `${relative}, ${full}`;
-    }
-  },
-
   // `update()`, when called from `flush()`, updates the elements,
   // and re-calls `setOwnTimeout()` to re-add `data` to the stale list later.
   update(data: Post | HTMLElement, now = new Date()) {
@@ -154,10 +138,20 @@ var RelativeDates = {
     const relative = RelativeDates.relative(diff, now, date, abbrev);
     if (isPost) {
       for (var singlePost of [data].concat(data.clones)) {
-        RelativeDates.updateNode(singlePost.nodes.date, relative);
+        const node = singlePost.nodes.date;
+        if (Conf.RelativeTime === 'Show') {
+          node.textContent = relative;
+        } else {
+          let full = node.dataset.fullTime;
+          if (!full) {
+            full = node.textContent;
+            node.dataset.fullTime = full;
+          }
+          node.textContent = Conf.RelativeTime === 'Both' ? `${full}, ${relative}` : `${relative}, ${full}`;
+        }
       }
     } else {
-      RelativeDates.updateNode(data, relative);
+      data.firstChild.textContent = relative;
     }
     RelativeDates.setOwnTimeout(diff, data);
   },

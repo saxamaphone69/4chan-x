@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.4.1 (2023-01-21)
+
+- Fixed new Relative dates settings' interaction with elements that aren't the date info on posts, like the refresh
+  button on the 4chan-XT catalog.
+
 ### v2.4.0 (2023-01-21)
 
 - Reworded 'Link Title in the catalog' setting's description.

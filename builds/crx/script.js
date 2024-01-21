@@ -80,8 +80,8 @@
   'use strict';
 
   var version = {
-    "version": "2.4.0",
-    "date": "2024-01-21T10:02:09.713Z"
+    "version": "2.4.1",
+    "date": "2024-01-21T10:59:05.831Z"
   };
 
   var meta = {
@@ -4707,21 +4707,6 @@ https://*.hcaptcha.com
       const diff = now - date;
       post.nodes.date.title = RelativeDates.relative(diff, now, date);
     },
-    updateNode(node, relative) {
-      switch (Conf.RelativeTime) {
-        case 'Show':
-          node.textContent = relative;
-          break;
-        case 'Both':
-        case 'BothRelativeFirst':
-          let full = node.dataset.fullTime;
-          if (!full) {
-            full = node.textContent;
-            node.dataset.fullTime = full;
-          }
-          node.textContent = Conf.RelativeTime === 'Both' ? `${full}, ${relative}` : `${relative}, ${full}`;
-      }
-    },
     // `update()`, when called from `flush()`, updates the elements,
     // and re-calls `setOwnTimeout()` to re-add `data` to the stale list later.
     update(data, now = new Date()) {
@@ -4738,10 +4723,20 @@ https://*.hcaptcha.com
       const relative = RelativeDates.relative(diff, now, date, abbrev);
       if (isPost) {
         for (var singlePost of [data].concat(data.clones)) {
-          RelativeDates.updateNode(singlePost.nodes.date, relative);
+          const node = singlePost.nodes.date;
+          if (Conf.RelativeTime === 'Show') {
+            node.textContent = relative;
+          } else {
+            let full = node.dataset.fullTime;
+            if (!full) {
+              full = node.textContent;
+              node.dataset.fullTime = full;
+            }
+            node.textContent = Conf.RelativeTime === 'Both' ? `${full}, ${relative}` : `${relative}, ${full}`;
+          }
         }
       } else {
-        RelativeDates.updateNode(data, relative);
+        data.firstChild.textContent = relative;
       }
       RelativeDates.setOwnTimeout(diff, data);
     },
