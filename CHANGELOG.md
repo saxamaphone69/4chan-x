@@ -3,7 +3,7 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
-### Unreleased
+### v2.4.0 (2023-01-21)
 
 - Reworded 'Link Title in the catalog' setting's description.
 - Relative times and full time stamps are no longer mutually exclusive. Setting was moved to the Time Formatting section
@@ -13,7 +13,7 @@ in XT.
 
 ### v2.3.5 (2023-01-09)
 
-- Fixed user poster IDs not appearing on new posts. [#20](https://github.com/TuxedoTako/4chan-xt/issues/20)
+- Fixed poster IDs not appearing on new posts. [#20](https://github.com/TuxedoTako/4chan-xt/issues/20)
 
 ### v2.3.4 (2023-12-31)
 
