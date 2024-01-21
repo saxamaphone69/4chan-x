@@ -5,12 +5,6 @@ import { g, Conf, d, doc } from "../globals/globals";
 import $ from "../platform/$";
 import { DAY, HOUR, MINUTE, SECOND } from "../platform/helpers";
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 var RelativeDates = {
   INTERVAL: 30000,
 
@@ -34,7 +28,7 @@ var RelativeDates = {
     }
   },
 
-  node() {
+  node(this: Post) {
     if (!this.info.date) { return; }
     const dateEl = this.nodes.date;
     if (Conf.RelativeTime === 'Hover') {
@@ -47,6 +41,7 @@ var RelativeDates = {
     // Since "Time Formatting" runs its `node` before us, the title tooltip will
     // pick up the user-formatted time instead of 4chan time when enabled.
     if (Conf.RelativeTime === 'Show') {
+      dateEl.dataset.fullTime = dateEl.textContent;
       dateEl.title = dateEl.textContent;
     }
 
@@ -55,37 +50,36 @@ var RelativeDates = {
 
   /** @param diff is milliseconds from now. */
   relative(diff: number, now: Date, date: Date, abbrev: boolean): string {
-    let number;
-    let unit = (() => {
-      if ((number = (diff / DAY)) >= 1) {
-      const years  = now.getFullYear()  - date.getFullYear();
-        let months = now.getMonth() - date.getMonth();
-      const days   = now.getDate()  - date.getDate();
-        if (years > 1) {
-          number = years - ((months < 0) || ((months === 0) && (days < 0)));
-          return 'year';
-        } else if ((years === 1) && ((months > 0) || ((months === 0) && (days >= 0)))) {
-          number = years;
-          return 'year';
+    let number: number;
+    let unit: string;
+    if ((number = (diff / DAY)) >= 1) {
+      const years = now.getFullYear() - date.getFullYear();
+      let months = now.getMonth() - date.getMonth();
+      const days = now.getDate() - date.getDate();
+      if (years > 1) {
+        number = years - ((months < 0) || ((months === 0) && (days < 0)));
+        unit = 'year';
+      } else if ((years === 1) && ((months > 0) || ((months === 0) && (days >= 0)))) {
+        number = years;
+        unit = 'year';
       } else if ((months = months + (12*years)) > 1) {
-          number = months - (days < 0);
-          return 'month';
-        } else if ((months === 1) && (days >= 0)) {
-          number = months;
-          return 'month';
-        } else {
-          return 'day';
-        }
+        number = months - (days < 0);
+        unit = 'month';
+      } else if ((months === 1) && (days >= 0)) {
+        number = months;
+        unit = 'month';
+      } else {
+        unit = 'day';
+      }
     } else if ((number = (diff / HOUR)) >= 1) {
-      return 'hour';
+      unit = 'hour';
     } else if ((number = (diff / MINUTE)) >= 1) {
-      return 'minute';
+      unit = 'minute';
     } else {
       // prevent "-1 seconds ago"
       number = Math.max(0, diff) / SECOND;
-      return 'second';
+      unit = 'second';
     }
-    })();
 
     const rounded = Math.round(number);
 
@@ -122,9 +116,7 @@ var RelativeDates = {
   },
 
   hover(post) {
-    const {
-      date
-    } = post.info;
+    const { date } = post.info;
     const now  = new Date();
     const diff = now - date;
     post.nodes.date.title = RelativeDates.relative(diff, now, date);
@@ -148,19 +140,16 @@ var RelativeDates = {
 
   // `update()`, when called from `flush()`, updates the elements,
   // and re-calls `setOwnTimeout()` to re-add `data` to the stale list later.
-  update(data: Post | HTMLElement, now: Date) {
+  update(data: Post | HTMLElement, now = new Date()) {
     let abbrev: boolean, date: Date;
     const isPost = data instanceof Post;
     if (isPost) {
-      ({
-        date
-      } = data.info);
+      ({ date } = data.info);
       abbrev = false;
     } else {
       date = new Date(+data.dataset.utc);
       abbrev = !!data.dataset.abbrev;
     }
-    if (!now) { now = new Date(); }
     const diff = now - date;
     const relative = RelativeDates.relative(diff, now, date, abbrev);
     if (isPost) {
