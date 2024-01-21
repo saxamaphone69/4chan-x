@@ -8,6 +8,7 @@ import { copyFile, readFile, writeFile } from 'fs/promises';
 import importBase64 from './rollup-plugin-base64.js';
 import generateManifestJson from '../src/meta/manifestJson.js';
 import terser from '@rollup/plugin-terser';
+import fixTsOutputFormat from './fix-ts-output-format.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -21,6 +22,7 @@ if (process.argv.includes('-beta')) {
   channel = '-noupdate';
 }
 const minify = process.argv.includes('-min');
+const noFormat = process.argv.includes('-no-format');
 
 (async () => {
   const packageJson = JSON.parse(await readFile(resolve(__dirname, '../package.json'), 'utf-8'));
@@ -34,12 +36,15 @@ const minify = process.argv.includes('-min');
 
   const version = JSON.parse(await readFile(resolve(__dirname, '../version.json'), 'utf-8'));
 
-  const inlineFile = await setupFileInliner(packageJson);
+  const inlineFile = setupFileInliner(packageJson);
 
   const bundle = await rollup({
     input: resolve(__dirname, '../src/main/Main.js'),
     plugins: [
       typescript(),
+      minify || noFormat ? undefined : fixTsOutputFormat({
+        include: ["**/*.ts", "**/*.tsx"],
+      }),
       inlineFile({
         include: ["**/*.html"],
       }),
@@ -80,7 +85,7 @@ const minify = process.argv.includes('-min');
           return `export default ${input};`;
         }
       })
-    ]
+    ].filter(Boolean)
   });
 
   /** @type {import('rollup').OutputOptions} */

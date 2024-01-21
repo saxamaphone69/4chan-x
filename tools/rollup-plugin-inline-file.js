@@ -1,6 +1,6 @@
 import { createFilter } from "@rollup/pluginutils";
 
-export default async function setupFileInliner(packageJson) {
+export default function setupFileInliner(packageJson) {
   /** @param {string} string */
   const escape = (string) => string.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$\{/g, '\\\${');
 
