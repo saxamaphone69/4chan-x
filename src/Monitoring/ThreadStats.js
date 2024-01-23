@@ -103,8 +103,7 @@ var ThreadStats = {
     const {thread, postCountEl, fileCountEl, ipCountEl} = ThreadStats;
     postCountEl.textContent = ThreadStats.postCount;
     fileCountEl.textContent = ThreadStats.fileCount;
-    // TOTO check if ipCountEl exists
-    ipCountEl.textContent  = thread.ipCount ?? '?';
+    if (ipCountEl) ipCountEl.textContent = thread.ipCount ?? '?';
     postCountEl.classList.toggle('warning', (thread.postLimit && !thread.isSticky));
     return fileCountEl.classList.toggle('warning', (thread.fileLimit && !thread.isSticky));
   },

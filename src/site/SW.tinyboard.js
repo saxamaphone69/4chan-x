@@ -3,6 +3,7 @@ import Main from "../main/Main";
 import $ from "../platform/$";
 import $$ from "../platform/$$";
 import { dict } from "../platform/helpers";
+import SWYotsuba from "./SW.yotsuba";
 
 /*
  * decaffeinate suggestions:
@@ -186,7 +187,7 @@ $\
 
   Build: {
     parseJSON(data, board) {
-      const o = this.parseJSON(data, board);
+      const o = SWYotsuba.Build.parseJSON(data, board);
       if (data.ext === 'deleted') {
         delete o.file;
         $.extend(o, {
@@ -202,7 +203,7 @@ $\
           if (extra_file.ext === 'deleted') {
             o.filesDeleted.push(i);
           } else {
-            file = this.parseJSONFile(data, board);
+            file = SWYotsuba.Build.parseJSONFile(data, board);
             o.files.push(file);
           }
         }

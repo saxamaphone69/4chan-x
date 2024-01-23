@@ -102,7 +102,7 @@ const noFormat = process.argv.includes('-no-format');
   // user script
   await bundle.write({
     ...sharedBundleOpts,
-    banner: metadata + license,
+    banner: (metadata + license).replace(/(?<!\r)\n/g, '\r\n'),
     // file: '../builds/test/rollupOutput.js',
     file: resolve(buildDir, fileName),
     plugins: minify ? [terser({

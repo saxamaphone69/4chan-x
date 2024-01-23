@@ -14,3 +14,4 @@ node_modules/
 /dist/
 /builds/*.gz
 /test/
+/builds/crx/crx.7z

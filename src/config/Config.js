@@ -65,7 +65,7 @@ const Config = {
       ],
       'Time Formatting': [
         true,
-        'Localize and format timestamps.'
+        'Localize and format timestamps. Has more options on the "Advanced" tab.'
       ],
       'Comment Expansion': [
         true,
