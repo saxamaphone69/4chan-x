@@ -15,7 +15,6 @@
 .field {
   background-color: #FFF;
   border: 1px solid #CCC;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   color: #333;
   font: 13px sans-serif;
@@ -533,7 +532,6 @@ audio.controls-added {
   font-size: 11px !important;
 }
 .message {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding: 6px 20px;
   max-height: 200px;
@@ -550,7 +548,6 @@ audio.controls-added {
 
 /* Settings */
 :root.fourchan-x body {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 #overlay {
@@ -563,7 +560,6 @@ audio.controls-added {
   width: 100%;
 }
 #fourchanx-settings {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   box-shadow: 0 0 15px rgba(0, 0, 0, .15);
   height: 600px;
@@ -831,7 +827,6 @@ div[data-checked="false"] > .suboption-list {
 }
 .catalog-thread {
   display: inline-block;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   border: 1px solid transparent;
   word-wrap: break-word;
@@ -1038,7 +1033,6 @@ div[data-checked="false"] > .suboption-list {
 }
 .catalog-post .prettyprinted {
   max-width: 100%;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 .catalog-post .MathJax_Display {
@@ -1735,7 +1729,6 @@ input.field.tripped:not(:hover):not(:focus) {
   resize: both;
 }
 .field {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0px;
   padding: 2px 4px 3px;
@@ -1995,7 +1988,6 @@ input[type="checkbox"]:checked ~ .checkbox-letter {
   overflow-x: auto;
 }
 .qr-preview {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   counter-increment: thumbnails;
   cursor: move;
