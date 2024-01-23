@@ -34,9 +34,6 @@
   background-color: #F2F2F2;
   color: #888;
 }
-.field::-webkit-search-decoration {
-  display: none;
-}
 .move {
   cursor: move;
   overflow: hidden;
@@ -759,7 +756,6 @@ div[data-checked="false"] > .suboption-list {
   left: -1em;
   width: 0;
 }
-/* ``::-webkit-*'' selectors break selector lists on Firefox. */
 #index-search::-webkit-search-cancel-button {
   display: none;
 }
