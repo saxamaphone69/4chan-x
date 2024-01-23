@@ -495,13 +495,11 @@ audio.controls-added {
   color: white;
 }
 .notification > .close {
+  font-size: 11px;
   padding: 7px;
   top: 0px;
   right: 5px;
   position: absolute;
-}
-.notification > .fa-times::before {
-  font-size: 11px !important;
 }
 .message {
   box-sizing: border-box;
