@@ -2012,7 +2012,7 @@ a:only-of-type > .remove {
 }
 
 /* Menu */
-.menu-button:not(.fa-bars) {
+.menu-button {
   display: inline-block;
   position: relative;
   cursor: pointer;
@@ -2359,8 +2359,7 @@ a:only-of-type > .remove {
 :root.gal-hide-thumbnails.gal-fit-height:not(.gal-pdf) .gal-labels {
   right: 28px !important;
 }
-:root.gallery-open.fixed #header-bar:not(.autohide),
-:root.gallery-open.fixed #header-bar:not(.autohide) #shortcuts .fa::before {
+:root.gallery-open.fixed #header-bar:not(.autohide) {
   visibility: hidden;
 }
 
