@@ -84,8 +84,7 @@ body.hasDropDownNav{
   color: #789922;
 }
 :root.sw-yotsuba .fileText a {
-  unicode-bidi: -moz-isolate;
-  unicode-bidi: -webkit-isolate;
+  unicode-bidi: isolate;
 }
 :root.sw-yotsuba #g-recaptcha {
   min-height: 78px;
