@@ -34,6 +34,7 @@ var ImageLoader = {
     const el = $.el('a', {
       href: 'javascript:;',
       title: 'Prefetch Images',
+      className: 'disabled',
       innerHTML: 'Prefetch',
     });
 

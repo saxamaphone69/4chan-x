@@ -31,6 +31,7 @@ export default function setupFileInliner(packageJson) {
 
       async transform(code, id) {
         if (filter(id)) {
+          code = code.replace(/\r\n/g, '\n');
           if (opts.transformer) {
             code = opts.transformer(code);
           }

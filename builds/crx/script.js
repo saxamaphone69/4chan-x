@@ -80,8 +80,8 @@
   'use strict';
 
   var version = {
-    "version": "2.4.2",
-    "date": "2024-01-23T18:08:24.553Z"
+    "version": "2.4.3",
+    "date": "2024-01-25T17:59:07.694Z"
   };
 
   var meta = {
@@ -5679,7 +5679,7 @@ https://*.hcaptcha.com
       a.style.cursor = 'pointer';
       return $$1.on(a, 'click', ExpandThread.cbToggle);
     },
-    
+
     disconnect(refresh) {
       if ((g.VIEW === 'thread') || !Conf['Thread Expansion']) { return; }
       for (var threadID in ExpandThread.statuses) {
@@ -10175,23 +10175,19 @@ https://*.hcaptcha.com
 #thread-watcher {
   box-shadow: -1px 2px 2px rgba(0, 0, 0, 0.25);
 }
-.captcha-img,
 .field {
   background-color: #FFF;
   border: 1px solid #CCC;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   color: #333;
   font: 13px sans-serif;
   outline: none;
   transition: color .25s, border-color .25s;
 }
-.field::-moz-placeholder {
+.field::placeholder {
   color: #AAA;
-  font-size: 13px;
   opacity: 1;
 }
-.captch-img:hover,
 .field:hover {
   border-color: #999;
 }
@@ -10201,9 +10197,6 @@ https://*.hcaptcha.com
 .field[disabled] {
   background-color: #F2F2F2;
   color: #888;
-}
-.field::-webkit-search-decoration {
-  display: none;
 }
 .move {
   cursor: move;
@@ -10251,8 +10244,7 @@ body.hasDropDownNav{
   color: #789922;
 }
 :root.sw-yotsuba .fileText a {
-  unicode-bidi: -moz-isolate;
-  unicode-bidi: -webkit-isolate;
+  unicode-bidi: isolate;
 }
 :root.sw-yotsuba #g-recaptcha {
   min-height: 78px;
@@ -10490,11 +10482,9 @@ audio.controls-added {
 }
 .fixed.top-header #header-bar.autohide:not(:hover) {
   margin-bottom: -1em;
-  -webkit-transform: translateY(-100%);
   transform: translateY(-100%);
 }
 .fixed.bottom-header #header-bar.autohide:not(:hover) {
-  -webkit-transform: translateY(100%);
   transform: translateY(100%);
 }
 #scroll-marker {
@@ -10524,12 +10514,6 @@ audio.controls-added {
 }
 #shortcuts:empty {
   display: none;
-}
-.brackets-wrap::before {
-  content: "\\00a0[";
-}
-.brackets-wrap::after {
-  content: "]\\00a0";
 }
 .dead-thread,
 .disabled:not(.replies-quoting-you) {
@@ -10582,34 +10566,26 @@ audio.controls-added {
 @media (min-width: 1300px) {
   :root.sw-yotsuba.fixed:not(.centered-links) #header-bar {
     white-space: nowrap;
-    display: -webkit-flex;
     display: flex;
-    -webkit-align-items: center;
     align-items: center;
   }
   :root.sw-yotsuba.fixed:not(.centered-links) #board-list {
-    -webkit-flex: auto;
     flex: auto;
   }
   :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list {
-    display: -webkit-flex;
     display: flex;
   }
   :root.sw-yotsuba.fixed:not(.centered-links) .hide-board-list-container {
-    -webkit-flex: none;
     flex: none;
     margin-right: 5px;
   }
   :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList {
-    -webkit-flex: auto;
     flex: auto;
-    display: -webkit-flex;
     display: flex;
     width: 0px; /* XXX Fixes Edge not shrinking the board list below default size when needed */
   }
   :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > a,
   :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > span:not(.space):not(.spacer) {
-    -webkit-flex: none;
     flex: none;
     padding: .17em;
     margin: -.17em -.32em;
@@ -10618,20 +10594,15 @@ audio.controls-added {
     pointer-events: none;
   }
   :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > span.space {
-    -webkit-flex: 0 .63 .63em;
     flex: 0 .63 .63em;
   }
   :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > span.spacer {
-    -webkit-flex: 0 .38 .38em;
     flex: 0 .38 .38em;
   }
   :root.sw-yotsuba.fixed:not(.centered-links) #shortcuts {
     float: initial;
-    -webkit-flex: none;
     flex: none;
-    display: -webkit-flex;
     display: flex;
-    -webkit-align-items: center;
     align-items: center;
   }
 }
@@ -10688,16 +10659,13 @@ audio.controls-added {
   color: white;
 }
 .notification > .close {
+  font-size: 11px;
   padding: 7px;
   top: 0px;
   right: 5px;
   position: absolute;
 }
-.notification > .fa-times::before {
-  font-size: 11px !important;
-}
 .message {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding: 6px 20px;
   max-height: 200px;
@@ -10714,12 +10682,10 @@ audio.controls-added {
 
 /* Settings */
 :root.fourchan-x body {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 #overlay {
   background-color: rgba(0, 0, 0, .5);
-  display: -webkit-flex;
   display: flex;
   top: 0;
   left: 0;
@@ -10727,7 +10693,6 @@ audio.controls-added {
   width: 100%;
 }
 #fourchanx-settings {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   box-shadow: 0 0 15px rgba(0, 0, 0, .15);
   height: 600px;
@@ -10736,14 +10701,11 @@ audio.controls-added {
   max-width: 100%;
   margin: auto;
   padding: 5px;
-  display: -webkit-flex;
   display: flex;
-  -webkit-flex-direction: column;
   flex-direction: column;
 }
 #fourchanx-settings > nav {
   padding: 2px 2px 8px;
-  display: -webkit-flex;
   display: flex;
 }
 #fourchanx-settings > nav a {
@@ -10755,7 +10717,6 @@ audio.controls-added {
   margin: 0;
 }
 .section-container {
-  -webkit-flex: 1;
   flex: 1;
   position: relative;
   overflow: auto;
@@ -10763,7 +10724,6 @@ audio.controls-added {
   overscroll-behavior: contain;
 }
 .sections-list {
-  -webkit-flex: 1;
   flex: 1;
 }
 .export, .import, .reset {
@@ -10958,7 +10918,6 @@ div[data-checked="false"] > .suboption-list {
   left: -1em;
   width: 0;
 }
-/* \`\`::-webkit-*'' selectors break selector lists on Firefox. */
 #index-search::-webkit-search-cancel-button {
   display: none;
 }
@@ -10995,7 +10954,6 @@ div[data-checked="false"] > .suboption-list {
 }
 .catalog-thread {
   display: inline-block;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   border: 1px solid transparent;
   word-wrap: break-word;
@@ -11179,17 +11137,13 @@ div[data-checked="false"] > .suboption-list {
   text-align: left;
   white-space: nowrap;
   border-top: 1px solid transparent;
-  display: -webkit-flex;
   display: flex;
-  -webkit-flex-direction: row;
   flex-direction: row;
-  -webkit-align-items: stretch;
   align-items: stretch;
 }
 .catalog-reply > * {
   padding: 3px;
   overflow: hidden;
-  -webkit-flex: none;
   flex: none;
 }
 .catalog-reply > span {
@@ -11197,12 +11151,10 @@ div[data-checked="false"] > .suboption-list {
   font-weight: bold;
 }
 .catalog-reply-excerpt {
-  -webkit-flex: 1 1 auto;
   flex: 1 1 auto;
 }
 .catalog-post .prettyprinted {
   max-width: 100%;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 .catalog-post .MathJax_Display {
@@ -11348,8 +11300,6 @@ textarea.copy-text-element {
   position: fixed;
 }
 :root.fixed-watcher #watched-threads {
-  /* XXX https://code.google.com/p/chromium/issues/detail?id=168840, https://bugs.webkit.org/show_bug.cgi?id=94158 */
-  max-height: 85vh;
   max-height: calc(100vh - 75px);
 }
 :root:not(.fixed-watcher) #watched-threads:not(:hover) {
@@ -11365,21 +11315,17 @@ textarea.copy-text-element {
 }
 #watched-threads .watcher-link {
   max-width: 250px;
-  display: -webkit-inline-flex;
   display: inline-flex;
-  -webkit-flex-direction: row;
   flex-direction: row;
 }
 #watched-threads .watcher-page,
 #watched-threads .watcher-unread {
-  -webkit-flex: 0 0 auto;
   flex: 0 0 auto;
   margin-right: 2px;
 }
 #watched-threads .watcher-title {
   overflow: hidden;
   text-overflow: ellipsis;
-  -webkit-flex: 0 1 auto;
   flex: 0 1 auto;
 }
 #watched-threads .watcher-title:not(:first-child) {
@@ -11552,8 +11498,6 @@ textarea.copy-text-element {
   max-height: 100vh;
 }
 :root.fit-height.fixed .full-image {
-  /* XXX https://code.google.com/p/chromium/issues/detail?id=168840, https://bugs.webkit.org/show_bug.cgi?id=94158 */
-  max-height: 93vh;
   max-height: calc(100vh - 35px);
 }
 :root.fit-width .full-image {
@@ -11567,8 +11511,6 @@ textarea.copy-text-element {
 }
 #ihover {
   pointer-events: none;
-  /* XXX https://code.google.com/p/chromium/issues/detail?id=168840, https://bugs.webkit.org/show_bug.cgi?id=94158 */
-  max-height: 95vh;
   max-height: calc(100vh - 25px);
   max-width: 100vw;
 }
@@ -11783,8 +11725,7 @@ $site$thread[hidden] + hr {
 }
 #qr select,
 #qr-filename-container > a,
-.remove,
-.captcha-img {
+.remove {
   cursor: pointer;
 }
 #qr {
@@ -11795,8 +11736,6 @@ $site$thread[hidden] + hr {
   border-radius: 3px 3px 0 0;
 }
 #qr > form {
-  /* XXX https://code.google.com/p/chromium/issues/detail?id=168840, https://bugs.webkit.org/show_bug.cgi?id=94158 */
-  max-height: 85vh;
   max-height: calc(100vh - 75px);
   overflow-y: auto;
   overflow-x: hidden;
@@ -11838,13 +11777,10 @@ $site$thread[hidden] + hr {
 }
 .persona {
   width: 100%;
-  display: -webkit-flex;
   display: flex;
-  -webkit-flex-direction: row;
   flex-direction: row;
 }
 .persona .field {
-  -webkit-flex: 1;
   flex: 1;
   width: 0;
 }
@@ -11860,9 +11796,7 @@ body:not(.board_f) #qr select[name="filetag"],
   display: none;
 }
 .persona button {
-  -webkit-flex: 0 0 23px;
   flex: 0 0 23px;
-  -webkit-align-self: stretch;
   align-self: stretch;
   border: 1px solid #BBB;
   padding: 0;
@@ -11899,7 +11833,6 @@ input.field.tripped:not(:hover):not(:focus) {
   resize: both;
 }
 .field {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   margin: 0px;
   padding: 2px 4px 3px;
@@ -11966,9 +11899,7 @@ input.field.tripped:not(:hover):not(:focus) {
 
 /* File Input, Submit Button, Oekaki */
 #file-n-submit, #qr .oekaki {
-  display: -webkit-flex;
   display: flex;
-  -webkit-align-items: stretch;
   align-items: stretch;
   height: 25px;
   margin-top: 1px;
@@ -11986,12 +11917,9 @@ input.field.tripped:not(:hover):not(:focus) {
   width: 25%;
 }
 #qr-filename-container {
-  -webkit-flex: 1 1 auto;
   flex: 1 1 auto;
   width: 0;
-  display: -webkit-flex;
   display: flex;
-  -webkit-align-items: center;
   align-items: center;
   position: relative;
   padding: 1px;
@@ -12007,7 +11935,6 @@ input#qr-filename {
 }
 #qr-no-file,
 .has-file #qr-filename {
-  -webkit-flex: 1 1 auto;
   flex: 1 1 auto;
   width: 0px; /* XXX Fixes filename not shrinking to allow space for buttons in Edge */
   display: inline-block;
@@ -12024,12 +11951,9 @@ input#qr-filename {
   display: none;
 }
 #qr .oekaki > label {
-  -webkit-flex: 1 1 auto;
   flex: 1 1 auto;
   width: 0;
-  display: -webkit-flex;
   display: flex;
-  -webkit-align-items: center;
   align-items: center;
   height: 100%;
 }
@@ -12037,7 +11961,6 @@ input#qr-filename {
   margin: 0 3px;
 }
 #qr .oekaki > label > input {
-  -webkit-flex: 1 1 auto;
   flex: 1 1 auto;
   width: 0;
   height: 100%;
@@ -12074,7 +11997,6 @@ input#qr-filename {
 
 /* Spoiler Checkbox, QR Icons */
 #qr-filename-container > label, #qr-filename-container > a {
-  -webkit-flex: none;
   flex: none;
   margin: 0;
   margin-right: 3px;
@@ -12150,16 +12072,13 @@ input[type="checkbox"]:checked ~ .checkbox-letter {
   min-height: 90px;
   max-width: 100%;
   min-width: 100%;
-  display: -webkit-flex;
   display: flex;
-  -webkit-flex-wrap: wrap;
   flex-wrap: wrap;
 }
 #dump-list:hover {
   overflow-x: auto;
 }
 .qr-preview {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   counter-increment: thumbnails;
   cursor: move;
@@ -12171,11 +12090,9 @@ input[type="checkbox"]:checked ~ .checkbox-letter {
   overflow: hidden;
   position: relative;
   text-shadow: 0 0 2px #000;
-  -webkit-transition: opacity .25s ease-in-out, -webkit-transform .25s ease-in-out;
-  transition: opacity .25s ease-in-out, transform .25s ease-in-out, -webkit-transform .25s ease-in-out;
+  transition: opacity .25s ease-in-out, transform .25s ease-in-out;
   vertical-align: top;
   background-size: cover;
-  -webkit-flex: none;
   flex: none;
 }
 .qr-preview:hover,
@@ -12195,12 +12112,10 @@ input[type="checkbox"]:checked ~ .checkbox-letter {
 }
 .qr-preview.drag {
   box-shadow: 0 0 10px rgba(0,0,0,.5);
-  -webkit-transform: scale(.8);
   transform: scale(.8);
 }
 .qr-preview.over {
   border-color: #fff;
-  -webkit-transform: scale(1.1);
   transform: scale(1.1);
   opacity: 0.9;
   z-index: 10;
@@ -12241,12 +12156,10 @@ a:only-of-type > .remove {
   position: absolute;
   bottom: 20px;
   right: 10px;
-  -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
 }
 .textarea {
   position: relative;
-  display: -webkit-flex;
   display: flex;
 }
 #char-count {
@@ -12263,7 +12176,7 @@ a:only-of-type > .remove {
 }
 
 /* Menu */
-.menu-button:not(.fa-bars) {
+.menu-button {
   display: inline-block;
   position: relative;
   cursor: pointer;
@@ -12382,11 +12295,9 @@ a:only-of-type > .remove {
   display: none;
 }
 #embedding > div:first-child {
-  display: -webkit-flex;
   display: flex;
 }
 #embedding .move {
-  -webkit-flex: 1;
   flex: 1;
 }
 #embedding .jump {
@@ -12401,32 +12312,22 @@ a:only-of-type > .remove {
   bottom: 0;
   left: 0;
   right: 0;
-  display: -webkit-flex;
   display: flex;
-  -webkit-flex-direction: row;
   flex-direction: row;
   background: rgba(0,0,0,0.7);
 }
 .gal-viewport {
-  display: -webkit-flex;
   display: flex;
-  -webkit-align-items: stretch;
   align-items: stretch;
-  -webkit-flex-direction: row;
   flex-direction: row;
-  -webkit-flex: 1 1 auto;
   flex: 1 1 auto;
   overflow: hidden;
 }
 .gal-thumbnails {
-  -webkit-flex: 0 0 150px;
   flex: 0 0 150px;
   overflow-y: auto;
-  display: -webkit-flex;
   display: flex;
-  -webkit-flex-direction: column;
   flex-direction: column;
-  -webkit-align-items: stretch;
   align-items: stretch;
   text-align: center;
   background: rgba(0,0,0,.5);
@@ -12443,7 +12344,6 @@ a:only-of-type > .remove {
   width: auto;
 }
 .gal-thumb {
-  -webkit-flex: 0 0 auto;
   flex: 0 0 auto;
   padding: 3px;
   line-height: 0;
@@ -12460,7 +12360,6 @@ a:only-of-type > .remove {
 }
 .gal-prev,
 .gal-next {
-  -webkit-flex: 0 0 20px;
   flex: 0 0 20px;
   position: relative;
   cursor: pointer;
@@ -12475,7 +12374,6 @@ a:only-of-type > .remove {
 .gal-next::after {
   position: absolute;
   top: 48.6%;
-  -webkit-transform: translateY(-50%);
   transform: translateY(-50%);
   display: inline-block;
   border-top: 11px solid transparent;
@@ -12491,13 +12389,9 @@ a:only-of-type > .remove {
   right: 3px;
 }
 .gal-image {
-  -webkit-flex: 1 0 auto;
   flex: 1 0 auto;
-  display: -webkit-flex;
   display: flex;
-  -webkit-align-items: flex-start;
   align-items: flex-start;
-  -webkit-justify-content: space-around;
   justify-content: space-around;
   overflow: hidden;
   /* Flex > Non-Flex child max-width and overflow fix (Firefox only?) */
@@ -12510,9 +12404,7 @@ a:only-of-type > .remove {
   overflow-x: scroll !important;
 }
 .gal-image a {
-  display: -webkit-flex;
   display: flex;
-  -webkit-align-items: flex-start;
   align-items: flex-start;
   margin: auto;
   line-height: 0;
@@ -12524,7 +12416,6 @@ a:only-of-type > .remove {
 }
 .gal-image img,
 .gal-image video {
-  -webkit-flex: none;
   flex: none;
 }
 .gal-fit-width .gal-image img,
@@ -12533,8 +12424,6 @@ a:only-of-type > .remove {
 }
 .gal-fit-height .gal-image img,
 .gal-fit-height .gal-image video {
-  /* XXX https://code.google.com/p/chromium/issues/detail?id=168840, https://bugs.webkit.org/show_bug.cgi?id=94158 */
-  max-height: 95vh;
   max-height: calc(100vh - 25px);
 }
 .gal-image iframe {
@@ -12586,13 +12475,9 @@ a:only-of-type > .remove {
 .gal-labels {
   position: fixed;
   bottom: 6px;
-  display: -webkit-flex;
   display: flex;
-  -webkit-flex-direction: column;
   flex-direction: column;
-  -webkit-align-items: flex-end;
   align-items: flex-end;
-
 }
 :root:not(.show-sauce) .gal-sauce {
   display: none;
@@ -12638,8 +12523,7 @@ a:only-of-type > .remove {
 :root.gal-hide-thumbnails.gal-fit-height:not(.gal-pdf) .gal-labels {
   right: 28px !important;
 }
-:root.gallery-open.fixed #header-bar:not(.autohide),
-:root.gallery-open.fixed #header-bar:not(.autohide) #shortcuts .fa::before {
+:root.gallery-open.fixed #header-bar:not(.autohide) {
   visibility: hidden;
 }
 
@@ -22448,28 +22332,9 @@ vp-replace
       }
     },
     escape(value) {
-      return value.replace(new RegExp(`\
-/\
-|\\\\\
-|\\^\
-|\\$\
-|\\n\
-|\\.\
-|\\(\
-|\\)\
-|\\{\
-|\\}\
-|\\[\
-|\\]\
-|\\?\
-|\\*\
-|\\+\
-|\\|\
-`, 'g'), function (c) {
+      return value.replace(/\/|\\|\^|\$|\n|\.|\(|\)|\{|\}|\[|\]|\?|\*|\+|\|/g, (c) => {
         if (c === '\n') {
           return '\\n';
-        } else if (c === '\\') {
-          return '\\\\';
         } else {
           return `\\${c}`;
         }
@@ -22528,12 +22393,11 @@ vp-replace
         const { type } = this.dataset;
         // Convert value -> regexp, unless type is MD5
         const values = Filter.values(type, Filter.menu.post);
-        const res = values.map(function (value) {
-          const re = ['uniqueID', 'MD5'].includes(type) ? value : Filter.escape(value);
+        const res = values.map((value) => {
           if (['uniqueID', 'MD5'].includes(type)) {
-            return `/${re}/`;
+            return `/${value}/`;
           } else {
-            return `/^${re}$/`;
+            return `/^${Filter.escape(value)}$/`;
           }
         }).join('\n');
         return Filter.addFilter(type, res, () => Filter.showFilters(type));
@@ -23944,6 +23808,7 @@ vp-replace
       const el = $$1.el('a', {
         href: 'javascript:;',
         title: 'Prefetch Images',
+        className: 'disabled',
         innerHTML: 'Prefetch',
       });
 
@@ -24066,7 +23931,7 @@ vp-replace
       for (let i = 0; i < this.files.length; i++) {
         var file = this.files[i];
         if (/webm$/i.test(file.url)) {var el;
-        
+
           if (this.isClone) {
             el = $$1('.webm-title', file.text);
           } else {
@@ -25096,7 +24961,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         hash & 0xFF
       ];
 
-      // Weight color luminance values, assign a font color that should be readable. 
+      // Weight color luminance values, assign a font color that should be readable.
       rgb.push($$1.luma(rgb) > 125 ?
         '#000'
       :
@@ -25253,7 +25118,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
    * DS102: Remove unnecessary code created because of implicit returns
    * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
    */
-  var PostJumper = { 
+  var PostJumper = {
     init() {
       if (!Conf['Unique ID and Capcode Navigation'] || !['index', 'thread'].includes(g.VIEW)) { return; }
 

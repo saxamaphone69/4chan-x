@@ -9,6 +9,7 @@ import importBase64 from './rollup-plugin-base64.js';
 import generateManifestJson from '../src/meta/manifestJson.js';
 import terser from '@rollup/plugin-terser';
 import fixTsOutputFormat from './fix-ts-output-format.js';
+import cleanup from 'rollup-plugin-cleanup';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -84,7 +85,14 @@ const noFormat = process.argv.includes('-no-format');
         transformer(input) {
           return `export default ${input};`;
         }
-      })
+      }),
+      cleanup({
+        extensions: ['js', 'ts', 'tsx', 'json', 'html', 'css'],
+        comments: 'all',
+        lineEndings: 'unix',
+        maxEmptyLines: 2,
+        sourcemap: minify,
+      }),
     ].filter(Boolean)
   });
 
@@ -102,7 +110,7 @@ const noFormat = process.argv.includes('-no-format');
   // user script
   await bundle.write({
     ...sharedBundleOpts,
-    banner: (metadata + license).replace(/(?<!\r)\n/g, '\r\n'),
+    banner: (metadata + license).replace(/\r\n/g, '\n'),
     // file: '../builds/test/rollupOutput.js',
     file: resolve(buildDir, fileName),
     plugins: minify ? [terser({
@@ -120,7 +128,7 @@ const noFormat = process.argv.includes('-no-format');
   const crxDir = resolve(buildDir, 'crx');
   await bundle.write({
     ...sharedBundleOpts,
-    banner: license,
+    banner: license.replace(/\r\n/g, '\n'),
     file: resolve(crxDir, 'script.js'),
   });
 

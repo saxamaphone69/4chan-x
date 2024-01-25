@@ -35,7 +35,7 @@ interface FilterObj {
   noti: boolean;
 }
 
-type FilterType = "postID" | "name" | "uniqueID" | "tripcode" | "capcode" | "pass" | "email" | "subject" | "comment" 
+type FilterType = "postID" | "name" | "uniqueID" | "tripcode" | "capcode" | "pass" | "email" | "subject" | "comment"
   | "flag" | "filename" | "dimensions" | "filesize" | "MD5";
 
 var Filter = {
@@ -346,11 +346,11 @@ var Filter = {
     pass(post) { return [post.info.pass]; },
     email(post) { return [post.info.email]; },
     subject(post) { return [post.info.subject || (post.isReply ? undefined : '')]; },
-    comment(post) { 
+    comment(post) {
       if (post.info.comment == null) {
         post.info.comment = g.sites[post.siteID]?.Build?.parseComment?.(post.info.commentHTML.innerHTML);
       }
-      return [post.info.comment]; 
+      return [post.info.comment];
     },
     flag(post) { return post.info.flag === undefined ? [] : [post.info.flag]; },
     filename(post) { return post.files.map(f => f.name); },
@@ -469,31 +469,12 @@ var Filter = {
   },
 
   escape(value) {
-    return value.replace(new RegExp(`\
-/\
-|\\\\\
-|\\^\
-|\\$\
-|\\n\
-|\\.\
-|\\(\
-|\\)\
-|\\{\
-|\\}\
-|\\[\
-|\\]\
-|\\?\
-|\\*\
-|\\+\
-|\\|\
-`, 'g'), function(c) {
-        if (c === '\n') {
-          return '\\n';
-        } else if (c === '\\') {
-          return '\\\\';
-        } else {
-          return `\\${c}`;
-        }
+    return value.replace(/\/|\\|\^|\$|\n|\.|\(|\)|\{|\}|\[|\]|\?|\*|\+|\|/g, (c) => {
+      if (c === '\n') {
+        return '\\n';
+      } else {
+        return `\\${c}`;
+      }
     });
   },
 
@@ -557,12 +538,11 @@ var Filter = {
       const {type} = this.dataset;
       // Convert value -> regexp, unless type is MD5
       const values = Filter.values(type, Filter.menu.post);
-      const res = values.map(function(value) {
-        const re = ['uniqueID', 'MD5'].includes(type) ? value : Filter.escape(value);
+      const res = values.map((value) => {
         if (['uniqueID', 'MD5'].includes(type)) {
-          return `/${re}/`;
+          return `/${value}/`;
         } else {
-          return `/^${re}$/`;
+          return `/^${Filter.escape(value)}$/`;
         }
       }).join('\n');
 
