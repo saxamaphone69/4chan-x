@@ -2,8 +2,6 @@
 
 import $ from '../platform/$';
 
-// import boardCss from './board.css';
-
 import burichan from './burichan.css';
 import futaba from './futaba.css';
 import linkifyAudio from './linkify.audio.png';
@@ -20,10 +18,10 @@ import linkifyPeertube from './linkify.peertube.png';
 import linkifySoundcloud from './linkify.soundcloud.png';
 import linkifyStreamable from './linkify.streamable.png';
 import linkifyTwitchtv from './linkify.twitchtv.png';
-import linkifyTwitter from './linkify.twitter.png';
+import linkifyX from './linkify.x.png';
 import linkifyVideo from './linkify.video.png';
 import linkifyVidlii from './linkify.vidlii.png';
-import linkifyCimeo from './linkify.vimeo.png';
+import linkifyVimeo from './linkify.vimeo.png';
 import linkifyVine from './linkify.vine.png';
 import linkifyVocaroo from './linkify.vocaroo.png';
 import linkifyYoutube from './linkify.youtube.png';
@@ -41,37 +39,29 @@ import yotsuba from './yotsuba.css';
 import { icons } from './style';
 import { g } from '../globals/globals';
 
-// <%
-  // var inc       = require['style'];
-  // var faCSS     = read('/node_modules/font-awesome/css/font-awesome.css');
-  // var mainCSS   = ['font-awesome', 'style', 'yotsuba', 'yotsuba-b', 'futaba', 'burichan', 'tomorrow', 'photon', 'spooky'].map(x => read(`${x}.css`)).join('');
-//   var iconNames = files.filter(f => /^linkify\.[^.]+\.png$/.test(f));
-//   var icons     = iconNames.map(readBase64);
-// %>
-
 const mainCSS = style + yotsuba +yotsubaB+futaba+burichan+tomorrow + photon + spooky;
 const faIcons: { name: string, data: string }[] = [
-  { name: "Audio", data: linkifyAudio },
-  { name: "Bitchute", data: linkifyBitchute },
-  { name: "Clyp", data: linkifyClyp },
-  { name: "Dailymotion", data: linkifyDailymotion },
-  { name: "Gfycat", data: linkifyGfycat },
-  { name: "Gist", data: linkifyGist },
-  { name: "Image", data: linkifyImage },
-  { name: "Installgentoo", data: linkifyInstallgentoo },
-  { name: "Liveleak", data: linkifyLiveleak },
-  { name: "Pastebin", data: linkifyPastebin },
-  { name: "Peertube", data: linkifyPeertube },
-  { name: "Soundcloud", data: linkifySoundcloud },
-  { name: "Streamable", data: linkifyStreamable },
-  { name: "Twitchtv", data: linkifyTwitchtv },
-  { name: "Twitter", data: linkifyTwitter },
-  { name: "Video", data: linkifyVideo },
-  { name: "Vidlii", data: linkifyVidlii },
-  { name: "Cimeo", data: linkifyCimeo },
-  { name: "Vine", data: linkifyVine },
-  { name: "Vocaroo", data: linkifyVocaroo },
-  { name: "Youtube", data: linkifyYoutube },
+  { name: "audio", data: linkifyAudio },
+  { name: "bitchute", data: linkifyBitchute },
+  { name: "clyp", data: linkifyClyp },
+  { name: "dailymotion", data: linkifyDailymotion },
+  { name: "gfycat", data: linkifyGfycat },
+  { name: "gist", data: linkifyGist },
+  { name: "image", data: linkifyImage },
+  { name: "installgentoo", data: linkifyInstallgentoo },
+  { name: "liveleak", data: linkifyLiveleak },
+  { name: "pastebin", data: linkifyPastebin },
+  { name: "peertube", data: linkifyPeertube },
+  { name: "soundcloud", data: linkifySoundcloud },
+  { name: "streamable", data: linkifyStreamable },
+  { name: "twitchtv", data: linkifyTwitchtv },
+  { name: "twitter", data: linkifyX },
+  { name: "video", data: linkifyVideo },
+  { name: "vidlii", data: linkifyVidlii },
+  { name: "vimeo", data: linkifyVimeo },
+  { name: "vine", data: linkifyVine },
+  { name: "vocaroo", data: linkifyVocaroo },
+  { name: "youtube", data: linkifyYoutube },
 ];
 
 const CSS = {

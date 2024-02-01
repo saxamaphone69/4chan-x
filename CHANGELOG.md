@@ -3,10 +3,15 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.4.4 (2023-02-01)
+
+- Fixed icons next to embed links. [28](https://github.com/TuxedoTako/4chan-xt/issues/28)
+- Updated some of those icons, and compressed some others.
+
 ### v2.4.3 (2023-01-25)
 
 - Updated CSS to remove older properties. [25](https://github.com/TuxedoTako/4chan-xt/issues/25)
-- Fixed image prefetching icon incorrectly shows it is enabled by default.
+- Fixed image prefetching icon incorrectly showing it is enabled by default.
   [26](https://github.com/TuxedoTako/4chan-xt/issues/26)
 - Fixed mixing of line endings in the entire output. [24](https://github.com/TuxedoTako/4chan-xt/issues/24)
 
