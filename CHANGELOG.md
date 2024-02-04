@@ -3,25 +3,31 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.4.5 (2023-02-04)
+
+- Fixed hovering over a link to a hidden thread throwing an error.
+  [#30](https://github.com/TuxedoTako/4chan-xt/issues/30)
+- Fixed example of the type option on general filters. [#29](https://github.com/TuxedoTako/4chan-xt/issues/29)
+
 ### v2.4.4 (2023-02-01)
 
-- Fixed icons next to embed links. [28](https://github.com/TuxedoTako/4chan-xt/issues/28)
+- Fixed icons next to embed links. [#28](https://github.com/TuxedoTako/4chan-xt/issues/28)
 - Updated some of those icons, and compressed some others.
 
 ### v2.4.3 (2023-01-25)
 
-- Updated CSS to remove older properties. [25](https://github.com/TuxedoTako/4chan-xt/issues/25)
+- Updated CSS to remove older properties. [#25](https://github.com/TuxedoTako/4chan-xt/issues/25)
 - Fixed image prefetching icon incorrectly showing it is enabled by default.
-  [26](https://github.com/TuxedoTako/4chan-xt/issues/26)
-- Fixed mixing of line endings in the entire output. [24](https://github.com/TuxedoTako/4chan-xt/issues/24)
+  [#26](https://github.com/TuxedoTako/4chan-xt/issues/26)
+- Fixed mixing of line endings in the entire output. [#24](https://github.com/TuxedoTako/4chan-xt/issues/24)
 
 ### v2.4.2 (2023-01-23)
 
 - Fixed infinite loop when a thread from a tinyboard website is in the thread watcher.
-  [23](https://github.com/TuxedoTako/4chan-xt/issues/23)
+  [#23](https://github.com/TuxedoTako/4chan-xt/issues/23)
 - Fixed bug that ocurred on threads on websites without IP counter.
-  [23](https://github.com/TuxedoTako/4chan-xt/issues/23#issuecomment-1905295911)
-- Fixed mixing of line endings in the header comments. [24](https://github.com/TuxedoTako/4chan-xt/issues/24)
+  [#23](https://github.com/TuxedoTako/4chan-xt/issues/23#issuecomment-1905295911)
+- Fixed mixing of line endings in the header comments. [#24](https://github.com/TuxedoTako/4chan-xt/issues/24)
 
 ### v2.4.1 (2023-01-21)
 

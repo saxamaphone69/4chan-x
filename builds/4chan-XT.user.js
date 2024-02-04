@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.4.4
+// @version      2.4.5
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.4.4",
-    "date": "2024-02-01T18:00:44Z"
+    "version": "2.4.5",
+    "date": "2024-02-04T12:36:27Z"
   };
 
   var meta = {
@@ -3949,8 +3949,6 @@ https://*.hcaptcha.com
         this.thread.posts.push(this.ID, this);
         g.posts.push(this.fullID, this);
       }
-      this.isFetchedQuote = false;
-      this.isClone = false;
     }
     parseNodes(root) {
       const s = g.SITE.selectors;
@@ -9447,7 +9445,7 @@ https://*.hcaptcha.com
   <li>
     Filters in the "General" section apply to multiple fields, by default <code>subject,name,filename,comment</code>.<br>
     The fields can be specified with the <code>type</code> option, separated by commas.<br>
-    For example: <code>type:@{filterTypes};</code>.<br>
+    For example: <code id="filterTypes"></code>.<br>
     Types can also be combined with a <code>+</code> sign; this indicates the filter applies to the given fields joined by newlines.<br>
     For example: <code>type:filename+filesize+dimensions;</code>.<br>
   </li>
@@ -15915,11 +15913,12 @@ vp-replace
         });
         return;
       }
-      Object.keys(Config.filter).filter(x => x !== 'general').map((x, i) => ({
-        innerHTML: (i ? "," : "") + `<wbr>${E(x)}`
-      }));
+      const filterTypes = Object.keys(Config.filter)
+        .filter(x => x !== 'general')
+        .join(',\u200B'); // \u200B is zero width space, to control where line breaks happen on a narrow screen
       $$1.extend(div, { innerHTML: FilterGuidePage });
-      return $$1('.warning', div).hidden = Conf['Filter'];
+      $$1('#filterTypes', div).textContent = `type:\u200B${filterTypes};`;
+      $$1('.warning', div).hidden = Conf['Filter'];
     },
     sauce(section) {
       $$1.extend(section, { innerHTML: SaucePage });

@@ -51,8 +51,8 @@ export default class Post {
   declare isHidden:       boolean;
   declare clones:         any[];
   declare isRebuilt?:     boolean;
-  declare isFetchedQuote: boolean;
-  declare isClone:        boolean;
+  declare isFetchedQuote: boolean | undefined;
+  declare isClone:        boolean | undefined;
   declare quotes:         string[];
   declare file:           ReturnType<Post['parseFile']>;
   declare files:          ReturnType<Post['parseFile']>[];
@@ -171,9 +171,6 @@ export default class Post {
       this.thread.posts.push(this.ID, this);
       g.posts.push(this.fullID, this);
     }
-
-    this.isFetchedQuote = false;
-    this.isClone = false;
   }
 
   parseNodes(root: HTMLElement) {

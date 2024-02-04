@@ -855,9 +855,9 @@ vp-replace
     return Settings.selectFilter.call(select);
   },
 
-  selectFilter() {
-    let name;
-    const div = this.nextElementSibling;
+  selectFilter(this: HTMLSelectElement) {
+    let name: string;
+    const div = this.nextElementSibling as HTMLElement;
     if ((name = this.value) !== 'guide') {
       if (!$.hasOwn(Config.filter, name)) { return; }
       $.rmAll(div);
@@ -865,8 +865,7 @@ vp-replace
         name,
         className: 'field',
         spellcheck: false
-      }
-      );
+      }) as HTMLTextAreaElement;
       $.on(ta, 'change', $.cb.value);
       $.get(name, Conf[name], function(item) {
         ta.value = item[name];
@@ -874,11 +873,12 @@ vp-replace
       });
       return;
     }
-    const filterTypes = Object.keys(Config.filter).filter(x => x !== 'general').map((x, i) => ({
-      innerHTML: (i ? "," : "") + `<wbr>${E(x)}`
-    }));
+    const filterTypes = Object.keys(Config.filter)
+      .filter(x => x !== 'general')
+      .join(',\u200B'); // \u200B is zero width space, to control where line breaks happen on a narrow screen
     $.extend(div, { innerHTML: FilterGuidePage });
-    return $('.warning', div).hidden = Conf['Filter'];
+    $('#filterTypes', div).textContent = `type:\u200B${filterTypes};`;
+    $('.warning', div).hidden = Conf['Filter'];
   },
 
   sauce(section) {
