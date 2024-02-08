@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.4.5
+// @version      2.4.6
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.4.5",
-    "date": "2024-02-04T12:36:27Z"
+    "version": "2.4.6",
+    "date": "2024-02-08T16:40:00Z"
   };
 
   var meta = {
@@ -7118,7 +7118,7 @@ https://*.hcaptcha.com
       new Board(o.boardID);
     const thread = g.threads.get(`${o.boardID}.${o.threadID}`) ||
       new Thread(o.threadID, board);
-    const post = new Post(g.SITE.Build.post(o), thread, board, { isFetchedQuote: true });
+    const post = new Post(g.SITE.Build.post(o), thread, board);
     post.resurrect();
     post.markAsFromArchive();
     if (post.file) {

@@ -3,6 +3,10 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.4.6 (2023-02-08)
+
+- Fixed inserted post from external archives missing the hide button before it.
+
 ### v2.4.5 (2023-02-04)
 
 - Fixed hovering over a link to a hidden thread throwing an error.
