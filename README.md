@@ -3,7 +3,14 @@
 Originally forked from [4chan X](https://github.com/ccd0/4chan-x) for [this PR](https://github.com/ccd0/4chan-x/pull/3341),
 this fork started getting some features on its own. See the releases.
 
-The 4chan XT project is a migration of 4chan X from coffeescript to TypeScript/JavaScript. It is named XT both as a continuation of eXTended, and a T for TypeScript. The goals of this project is to first get a working bundle from js/ts files, and then gradually convert js files to ts and add types as needed.
+The 4chan XT project is a migration of 4chan X from coffeescript to TypeScript/JavaScript. It is named XT both as a
+continuation of eXTended, and a T for TypeScript. The goals of this project is to first get a working bundle from js/ts
+files, and then gradually convert js files to ts and add types as needed.
+
+## Install
+
+This fork is only distributed trough GitHub releases at this moment. Automatic updates are supported for the user script
+version, but not the chrome extension.
 
 ## TODO
 
@@ -17,21 +24,20 @@ The 4chan XT project is a migration of 4chan X from coffeescript to TypeScript/J
   - [x] userscript
   - [ ] .crx extension
     - [x] crx directory that can be loaded as an unpacked extension is created
-  - [x] beta
-  - [x] noupdate
 - [x] port updates made to 4chan-X made since this was forked
+- [ ] Clean up circular dependencies
 
 ## Other notes
 
 - A lot of files have circular dependencies, but rollup can handle that
   - but for some scripts that add to the same object I had to merge them, like Posting/QR and site/SW.yotsuba.js
   - sometimes something might not be initialized before use, for example, `$.dict()` and `$.SECONDS`
-    - I moved these to a new file called helpers.ts, which shouldn't have dependencies itself, so it's also available
-- tsconfig.json has `"checkJs": true,`, and a lot of js files report type errors when opened because of unknown properties on objects and reassigning variables with different types. These errors don't block the bundle at this moment.
-- old files in the builds directory stay as reference until the new builds are functional, new files go in the builds/test directory
-- old build scripts are also kept around for reference until the new build output is fully functional
+    - I moved these to a new file called helpers.ts, which shouldn't have dependencies itself
+- tsconfig.json has `"checkJs": true,`, and a lot of js files report type errors when opened because of unknown
+  properties on objects and reassigning variables with different types. These errors don't block the bundle at this moment.
 - the es 2020 target was choses for optional chaining
-- @violentmonkey/types was chosen over @types/greasemonkey because @types/greasemonkey only declares the GM object, and not GM\_ functions
+- @violentmonkey/types was chosen over @types/greasemonkey because @types/greasemonkey only declares the GM object,
+  and not GM\_ functions
 
 ## commits since this was forked
 

@@ -5,7 +5,7 @@ in XT.
 
 ### v2.4.6 (2023-02-08)
 
-- Fixed inserted post from external archives missing the hide button before it.
+- Fixed inserted posts from external archives missing the hide button before it.
 
 ### v2.4.5 (2023-02-04)
 
@@ -83,7 +83,7 @@ in XT.
 - Version number is no longer prefixed with "XT ", and will now follow major.minor.bugfix.
 - Fixed "Expand All Images" shortcut in the header. [#13](https://github.com/TuxedoTako/4chan-xt/issues/13)
 - Ran the chrome extension version, and fixed a problem with the ajax function. How long has that been down? I use the
-  extension version myself.
+  user script version myself.
 
 ### XT v2.2.6 (2023-12-22)
 
@@ -153,9 +153,7 @@ in XT.
   - callbackNodesDB: increase nr of callbacks because the setTimeout triggers a reflow, which in some of my tests took
     as long as the actual chunk of callbacks
 
-### XT v2.0.0
-
-#### 2023-04-30
+### XT v2.0.0 (2023-04-30)
 
 This is the first XT release, which means this is after the migration from coffeescript to typescript, but there are
 some other changes as well. These changes aren't in the upstream PR.
