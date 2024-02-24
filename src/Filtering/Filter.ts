@@ -12,7 +12,7 @@ import { dict } from "../platform/helpers";
 import QuoteYou from "../Quotelinks/QuoteYou";
 import PostHiding from "./PostHiding";
 import ThreadHiding from "./ThreadHiding";
-import type Post from "../classes/Post";
+import Post from "../classes/Post";
 
 /*
  * decaffeinate suggestions:
@@ -268,7 +268,7 @@ var Filter = {
 
   node(this: Post) {
     if (this.isClone) { return; }
-    const {hide, stub, hl, top, noti} = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
+    const {hide, stub, hl, noti} = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
     if (hide) {
       if (this.isReply) {
         PostHiding.hide(this, stub);
@@ -282,7 +282,15 @@ var Filter = {
       }
     }
     if (noti && Unread.posts && (this.ID > Unread.lastReadPost) && !QuoteYou.isYou(this)) {
-      return Unread.openNotification(this, ' triggered a notification filter');
+      Unread.openNotification(this, ' triggered a notification filter');
+    }
+    if (this.file) {
+      $.on(this.file.thumbLink, 'click', (e: MouseEvent) => {
+        if (!e.shiftKey) return;
+        Filter.quickFilterMD5.call(this);
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      });
     }
   },
 
@@ -413,7 +421,7 @@ var Filter = {
   },
 
   quickFilterMD5() {
-    const post: Post = Get.postFromNode(this);
+    const post: Post = this instanceof Post ? this : Get.postFromNode(this);
     const files = post.files.filter(f => f.MD5);
     if (!files.length) { return; }
     const filter = files.map(f => `/${f.MD5}/`).join('\n');

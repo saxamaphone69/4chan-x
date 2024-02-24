@@ -296,8 +296,14 @@ var Index = {
   catalogNode() {
     return $.on(this.nodes.root, 'mousedown click', e => {
       if ((e.button !== 0) || !e.shiftKey) { return; }
-      if (e.type === 'click') { Index.toggleHide(this.thread); }
-      return e.preventDefault();
+      if (e.type === 'click') {
+        e.preventDefault();
+        if (e.target.classList.contains('catalog-thumb')) {
+          Filter.quickFilterMD5.call(this.thread.OP);
+        } else {
+          Index.toggleHide(this.thread);
+        }
+      }
     });
   }, // Also on mousedown to prevent highlighting text.
 

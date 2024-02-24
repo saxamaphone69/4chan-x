@@ -7,6 +7,7 @@ in XT.
 
 - Moved different themes to CSS variables.
 - Added `color-scheme: dark;` for tomorrow and spooky themes for dark scroll bars, inputs and buttons.
+- Quick MD5 filter on shift + click on a file.
 
 ### v2.4.6 (2023-02-08)
 
