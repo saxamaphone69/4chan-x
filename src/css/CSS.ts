@@ -26,11 +26,11 @@ import linkifyVine from './linkify.vine.png';
 import linkifyVocaroo from './linkify.vocaroo.png';
 import linkifyYoutube from './linkify.youtube.png';
 
+import variableBase from './variableBase.css';
 import photon from './photon.css';
 import report from './report.css';
 import spooky from './spooky.css';
 import style from './style.css';
-// style.inc
 import supports from './supports.css';
 import tomorrow from './tomorrow.css';
 import www from './www.css';
@@ -39,7 +39,7 @@ import yotsuba from './yotsuba.css';
 import { icons } from './style';
 import { g } from '../globals/globals';
 
-const mainCSS = style + yotsuba +yotsubaB+futaba+burichan+tomorrow + photon + spooky;
+const mainCSS = style + variableBase + yotsuba +yotsubaB+futaba+burichan+tomorrow + photon + spooky;
 const faIcons: { name: string, data: string }[] = [
   { name: "audio", data: linkifyAudio },
   { name: "bitchute", data: linkifyBitchute },
