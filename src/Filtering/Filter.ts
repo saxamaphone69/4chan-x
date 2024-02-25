@@ -286,7 +286,7 @@ var Filter = {
     }
     if (this.file) {
       $.on(this.file.thumbLink, 'click', (e: MouseEvent) => {
-        if (!e.shiftKey) return;
+        if (!e.shiftKey || !Conf['MD5 Quick Filter in Threads']) return;
         Filter.quickFilterMD5.call(this);
         e.preventDefault();
         e.stopImmediatePropagation();

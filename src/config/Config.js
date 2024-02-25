@@ -204,6 +204,16 @@ const Config = {
         'Show notification when quick filtering MD5s using the button or keybind.',
         1
       ],
+      'MD5 Quick Filter in the Catalog': [
+        true,
+        'Quick filter by MD5 when clicking a thumbnail in the catalog and holding Shift. Disabling falls back on just hiding the thread.',
+        1
+      ],
+      'MD5 Quick Filter in Threads': [
+        true,
+        'Quick filter by MD5 when clicking a thumbnail in a thread while holding shift.',
+        1
+      ],
       'Recursive Hiding': [
         true,
         'Hide replies of hidden posts, recursively.'

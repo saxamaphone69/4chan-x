@@ -9,10 +9,10 @@
 }
 
 /* 4chan style fixes */
-.highlight-you .quotesYou$site$highlightable$reply {
+:root.highlight-you .quotesYou$site$highlightable$reply {
   border-left: 3px solid var(--xt-border-highlight) !important;
 }
-.highlight-own .yourPost$site$highlightable$reply {
+:root.highlight-own .yourPost$site$highlightable$reply {
   border-left: 3px dashed var(--xt-border-highlight) !important;
 }
 

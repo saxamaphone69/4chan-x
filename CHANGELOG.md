@@ -3,11 +3,13 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
-### Unreleased
+### v2.5.0 (2023-02-25)
 
+- Quick MD5 filter on shift + click on a thumbnail or expanded file.
+  - Can be turned off in the settings.
 - Moved different themes to CSS variables.
+  - This shouldn't make a difference for the end user, but I have accidentally broking things before.
 - Added `color-scheme: dark;` for tomorrow and spooky themes for dark scroll bars, inputs and buttons.
-- Quick MD5 filter on shift + click on a file.
 
 ### v2.4.6 (2023-02-08)
 

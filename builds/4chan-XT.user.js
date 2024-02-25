@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.4.6
+// @version      2.5.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.4.6",
-    "date": "2024-02-08T16:40:00Z"
+    "version": "2.5.0",
+    "date": "2024-02-25T12:39:57Z"
   };
 
   var meta = {
@@ -608,6 +608,16 @@ div.boardTitle {
         'MD5 Quick Filter Notifications': [
           true,
           'Show notification when quick filtering MD5s using the button or keybind.',
+          1
+        ],
+        'MD5 Quick Filter in the Catalog': [
+          true,
+          'Quick filter by MD5 when clicking a thumbnail in the catalog and holding Shift. Disabling falls back on just hiding the thread.',
+          1
+        ],
+        'MD5 Quick Filter in Threads': [
+          true,
+          'Quick filter by MD5 when clicking a thumbnail in a thread while holding shift.',
           1
         ],
         'Recursive Hiding': [
@@ -8166,8 +8176,14 @@ https://*.hcaptcha.com
     catalogNode() {
       return $$1.on(this.nodes.root, 'mousedown click', e => {
         if ((e.button !== 0) || !e.shiftKey) { return; }
-        if (e.type === 'click') { Index.toggleHide(this.thread); }
-        return e.preventDefault();
+        if (e.type === 'click') {
+          e.preventDefault();
+          if (Conf['MD5 Quick Filter in the Catalog'] && e.target.classList.contains('catalog-thumb')) {
+            Filter.quickFilterMD5.call(this.thread.OP);
+          } else {
+            Index.toggleHide(this.thread);
+          }
+        }
       });
     }, // Also on mousedown to prevent highlighting text.
 
@@ -9366,9 +9382,30 @@ https://*.hcaptcha.com
       const threadRoot = thread.nodes.root;
       threadRoot.hidden = (thread.isHidden = false);
       Index$1.updateHideLabel();
-      if (thread.catalogView && Index$1.showHiddenThreads) {
-        $$1.rm(thread.catalogView.nodes.root);
-        return $$1.event('PostsRemoved', null, Index$1.root);
+      if (thread.catalogView) {
+        const { root } = thread.catalogView.nodes;
+
+        if (Index$1.showHiddenThreads) {
+          $$1.rm(root);
+          $$1.event('PostsRemoved', null, Index$1.root);
+        } else {
+          let i = Index$1.sortedThreadIDs.indexOf(thread.ID) - 1;
+
+          while (true) {
+            if (i < 0) {
+              $$1('.board').insertAdjacentElement('afterbegin', root);
+              break;
+            }
+            const rootPrevious = d.getElementById(`t${Index$1.sortedThreadIDs[i]}`);
+            if (rootPrevious) {
+              rootPrevious.insertAdjacentElement('afterend', root);
+              break;
+            }
+            --i;
+          }
+
+          $$1.event('PostsInserted', null, Index$1.root);
+        }
       }
     }
   };
@@ -9700,61 +9737,23 @@ https://*.hcaptcha.com
 <div></div>
 `;
 
-  var burichan = `/* General */
-:root.burichan .dialog {
-  background-color: #D6DAF0;
-  border-color: #B7C5D9;
-}
-:root.burichan .field:focus,
-:root.burichan .field.focus {
-  border-color: #98E;
-}
-
-/* Header */
-:root.burichan #header-bar.dialog {
-  background-color: rgba(214,218,240,0.98);
-}
-:root.burichan:not(.fixed) #header-bar, :root.burichan #header-bar #notifications {
-  font-size: 11pt;
-}
-:root.burichan #header-bar, :root.burichan #header-bar #notifications {
-  color: #89A;
-}
-:root.burichan #header-bar a, :root.burichan #header-bar #notifications a {
-  color: #34345C;
-}
-
-/* Settings */
-:root.burichan #fourchanx-settings fieldset, :root.burichan .section-main div::before {
-  border-color: #B7C5D9;
-}
-:root.burichan .suboption-list > div:last-of-type {
-  background-color: #D6DAF0;
-}
-
-/* Catalog */
-:root.burichan.catalog-hover-expand .catalog-container:hover > .post {
-  background-color: #D6DAF0;
-}
-:root.burichan.werkTyme .catalog-thread:not(:hover),
-:root.burichan.werkTyme:not(.catalog-hover-expand) .catalog-thread,
-:root.burichan.catalog-hover-expand .catalog-container:hover > .post,
-:root.burichan.catalog-hover-expand .catalog-container:hover .catalog-reply {
-  border-color: #B7C5D9;
-}
-
-/* Quote */
-:root.burichan .backlink.deadlink {
-  color: #34345C !important;
-}
-:root.burichan .inline {
-  border-color: #B7C5D9;
-  background-color: rgba(255, 255, 255, .14);
-}
-
-/* Fappe and Werk Tyme */
-:root.burichan .indicator {
-  color: #D6DAF0;
+  var burichan = `:root.burichan {
+  --xt-background: #D6DAF0;
+  --xt-border: #B7C5D9;
+  --xt-border-field-focus: #98E;
+  --xt-border-highlight: 3px dashed rgba(221, 0, 0, .8);
+  --xt-header-dialog-bg: rgba(214, 218, 240, 0.98);
+  --xt-notification-size: 11pt;
+  --xt-header-dialog-fg: #89A;
+  --xt-header-link: #34345C;
+  --xt-dead-link: #34345C;
+  --xt-qr-link-border: rgb(199, 203, 225) rgb(199, 203, 225) rgb(184, 188, 210);
+  --xt-qr-bg: linear-gradient(#E5E9FF, #D6DAF0) repeat scroll 0% 0% transparent;
+  --xt-menu-fg: #000;
+  --xt-entry-size: 12pt;
+  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-link-hover-bg: #D9DDF3;
+  --xt-unread: rgba(214, 218, 240, 0.5);
 }
 
 /* Anonymize */
@@ -9762,42 +9761,6 @@ https://*.hcaptcha.com
   font-size: 12pt;
 }
 
-/* QR */
-.burichan #dump-list::-webkit-scrollbar-thumb {
-  background-color: #D6DAF0;
-  border-color: #B7C5D9;
-}
-:root.burichan .qr-preview {
-  background-color: rgba(0, 0, 0, .15);
-}
-:root.burichan .qr-link {
-  border-color: rgb(199, 203, 225) rgb(199, 203, 225) rgb(184, 188, 210);
-  background: linear-gradient(#E5E9FF, #D6DAF0) repeat scroll 0% 0% transparent;
-}
-:root.burichan .qr-link:hover {
-  background: #D9DDF3;
-}
-
-/* Menu */
-:root.burichan #menu {
-  color: #000000;
-}
-:root.burichan .entry {
-  font-size: 12pt;
-}
-:root.burichan .focused.entry {
-  background: rgba(255, 255, 255, .33);
-}
-
-/* Unread */
-:root.burichan .unread-mark-read {
-  background-color: rgba(214,218,240,0.5);
-}
-
-/* Thread Watcher */
-:root.burichan .replies-quoting-you > a, :root.burichan #watcher-link.replies-quoting-you, :root.burichan .last-page > a > .watcher-page {
-  color: #F00;
-}
 
 /* Watcher Favicon */
 :root.burichan .watch-thread-link
@@ -9806,61 +9769,21 @@ https://*.hcaptcha.com
 }
 `;
 
-  var futaba = `/* General */
-:root.futaba .dialog {
-  background-color: #F0E0D6;
-  border-color: #D9BFB7;
-}
-:root.futaba .field:focus,
-:root.futaba .field.focus {
-  border-color: #EA8;
-}
-
-/* Header */
-:root.futaba #header-bar.dialog {
-  background-color: rgba(240,224,214,0.98);
-}
-:root.futaba:not(.fixed) #header-bar, :root.futaba #notifications {
-  font-size: 11pt;
-}
-:root.futaba #header-bar, :root.futaba #notifications {
-  color: #B86;
-}
-:root.futaba #header-bar a, :root.futaba #notifications a {
-  color: #800000;
-}
-
-/* Settings */
-:root.futaba #fourchanx-settings fieldset, :root.futaba .section-main div::before {
-  border-color: #D9BFB7;
-}
-:root.futaba .suboption-list > div:last-of-type {
-  background-color: #F0E0D6;
-}
-
-/* Catalog */
-:root.futaba.catalog-hover-expand .catalog-container:hover > .post {
-  background-color: #F0E0D6;
-}
-:root.futaba.werkTyme .catalog-thread:not(:hover),
-:root.futaba.werkTyme:not(.catalog-hover-expand) .catalog-thread,
-:root.futaba.catalog-hover-expand .catalog-container:hover > .post,
-:root.futaba.catalog-hover-expand .catalog-container:hover .catalog-reply {
-  border-color: #D9BFB7;
-}
-
-/* Quote */
-:root.futaba .backlink.deadlink {
-  color: #00E !important;
-}
-:root.futaba .inline {
-  border-color: #D9BFB7;
-  background-color: rgba(255, 255, 255, .14);
-}
-
-/* Fappe and Werk Tyme */
-:root.futaba .indicator {
-  color: #F0E0D6;
+  var futaba = `:root.futaba {
+  --xt-background: #F0E0D6;
+  --xt-border: #D9BFB7;
+  --xt-border-field-focus: #EA8;
+  --xt-border-highlight: rgba(240, 224, 214, 0.98);
+  --xt-notification-size: 11pt;
+  --xt-header-dialog-fg: #B86;
+  --xt-dead-link: #00E;
+  --xt-header-dialog-bg: rgba(0, 0, 0, .15);
+  --xt-header-link: #800000;
+  --xt-qr-link-border: rgb(225, 209, 199) rgb(225, 209, 199) rgb(210, 194, 184);
+  --xt-qr-bg: linear-gradient(#FFEFE5, #F0E0D6) repeat scroll 0% 0% transparent;
+  --xt-entry-size: 12pt;
+  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-unread: rgba(240, 224, 214, 0.5);
 }
 
 /* Anonymize */
@@ -9868,42 +9791,6 @@ https://*.hcaptcha.com
   font-size: 12pt;
 }
 
-/* QR */
-.futaba #dump-list::-webkit-scrollbar-thumb {
-  background-color: #F0E0D6;
-  border-color: #D9BFB7;
-}
-:root.futaba .qr-preview {
-  background-color: rgba(0, 0, 0, .15);
-}
-:root.futaba .qr-link {
-  border-color: rgb(225, 209, 199) rgb(225, 209, 199) rgb(210, 194, 184);
-  background: linear-gradient(#FFEFE5, #F0E0D6) repeat scroll 0% 0% transparent;
-}
-:root.futaba .qr-link:hover {
-  background: #F0E0D6;
-}
-
-/* Menu */
-:root.futaba #menu {
-  color: #800000;
-}
-:root.futaba .entry {
-  font-size: 12pt;
-}
-:root.futaba .focused.entry {
-  background: rgba(255, 255, 255, .33);
-}
-
-/* Unread */
-:root.futaba .unread-mark-read {
-  background-color: rgba(240,224,214,0.5);
-}
-
-/* Thread Watcher */
-:root.futaba .replies-quoting-you > a, :root.futaba #watcher-link.replies-quoting-you, :root.futaba .last-page > a > .watcher-page {
-  color: #F00;
-}
 
 /* Watcher Favicon */
 :root.futaba .watch-thread-link
@@ -9954,109 +9841,188 @@ https://*.hcaptcha.com
 
   var linkifyYoutube = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAAXNSR0IArs4c6QAAADBQTFRFAAAA/wAA/wAA/wAA/wAA/wAA/wAA/wAA/////+Dg/8DA/7Cw/1BQ/0BA/xsb/wAABceraAAAAAh0Uk5TABAwQFBgcIDN7a/fAAAAS0lEQVR42mPAAoTNy8uLDRkYWP+DQQCDPoTxicEfwvjKUP///8/7//9/BzF+dL+HMrqgjJ/n////DlL8D6QYrh1hIIOwGcgKLHYDAI8wSVRb1KCAAAAAAElFTkSuQmCC';
 
-  var photon = `/* General */
-:root.photon .dialog {
-  background-color: #DDD;
-  border-color: #CCC;
+  var variableBase = `/* General */
+.dialog {
+  background-color: var(--xt-background);
+  border-color: var(--xt-border);
 }
-:root.photon .field:focus,
-:root.photon .field.focus {
-  border-color: #EA8;
+.field:focus,
+.field.focus {
+  border-color: var(--xt-border-field-focus);
+}
+
+/* 4chan style fixes */
+:root.highlight-you .quotesYou$site$highlightable$reply {
+  border-left: 3px solid var(--xt-border-highlight) !important;
+}
+:root.highlight-own .yourPost$site$highlightable$reply {
+  border-left: 3px dashed var(--xt-border-highlight) !important;
+}
+
+/* Header */
+#header-bar.dialog {
+  background-color: var(--xt-header-dialog-bg);
+}
+:root:not(.fixed) #header-bar, #notifications {
+  font-size: var(--xt-notification-size, 9pt);
+}
+#header-bar, #notifications {
+  color: var(--xt-header-dialog-fg);
+}
+#board-list a, #shortcuts a {
+  color: var(--xt-header-link, unset);
+}
+
+/* Settings */
+#fourchanx-settings fieldset, .section-main div::before {
+  border-color: var(--xt-border);
+}
+.suboption-list > div:last-of-type {
+  background-color: var(--xt-background);
+}
+
+/* Catalog */
+:root.catalog-hover-expand .catalog-container:hover > .post {
+  background-color: var(--xt-background);
+}
+:root.werkTyme .catalog-thread:not(:hover),
+:root.werkTyme:not(.catalog-hover-expand) .catalog-thread,
+:root.catalog-hover-expand .catalog-container:hover > .post,
+:root.catalog-hover-expand .catalog-container:hover .catalog-reply {
+  border-color: var(--xt-border);
+}
+
+/* Quote */
+.backlink.deadlink {
+  color: var(--xt-dead-link) !important;
+}
+.inline {
+  border-color: var(--xt-border);
+  background-color: var(--xt-inline, rgba(255, 255, 255, .14));
+}
+
+/* Fappe and Werk Tyme */
+.indicator {
+  color: var(--xt-background);
+}
+
+/* QR */
+#dump-list::-webkit-scrollbar-thumb {
+  background-color: var(--xt-background);
+  border-color: var(--xt-border);
+}
+.qr-preview {
+  background-color: var(--xt-qr-preview-bg, rgba(0, 0, 0, .15));
+}
+.qr-link {
+  border-color: var(--xt-qr-link-border);
+  background: var(--xt-qr-bg);
+}
+.qr-link:hover {
+  background: var(--xt-link-hover-bg, var(--xt-background));
+}
+
+/* Menu */
+#menu {
+  color: var(--xt-menu-fg, var(--xt-header-link));
+}
+.entry {
+  font-size: var(--xt-entry-size, 10pt);
+}
+.focused.entry {
+  background: var(--xt-entry-fucus-bg);
+}
+
+/* Unread */
+.unread-mark-read {
+  background-color: var(--xt-unread);
+}
+
+/* Thread Watcher */
+.replies-quoting-you > a, #watcher-link.replies-quoting-you, .last-page > a > .watcher-page {
+  color: var(--xt-watcher-quoting-you, #F00);
+}
+
+/* Moved from style.css */
+
+/* Highlighting */
+.qphl {
+  outline: 2px solid var(--xt-qphl, rgba(216, 94, 49, .8));
+}
+:root.highlight-you .quotesYou$site$highlightable$op,
+:root.highlight-you .quotesYou$site$highlightable$reply {
+  border-left: 3px solid var(--xt-border-highlight);
+}
+:root.highlight-own .yourPost$site$highlightable$op,
+:root.highlight-own .yourPost$site$highlightable$reply {
+  border-left: 3px dashed var(--xt-border-highlight) ;
+}
+.filter-highlight$site$highlightable$op,
+.filter-highlight$site$highlightable$reply {
+  box-shadow: inset 5px 0 var(--xt-filter-highlight, rgba(221, 0, 0, .5));
+}
+:root.highlight-own .yourPost > $site$sideArrows,
+:root.highlight-you .quotesYou > $site$sideArrows,
+.filter-highlight > $site$sideArrows {
+  color: var(--xt-highlight-side-arrow, rgba(221, 0, 0, .8));
+}
+
+:root:not(.werkTyme) .catalog-thread.filter-highlight .catalog-thumb,
+:root.werkTyme .catalog-thread.filter-highlight:not(:hover),
+:root.werkTyme:not(.catalog-hover-expand) .catalog-thread.filter-highlight,
+:root.werkTyme.catalog-hover-expand .catalog-thread.filter-highlight > .catalog-container:hover > .catalog-post,
+:root.catalog $site$catalog$thread.filter-highlight$site$highlightable$catalog {
+  box-shadow: 0 0 3px 3px var(--xt-highlight-shadow, rgba(255, 0, 0, .5));
+}
+:root:not(.werkTyme) .catalog-thread.watched .catalog-thumb,
+:root:root.werkTyme .catalog-thread.watched:not(:hover),
+:root:root.werkTyme:not(.catalog-hover-expand) .catalog-thread.watched,
+:root.werkTyme.catalog-hover-expand .catalog-thread.watched > .catalog-container:hover > .catalog-post {
+  border: 2px solid var(--xt-watched-border, rgba(255, 0, 0, .75));
+}
+
+.unread-line {
+  border-color: var(--xt-unread-line, rgb(255,0,0));
+}
+
+:root.tomorrow,
+:root.spooky {
+  color-scheme: dark;
+}
+
+:root.tomorrow #file-n-submit>input,
+:root.tomorrow #qr-draw-buton,
+:root.spooky #file-n-submit>input,
+:root.spooky #qr-draw-buton {
+  background-image: none;
+}
+
+:root.tomorrow .field,
+:root.spooly .field {
+  background-color: unset;
+  color: unset;
+  border-color: unset;
+}`;
+
+  var photon = `:root.photon {
+  --xt-background: #DDD;
+  --xt-border: #CCC;
+  --xt-border-field-focus: #EA8;
+  --xt-border-highlight: rgba(221, 0, 0, .8);
+  --xt-header-dialog-bg: rgba(221, 221, 221, 0.98);
+  --xt-header-dialog-fg: #333;
+  --xt-dead-link: #F60;
+  --xt-qr-link-border: rgb(206, 206, 206) rgb(206, 206, 206) rgb(191, 191, 191);
+  --xt-qr-bg: linear-gradient(#ECECEC, #DDD) repeat scroll 0% 0% transparent;
+  --xt-menu-fg: #333;
+  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-unread: rgba(221, 221, 221, 0.5);
+  --xt-watcher-quoting-you: #00F;
 }
 
 /* 4chan style fixes */
 :root.photon #arc-list tr:nth-of-type(odd) span.quote {
   color: #C0E17A;
-}
-:root.photon.highlight-you .quotesYou$site$highlightable$reply {
-  border-left: 3px solid rgba(221, 0, 0, .8) !important;
-}
-:root.photon.highlight-own .yourPost$site$highlightable$reply {
-  border-left: 3px dashed rgba(221, 0, 0, .8) !important;
-}
-
-/* Header */
-:root.photon #header-bar.dialog {
-  background-color: rgba(221,221,221,0.98);
-}
-:root.photon:not(.fixed) #header-bar, :root.photon #notifications {
-  font-size: 9pt;
-}
-:root.photon #header-bar, :root.photon #notifications {
-  color: #333;
-}
-:root.photon #header-bar a, :root.photon #notifications a {
-  color: #FF6600;
-}
-
-/* Settings */
-:root.photon #fourchanx-settings fieldset, :root.photon .section-main div::before {
-  border-color: #CCC;
-}
-:root.photon .suboption-list > div:last-of-type {
-  background-color: #DDD;
-}
-
-/* Catalog */
-:root.photon.catalog-hover-expand .catalog-container:hover > .post {
-  background-color: #DDD;
-}
-:root.photon.werkTyme .catalog-thread:not(:hover),
-:root.photon.werkTyme:not(.catalog-hover-expand) .catalog-thread,
-:root.photon.catalog-hover-expand .catalog-container:hover > .post,
-:root.photon.catalog-hover-expand .catalog-container:hover .catalog-reply {
-  border-color: #CCC;
-}
-
-/* Quote */
-:root.photon .backlink.deadlink {
-  color: #F60 !important;
-}
-:root.photon .inline {
-  border-color: #CCC;
-  background-color: rgba(255, 255, 255, .14);
-}
-
-/* Fappe and Werk Tyme */
-:root.photon .indicator {
-  color: #DDD;
-}
-
-/* QR */
-.photon #dump-list::-webkit-scrollbar-thumb {
-  background-color: #DDD;
-  border-color: #CCC;
-}
-:root.photon .qr-preview {
-  background-color: rgba(0, 0, 0, .15);
-}
-:root.photon .qr-link {
-  border-color: rgb(206, 206, 206) rgb(206, 206, 206) rgb(191, 191, 191);
-  background: linear-gradient(#ECECEC, #DDD) repeat scroll 0% 0% transparent;
-}
-:root.photon .qr-link:hover {
-  background: #DDDDDD;
-}
-
-/* Menu */
-:root.photon #menu {
-  color: #333;
-}
-:root.photon .entry {
-  font-size: 10pt;
-}
-:root.photon .focused.entry {
-  background: rgba(255, 255, 255, .33);
-}
-
-/* Unread */
-:root.photon .unread-mark-read {
-  background-color: rgba(221,221,221,0.5);
-}
-
-/* Thread Watcher */
-:root.photon .replies-quoting-you > a, :root.photon #watcher-link.replies-quoting-you, :root.photon .last-page > a > .watcher-page {
-  color: #00F !important;
 }
 
 /* Watcher Favicon */
@@ -10095,107 +10061,36 @@ https://*.hcaptcha.com
   color: red;
 }`;
 
-  var spooky = `/* General */
-:root.spooky .dialog {
-  background-color: #171526;
-  border-color: #707070;
-}
-:root.spooky .field:focus,
-:root.spooky .field.focus {
-  border-color: #98E;
+  var spooky = `:root.spooky {
+  --xt-background: #171526;
+  --xt-link-hover-bg: #1A1829;
+  --xt-border: #707070;
+  --xt-border-field-focus: #98E;
+  --xt-border-highlight: rgba(145, 182, 214, .8);
+  --xt-header-dialog-bg: rgba(23, 21, 38, 0.98);
+  --xt-header-dialog-fg: #C49756;
+  --xt-header-link: #FE9600;
+  --xt-dead-link: #FE9600;
+  --xt-qr-link-border: rgb(8, 6, 23) rgb(8, 6, 23) rgb(0, 0, 8);
+  --xt-qr-bg: linear-gradient(#262435, #171526) repeat scroll 0% 0% transparent;
+  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-unread: rgba(23, 21, 38, 0.5);
+
+  --xt-unread-line: rgb(197, 200, 198);
+  --xt-filter-highlight: rgba(145, 182, 214, .5);
+  --xt-qphl: rgba(145, 182, 214, .8);
+  --xt-highlight-side-arrow: rgb(155, 185, 210);
 }
 
 /* 4chan style fixes */
 :root.spooky #arc-list span.quote {
   color: #634C2C;
 }
-:root.spooky.highlight-you .quotesYou$site$highlightable$reply {
-  border-left: 3px solid rgba(145, 182, 214, .8) !important;
-}
-:root.spooky.highlight-own .yourPost$site$highlightable$reply {
-  border-left: 3px dashed rgba(145, 182, 214, .8) !important;
-}
 
-/* Header */
-:root.spooky #header-bar.dialog {
-  background-color: rgba(23,21,38,0.98);
-}
-:root.spooky:not(.fixed) #header-bar, :root.spooky #notifications {
-  font-size: 9pt;
-}
-:root.spooky #header-bar, :root.spooky #notifications {
-  color: #C49756;
-}
-:root.spooky #board-list a, :root.spooky #shortcuts a {
-  color: #FE9600;
-}
 :root.spooky.shortcut-icons .native-settings {
   background-image: url('//s.4cdn.org/image/favicon-ws.ico');
 }
 
-/* Settings */
-:root.spooky #fourchanx-settings fieldset, :root.spooky .section-main div::before {
-  border-color: #707070;
-}
-:root.spooky .suboption-list > div:last-of-type {
-  background-color: #171526;
-}
-
-/* Catalog */
-:root.spooky.catalog-hover-expand .catalog-container:hover > .post {
-  background-color: #171526;
-}
-:root.spooky.werkTyme .catalog-thread:not(:hover),
-:root.spooky.werkTyme:not(.catalog-hover-expand) .catalog-thread,
-:root.spooky.catalog-hover-expand .catalog-container:hover > .post,
-:root.spooky.catalog-hover-expand .catalog-container:hover .catalog-reply {
-  border-color: #707070;
-}
-
-/* Quote */
-:root.spooky .backlink.deadlink {
-  color: #FE9600 !important;
-}
-:root.spooky .inline {
-  border-color: #707070;
-  background-color: rgba(255, 255, 255, .14);
-}
-
-/* Fappe and Werk Tyme */
-:root.spooky .indicator {
-  color: #171526;
-}
-
-/* Highlighting */
-:root.spooky .qphl {
-  outline: 2px solid rgba(145, 182, 214, .8);
-}
-:root.spooky.highlight-you .quotesYou$site$highlightable$op,
-:root.spooky.highlight-you .quotesYou$site$highlightable$reply {
-  border-left: 3px solid rgba(145, 182, 214, .8);
-}
-:root.spooky.highlight-own .yourPost$site$highlightable$op,
-:root.spooky.highlight-own .yourPost$site$highlightable$reply {
-  border-left: 3px dashed rgba(145, 182, 214, .8);
-}
-:root.spooky .filter-highlight$site$highlightable$op,
-:root.spooky .filter-highlight$site$highlightable$reply {
-  box-shadow: inset 5px 0 rgba(145, 182, 214, .5);
-}
-:root.spooky.highlight-own .yourPost > $site$sideArrows,
-:root.spooky.highlight-you .quotesYou > $site$sideArrows,
-:root.spooky .filter-highlight > $site$sideArrows {
-  color: rgb(155, 185, 210);
-}
-
-/* QR */
-.spooky #dump-list::-webkit-scrollbar-thumb {
-  background-color: #171526;
-  border-color: #707070;
-}
-:root.spooky .qr-preview {
-  background-color: rgba(0, 0, 0, .15);
-}
 :root.spooky #qr .field {
   background-color: rgb(26, 27, 29);
   color: rgb(197,200,198);
@@ -10226,44 +10121,16 @@ https://*.hcaptcha.com
 :root.spooky #file-n-submit > input,
 :root.spooky #qr-draw-button {
   border-color: rgb(40, 41, 42);
+  background: unset;
 }
 :root.spooky #qr-filename {
   color: rgb(197,200,198);
 }
 
-:root.spooky .qr-link {
-  border-color: rgb(8, 6, 23) rgb(8, 6, 23) rgb(0, 0, 8);
-  background: linear-gradient(#262435, #171526) repeat scroll 0% 0% transparent;
-}
-:root.spooky .qr-link:hover {
-  background: #1A1829;
-}
-
-
-/* Menu */
-:root.spooky #menu {
-  color: #FE9600;
-}
-:root.spooky .entry {
-  font-size: 10pt;
-}
-:root.spooky .focused.entry {
-  background: rgba(255, 255, 255, .33);
-}
-
 /* Unread */
 :root.spooky .unread-line {
-  border-color: rgb(197, 200, 198);
   visibility: visible;
   opacity: 1;
-}
-:root.spooky .unread-mark-read {
-  background-color: rgba(23,21,38,0.5);
-}
-
-/* Thread Watcher */
-:root.spooky .replies-quoting-you > a, :root.spooky #watcher-link.replies-quoting-you, :root.spooky .last-page > a > .watcher-page {
-  color: #F00 !important;
 }
 
 /* Watcher Favicon */
@@ -11337,7 +11204,6 @@ textarea.copy-text-element {
 /* Unread */
 .unread-line {
   margin: 0;
-  border-color: rgb(255,0,0);
 }
 .unread-line + br {
   display: none;
@@ -11707,47 +11573,12 @@ input[name="Default Volume"] {
 :root.catalog-mode #navlinks {
   display: none;
 }
-
-/* Highlighting */
-.qphl {
-  outline: 2px solid rgba(216, 94, 49, .8);
-}
-:root.highlight-you .quotesYou$site$highlightable$op,
-:root.highlight-you .quotesYou$site$highlightable$reply {
-  border-left: 3px solid rgba(221, 0, 0, .8);
-}
-:root.highlight-own .yourPost$site$highlightable$op,
-:root.highlight-own .yourPost$site$highlightable$reply {
-  border-left: 3px dashed rgba(221, 0, 0, .8);
-}
-.filter-highlight$site$highlightable$op,
-.filter-highlight$site$highlightable$reply {
-  box-shadow: inset 5px 0 rgba(221, 0, 0, .5);
-}
-:root.highlight-own .yourPost > $site$sideArrows,
-:root.highlight-you .quotesYou > $site$sideArrows,
-.filter-highlight > $site$sideArrows {
-  color: rgba(221, 0, 0, .8);
-}
 :root.highlight-own .yourPost$site$highlightable$op::after,
 :root.highlight-you .quotesYou$site$highlightable$op::after,
 .filter-highlight$site$highlightable$op::after {
   content: "";
   display: block;
   clear: both;
-}
-:root:not(.werkTyme) .catalog-thread.filter-highlight .catalog-thumb,
-:root.werkTyme .catalog-thread.filter-highlight:not(:hover),
-:root.werkTyme:not(.catalog-hover-expand) .catalog-thread.filter-highlight,
-:root.werkTyme.catalog-hover-expand .catalog-thread.filter-highlight > .catalog-container:hover > .catalog-post,
-:root.catalog $site$catalog$thread.filter-highlight$site$highlightable$catalog {
-  box-shadow: 0 0 3px 3px rgba(255, 0, 0, .5);
-}
-:root:not(.werkTyme) .catalog-thread.watched .catalog-thumb,
-:root:root.werkTyme .catalog-thread.watched:not(:hover),
-:root:root.werkTyme:not(.catalog-hover-expand) .catalog-thread.watched,
-:root.werkTyme.catalog-hover-expand .catalog-thread.watched > .catalog-container:hover > .catalog-post {
-  border: 2px solid rgba(255, 0, 0, .75);
 }
 
 /* Spoiler text */
@@ -12692,33 +12523,36 @@ div.post {
 }
 `;
 
-  var tomorrow = `/* General */
-:root.tomorrow .dialog {
-  background-color: #282A2E;
-  border-color: #111;
+  var tomorrow = `:root.tomorrow {
+  --xt-background: #282A2E;
+  --xt-border: #111;
+  --xt-border-field-focus: rgb(129, 162, 190);
+  --xt-border-highlight: rgba(145, 182, 214, .8);
+  --xt-header-dialog-bg: rgba(40,42,46,0.9);
+  --xt-header-dialog-fg: #C5C8C6;
+  --xt-header-link: #81A2BE;
+  --xt-dead-link: #81A2BE;
+  --xt-inline: rgba(0, 0, 0, .14);
+  --xt-qr-preview-bg: rgba(255, 255, 255, .15);
+  --xt-qr-link-border: rgb(25, 27, 31) rgb(25, 27, 31) rgb(10, 12, 16);
+  --xt-qr-bg: linear-gradient(#37393D, #282A2E) repeat scroll 0% 0% transparent;
+  --xt-menu-fg: #C5C8C6;
+  --xt-entry-fucus-bg: rgba(0, 0, 0, .33);
+  --xt-unread: rgba(40, 42, 46, 0.5);
+
+  --xt-unread-line: rgb(197, 200, 198);
+  --xt-filter-highlight: rgba(145, 182, 214, .5);
+  --xt-highlight-shadow: rgba(64, 192, 255, .7);
+  --xt-watched-border: rgb(64, 192, 255);
+  --xt-qphl: rgba(145, 182, 214, .8);
+  --xt-highlight-side-arrow: rgb(155, 185, 210);
 }
 
 /* 4chan style fixes */
 :root.tomorrow #arc-list span.quote {
   color: #B5BD68;
 }
-:root.tomorrow.highlight-you .quotesYou$site$highlightable$reply {
-  border-left: 3px solid rgba(145, 182, 214, .8) !important;
-}
-:root.tomorrow.highlight-own .yourPost$site$highlightable$reply {
-  border-left: 3px dashed rgba(145, 182, 214, .8) !important;
-}
 
-/* Header */
-:root.tomorrow #header-bar.dialog {
-  background-color: rgba(40,42,46,0.9);
-}
-:root.tomorrow:not(.fixed) #header-bar, :root.tomorrow #notifications {
-  font-size: 9pt;
-}
-:root.tomorrow #header-bar, :root.tomorrow #notifications {
-  color: #C5C8C6;
-}
 :root.tomorrow #header-bar a, :root.tomorrow #notifications a {
   color: #81A2BE;
 }
@@ -12726,82 +12560,7 @@ div.post {
   background-image: url('//s.4cdn.org/image/favicon-ws.ico');
 }
 
-/* Settings */
-:root.tomorrow #fourchanx-settings fieldset, :root.tomorrow .section-main div::before {
-  border-color: #111;
-}
-:root.tomorrow .suboption-list > div:last-of-type {
-  background-color: #282A2E;
-}
 
-/* Catalog */
-:root.tomorrow.catalog-hover-expand .catalog-container:hover > .post {
-  background-color: #282A2E;
-}
-:root.tomorrow.werkTyme .catalog-thread:not(:hover),
-:root.tomorrow.werkTyme:not(.catalog-hover-expand) .catalog-thread,
-:root.tomorrow.catalog-hover-expand .catalog-container:hover > .post,
-:root.tomorrow.catalog-hover-expand .catalog-container:hover .catalog-reply {
-  border-color: #111;
-}
-
-/* Quote */
-:root.tomorrow .backlink.deadlink {
-  color: #81A2BE !important;
-}
-:root.tomorrow .inline {
-  border-color: #111;
-  background-color: rgba(0, 0, 0, .14);
-}
-
-/* Fappe and Werk Tyme */
-:root.tomorrow .indicator {
-  color: #282A2E;
-}
-
-/* Highlighting */
-:root.tomorrow .qphl {
-  outline: 2px solid rgba(145, 182, 214, .8);
-}
-:root.tomorrow.highlight-you .quotesYou$site$highlightable$op,
-:root.tomorrow.highlight-you .quotesYou$site$highlightable$reply {
-  border-left: 3px solid rgba(145, 182, 214, .8);
-}
-:root.tomorrow.highlight-own .yourPost$site$highlightable$op,
-:root.tomorrow.highlight-own .yourPost$site$highlightable$reply {
-  border-left: 3px dashed rgba(145, 182, 214, .8);
-}
-:root.tomorrow .filter-highlight$site$highlightable$op,
-:root.tomorrow .filter-highlight$site$highlightable$reply {
-  box-shadow: inset 5px 0 rgba(145, 182, 214, .5);
-}
-:root.tomorrow.highlight-own .yourPost > $site$sideArrows,
-:root.tomorrow.highlight-you .quotesYou > $site$sideArrows,
-:root.tomorrow .filter-highlight > $site$sideArrows {
-  color: rgb(155, 185, 210);
-}
-:root.tomorrow .catalog-thread.filter-highlight .catalog-thumb,
-:root.tomorrow.werkTyme .catalog-thread.filter-highlight:not(:hover),
-:root.tomorrow.werkTyme:not(.catalog-hover-expand) .catalog-thread.filter-highlight,
-:root.tomorrow.werkTyme.catalog-hover-expand .catalog-thread.filter-highlight > .catalog-container:hover > .catalog-post {
-  box-shadow: 0 0 3px 3px rgba(64, 192, 255, .7);
-}
-:root.tomorrow .catalog-thread.watched .catalog-thumb,
-:root.tomorrow.werkTyme .catalog-thread.watched:not(:hover),
-:root.tomorrow.werkTyme:not(.catalog-hover-expand) .catalog-thread.watched,
-:root.tomorrow.werkTyme.catalog-hover-expand .catalog-thread.watched > .catalog-container:hover > .catalog-post {
-  border: 2px solid rgb(64, 192, 255);
-}
-
-
-/* QR */
-.tomorrow #dump-list::-webkit-scrollbar-thumb {
-  background-color: #282A2E;
-  border-color: #111;
-}
-:root.tomorrow .qr-preview {
-  background-color: rgba(255, 255, 255, .15);
-}
 :root.tomorrow #qr .field {
   background-color: rgb(26, 27, 29);
   color: rgb(197,200,198);
@@ -12809,7 +12568,7 @@ div.post {
 }
 :root.tomorrow #qr .field:focus,
 :root.tomorrow #qr .field.focus {
-  border-color: rgb(129, 162, 190) !important;
+  border-color: var(--xt-border-field-focus) !important;
   background-color: rgb(30,32,36);
 }
 :root.tomorrow .persona button {
@@ -12832,40 +12591,10 @@ div.post {
 :root.tomorrow #file-n-submit > input,
 :root.tomorrow #qr-draw-button {
   border-color: rgb(40, 41, 42);
+  background: unset;
 }
 :root.tomorrow #qr-filename {
   color: rgb(197,200,198);
-}
-:root.tomorrow .qr-link {
-  border-color: rgb(25, 27, 31) rgb(25, 27, 31) rgb(10, 12, 16);
-  background: linear-gradient(#37393D, #282A2E) repeat scroll 0% 0% transparent;
-}
-:root.tomorrow .qr-link:hover {
-  background: #282A2E;
-}
-
-/* Menu */
-:root.tomorrow #menu {
-  color: #C5C8C6;
-}
-:root.tomorrow .entry {
-  font-size: 10pt;
-}
-:root.tomorrow .focused.entry {
-  background: rgba(0, 0, 0, .33);
-}
-
-/* Unread */
-:root.tomorrow .unread-line {
-  border-color: rgb(197, 200, 198);
-}
-:root.tomorrow .unread-mark-read {
-  background-color: rgba(40,42,46,0.5);
-}
-
-/* Thread Watcher */
-:root.tomorrow .replies-quoting-you > a, :root.tomorrow #watcher-link.replies-quoting-you, :root.tomorrow .last-page > a > .watcher-page {
-  color: #F00 !important;
 }
 
 /* Watcher Favicon */
@@ -12888,108 +12617,22 @@ div.post {
 }
 `;
 
-  var yotsubaB = `/* General */
-:root.yotsuba-b .dialog {
-  background-color: #D6DAF0;
-  border-color: #B7C5D9;
-}
-:root.yotsuba-b .field:focus,
-:root.yotsuba-b .field.focus {
-  border-color: #98E;
-}
-
-/* 4chan style fixes */
-:root.yotsuba-b.highlight-you .quotesYou$site$highlightable$reply {
-  border-left: 3px solid rgba(221, 0, 0, .8) !important;
-}
-:root.yotsuba-b.highlight-own .yourPost$site$highlightable$reply {
-  border-left: 3px dashed rgba(221, 0, 0, .8) !important;
-}
-
-/* Header */
-:root.yotsuba-b #header-bar.dialog {
-  background-color: rgba(214,218,240,0.98);
-}
-:root.yotsuba-b:not(.fixed) #header-bar, :root.yotsuba-b #notifications {
-  font-size: 9pt;
-}
-:root.yotsuba-b #header-bar, :root.yotsuba-b #notifications {
-  color: #89A;
-}
-:root.yotsuba-b #board-list a, :root.yotsuba-b #shortcuts a {
-  color: #34345C;
-}
-
-/* Settings */
-:root.yotsuba-b #fourchanx-settings fieldset, :root.yotsuba-b .section-main div::before {
-  border-color: #B7C5D9;
-}
-:root.yotsuba-b .suboption-list > div:last-of-type {
-  background-color: #D6DAF0;
-}
-
-/* Catalog */
-:root.yotsuba-b.catalog-hover-expand .catalog-container:hover > .post {
-  background-color: #D6DAF0;
-}
-:root.yotsuba-b.werkTyme .catalog-thread:not(:hover),
-:root.yotsuba-b.werkTyme:not(.catalog-hover-expand) .catalog-thread,
-:root.yotsuba-b.catalog-hover-expand .catalog-container:hover > .post,
-:root.yotsuba-b.catalog-hover-expand .catalog-container:hover .catalog-reply {
-  border-color: #B7C5D9;
-}
-
-/* Quote */
-:root.yotsuba-b .backlink.deadlink {
-  color: #34345C !important;
-}
-:root.yotsuba-b .inline {
-  border-color: #B7C5D9;
-  background-color: rgba(255, 255, 255, .14);
-}
-
-/* Fappe and Werk Tyme */
-:root.yotsuba-b .indicator {
-  color: #D6DAF0;
-}
-
-/* QR */
-.yotsuba-b #dump-list::-webkit-scrollbar-thumb {
-  background-color: #D6DAF0;
-  border-color: #B7C5D9;
-}
-:root.yotsuba-b .qr-preview {
-  background-color: rgba(0, 0, 0, .15);
-}
-:root.yotsuba-b .qr-link {
-  border-color: rgb(199, 203, 225) rgb(199, 203, 225) rgb(184, 188, 210);
-  background: linear-gradient(#E5E9FF, #D6DAF0) repeat scroll 0% 0% transparent;
-}
-:root.yotsuba-b .qr-link:hover {
-  background: #D9DDF3;
-}
-
-
-/* Menu */
-:root.yotsuba-b #menu {
-  color: #000;
-}
-:root.yotsuba-b .entry {
-  font-size: 10pt;
-}
-:root.yotsuba-b .focused.entry {
-  background: rgba(255, 255, 255, .33);
-}
-
-/* Unread */
-:root.yotsuba-b .unread-mark-read {
-  background-color: rgba(214,218,240,0.5);
-}
-
-/* Thread Watcher */
-:root.yotsuba-b .replies-quoting-you > a, :root.yotsuba-b #watcher-link.replies-quoting-you {
-  color: #F00;
-}
+  var yotsubaB = `:root.yotsuba-b {
+  --xt-background: #D6DAF0;
+  --xt-link-hover-bg: #D9DDF3;
+  --xt-border: #B7C5D9;
+  --xt-border-field-focus: #98E;
+  --xt-border-highlight: rgba(221, 0, 0, .8);
+  --xt-header-dialog-bg: rgba(214,218,240,0.98);
+  --xt-header-dialog-fg: #89A;
+  --xt-header-link: #34345C;
+  --xt-dead-link: #34345C;
+  --xt-qr-link-border: rgb(199, 203, 225) rgb(199, 203, 225) rgb(184, 188, 210);
+  --xt-qr-bg: linear-gradient(#E5E9FF, #D6DAF0) repeat scroll 0% 0% transparent;
+  --xt-menu-fg: #000,
+  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-unread: rgba(214, 218, 240, 0.5);
+  }
 
 /* Watcher Favicon */
 :root.yotsuba-b .watch-thread-link
@@ -12998,106 +12641,19 @@ div.post {
 }
 `;
 
-  var yotsuba = `/* General */
-:root.yotsuba .dialog {
-  background-color: #F0E0D6;
-  border-color: #D9BFB7;
-}
-:root.yotsuba .field:focus,
-:root.yotsuba .field.focus {
-  border-color: #EA8;
-}
-
-/* 4chan style fixes */
-:root.yotsuba.highlight-you .quotesYou$site$highlightable$reply {
-  border-left: 3px solid rgba(221, 0, 0, .8) !important;
-}
-:root.yotsuba.highlight-own .yourPost$site$highlightable$reply {
-  border-left: 3px dashed rgba(221, 0, 0, .8) !important;
-}
-
-/* Header */
-:root.yotsuba #header-bar.dialog {
-  background-color: rgba(240,224,214,0.98);
-}
-:root.yotsuba:not(.fixed) #header-bar, :root.yotsuba #notifications {
-  font-size: 9pt;
-}
-:root.yotsuba #header-bar, :root.yotsuba #notifications {
-  color: #B86;
-}
-:root.yotsuba #board-list a, :root.yotsuba #shortcuts a  {
-  color: #800000;
-}
-
-/* Settings */
-:root.yotsuba #fourchanx-settings fieldset, :root.yotsuba .section-main div::before {
-  border-color: #D9BFB7;
-}
-:root.yotsuba .suboption-list > div:last-of-type {
-  background-color: #F0E0D6;
-}
-
-/* Catalog */
-:root.yotsuba.catalog-hover-expand .catalog-container:hover > .post {
-  background-color: #F0E0D6;
-}
-:root.yotsuba.werkTyme .catalog-thread:not(:hover),
-:root.yotsuba.werkTyme:not(.catalog-hover-expand) .catalog-thread,
-:root.yotsuba.catalog-hover-expand .catalog-container:hover > .post,
-:root.yotsuba.catalog-hover-expand .catalog-container:hover .catalog-reply {
-  border-color: #D9BFB7;
-}
-
-/* Quote */
-:root.yotsuba .backlink.deadlink {
-  color: #00E !important;
-}
-:root.yotsuba .inline {
-  border-color: #D9BFB7;
-  background-color: rgba(255, 255, 255, .14);
-}
-
-/* Fappe and Werk Tyme */
-:root.yotsuba .indicator {
-  color: #F0E0D6;
-}
-
-/* QR */
-.yotsuba #dump-list::-webkit-scrollbar-thumb {
-  background-color: #F0E0D6;
-  border-color: #D9BFB7;
-}
-:root.yotsuba .qr-preview {
-  background-color: rgba(0, 0, 0, .15);
-}
-:root.yotsuba .qr-link {
-  border-color: rgb(225, 209, 199) rgb(225, 209, 199) rgb(210, 194, 184);
-  background: linear-gradient(#FFEFE5, #F0E0D6) repeat scroll 0% 0% transparent;
-}
-:root.yotsuba .qr-link:hover {
-  background: #F0E0D6;
-}
-
-/* Menu */
-:root.yotsuba #menu {
-  color: #800000;
-}
-:root.yotsuba .entry {
-  font-size: 10pt;
-}
-:root.yotsuba .focused.entry {
-  background: rgba(255, 255, 255, .33);
-}
-
-/* Unread */
-:root.yotsuba .unread-mark-read {
-  background-color: rgba(240,224,214,0.5);
-}
-
-/* Thread Watcher */
-:root.yotsuba .replies-quoting-you > a, :root.yotsuba #watcher-link.replies-quoting-you, :root.yotsuba .last-page > a > .watcher-page {
-  color: #F00;
+  var yotsuba = `:root.yotsuba {
+  --xt-background: #F0E0D6;
+  --xt-border: #D9BFB7;
+  --xt-border-field-focus: #EA8;
+  --xt-border-highlight: rgba(221, 0, 0, .8);
+  --xt-header-dialog-bg: rgba(240,224,214,0.98);
+  --xt-header-dialog-fg: #B86
+  --xt-header-link: #800000;
+  --xt-dead-link: #00E;
+  --xt-qr-link-border: rgb(225, 209, 199) rgb(225, 209, 199) rgb(210, 194, 184);
+  --xt-qr-bg: linear-gradient(#FFEFE5, #F0E0D6) repeat scroll 0% 0% transparent;
+  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-unread: rgba(240, 224, 214, 0.5);
 }
 
 /* Watcher Favicon */
@@ -13117,7 +12673,7 @@ div.post {
 `).join(''));
 
   // cSpell:ignore installGentoo, webfont
-  const mainCSS = style + yotsuba + yotsubaB + futaba + burichan + tomorrow + photon + spooky;
+  const mainCSS = style + variableBase + yotsuba + yotsubaB + futaba + burichan + tomorrow + photon + spooky;
   const faIcons = [
     { name: "audio", data: linkifyAudio },
     { name: "bitchute", data: linkifyBitchute },
@@ -22242,7 +21798,7 @@ vp-replace
       if (this.isClone) {
         return;
       }
-      const { hide, stub, hl, top, noti } = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
+      const { hide, stub, hl, noti } = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
       if (hide) {
         if (this.isReply) {
           PostHiding.hide(this, stub);
@@ -22256,7 +21812,16 @@ vp-replace
         }
       }
       if (noti && Unread.posts && (this.ID > Unread.lastReadPost) && !QuoteYou.isYou(this)) {
-        return Unread.openNotification(this, ' triggered a notification filter');
+        Unread.openNotification(this, ' triggered a notification filter');
+      }
+      if (this.file) {
+        $$1.on(this.file.thumbLink, 'click', (e) => {
+          if (!e.shiftKey || !Conf['MD5 Quick Filter in Threads'])
+            return;
+          Filter.quickFilterMD5.call(this);
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        });
       }
     },
     catalog() {
@@ -22384,7 +21949,7 @@ vp-replace
       });
     },
     quickFilterMD5() {
-      const post = Get$1.postFromNode(this);
+      const post = this instanceof Post ? this : Get$1.postFromNode(this);
       const files = post.files.filter(f => f.MD5);
       if (!files.length) {
         return;

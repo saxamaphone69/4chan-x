@@ -298,7 +298,7 @@ var Index = {
       if ((e.button !== 0) || !e.shiftKey) { return; }
       if (e.type === 'click') {
         e.preventDefault();
-        if (e.target.classList.contains('catalog-thumb')) {
+        if (Conf['MD5 Quick Filter in the Catalog'] && e.target.classList.contains('catalog-thumb')) {
           Filter.quickFilterMD5.call(this.thread.OP);
         } else {
           Index.toggleHide(this.thread);

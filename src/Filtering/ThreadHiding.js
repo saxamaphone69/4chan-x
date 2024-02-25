@@ -277,9 +277,30 @@ var ThreadHiding = {
     const threadRoot = thread.nodes.root;
     threadRoot.hidden = (thread.isHidden = false);
     Index.updateHideLabel();
-    if (thread.catalogView && Index.showHiddenThreads) {
-      $.rm(thread.catalogView.nodes.root);
-      return $.event('PostsRemoved', null, Index.root);
+    if (thread.catalogView) {
+      const { root } = thread.catalogView.nodes;
+
+      if (Index.showHiddenThreads) {
+        $.rm(root);
+        $.event('PostsRemoved', null, Index.root);
+      } else {
+        let i = Index.sortedThreadIDs.indexOf(thread.ID) - 1;
+
+        while (true) {
+          if (i < 0) {
+            $('.board').insertAdjacentElement('afterbegin', root);
+            break;
+          }
+          const rootPrevious = d.getElementById(`t${Index.sortedThreadIDs[i]}`);
+          if (rootPrevious) {
+            rootPrevious.insertAdjacentElement('afterend', root)
+            break;
+          }
+          --i;
+        }
+
+        $.event('PostsInserted', null, Index.root);
+      }
     }
   }
 };
