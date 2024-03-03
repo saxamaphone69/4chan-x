@@ -3,12 +3,12 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
-### v2.5.1 (2023-03-03)
+### v2.5.1 (2024-03-03)
 
-- Fixed missing semicolon. Thanks to
+- Fixed missing semicolon in yotsuba.css. Thanks to
   [@saxamaphone69's review](https://github.com/TuxedoTako/4chan-xt/commit/d795e93e045f5192b51f5680b7e65cd089e99625#commitcomment-139046323).
 
-### v2.5.0 (2023-02-25)
+### v2.5.0 (2024-02-25)
 
 - Quick MD5 filter on shift + click on a thumbnail or expanded file.
   [#32](https://github.com/TuxedoTako/4chan-xt/issues/32)
@@ -17,29 +17,29 @@ in XT.
   - This shouldn't make a difference for the end user, but I have accidentally broking things before.
 - Added `color-scheme: dark;` for tomorrow and spooky themes for dark scroll bars, inputs and buttons.
 
-### v2.4.6 (2023-02-08)
+### v2.4.6 (2024-02-08)
 
 - Fixed inserted posts from external archives missing the hide button before it.
 
-### v2.4.5 (2023-02-04)
+### v2.4.5 (2024-02-04)
 
 - Fixed hovering over a link to a hidden thread throwing an error.
   [#30](https://github.com/TuxedoTako/4chan-xt/issues/30)
 - Fixed example of the type option on general filters. [#29](https://github.com/TuxedoTako/4chan-xt/issues/29)
 
-### v2.4.4 (2023-02-01)
+### v2.4.4 (2024-02-01)
 
 - Fixed icons next to embed links. [#28](https://github.com/TuxedoTako/4chan-xt/issues/28)
 - Updated some of those icons, and compressed some others.
 
-### v2.4.3 (2023-01-25)
+### v2.4.3 (2024-01-25)
 
 - Updated CSS to remove older properties. [#25](https://github.com/TuxedoTako/4chan-xt/issues/25)
 - Fixed image prefetching icon incorrectly showing it is enabled by default.
   [#26](https://github.com/TuxedoTako/4chan-xt/issues/26)
 - Fixed mixing of line endings in the entire output. [#24](https://github.com/TuxedoTako/4chan-xt/issues/24)
 
-### v2.4.2 (2023-01-23)
+### v2.4.2 (2024-01-23)
 
 - Fixed infinite loop when a thread from a tinyboard website is in the thread watcher.
   [#23](https://github.com/TuxedoTako/4chan-xt/issues/23)
@@ -47,12 +47,12 @@ in XT.
   [#23](https://github.com/TuxedoTako/4chan-xt/issues/23#issuecomment-1905295911)
 - Fixed mixing of line endings in the header comments. [#24](https://github.com/TuxedoTako/4chan-xt/issues/24)
 
-### v2.4.1 (2023-01-21)
+### v2.4.1 (2024-01-21)
 
 - Fixed new Relative dates settings' interaction with elements that aren't the date info on posts, like the refresh
   button on the 4chan-XT catalog.
 
-### v2.4.0 (2023-01-21)
+### v2.4.0 (2024-01-21)
 
 - Reworded 'Link Title in the catalog' setting's description.
 - Relative times and full time stamps are no longer mutually exclusive. Setting was moved to the Time Formatting section
@@ -60,7 +60,7 @@ in XT.
 - Build script: added a transformer on the TypeScript output to keep the script from getting bigger when moving files
   from js to ts. If you think this is a waste of time on the build step you can use the `-no-format` flag.
 
-### v2.3.5 (2023-01-09)
+### v2.3.5 (2024-01-09)
 
 - Fixed poster IDs not appearing on new posts. [#20](https://github.com/TuxedoTako/4chan-xt/issues/20)
 
