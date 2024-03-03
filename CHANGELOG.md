@@ -3,9 +3,15 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.5.1 (2023-03-03)
+
+- Fixed missing semicolon. Thanks to
+  [@saxamaphone69's review](https://github.com/TuxedoTako/4chan-xt/commit/d795e93e045f5192b51f5680b7e65cd089e99625#commitcomment-139046323).
+
 ### v2.5.0 (2023-02-25)
 
 - Quick MD5 filter on shift + click on a thumbnail or expanded file.
+  [#32](https://github.com/TuxedoTako/4chan-xt/issues/32)
   - Can be turned off in the settings.
 - Moved different themes to CSS variables.
   - This shouldn't make a difference for the end user, but I have accidentally broking things before.

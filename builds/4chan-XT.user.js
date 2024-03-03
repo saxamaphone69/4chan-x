@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.5.0
+// @version      2.5.1
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.5.0",
-    "date": "2024-02-25T12:39:57Z"
+    "version": "2.5.1",
+    "date": "2024-03-03T12:02:25Z"
   };
 
   var meta = {
@@ -12647,7 +12647,7 @@ div.post {
   --xt-border-field-focus: #EA8;
   --xt-border-highlight: rgba(221, 0, 0, .8);
   --xt-header-dialog-bg: rgba(240,224,214,0.98);
-  --xt-header-dialog-fg: #B86
+  --xt-header-dialog-fg: #B86;
   --xt-header-link: #800000;
   --xt-dead-link: #00E;
   --xt-qr-link-border: rgb(225, 209, 199) rgb(225, 209, 199) rgb(210, 194, 184);
