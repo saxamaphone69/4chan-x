@@ -3,6 +3,12 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.5.2 (2024-03-06)
+
+- Fixed thread watcher icon not changing colors when somebody replies to your post in the tomorrow theme.
+  [#35](https://github.com/TuxedoTako/4chan-xt/issues/35)
+- Fixed header color in the futaba theme.
+
 ### v2.5.1 (2024-03-03)
 
 - Fixed missing semicolon in yotsuba.css. Thanks to

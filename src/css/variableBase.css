@@ -87,7 +87,7 @@
   font-size: var(--xt-entry-size, 10pt);
 }
 .focused.entry {
-  background: var(--xt-entry-fucus-bg);
+  background: var(--xt-entry-focus-bg);
 }
 
 /* Unread */
@@ -97,7 +97,7 @@
 
 /* Thread Watcher */
 .replies-quoting-you > a, #watcher-link.replies-quoting-you, .last-page > a > .watcher-page {
-  color: var(--xt-watcher-quoting-you, #F00);
+  color: var(--xt-watcher-quoting-you, #F00) !important;
 }
 
 /* Moved from style.css */

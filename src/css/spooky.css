@@ -10,7 +10,7 @@
   --xt-dead-link: #FE9600;
   --xt-qr-link-border: rgb(8, 6, 23) rgb(8, 6, 23) rgb(0, 0, 8);
   --xt-qr-bg: linear-gradient(#262435, #171526) repeat scroll 0% 0% transparent;
-  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(23, 21, 38, 0.5);
 
   --xt-unread-line: rgb(197, 200, 198);

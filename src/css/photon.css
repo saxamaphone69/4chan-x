@@ -9,7 +9,7 @@
   --xt-qr-link-border: rgb(206, 206, 206) rgb(206, 206, 206) rgb(191, 191, 191);
   --xt-qr-bg: linear-gradient(#ECECEC, #DDD) repeat scroll 0% 0% transparent;
   --xt-menu-fg: #333;
-  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(221, 221, 221, 0.5);
   --xt-watcher-quoting-you: #00F;
 }

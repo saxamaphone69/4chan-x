@@ -12,7 +12,7 @@
   --xt-qr-link-border: rgb(25, 27, 31) rgb(25, 27, 31) rgb(10, 12, 16);
   --xt-qr-bg: linear-gradient(#37393D, #282A2E) repeat scroll 0% 0% transparent;
   --xt-menu-fg: #C5C8C6;
-  --xt-entry-fucus-bg: rgba(0, 0, 0, .33);
+  --xt-entry-focus-bg: rgba(0, 0, 0, .33);
   --xt-unread: rgba(40, 42, 46, 0.5);
 
   --xt-unread-line: rgb(197, 200, 198);

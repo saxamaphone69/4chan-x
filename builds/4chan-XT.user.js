@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.5.1
+// @version      2.5.2
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.5.1",
-    "date": "2024-03-03T12:02:25Z"
+    "version": "2.5.2",
+    "date": "2024-03-06T18:23:46Z"
   };
 
   var meta = {
@@ -9751,7 +9751,7 @@ https://*.hcaptcha.com
   --xt-qr-bg: linear-gradient(#E5E9FF, #D6DAF0) repeat scroll 0% 0% transparent;
   --xt-menu-fg: #000;
   --xt-entry-size: 12pt;
-  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-link-hover-bg: #D9DDF3;
   --xt-unread: rgba(214, 218, 240, 0.5);
 }
@@ -9777,12 +9777,12 @@ https://*.hcaptcha.com
   --xt-notification-size: 11pt;
   --xt-header-dialog-fg: #B86;
   --xt-dead-link: #00E;
-  --xt-header-dialog-bg: rgba(0, 0, 0, .15);
+  --xt-header-dialog-bg: rgba(240,224,214,0.98);
   --xt-header-link: #800000;
   --xt-qr-link-border: rgb(225, 209, 199) rgb(225, 209, 199) rgb(210, 194, 184);
   --xt-qr-bg: linear-gradient(#FFEFE5, #F0E0D6) repeat scroll 0% 0% transparent;
   --xt-entry-size: 12pt;
-  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(240, 224, 214, 0.5);
 }
 
@@ -9930,7 +9930,7 @@ https://*.hcaptcha.com
   font-size: var(--xt-entry-size, 10pt);
 }
 .focused.entry {
-  background: var(--xt-entry-fucus-bg);
+  background: var(--xt-entry-focus-bg);
 }
 
 /* Unread */
@@ -9940,7 +9940,7 @@ https://*.hcaptcha.com
 
 /* Thread Watcher */
 .replies-quoting-you > a, #watcher-link.replies-quoting-you, .last-page > a > .watcher-page {
-  color: var(--xt-watcher-quoting-you, #F00);
+  color: var(--xt-watcher-quoting-you, #F00) !important;
 }
 
 /* Moved from style.css */
@@ -10015,7 +10015,7 @@ https://*.hcaptcha.com
   --xt-qr-link-border: rgb(206, 206, 206) rgb(206, 206, 206) rgb(191, 191, 191);
   --xt-qr-bg: linear-gradient(#ECECEC, #DDD) repeat scroll 0% 0% transparent;
   --xt-menu-fg: #333;
-  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(221, 221, 221, 0.5);
   --xt-watcher-quoting-you: #00F;
 }
@@ -10073,7 +10073,7 @@ https://*.hcaptcha.com
   --xt-dead-link: #FE9600;
   --xt-qr-link-border: rgb(8, 6, 23) rgb(8, 6, 23) rgb(0, 0, 8);
   --xt-qr-bg: linear-gradient(#262435, #171526) repeat scroll 0% 0% transparent;
-  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(23, 21, 38, 0.5);
 
   --xt-unread-line: rgb(197, 200, 198);
@@ -12537,7 +12537,7 @@ div.post {
   --xt-qr-link-border: rgb(25, 27, 31) rgb(25, 27, 31) rgb(10, 12, 16);
   --xt-qr-bg: linear-gradient(#37393D, #282A2E) repeat scroll 0% 0% transparent;
   --xt-menu-fg: #C5C8C6;
-  --xt-entry-fucus-bg: rgba(0, 0, 0, .33);
+  --xt-entry-focus-bg: rgba(0, 0, 0, .33);
   --xt-unread: rgba(40, 42, 46, 0.5);
 
   --xt-unread-line: rgb(197, 200, 198);
@@ -12630,7 +12630,7 @@ div.post {
   --xt-qr-link-border: rgb(199, 203, 225) rgb(199, 203, 225) rgb(184, 188, 210);
   --xt-qr-bg: linear-gradient(#E5E9FF, #D6DAF0) repeat scroll 0% 0% transparent;
   --xt-menu-fg: #000,
-  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(214, 218, 240, 0.5);
   }
 
@@ -12652,7 +12652,7 @@ div.post {
   --xt-dead-link: #00E;
   --xt-qr-link-border: rgb(225, 209, 199) rgb(225, 209, 199) rgb(210, 194, 184);
   --xt-qr-bg: linear-gradient(#FFEFE5, #F0E0D6) repeat scroll 0% 0% transparent;
-  --xt-entry-fucus-bg: rgba(255, 255, 255, .33);
+  --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(240, 224, 214, 0.5);
 }
 
