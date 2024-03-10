@@ -9,10 +9,15 @@ files, and then gradually convert js files to ts and add types as needed.
 
 ## Install
 
-This fork is only distributed trough GitHub releases at this moment. Automatic updates are supported for the user script
-version, but not the chrome extension.
+This fork is distributed trough GitHub releases and [Greasy Fork](https://greasyfork.org/scripts/489508-4chan-xt).
+There are known issues with updating user script trough github: [#34](https://github.com/TuxedoTako/4chan-xt/issues/34)
+[violentmonkey#1673](https://github.com/violentmonkey/violentmonkey/issues/1673), but Greasy Fork doesn't allow the
+minified version. Automatic updates are supported for the user script version, but not the chrome extension.
 
 ## TODO
+
+<details>
+<summary>Click to expand</summary>
 
 - find alternative for `<% if (`
   - [x] made html templates jsx/txt functions
@@ -26,6 +31,8 @@ version, but not the chrome extension.
     - [x] crx directory that can be loaded as an unpacked extension is created
 - [x] port updates made to 4chan-X made since this was forked
 - [ ] Clean up circular dependencies
+
+</details>
 
 ## Other notes
 
