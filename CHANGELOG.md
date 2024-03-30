@@ -3,6 +3,10 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### v2.6.0 (2024-03-30)
+
+- Added an option to Update stats more often and add purge position when a thread is close to getting purged, for anons who manage general threads. [#39](https://github.com/TuxedoTako/4chan-xt/issues/39)
+
 ### v2.5.2 (2024-03-06)
 
 - Fixed thread watcher icon not changing colors when somebody replies to your post in the tomorrow theme.

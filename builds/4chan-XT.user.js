@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.5.2
+// @version      2.6.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -193,8 +193,8 @@
   'use strict';
 
   var version = {
-    "version": "2.5.2",
-    "date": "2024-03-06T18:23:46Z"
+    "version": "2.6.0",
+    "date": "2024-03-30T18:22:54Z"
   };
 
   var meta = {
@@ -849,6 +849,11 @@ div.boardTitle {
           true,
           'Display the page count in the thread stats.',
           1
+        ],
+        'Purge Position': [
+          false,
+          'Update stats more often and add purge position when a thread is close to getting purged, for anons who manage general threads.',
+          2
         ],
         'Updater and Stats in Header': [
           true,
@@ -18108,7 +18113,6 @@ vp-replace
   /*
    * decaffeinate suggestions:
    * DS102: Remove unnecessary code created because of implicit returns
-   * DS202: Simplify dynamic range loops
    * DS207: Consider shorter variations of null checks
    * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
    */
@@ -18469,7 +18473,7 @@ vp-replace
       const postRange = new Range();
       postRange.selectNode(root);
       let text = post.board.ID === g.BOARD.ID ? `>>${post}\n` : `>>>/${post.board}/${post}\n`;
-      for (let i = 0, end = sel.rangeCount, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+      for (let i = 0; i < sel.rangeCount; i++) {
         try {
           var insideCode, node;
           range = sel.getRangeAt(i);
@@ -18631,7 +18635,7 @@ vp-replace
         if (m = src.match(/data:(image\/(\w+));base64,(.+)/)) {
           var bstr = atob(m[3]);
           var arr = new Uint8Array(bstr.length);
-          for (var i = 0, end = bstr.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+          for (let i = 0; i < bstr.length; i++) {
             arr[i] = bstr.charCodeAt(i);
           }
           var blob = new Blob([arr], {type: m[1]});
@@ -20697,25 +20701,13 @@ vp-replace
   $.whenModified = function (url, bucket, cb, options = {}) {
     let t;
     const { timeout, ajax } = options;
-    const params = [];
-    // XXX https://bugs.chromium.org/p/chromium/issues/detail?id=643659
-    if ($.engine === 'blink') {
-      params.push(`s=${bucket}`);
-    }
-    if (url.split('/')[2] === 'a.4cdn.org') {
-      params.push(`t=${Date.now()}`);
-    }
-    const url0 = url;
-    if (params.length) {
-      url += '?' + params.join('&');
-    }
     const headers = dict();
-    if ((t = $.lastModified[bucket]?.[url0]) != null) {
+    if ((t = $.lastModified[bucket]?.[url]) != null) {
       headers['If-Modified-Since'] = t;
     }
     const r = (ajax || $.ajax)(url, {
       onloadend() {
-        ($.lastModified[bucket] || ($.lastModified[bucket] = dict()))[url0] = this.getResponseHeader('Last-Modified');
+        ($.lastModified[bucket] || ($.lastModified[bucket] = dict()))[url] = this.getResponseHeader('Last-Modified');
         return cb.call(this);
       },
       timeout,
@@ -25156,11 +25148,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     }
   };
 
-  /*
-   * decaffeinate suggestions:
-   * DS102: Remove unnecessary code created because of implicit returns
-   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
-   */
   var ThreadStats = {
     postCount: 0,
     fileCount: 0,
@@ -25177,7 +25164,14 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       const statsHTML = {innerHTML: "<span id=\"post-count\">?</span> / <span id=\"file-count\">?</span>" + ((Conf["IP Count in Stats"] && g.SITE.hasIPCount) ? " / <span id=\"ip-count\">?</span>" : "") + ((Conf["Page Count in Stats"]) ? " / <span id=\"page-count\">?</span>" : "")};
       let statsTitle = 'Posts / Files';
       if (Conf['IP Count in Stats'] && g.SITE.hasIPCount) { statsTitle += ' / IPs'; }
-      if (Conf['Page Count in Stats']) { statsTitle += (this.showPurgePos ? ' / Purge Position' : ' / Page'); }
+      if (Conf['Page Count in Stats']) {
+        if (this.showPurgePos) {
+          statsTitle += ' / Purge Position';
+        } else {
+          statsTitle += ' / Page';
+          if (Conf['Purge Position']) statsTitle += ' (Purge Position)';
+        }
+      }
 
       if (Conf['Updater and Stats in Header']) {
         this.dialog = (sc = $$1.el('span', {
@@ -25227,7 +25221,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           ThreadStats.fileCount += post.files.length;
         }
       }
-      return ThreadStats.postIndex = n;
+      ThreadStats.postIndex = n;
     },
 
     onUpdate(e) {
@@ -25256,7 +25250,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       fileCountEl.textContent = ThreadStats.fileCount;
       if (ipCountEl) ipCountEl.textContent = thread.ipCount ?? '?';
       postCountEl.classList.toggle('warning', (thread.postLimit && !thread.isSticky));
-      return fileCountEl.classList.toggle('warning', (thread.fileLimit && !thread.isSticky));
+      fileCountEl.classList.toggle('warning', (thread.fileLimit && !thread.isSticky));
     },
 
     fetchPage() {
@@ -25267,8 +25261,12 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         $$1.addClass(ThreadStats.pageCountEl, 'warning');
         return;
       }
-      ThreadStats.timeout = setTimeout(ThreadStats.fetchPage, 2 * MINUTE);
-      return $$1.whenModified(
+      ThreadStats.timeout = setTimeout(
+        ThreadStats.fetchPage,
+        Conf['Purge Position'] && ThreadStats.pageCountEl.classList.contains('warning')
+          ? (5 * SECOND) : (2 * MINUTE)
+      );
+      $$1.whenModified(
         g.SITE.urls.threadsListJSON(ThreadStats.thread),
         'ThreadStats',
         ThreadStats.onThreadsLoad
@@ -25288,7 +25286,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
             }
           }
           ThreadStats.pageCountEl.textContent = purgePos;
-          return ThreadStats.pageCountEl.classList.toggle('warning', (purgePos === 1));
+          ThreadStats.pageCountEl.classList.toggle('warning', (purgePos === 1));
         } else {
           let nThreads;
           let i = (nThreads = 0);
@@ -25300,7 +25298,11 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
             for (thread of page.threads) {
               if (thread.no === ThreadStats.thread.ID) {
                 ThreadStats.pageCountEl.textContent = pageNum + 1;
-                ThreadStats.pageCountEl.classList.toggle('warning', (i >= (nThreads - this.response[0].threads.length)));
+                const hasWarning = (i >= (nThreads - this.response[0].threads.length));
+                ThreadStats.pageCountEl.classList.toggle('warning', hasWarning);
+                if (hasWarning && Conf['Purge Position']) {
+                  ThreadStats.pageCountEl.textContent += ` (${nThreads - i - 1})`;
+                }
                 ThreadStats.lastPageUpdate = new Date(thread.last_modified * SECOND);
                 ThreadStats.retry();
                 return;
@@ -25310,7 +25312,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           }
         }
       } else if (this.status === 304) {
-        return ThreadStats.retry();
+        ThreadStats.retry();
       }
     },
 
@@ -25324,7 +25326,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         (ThreadStats.thread.posts.get(ThreadStats.thread.lastPost).info.date <= ThreadStats.lastPageUpdate)
       ) { return; }
       clearTimeout(ThreadStats.timeout);
-      return ThreadStats.timeout = setTimeout(ThreadStats.fetchPage, 5 * SECOND);
+      ThreadStats.timeout = setTimeout(ThreadStats.fetchPage, 5 * SECOND);
     }
   };
 

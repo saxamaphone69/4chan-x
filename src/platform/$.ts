@@ -221,19 +221,13 @@ $.lastModified = dict();
 $.whenModified = function(url, bucket, cb, options={}) {
   let t;
   const {timeout, ajax} = options;
-  const params = [];
-  // XXX https://bugs.chromium.org/p/chromium/issues/detail?id=643659
-  if ($.engine === 'blink') { params.push(`s=${bucket}`); }
-  if (url.split('/')[2] === 'a.4cdn.org') { params.push(`t=${Date.now()}`); }
-  const url0 = url;
-  if (params.length) { url += '?' + params.join('&'); }
   const headers = dict();
-  if ((t = $.lastModified[bucket]?.[url0]) != null) {
+  if ((t = $.lastModified[bucket]?.[url]) != null) {
     headers['If-Modified-Since'] = t;
   }
   const r = (ajax || $.ajax)(url, {
     onloadend() {
-      ($.lastModified[bucket] || ($.lastModified[bucket] = dict()))[url0] = this.getResponseHeader('Last-Modified');
+      ($.lastModified[bucket] || ($.lastModified[bucket] = dict()))[url] = this.getResponseHeader('Last-Modified');
       return cb.call(this);
     },
     timeout,

@@ -444,6 +444,11 @@ const Config = {
         'Display the page count in the thread stats.',
         1
       ],
+      'Purge Position': [
+        false,
+        'Update stats more often and add purge position when a thread is close to getting purged, for anons who manage general threads.',
+        2
+      ],
       'Updater and Stats in Header': [
         true,
         'Places the thread updater and thread stats in the header instead of floating them.'

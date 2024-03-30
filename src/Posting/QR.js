@@ -19,7 +19,6 @@ import { DAY, dict, SECOND } from '../platform/helpers';
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
@@ -380,7 +379,7 @@ var QR = {
     const postRange = new Range();
     postRange.selectNode(root);
     let text = post.board.ID === g.BOARD.ID ? `>>${post}\n` : `>>>/${post.board}/${post}\n`;
-    for (let i = 0, end = sel.rangeCount, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+    for (let i = 0; i < sel.rangeCount; i++) {
       try {
         var insideCode, node;
         range = sel.getRangeAt(i);
@@ -542,7 +541,7 @@ var QR = {
       if (m = src.match(/data:(image\/(\w+));base64,(.+)/)) {
         var bstr = atob(m[3]);
         var arr = new Uint8Array(bstr.length);
-        for (var i = 0, end = bstr.length, asc = 0 <= end; asc ? i < end : i > end; asc ? i++ : i--) {
+        for (let i = 0; i < bstr.length; i++) {
           arr[i] = bstr.charCodeAt(i);
         }
         var blob = new Blob([arr], {type: m[1]});

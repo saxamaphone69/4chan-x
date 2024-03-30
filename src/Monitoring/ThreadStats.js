@@ -5,11 +5,6 @@ import { g, Conf, E, doc, d } from "../globals/globals";
 import $ from "../platform/$";
 import { MINUTE, SECOND } from "../platform/helpers";
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 var ThreadStats = {
   postCount: 0,
   fileCount: 0,
@@ -26,7 +21,14 @@ var ThreadStats = {
     const statsHTML = {innerHTML: "<span id=\"post-count\">?</span> / <span id=\"file-count\">?</span>" + ((Conf["IP Count in Stats"] && g.SITE.hasIPCount) ? " / <span id=\"ip-count\">?</span>" : "") + ((Conf["Page Count in Stats"]) ? " / <span id=\"page-count\">?</span>" : "")};
     let statsTitle = 'Posts / Files';
     if (Conf['IP Count in Stats'] && g.SITE.hasIPCount) { statsTitle += ' / IPs'; }
-    if (Conf['Page Count in Stats']) { statsTitle += (this.showPurgePos ? ' / Purge Position' : ' / Page'); }
+    if (Conf['Page Count in Stats']) {
+      if (this.showPurgePos) {
+        statsTitle += ' / Purge Position';
+      } else {
+        statsTitle += ' / Page';
+        if (Conf['Purge Position']) statsTitle += ' (Purge Position)';
+      }
+    }
 
     if (Conf['Updater and Stats in Header']) {
       this.dialog = (sc = $.el('span', {
@@ -76,7 +78,7 @@ var ThreadStats = {
         ThreadStats.fileCount += post.files.length;
       }
     }
-    return ThreadStats.postIndex = n;
+    ThreadStats.postIndex = n;
   },
 
   onUpdate(e) {
@@ -105,7 +107,7 @@ var ThreadStats = {
     fileCountEl.textContent = ThreadStats.fileCount;
     if (ipCountEl) ipCountEl.textContent = thread.ipCount ?? '?';
     postCountEl.classList.toggle('warning', (thread.postLimit && !thread.isSticky));
-    return fileCountEl.classList.toggle('warning', (thread.fileLimit && !thread.isSticky));
+    fileCountEl.classList.toggle('warning', (thread.fileLimit && !thread.isSticky));
   },
 
   fetchPage() {
@@ -116,8 +118,12 @@ var ThreadStats = {
       $.addClass(ThreadStats.pageCountEl, 'warning');
       return;
     }
-    ThreadStats.timeout = setTimeout(ThreadStats.fetchPage, 2 * MINUTE);
-    return $.whenModified(
+    ThreadStats.timeout = setTimeout(
+      ThreadStats.fetchPage,
+      Conf['Purge Position'] && ThreadStats.pageCountEl.classList.contains('warning')
+        ? (5 * SECOND) : (2 * MINUTE)
+    );
+    $.whenModified(
       g.SITE.urls.threadsListJSON(ThreadStats.thread),
       'ThreadStats',
       ThreadStats.onThreadsLoad
@@ -137,7 +143,7 @@ var ThreadStats = {
           }
         }
         ThreadStats.pageCountEl.textContent = purgePos;
-        return ThreadStats.pageCountEl.classList.toggle('warning', (purgePos === 1));
+        ThreadStats.pageCountEl.classList.toggle('warning', (purgePos === 1));
       } else {
         let nThreads;
         let i = (nThreads = 0);
@@ -149,7 +155,11 @@ var ThreadStats = {
           for (thread of page.threads) {
             if (thread.no === ThreadStats.thread.ID) {
               ThreadStats.pageCountEl.textContent = pageNum + 1;
-              ThreadStats.pageCountEl.classList.toggle('warning', (i >= (nThreads - this.response[0].threads.length)));
+              const hasWarning = (i >= (nThreads - this.response[0].threads.length));
+              ThreadStats.pageCountEl.classList.toggle('warning', hasWarning);
+              if (hasWarning && Conf['Purge Position']) {
+                ThreadStats.pageCountEl.textContent += ` (${nThreads - i - 1})`;
+              }
               ThreadStats.lastPageUpdate = new Date(thread.last_modified * SECOND);
               ThreadStats.retry();
               return;
@@ -159,7 +169,7 @@ var ThreadStats = {
         }
       }
     } else if (this.status === 304) {
-      return ThreadStats.retry();
+      ThreadStats.retry();
     }
   },
 
@@ -173,7 +183,7 @@ var ThreadStats = {
       (ThreadStats.thread.posts.get(ThreadStats.thread.lastPost).info.date <= ThreadStats.lastPageUpdate)
     ) { return; }
     clearTimeout(ThreadStats.timeout);
-    return ThreadStats.timeout = setTimeout(ThreadStats.fetchPage, 5 * SECOND);
+    ThreadStats.timeout = setTimeout(ThreadStats.fetchPage, 5 * SECOND);
   }
 };
 export default ThreadStats;
