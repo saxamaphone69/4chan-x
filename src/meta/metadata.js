@@ -87,6 +87,7 @@ export default async function generateMetadata(packageJson, channel, fileName, m
   }
   output += `
 // @icon         data:image/png;base64,${icon}
+// @license      MIT
 // ==/UserScript==
 `;
 
