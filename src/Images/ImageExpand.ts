@@ -11,6 +11,7 @@ import ImageCommon from "./ImageCommon";
 import Volume from "./Volume";
 import Audio from "./Audio";
 import type { default as Post, PostClone } from "../classes/Post";
+import Icon from "../Icons/icon";
 
 /*
  * decaffeinate suggestions:
@@ -23,14 +24,13 @@ var ImageExpand = {
 
     this.EAI = $.el('a', {
       className: 'expand-all-shortcut',
-      textContent: 'Expand All Images',
       title: 'Expand All Images',
       href: 'javascript:;'
-    }
-    );
+    });
+    Icon.set(this.EAI, 'expand', 'Expand All Images');
 
     $.on(this.EAI, 'click', this.cb.toggleAll);
-    Header.addShortcut('expand-all', this.EAI, 520, '➕︎');
+    Header.addShortcut('expand-all', this.EAI, 520);
     $.on(d, 'scroll visibilitychange', this.cb.playVideos);
     this.videoControls = $.el('span', {className: 'video-controls'});
     $.extend(this.videoControls, {innerHTML: " <a href=\"javascript:;\" title=\"You can also contract the video by dragging it to the left.\">contract</a>"});

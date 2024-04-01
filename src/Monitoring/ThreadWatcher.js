@@ -20,6 +20,7 @@ import Menu from '../Menu/Menu';
 import UI from '../General/UI';
 import Get from '../General/Get';
 import { dict, HOUR, MINUTE } from '../platform/helpers';
+import Icon from '../Icons/icon';
 
 /*
  * decaffeinate suggestions:
@@ -35,16 +36,16 @@ var ThreadWatcher = {
     if (!(this.enabled = Conf['Thread Watcher'])) { return; }
 
     this.shortcut = (sc = $.el('a', {
-      id:          'watcher-link',
-      textContent: 'Watcher',
-      title:       'Thread Watcher',
-      href:        'javascript:;',
-    }
-    ));
+      id:    'watcher-link',
+      title: 'Thread Watcher',
+      href:  'javascript:;',
+    }));
+    Icon.set(this.shortcut, 'eye', 'watcher');
 
     this.db     = new DataBoard('watchedThreads', this.refresh, true);
     this.dbLM   = new DataBoard('watcherLastModified', null, true);
     this.dialog = UI.dialog('thread-watcher', { innerHTML: ThreadWatcherPage });
+    Icon.set(this.dialog.firstElementChild.firstElementChild, 'refresh');
     this.status = $('#watcher-status', this.dialog);
     this.list   = this.dialog.lastElementChild;
     this.refreshButton = $('.refresh', this.dialog);
@@ -77,7 +78,7 @@ var ThreadWatcher = {
       this.dialog.hidden = true;
     }
 
-    Header.addShortcut('watcher', sc, 510, '👁︎');
+    Header.addShortcut('watcher', sc, 510,);
 
     ThreadWatcher.initLastModified();
     ThreadWatcher.fetchAuto();

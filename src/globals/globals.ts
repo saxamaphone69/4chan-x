@@ -26,7 +26,9 @@ export interface BoardConfig {
   per_page:          number,
   spoilers:          number,
   title:             string
-  ws_board:           1 | 0
+  ws_board:          1 | 0
+  country_flags:     number,
+  board_flags:       Record<string, string>,
 }
 
 export interface Board {

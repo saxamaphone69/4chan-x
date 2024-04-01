@@ -413,7 +413,7 @@ $.one = function(el, events, handler) {
   return $.on(el, events, cb);
 };
 
-$.event = function(event, detail, root=d) {
+$.event = function(event, detail, root: EventTarget = d) {
   if (!globalThis.chrome?.extension) {
     if ((detail != null) && (typeof cloneInto === 'function')) {
       detail = cloneInto(detail, d.defaultView);
@@ -497,7 +497,7 @@ $.queueTask = (function() {
     // setTimeout is throttled in background tabs on firefox
     Promise.resolve().then(execTask);
   };
-})();
+})() as (fn: (fn: any) => any, ...args: any[]) => void;
 
 /**
  * Runs a function on the page instead of the user script or extension context.
@@ -591,7 +591,7 @@ $.oneItemSugar = fn => (function(key, val, cb) {
   } else {
     return fn(key, val);
   }
-});
+}) as ((key: string, value: any, callback?: (() => void)) => void) | ((key: any, value: any) => void);
 
 $.syncing = dict();
 

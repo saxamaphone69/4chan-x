@@ -19,6 +19,7 @@ import { Conf, d, doc, g } from '../globals/globals';
 import UI from '../General/UI';
 import Get from '../General/Get';
 import { debounce, dict, SECOND } from '../platform/helpers';
+import Icon from '../Icons/icon';
 
 var Gallery = {
   init() {
@@ -29,12 +30,12 @@ var Gallery = {
     const el = $.el('a', {
       href: 'javascript:;',
       title: 'Gallery',
-      textContent: 'Gallery',
     });
+    Icon.set(el, 'image', 'Gallery');
 
     $.on(el, 'click', this.cb.toggle);
 
-    Header.addShortcut('gallery', el, 530, '🖼︎');
+    Header.addShortcut('gallery', el, 530);
 
     return Callbacks.Post.push({
       name: 'Gallery',

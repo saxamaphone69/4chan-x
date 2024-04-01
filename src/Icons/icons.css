@@ -1,0 +1,22 @@
+/* Icons */
+svg.icon {
+  height: 14px;
+}
+:root.shortcut-icons #shortcuts .shortcut {
+  padding-top: 0;
+  padding-bottom: 0;
+  display: flex;
+  height: 14px;
+}
+:root.shortcut-icons #shortcuts .icon--alt-text,
+:root:not(.shortcut-icons) .shortcut svg {
+  display: none;
+}
+:root.shortcut-icons .shortcut.brackets-wrap::before,
+:root.shortcut-icons .shortcut.brackets-wrap::after{
+  display: none;
+}
+@keyframes spin {
+  0% {transform:rotate(0deg);}
+  100% {transform:rotate(359deg);}
+}

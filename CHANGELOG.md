@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### Unreleased
+
+- Re-added font-awesome for the header icons. This time I'm only importing the icons needed instead of the while icon
+  font. [#38](https://github.com/TuxedoTako/4chan-xt/issues/38)
+
 ### v2.6.0 (2024-03-30)
 
 - Added an option to Update stats more often and add purge position when a thread is close to getting purged, for anons who manage general threads. [#39](https://github.com/TuxedoTako/4chan-xt/issues/39)

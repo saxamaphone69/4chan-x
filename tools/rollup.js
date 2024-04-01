@@ -1,6 +1,7 @@
 import { rollup } from 'rollup';
 import typescript from '@rollup/plugin-typescript';
 import setupFileInliner from './rollup-plugin-inline-file.js';
+import faFix from './rollup-plugin-fa.js';
 import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import generateMetadata from '../src/meta/metadata.js';
@@ -10,6 +11,7 @@ import generateManifestJson from '../src/meta/manifestJson.js';
 import terser from '@rollup/plugin-terser';
 import fixTsOutputFormat from './fix-ts-output-format.js';
 import cleanup from 'rollup-plugin-cleanup';
+import alias from '@rollup/plugin-alias';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -43,6 +45,18 @@ const noFormat = process.argv.includes('-no-format');
     input: resolve(__dirname, '../src/main/Main.js'),
     plugins: [
       typescript(),
+      alias({
+        entries: [
+          {
+            find: /^@fa\/(.*)$/,
+            replacement: resolve(__dirname, '../node_modules/@fortawesome/free-regular-svg-icons/$1.js')
+          },
+          {
+            find: /^@fas\/(.*)$/,
+            replacement: resolve(__dirname, '../node_modules/@fortawesome/free-solid-svg-icons/$1.js')
+          },
+        ]
+      }),
       minify || noFormat ? undefined : fixTsOutputFormat({
         include: ["**/*.ts", "**/*.tsx"],
       }),
@@ -86,6 +100,7 @@ const noFormat = process.argv.includes('-no-format');
           return `export default ${input};`;
         }
       }),
+      faFix,
       cleanup({
         extensions: ['js', 'ts', 'tsx', 'json', 'html', 'css'],
         comments: 'all',

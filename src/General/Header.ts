@@ -604,10 +604,6 @@ var Header = {
       id: `shortcut-${id}`,
       className: 'shortcut brackets-wrap'
     });
-    if (icon) {
-      shortcut.style.setProperty('--icon', `"${icon}"`);
-      shortcut.classList.add('icon-shortcut');
-    }
     $.add(shortcut, el);
     shortcut.dataset.index = index.toString();
     for (var item of $$('[data-index]', Header.shortcuts)) {

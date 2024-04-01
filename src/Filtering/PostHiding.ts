@@ -7,12 +7,6 @@ import Menu from "../Menu/Menu";
 import $ from "../platform/$";
 import Recursive from "./Recursive";
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 var PostHiding = {
   init() {
     if (!['index', 'thread'].includes(g.VIEW) || (!Conf['Reply Hiding Buttons'] && !(Conf['Menu'] && Conf['Reply Hiding Link']))) { return; }
@@ -22,7 +16,7 @@ var PostHiding = {
     }
 
     this.db = new DataBoard('hiddenPosts');
-    return Callbacks.Post.push({
+    Callbacks.Post.push({
       name: 'Reply Hiding',
       cb:   this.node
     });
@@ -51,9 +45,9 @@ var PostHiding = {
     if (sa = g.SITE.selectors.sideArrows) {
       const sideArrows = $(sa, this.nodes.root);
       $.replace(sideArrows.firstChild, button);
-      return sideArrows.className = 'replacedSideArrows';
+      sideArrows.className = 'replacedSideArrows';
     } else {
-      return $.prepend(this.nodes.info, button);
+      $.prepend(this.nodes.info, button);
     }
   },
 
@@ -146,7 +140,7 @@ var PostHiding = {
             {el: replies}
         ]});
 
-      return Menu.menu.addEntry({
+      Menu.menu.addEntry({
         el: hideStubLink,
         order: 15,
         open(post) {
@@ -177,7 +171,7 @@ var PostHiding = {
         return;
       }
       PostHiding.saveHiddenState(post, true, thisPost, makeStub, replies);
-      return $.event('CloseMenu');
+      $.event('CloseMenu');
     },
 
     show() {
@@ -197,7 +191,7 @@ var PostHiding = {
       if (data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID})) {
         PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies);
       }
-      return $.event('CloseMenu');
+      $.event('CloseMenu');
     },
     hideStub() {
       let data;
@@ -237,16 +231,16 @@ var PostHiding = {
         makeStub,
         hideRecursively
       };
-      return PostHiding.db.set(data);
+      PostHiding.db.set(data);
     } else {
-      return PostHiding.db.delete(data);
+      PostHiding.db.delete(data);
     }
   },
 
   toggle() {
     const post = Get.postFromNode(this);
     PostHiding[(post.isHidden ? 'show' : 'hide')](post);
-    return PostHiding.saveHiddenState(post, post.isHidden);
+    PostHiding.saveHiddenState(post, post.isHidden);
   },
 
   hide(post, makeStub=Conf['Stubs'], hideRecursively=Conf['Recursive Hiding']) {
@@ -275,7 +269,7 @@ var PostHiding = {
     if (Conf['Menu']) {
       $.add(post.nodes.stub, Menu.makeButton(post));
     }
-    return $.prepend(post.nodes.root, post.nodes.stub);
+    $.prepend(post.nodes.root, post.nodes.stub);
   },
 
   show(post, showRecursively=Conf['Recursive Hiding']) {

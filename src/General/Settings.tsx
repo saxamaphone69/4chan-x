@@ -30,6 +30,7 @@ import { c, Conf, d, doc, E, g } from '../globals/globals';
 import Header from './Header';
 import h, { hFragment } from '../globals/jsx';
 import { dict, platform } from '../platform/helpers';
+import Icon from '../Icons/icon';
 
 var Settings = {
   dialog: undefined as HTMLDivElement | undefined,
@@ -37,15 +38,14 @@ var Settings = {
   init() {
     // 4chan X settings link
     const link = $.el('a', {
-      className:   'settings-link',
-      textContent: 'Settings',
-      title:       `${meta.name} Settings`,
-      href:        'javascript:;'
-    }
-    );
+      className: 'settings-link',
+      title:     `${meta.name} Settings`,
+      href:      'javascript:;'
+    });
+    Icon.set(link, 'wrench', 'Settings');
     $.on(link, 'click', Settings.open);
 
-    Header.addShortcut('settings', link, 820, '🔧︎');
+    Header.addShortcut('settings', link, 820);
 
     const add = this.addSection;
 

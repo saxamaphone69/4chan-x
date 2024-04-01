@@ -38,8 +38,9 @@ import yotsubaB from './yotsuba-b.css';
 import yotsuba from './yotsuba.css';
 import { icons } from './style';
 import { g } from '../globals/globals';
+import iconCss from '../Icons/icons.css';
 
-const mainCSS = style + variableBase + yotsuba +yotsubaB+futaba+burichan+tomorrow + photon + spooky;
+const mainCSS = style + variableBase + yotsuba +yotsubaB+futaba+burichan+tomorrow + photon + spooky + iconCss;
 const faIcons: { name: string, data: string }[] = [
   { name: "audio", data: linkifyAudio },
   { name: "bitchute", data: linkifyBitchute },

@@ -24,6 +24,10 @@
     // https://stackoverflow.com/q/40460790, https://github.com/rollup/plugins/issues/243
     "outDir": "builds/test/crx/tsOutput",
     "importHelpers": true,
+    "paths": {
+      "@fa/*": ["./node_modules/@fortawesome/free-regular-svg-icons/*"],
+      "@fas/*": ["./node_modules/@fortawesome/free-solid-svg-icons/*"],
+    }
   },
   "exclude": [
     "builds/test/tsOutput"

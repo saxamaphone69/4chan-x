@@ -1,6 +1,7 @@
 import Callbacks from "../classes/Callbacks";
 import Header from "../General/Header";
 import { g, Conf, d, doc } from "../globals/globals";
+import Icon from "../Icons/icon";
 import $ from "../platform/$";
 
 /*
@@ -35,12 +36,12 @@ var ImageLoader = {
       href: 'javascript:;',
       title: 'Prefetch Images',
       className: 'disabled',
-      innerHTML: 'Prefetch',
     });
+    Icon.set(el, 'bolt', 'Prefetch')
 
     $.on(el, 'click', this.toggle);
 
-    return Header.addShortcut('prefetch', el, 525, '🗲︎');
+    return Header.addShortcut('prefetch', el, 525);
   },
 
   node() {

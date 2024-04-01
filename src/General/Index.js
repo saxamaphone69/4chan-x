@@ -31,6 +31,7 @@ import PageList from './Index/PageList.html';
 import BoardConfig from './BoardConfig';
 import Get from './Get';
 import { dict, SECOND } from '../platform/helpers';
+import Icon from '../Icons/icon';
 
 var Index = {
   showHiddenThreads: false,
@@ -83,11 +84,10 @@ var Index = {
     this.button = $.el('a', {
       title: 'Refresh',
       href: 'javascript:;',
-      textContent: 'Refresh',
-      className: 'bigger-icon',
     });
+    Icon.set(this.button, 'refresh', 'Refresh')
     $.on(this.button, 'click', () => Index.update());
-    Header.addShortcut('index-refresh', this.button, 590, '🗘');
+    Header.addShortcut('index-refresh', this.button, 590);
 
     // Header "Index Navigation" submenu
     const entries = [];
