@@ -357,6 +357,7 @@ audio.controls-added {
 }
 #shortcuts {
   float: right;
+  display: flex;
 }
 :root.autohiding-scrollbar #shortcuts {
   margin-right: 12px;
@@ -1695,7 +1696,6 @@ input.field.tripped:not(:hover):not(:focus) {
 #file-n-submit, #qr .oekaki {
   display: flex;
   align-items: stretch;
-  height: 25px;
   margin-top: 1px;
 }
 #file-n-submit > input, #qr-draw-button {
@@ -1740,6 +1740,9 @@ input#qr-filename {
 }
 #qr-no-file {
   color: #AAA;
+}
+#qr .oekaki.has-file {
+  height: 25px;
 }
 #qr .oekaki.has-file {
   display: none;
@@ -1967,6 +1970,17 @@ a:only-of-type > .remove {
 }
 #char-count.warning {
   color: red;
+}
+#file-n-submit {
+  display: flex;
+  flex-direction: column;
+}
+#file-n-submit .row {
+  display: flex;
+  flex-direction: row;
+}
+#file-n-submit .row.space {
+  justify-content: space-between;
 }
 
 /* Menu */
