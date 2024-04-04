@@ -62,6 +62,8 @@ var QR = {
     filename: HTMLInputElement,
     spoiler: HTMLInputElement,
     oekakiButton: HTMLAnchorElement,
+    randomizeButton: HTMLAnchorElement,
+    restoreNameButton: HTMLAnchorElement,
     fileRM: HTMLAnchorElement,
     urlButton: HTMLAnchorElement,
     pasteArea: HTMLAnchorElement,
@@ -712,6 +714,8 @@ var QR = {
     setNode('addPost',        '#add-post');
     setNode('oekaki',         '.oekaki');
     setNode('drawButton',     '#qr-draw-button');
+    setNode('randomizeButton','#qr-randomize');
+    setNode('restoreNameButton','#qr-restore-name');
     setNode('fileSubmit',     '#file-n-submit');
     setNode('fileButton',     '#qr-file-button');
     setNode('noFile',         '#qr-no-file');
@@ -757,6 +761,8 @@ var QR = {
     $.on(nodes.drawButton,     'click',     QR.oekaki.draw);
     $.on(nodes.fileButton,     'click',     QR.openFileInput);
     $.on(nodes.noFile,         'click',     QR.openFileInput);
+    $.on(nodes.randomizeButton,'click',     () => { QR.selected.randomizeName(); });
+    $.on(nodes.restoreNameButton,'click',   () => { QR.selected.restoreName(); });
     $.on(nodes.filename,       'focus',     function() { return $.addClass(this.parentNode, 'focus'); });
     $.on(nodes.filename,       'blur',      function() { return $.rmClass(this.parentNode, 'focus'); });
     $.on(nodes.spoiler,        'change',    () => QR.selected.nodes.spoiler.click());
@@ -818,6 +824,8 @@ var QR = {
     Icon.set(nodes.urlButton, 'link');
     Icon.set(nodes.pasteArea, 'clipboard');
     Icon.set(nodes.customCooldown, 'clock');
+    Icon.set(nodes.randomizeButton, 'shuffle');
+    Icon.set(nodes.restoreNameButton, 'undo');
   },
 
   flags() {
@@ -1723,6 +1731,7 @@ class post {
   declare filesize?: string;
   declare URL?: string;
   declare com?: string;
+  declare pasting?: boolean;
 
   constructor(select) {
     this.select = this.select.bind(this);
@@ -1998,9 +2007,7 @@ class post {
     this.file = file;
     this.originalName = file.name;
     if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f')) {
-      let ext;
-      this.filename = `${Date.now() * 1000 - Math.floor(Math.random() * 365 * DAY * 1000)}`;
-      if (ext = this.file.name.match(QR.validExtension)) { this.filename += ext[0]; }
+      this.randomizeName(false);
     } else {
       this.filename = this.file.name;
     }
@@ -2024,6 +2031,17 @@ class post {
       this.readFile();
     }
     this.preventAutoPost();
+  }
+
+  randomizeName(set = true) {
+    this.filename = `${Date.now() * 1000 - Math.floor(Math.random() * 365 * DAY * 1000)}`;
+    const ext = this.file.name.match(QR.validExtension)
+    if (ext) this.filename += ext[0];
+    if (set) QR.nodes.filename.value = this.filename;
+  }
+
+  restoreName() {
+    QR.nodes.filename.value = this.filename = this.originalName;
   }
 
   checkSize() {

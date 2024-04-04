@@ -7,6 +7,7 @@ in XT.
 
 - Re-added font-awesome for the header icons. This time I'm only importing the icons needed instead of the while icon
   font. [#38](https://github.com/TuxedoTako/4chan-xt/issues/38)
+- Added button to un-randomize the filename in the quick reply. [#40](https://github.com/TuxedoTako/4chan-xt/issues/40)
 
 ### v2.6.0 (2024-03-30)
 

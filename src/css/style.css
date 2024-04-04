@@ -1800,6 +1800,8 @@ input#qr-filename {
 }
 #qr:not(.has-spoiler) #qr-spoiler-label,
 #file-n-submit:not(.has-file) #qr-spoiler-label,
+#file-n-submit:not(.has-file) #qr-randomize,
+#file-n-submit:not(.has-file) #qr-restore-name,
 .has-file #paste-area,
 .has-file #url-button,
 #file-n-submit:not(.custom-cooldown) #custom-cooldown-button {
@@ -1981,6 +1983,12 @@ a:only-of-type > .remove {
 }
 #file-n-submit .row.space {
   justify-content: space-between;
+}
+#file-n-submit a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1px 3px 0 3px;
 }
 
 /* Menu */

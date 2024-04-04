@@ -10,6 +10,8 @@ import { svgPathData as pencilSvg, width as pencilW, height as pencilH } from "@
 import { svgPathData as clipboardSvg, width as clipboardW, height as clipboardH } from "@fas/faClipboard";
 import { svgPathData as clockSvg, width as clockW, height as clockH } from "@fa/faClock";
 import { svgPathData as linkSvg, width as linkW, height as linkH } from "@fas/faLink";
+import { svgPathData as shuffleSvg, width as shuffleW, height as shuffleH } from "@fas/faShuffle";
+import { svgPathData as undoSvg, width as undoW, height as undoH } from "@fas/faRotateLeft";
 
 
 const toSvg = (svgPathData: string, width: string | number, height: string | number) => {
@@ -17,22 +19,25 @@ const toSvg = (svgPathData: string, width: string | number, height: string | num
     `<path d="${svgPathData}" fill="currentColor" /></svg>`;
 }
 
-const icons = new Map<string, string>()
-  .set('image', toSvg(imgSvg, imgW, imgH))
-  .set('eye', toSvg(eyeSvg, eyeW, eyeH))
-  .set('expand', toSvg(expandSvg, expandW, expandH))
-  .set('comment', toSvg(commentSvg, commentW, commentH))
-  .set('refresh', toSvg(refreshSvg, refreshW, refreshH))
-  .set('wrench', toSvg(wrenchSvg, wrenchW, wrenchH))
-  .set('bolt', toSvg(boltSvg, boltW, boltH))
-  .set('link', toSvg(linkSvg, linkW, linkH))
-  .set('pencil', toSvg(pencilSvg, pencilW, pencilH))
-  .set('clipboard', toSvg(clipboardSvg, clipboardW, clipboardH))
-  .set('clock', toSvg(clockSvg, clockW, clockH));
+const icons = {
+   image:     toSvg(imgSvg, imgW, imgH),
+   eye:       toSvg(eyeSvg, eyeW, eyeH),
+   expand:    toSvg(expandSvg, expandW, expandH),
+   comment:   toSvg(commentSvg, commentW, commentH),
+   refresh:   toSvg(refreshSvg, refreshW, refreshH),
+   wrench:    toSvg(wrenchSvg, wrenchW, wrenchH),
+   bolt:      toSvg(boltSvg, boltW, boltH),
+   link:      toSvg(linkSvg, linkW, linkH),
+   pencil:    toSvg(pencilSvg, pencilW, pencilH),
+   clipboard: toSvg(clipboardSvg, clipboardW, clipboardH),
+   clock:     toSvg(clockSvg, clockW, clockH),
+   shuffle:   toSvg(shuffleSvg, shuffleW, shuffleH),
+   undo:      toSvg(undoSvg, undoW, undoH),
+} as const;
 
 var Icon = {
-  set (node: HTMLElement, name: string, altText?: string) {
-    const html = icons.get(name);
+  set (node: HTMLElement, name: keyof typeof icons, altText?: string) {
+    const html = icons[name];
     if (!html) throw new Error(`Icon "${name}" not found.`);
     if (altText) {
      node.innerHTML = `<span class="icon--alt-text">${E(altText)}</span>${html}`;
