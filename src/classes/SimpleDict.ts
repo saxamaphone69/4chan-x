@@ -62,7 +62,7 @@ export default class SimpleDict<T> {
     }
   }
 
-  forEach(fn) {
+  forEach(fn: (data: T) => void) {
     for (var key of this.keys) { fn(this[key]); }
   }
 

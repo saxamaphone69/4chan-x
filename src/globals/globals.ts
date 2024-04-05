@@ -29,6 +29,7 @@ export interface BoardConfig {
   ws_board:          1 | 0
   country_flags:     number,
   board_flags:       Record<string, string>,
+  user_ids?:         number,
 }
 
 export interface Board {

@@ -5,9 +5,10 @@ in XT.
 
 ### Unreleased
 
-- Re-added font-awesome for the header icons. This time I'm only importing the icons needed instead of the while icon
+- Re-added font-awesome for the header icons. This time I'm only importing the icons needed instead of the whole icon
   font. [#38](https://github.com/TuxedoTako/4chan-xt/issues/38)
 - Added button to un-randomize the filename in the quick reply. [#40](https://github.com/TuxedoTako/4chan-xt/issues/40)
+- Added option to hide posts by ID. [#41](https://github.com/TuxedoTako/4chan-xt/issues/41)
 
 ### v2.6.0 (2024-03-30)
 
