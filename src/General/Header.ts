@@ -10,6 +10,7 @@ import Get from "./Get";
 import Settings from "./Settings";
 import UI from "./UI";
 import meta from '../../package.json';
+import Icon from "../Icons/icon";
 
 /*
  * decaffeinate suggestions:
@@ -140,7 +141,8 @@ var Header = {
       const cs = $.el('a', {href: 'javascript:;'});
       if (g.VIEW === 'catalog') {
         cs.title = (cs.textContent = 'Catalog Settings');
-        this.addShortcut('native', cs, 810, '🕮︎');
+        Icon.set(cs, 'bookOpen', 'Catalog Settings');
+        this.addShortcut('native', cs, 810);
       } else {
         cs.title = (cs.textContent = '4chan Settings');
         cs.className = 'native-settings';
@@ -599,7 +601,7 @@ var Header = {
     }
   },
 
-  addShortcut(id: string, el: HTMLElement, index: number, icon?: string) {
+  addShortcut(id: string, el: HTMLElement, index: number) {
     const shortcut = $.el('span', {
       id: `shortcut-${id}`,
       className: 'shortcut brackets-wrap'

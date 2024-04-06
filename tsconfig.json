@@ -27,9 +27,10 @@
     "paths": {
       "@fa/*": ["./node_modules/@fortawesome/free-regular-svg-icons/*"],
       "@fas/*": ["./node_modules/@fortawesome/free-solid-svg-icons/*"],
-    }
+    },
+    "skipDefaultLibCheck": true,
   },
   "exclude": [
-    "builds/test/tsOutput"
+    "builds/"
   ]
 }

@@ -1,4 +1,5 @@
 import { E } from '../globals/globals';
+import { isEscaped, type EscapedHtml } from '../globals/jsx';
 import { svgPathData as imgSvg, width as imgW, height as imgH } from "@fa/faImage";
 import { svgPathData as eyeSvg, width as eyeW, height as eyeH } from "@fa/faEye";
 import { svgPathData as expandSvg, width as expandW, height as expandH } from "@fas/faUpRightAndDownLeftFromCenter";
@@ -12,6 +13,8 @@ import { svgPathData as clockSvg, width as clockW, height as clockH } from "@fa/
 import { svgPathData as linkSvg, width as linkW, height as linkH } from "@fas/faLink";
 import { svgPathData as shuffleSvg, width as shuffleW, height as shuffleH } from "@fas/faShuffle";
 import { svgPathData as undoSvg, width as undoW, height as undoH } from "@fas/faRotateLeft";
+import { svgPathData as downloadSvg, width as downloadW, height as downloadH } from "@fas/faDownload";
+import { svgPathData as bookOpenSvg, width as bookOpenW, height as bookOpenH } from "@fas/faBookOpen";
 
 
 const toSvg = (svgPathData: string, width: string | number, height: string | number) => {
@@ -33,18 +36,31 @@ const icons = {
    clock:     toSvg(clockSvg, clockW, clockH),
    shuffle:   toSvg(shuffleSvg, shuffleW, shuffleH),
    undo:      toSvg(undoSvg, undoW, undoH),
+   download:  toSvg(downloadSvg, downloadW, downloadH),
+   bookOpen:  toSvg(bookOpenSvg, bookOpenW, bookOpenH),
 } as const;
 
 var Icon = {
+  /** Sets an icon in an HTML element */
   set (node: HTMLElement, name: keyof typeof icons, altText?: string) {
     const html = icons[name];
     if (!html) throw new Error(`Icon "${name}" not found.`);
     if (altText) {
-     node.innerHTML = `<span class="icon--alt-text">${E(altText)}</span>${html}`;
+      node.innerHTML = `<span class="icon--alt-text">${E(altText)}</span>${html}`;
     } else {
       node.innerHTML = html;
     }
-  }
+  },
+
+  /** Get the raw SVG string for an icon. */
+  get(name: keyof typeof icons): string {
+    return icons[name];
+  },
+
+  /** Get the raw SVG string for an icon wrapped for use in JSX. */
+  raw(name: keyof typeof icons): EscapedHtml {
+    return { innerHTML: icons[name], [isEscaped]: true };
+  },
 };
 
 export default Icon;

@@ -3,12 +3,15 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
-### Unreleased
+### 2.7.0 (2024-04-06)
 
 - Re-added font-awesome for the header icons. This time I'm only importing the icons needed instead of the whole icon
   font. [#38](https://github.com/TuxedoTako/4chan-xt/issues/38)
 - Added button to un-randomize the filename in the quick reply. [#40](https://github.com/TuxedoTako/4chan-xt/issues/40)
-- Added option to hide posts by ID. [#41](https://github.com/TuxedoTako/4chan-xt/issues/41)
+  - Moved the icon buttons and submit to a new row to give the file input some space.
+- Added option to hide posts by poster ID. [#41](https://github.com/TuxedoTako/4chan-xt/issues/41)
+- Made the audio the source of truth for video sound posts. Should fix
+  [#36](https://github.com/TuxedoTako/4chan-xt/issues/36), but I didn't find a video to longer audio to test on.
 
 ### v2.6.0 (2024-03-30)
 

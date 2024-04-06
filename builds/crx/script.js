@@ -1,9 +1,11 @@
 /*
-* 4chan X
+* 4chan XT
 *
 * Licensed under the MIT license.
-* https://github.com/ccd0/4chan-x/blob/master/LICENSE
+* https://github.com/TuxedoTako/4chan-xt/blob/project-XT/LICENSE
 *
+* 4chan X Copyright © 2009-2023 ccd0
+* https://github.com/ccd0/4chan-x
 * Appchan X Copyright © 2013-2016 Zixaphir <zixaphirmoxphar@gmail.com>
 * http://zixaphir.github.io/appchan-x/ 
 * 4chan x Copyright © 2009-2011 James Campos <james.r.campos@gmail.com>
@@ -73,6 +75,9 @@
 * src/Monitoring/ThreadUpdater/beep.wav from http://freesound.org/people/pierrecartoons1979/sounds/90112/
 *   cc-by-nc-3.0
 *
+* Font Awesome (https://fontawesome.com)
+*   license: CC BY 4.0 (https://fontawesome.com/license/free#icons)
+*
 * Icons used to identify various websites are property of the respective websites.
 */
 
@@ -80,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.6.0",
-    "date": "2024-03-30T18:22:54Z"
+    "version": "2.7.0",
+    "date": "2024-04-06T16:30:44Z"
   };
 
   var meta = {
@@ -1519,7 +1524,7 @@ https://*.hcaptcha.com
     <input type="checkbox" id="autohide" title="Auto-hide">
     Quick Reply
   </label>
-  <a href="javascript:;" class="close" title="Close">×</a>
+  <a href="javascript:;" class="close" title="Close">✕</a>
   <select data-name="thread" title="Create a new thread / Reply">
     <option value="new">New thread</option>
   </select>
@@ -1548,22 +1553,30 @@ https://*.hcaptcha.com
     <span class="oekaki-bg" title="Background Color"><input name="oekaki-bg" type="checkbox" checked><input name="oekaki-bgcolor" type="color" value="#ffffff"></span>
   </div>
   <div id="file-n-submit">
-    <input type="button" id="qr-file-button" value="Files">
-    <span id="qr-filename-container" class="field">
-      <span id="qr-no-file">No selected file</span>
-      <input id="qr-filename" data-name="filename" spellcheck="false">
-      <label id="qr-spoiler-label">
-        <input type="checkbox" id="qr-file-spoiler" title="Spoiler image">
-        <a class="checkbox-letter">S</a>
-      </label>
-      <a id="qr-oekaki-button" title="Edit in Tegaki">✎︎</a>
-      <a href="javascript:;" id="qr-filerm" title="Remove file">✕</a>
-      <a id="url-button" title="Post from URL">🔗︎</a>
-      <a hidden id="paste-area" title="Select to paste images" tabindex="-1" contentEditable="true">📋︎</a>
-      <a id="custom-cooldown-button" title="Toggle custom cooldown" class="disabled">🕒︎</a>
-      <a id="dump-button" title="Dump list">+</a>
+    <span class="row">
+      <input type="button" id="qr-file-button" value="Files">
+      <span id="qr-filename-container" class="field">
+        <span id="qr-no-file">No selected file</span>
+        <input id="qr-filename" data-name="filename" spellcheck="false">
+        <label id="qr-spoiler-label">
+          <input type="checkbox" id="qr-file-spoiler" title="Spoiler image">
+          <a class="checkbox-letter">S</a>
+        </label>
+      </span>
     </span>
-    <input type="submit">
+    <span class="row space">
+      <span class="row">
+        <a href="javascript:;" id="qr-oekaki-button" title="Edit in Tegaki">✎︎</a>
+        <a href="javascript:;" id="qr-randomize" title="Randomize filename">R</a>
+        <a href="javascript:;" id="qr-restore-name" title="Reset filename">U</a>
+        <a href="javascript:;" id="qr-filerm" title="Remove file">✕</a>
+        <a href="javascript:;" id="url-button" title="Post from URL">🔗︎</a>
+        <a href="javascript:;" hidden id="paste-area" title="Select to paste images" tabindex="-1" contentEditable="true">📋︎</a>
+        <a href="javascript:;" id="custom-cooldown-button" title="Toggle custom cooldown" class="disabled">🕒︎</a>
+        <a href="javascript:;" id="dump-button" title="Dump list">➕︎</a>
+      </span>
+      <input type="submit">
+    </span>
   </div>
   <select data-default="4" name="filetag">
     <option value="0">Hentai</option>
@@ -3306,49 +3319,189 @@ https://*.hcaptcha.com
   const Audio = {
     /** Add event listeners for videos with audio from a third party */
     setupSync(video, audio) {
-      video.addEventListener('playing', () => {
-        audio.currentTime = video.currentTime;
-        audio.play();
+      audio.addEventListener('playing', () => {
+        video.currentTime = audio.currentTime % video.duration;
+        video.play();
       });
-      video.addEventListener('pause', () => {
-        audio.pause();
+      audio.addEventListener('play', () => {
+        video.currentTime = audio.currentTime % video.duration;
+        video.play();
       });
-      video.addEventListener('seeked', () => {
-        audio.currentTime = video.currentTime;
+      audio.addEventListener('pause', () => {
+        video.pause();
       });
-      video.addEventListener('ratechange', () => {
-        audio.currentTime = video.currentTime;
-        audio.playbackRate = video.playbackRate;
+      audio.addEventListener('seeked', () => {
+        video.currentTime = audio.currentTime % video.duration;
       });
-      video.addEventListener('waiting', () => {
-        audio.currentTime = video.currentTime;
-        audio.pause();
+      audio.addEventListener('ratechange', () => {
+        video.currentTime = audio.currentTime;
+        video.playbackRate = audio.playbackRate;
+      });
+      audio.addEventListener('waiting', () => {
+        video.currentTime = audio.currentTime % video.duration;
+        video.pause();
       });
       audio.addEventListener('canplay', () => {
         if (audio.currentTime < .1)
           video.currentTime = 0;
       }, { once: true });
     },
-    setupAudioSlider(video, audio) {
-      const container = document.createElement('span');
-      // \u00A0 is non breaking space
-      container.appendChild(document.createTextNode('🔊︎\u00A0'));
-      const control = document.createElement('input');
-      control.type = 'range';
-      control.max = '1';
-      control.step = '0.01';
-      control.valueAsNumber = audio.volume;
-      control.addEventListener('input', () => {
-        audio.volume = control.valueAsNumber;
-      });
-      container.appendChild(control);
-      const downloadLink = document.createElement('a');
-      downloadLink.href = audio.src;
-      downloadLink.download = '';
-      downloadLink.target = '_blank';
-      downloadLink.textContent = '\u00A0📥︎';
-      container.appendChild(downloadLink);
-      return container;
+  };
+
+  /*
+   * This file has the code for the jsx to { innerHTML: "safe string" }
+   *
+   * Usage: import h from this file.
+   * Attributes are stringified raw, so the names must be like html text: eg class and not className.
+   * Boolean values are stringified as followed: true will mean the attribute is there, false means it will be omitted.
+   * Strings bound to attributes and children will be escaped automatically.
+   * It returns interface EscapedHtml { innerHTML: "safe string", [isEscaped]: true }
+   *
+   * For strings that don't have a parent element you can use fragments: <></>.
+   * Note that you need to import hFragment, which for some reason isn't auto imported on "add all missing imports"
+   */
+  /**
+   * The symbol indicating that a string is safely escaped.
+   * This is a symbol so it can't be faked by a json blob from the internet.
+   */
+  const isEscaped = Symbol('isEscaped');
+  const voidElements = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr',]);
+  const hFragment = Symbol('hFragment');
+  /** Function that jsx/tsx will be compiled to. */
+  function h(tag, attributes, ...children) {
+    let innerHTML = tag === hFragment ? '' : `<${tag}`;
+    if (attributes) {
+      for (const [attribute, value] of Object.entries(attributes)) {
+        if (!value && value !== 0)
+          continue;
+        innerHTML += ` ${attribute}`;
+        if (value === true)
+          continue;
+        innerHTML += `="${E(value.toString())}"`;
+      }
+    }
+    if (tag !== hFragment)
+      innerHTML += '>';
+    const isVoid = tag !== hFragment && voidElements.has(tag);
+    if (isVoid) {
+      if (children.length)
+        throw new TypeError(`${tag} is a void html element and can't have child elements`);
+    } else {
+      for (const child of children) {
+        if (child === null || child === undefined || child === '')
+          continue;
+        if (child instanceof Object && "innerHTML" in child && child[isEscaped]) {
+          innerHTML += child.innerHTML;
+          continue;
+        }
+        innerHTML += E(child.toString());
+      }
+    }
+    if (!isVoid && tag !== hFragment)
+      innerHTML += `</${tag}>`;
+    return { innerHTML, [isEscaped]: true };
+  }
+
+  // Image
+  var svgPathData$e = 'M448 80c8.8 0 16 7.2 16 16V415.8l-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3V96c0-8.8 7.2-16 16-16H448zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z';
+  var width$e = 512;var height$e = 512;
+
+  // Eye
+  var svgPathData$d = 'M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z';
+  var width$d = 576;var height$d = 512;
+
+  // UpRightAndDownLeftFromCenter
+  var svgPathData$c = 'M344 0H488c13.3 0 24 10.7 24 24V168c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39-87 87c-9.4 9.4-24.6 9.4-33.9 0l-32-32c-9.4-9.4-9.4-24.6 0-33.9l87-87L327 41c-6.9-6.9-8.9-17.2-5.2-26.2S334.3 0 344 0zM168 512H24c-13.3 0-24-10.7-24-24V344c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39 87-87c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8z';
+  var width$c = 512;var height$c = 512;
+
+  // Comment
+  var svgPathData$b = 'M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9c.1-.2 .2-.3 .3-.5z';
+  var width$b = 512;var height$b = 512;
+
+  // Rotate
+  var svgPathData$a = 'M142.9 142.9c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5c0 0 0 0 0 0H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8zM16 312v7.6 .7V440c0 9.7 5.8 18.5 14.8 22.2s19.3 1.7 26.2-5.2l41.6-41.6c87.6 86.5 228.7 86.2 315.8-1c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.2 62.2-162.7 62.5-225.3 1L185 329c6.9-6.9 8.9-17.2 5.2-26.2s-12.5-14.8-22.2-14.8H48.4h-.7H40c-13.3 0-24 10.7-24 24z';
+  var width$a = 512;var height$a = 512;
+
+  // Wrench
+  var svgPathData$9 = 'M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
+  var width$9 = 512;var height$9 = 512;
+
+  // Bolt
+  var svgPathData$8 = 'M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z';
+  var width$8 = 448;var height$8 = 512;
+
+  // Pencil
+  var svgPathData$7 = 'M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z';
+  var width$7 = 512;var height$7 = 512;
+
+  // Clipboard
+  var svgPathData$6 = 'M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z';
+  var width$6 = 384;var height$6 = 512;
+
+  // Clock
+  var svgPathData$5 = 'M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z';
+  var width$5 = 512;var height$5 = 512;
+
+  // Link
+  var svgPathData$4 = 'M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z';
+  var width$4 = 640;var height$4 = 512;
+
+  // Shuffle
+  var svgPathData$3 = 'M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160H352c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96h32V64c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V416H352c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8h32V320c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z';
+  var width$3 = 512;var height$3 = 512;
+
+  // RotateLeft
+  var svgPathData$2 = 'M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z';
+  var width$2 = 512;var height$2 = 512;
+
+  // Download
+  var svgPathData$1 = 'M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
+  var width$1 = 512;var height$1 = 512;
+
+  // BookOpen
+  var svgPathData = 'M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5V78.6c0-4.2-1.6-8.4-5-11C247.4 52 202.4 32 144 32C93.5 32 46.3 45.3 18.1 56.1C6.8 60.5 0 71.7 0 83.8V454.1c0 11.9 12.8 20.2 24.1 16.5C55.6 460.1 105.5 448 144 448c33.9 0 79 14 105.6 23.5zm76.8 0C353 462 398.1 448 432 448c38.5 0 88.4 12.1 119.9 22.6c11.3 3.8 24.1-4.6 24.1-16.5V83.8c0-12.1-6.8-23.3-18.1-27.6C529.7 45.3 482.5 32 432 32c-58.4 0-103.4 20-123 35.6c-3.3 2.6-5 6.8-5 11V456c0 11.4 11.7 19.3 22.4 15.5z';
+  var width = 576;var height = 512;
+
+  const toSvg = (svgPathData, width, height) => {
+    return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 ${width} ${height}">` +
+      `<path d="${svgPathData}" fill="currentColor" /></svg>`;
+  };
+  const icons$1 = {
+    image: toSvg(svgPathData$e, width$e, height$e),
+    eye: toSvg(svgPathData$d, width$d, height$d),
+    expand: toSvg(svgPathData$c, width$c, height$c),
+    comment: toSvg(svgPathData$b, width$b, height$b),
+    refresh: toSvg(svgPathData$a, width$a, height$a),
+    wrench: toSvg(svgPathData$9, width$9, height$9),
+    bolt: toSvg(svgPathData$8, width$8, height$8),
+    link: toSvg(svgPathData$4, width$4, height$4),
+    pencil: toSvg(svgPathData$7, width$7, height$7),
+    clipboard: toSvg(svgPathData$6, width$6, height$6),
+    clock: toSvg(svgPathData$5, width$5, height$5),
+    shuffle: toSvg(svgPathData$3, width$3, height$3),
+    undo: toSvg(svgPathData$2, width$2, height$2),
+    download: toSvg(svgPathData$1, width$1, height$1),
+    bookOpen: toSvg(svgPathData, width, height),
+  };
+  var Icon = {
+    /** Sets an icon in an HTML element */
+    set(node, name, altText) {
+      const html = icons$1[name];
+      if (!html)
+        throw new Error(`Icon "${name}" not found.`);
+      if (altText) {
+        node.innerHTML = `<span class="icon--alt-text">${E(altText)}</span>${html}`;
+      } else {
+        node.innerHTML = html;
+      }
+    },
+    /** Get the raw SVG string for an icon. */
+    get(name) {
+      return icons$1[name];
+    },
+    /** Get the raw SVG string for an icon wrapped for use in JSX. */
+    raw(name) {
+      return { innerHTML: icons$1[name], [isEscaped]: true };
     },
   };
 
@@ -3364,12 +3517,12 @@ https://*.hcaptcha.com
       }
       this.EAI = $$1.el('a', {
         className: 'expand-all-shortcut',
-        textContent: 'Expand All Images',
         title: 'Expand All Images',
         href: 'javascript:;'
       });
+      Icon.set(this.EAI, 'expand', 'Expand All Images');
       $$1.on(this.EAI, 'click', this.cb.toggleAll);
-      Header$1.addShortcut('expand-all', this.EAI, 520, '➕︎');
+      Header$1.addShortcut('expand-all', this.EAI, 520);
       $$1.on(d, 'scroll visibilitychange', this.cb.playVideos);
       this.videoControls = $$1.el('span', { className: 'video-controls' });
       $$1.extend(this.videoControls, { innerHTML: " <a href=\"javascript:;\" title=\"You can also contract the video by dragging it to the left.\">contract</a>" });
@@ -3619,14 +3772,11 @@ https://*.hcaptcha.com
           Volume.setup(audioEl);
           if (isVideo) {
             Audio.setupSync(el, audioEl);
-            if (Conf['Show Controls']) {
-              file.audioSlider = Audio.setupAudioSlider(el, audioEl);
-              $$1.after(el.parentElement, file.audioSlider);
-            }
-          } else {
-            audioEl.controls = Conf['Show Controls'];
-            audioEl.autoplay = Conf['Autoplay'];
+            el.controls = false;
+            audioEl.loop = true;
           }
+          audioEl.controls = Conf['Show Controls'];
+          audioEl.autoplay = Conf['Autoplay'];
           $$1.after(el, audioEl);
           file.audio = audioEl;
         }
@@ -3661,8 +3811,8 @@ https://*.hcaptcha.com
       }
     },
     setupVideo(post, playing, controls) {
-      const { fullImage } = post.file;
-      if (!playing) {
+      const { fullImage, audio } = post.file;
+      if (!playing && !audio) {
         fullImage.controls = controls;
         return;
       }
@@ -3674,7 +3824,7 @@ https://*.hcaptcha.com
           return post.file.wasPlaying = true;
         }
       });
-      if (controls) {
+      if (controls && !audio) {
         return ImageCommon.addControls(fullImage);
       }
     },
@@ -4260,95 +4410,82 @@ https://*.hcaptcha.com
     }
   };
 
-  /*
-   * decaffeinate suggestions:
-   * DS102: Remove unnecessary code created because of implicit returns
-   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
-   */
   var Recursive = {
-    recursives: dict(),
+    recursives: new Map(),
     init() {
-      if (!['index', 'thread'].includes(g.VIEW)) { return; }
-      return Callbacks.Post.push({
+      if (!['index', 'thread'].includes(g.VIEW))
+        return;
+      Callbacks.Post.push({
         name: 'Recursive',
-        cb:   this.node
+        cb: this.node
       });
     },
-
     node() {
-      if (this.isClone || this.isFetchedQuote) { return; }
+      if (this.isClone || this.isFetchedQuote)
+        return;
       for (var quote of this.quotes) {
-        var obj;
-        if ((obj = Recursive.recursives[quote])) {
+        const obj = Recursive.recursives.get(quote);
+        if (obj) {
           for (var i = 0; i < obj.recursives.length; i++) {
-            var recursive = obj.recursives[i];
-            recursive(this, ...obj.args[i]);
+            obj.recursives[i](this, ...obj.args[i]);
           }
         }
       }
     },
-
     add(recursive, post, ...args) {
-      const obj = Recursive.recursives[post.fullID] || (Recursive.recursives[post.fullID] = {
-        recursives: [],
-        args: []
-      });
+      let obj = Recursive.recursives.get(post.fullID);
+      if (!obj) {
+        obj = { recursives: [], args: [] };
+        Recursive.recursives.set(post.fullID, obj);
+      }
       obj.recursives.push(recursive);
-      return obj.args.push(args);
+      obj.args.push(args);
     },
-
     rm(recursive, post) {
-      let obj;
-      if (!(obj = Recursive.recursives[post.fullID])) { return; }
-      for (let i = 0; i < obj.recursives.length; i++) {
-        var rec = obj.recursives[i];
-        if (rec === recursive) {
+      const obj = Recursive.recursives.get(post.fullID);
+      if (!obj)
+        return;
+      for (let i = obj.recursives.length - 1; i >= 0; --i) {
+        if (obj.recursives[i] === recursive) {
           obj.recursives.splice(i, 1);
           obj.args.splice(i, 1);
         }
       }
     },
-
     apply(recursive, post, ...args) {
-      const {fullID} = post;
-      return g.posts.forEach(function(post) {
+      const { fullID } = post;
+      g.posts.forEach(function (post) {
         if (post.quotes.includes(fullID)) {
-          return recursive(post, ...args);
+          recursive(post, ...args);
         }
       });
     }
   };
 
-  /*
-   * decaffeinate suggestions:
-   * DS102: Remove unnecessary code created because of implicit returns
-   * DS207: Consider shorter variations of null checks
-   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
-   */
   var PostHiding = {
+    db: undefined,
     init() {
-      if (!['index', 'thread'].includes(g.VIEW) || (!Conf['Reply Hiding Buttons'] && !(Conf['Menu'] && Conf['Reply Hiding Link']))) { return; }
-
+      if (!['index', 'thread'].includes(g.VIEW) || (!Conf['Reply Hiding Buttons'] && !(Conf['Menu'] && Conf['Reply Hiding Link']))) {
+        return;
+      }
       if (Conf['Reply Hiding Buttons']) {
         $$1.addClass(doc, "reply-hide");
       }
-
       this.db = new DataBoard('hiddenPosts');
-      return Callbacks.Post.push({
+      Callbacks.Post.push({
         name: 'Reply Hiding',
-        cb:   this.node
+        cb: this.node
       });
     },
-
     isHidden(boardID, threadID, postID) {
-      return !!(PostHiding.db && PostHiding.db.get({boardID, threadID, postID}));
+      return !!(PostHiding.db && PostHiding.db.get({ boardID, threadID, postID }));
     },
-
     node() {
       let data, sa;
-      if (!this.isReply || this.isClone || this.isFetchedQuote) { return; }
-
-      if (data = PostHiding.db.get({boardID: this.board.ID, threadID: this.thread.ID, postID: this.ID})) {
+      if (!this.isReply || this.isClone || this.isFetchedQuote) {
+        return;
+      }
+      if (data = PostHiding.db.get({ boardID: this.board.ID, threadID: this.thread.ID, postID: this.ID })) {
         if (data.thisPost) {
           PostHiding.hide(this, data.makeStub, data.hideRecursively);
         } else {
@@ -4356,43 +4493,44 @@ https://*.hcaptcha.com
           Recursive.add(PostHiding.hide, this, data.makeStub, true);
         }
       }
-
-      if (!Conf['Reply Hiding Buttons']) { return; }
-
+      if (!Conf['Reply Hiding Buttons']) {
+        return;
+      }
       const button = PostHiding.makeButton(this, 'hide');
       if (sa = g.SITE.selectors.sideArrows) {
         const sideArrows = $$1(sa, this.nodes.root);
         $$1.replace(sideArrows.firstChild, button);
-        return sideArrows.className = 'replacedSideArrows';
+        sideArrows.className = 'replacedSideArrows';
       } else {
-        return $$1.prepend(this.nodes.info, button);
+        $$1.prepend(this.nodes.info, button);
       }
     },
-
     menu: {
+      post: undefined,
       init() {
-        if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Reply Hiding Link']) { return; }
-
-        // Hide
-        let div = $$1.el('div', {
-          className: 'hide-reply-link',
-          textContent: 'Hide'
+        if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Reply Hiding Link']) {
+          return;
         }
-        );
-
-        let apply = $$1.el('a', {
+        // Hide
+        let applyHide = $$1.el('a', {
           textContent: 'Apply',
           href: 'javascript:;'
+        });
+        $$1.on(applyHide, 'click', PostHiding.menu.hide);
+        const hideOptions = [
+          { el: applyHide },
+          { el: UI.checkbox('thisPost', 'This post', true) },
+          { el: UI.checkbox('replies', 'Hide replies', Conf['Recursive Hiding']) },
+          { el: UI.checkbox('makeStub', 'Make stub', Conf['Stubs']) },
+        ];
+        if (g.BOARD.config.user_ids) {
+          hideOptions.push({ el: UI.checkbox('byId', 'By poster id', false) });
         }
-        );
-        $$1.on(apply, 'click', PostHiding.menu.hide);
-
-        let thisPost = UI.checkbox('thisPost', 'This post',    true);
-        let replies  = UI.checkbox('replies',  'Hide replies', Conf['Recursive Hiding']);
-        const makeStub = UI.checkbox('makeStub', 'Make stub',    Conf['Stubs']);
-
         Menu.menu.addEntry({
-          el: div,
+          el: $$1.el('div', {
+            className: 'hide-reply-link',
+            textContent: 'Hide'
+          }),
           order: 20,
           open(post) {
             if (!post.isReply || post.isClone || post.isHidden) {
@@ -4401,195 +4539,196 @@ https://*.hcaptcha.com
             PostHiding.menu.post = post;
             return true;
           },
-          subEntries: [
-              {el: apply}
-            ,
-              {el: thisPost}
-            ,
-              {el: replies}
-            ,
-              {el: makeStub}
-          ]});
-
+          subEntries: hideOptions
+        });
         // Show
-        div = $$1.el('div', {
-          className: 'show-reply-link',
-          textContent: 'Show'
-        }
-        );
-
-        apply = $$1.el('a', {
+        const applyShow = $$1.el('a', {
           textContent: 'Apply',
           href: 'javascript:;'
-        }
-        );
-        $$1.on(apply, 'click', PostHiding.menu.show);
-
-        thisPost = UI.checkbox('thisPost', 'This post',    false);
-        replies  = UI.checkbox('replies',  'Show replies', false);
+        });
+        $$1.on(applyShow, 'click', PostHiding.menu.show);
+        const thisPost = UI.checkbox('thisPost', 'This post', false);
+        const replies = UI.checkbox('replies', 'Show replies', false);
         const hideStubLink = $$1.el('a', {
           textContent: 'Hide stub',
           href: 'javascript:;'
-        }
-        );
+        });
         $$1.on(hideStubLink, 'click', PostHiding.menu.hideStub);
-
+        const showOptions = [
+          { el: applyShow },
+          { el: thisPost },
+          { el: replies },
+        ];
+        let byId;
+        if (g.BOARD.config.user_ids) {
+          byId = UI.checkbox('byId', 'By poster id', false);
+          showOptions.push({ el: byId });
+        }
         Menu.menu.addEntry({
-          el: div,
+          el: $$1.el('div', {
+            className: 'show-reply-link',
+            textContent: 'Show'
+          }),
           order: 20,
           open(post) {
-            let data;
             if (!post.isReply || post.isClone || !post.isHidden) {
               return false;
             }
-            if (!(data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID}))) {
+            const data = PostHiding.db.get({ boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID });
+            if (!data)
               return false;
-            }
             PostHiding.menu.post = post;
             thisPost.firstChild.checked = post.isHidden;
-            replies.firstChild.checked  = (data?.hideRecursively != null) ? data.hideRecursively : Conf['Recursive Hiding'];
+            replies.firstChild.checked = data.hideRecursively ?? Conf['Recursive Hiding'];
+            if (byId)
+              byId.firstChild.checked = data.byId;
             return true;
           },
-          subEntries: [
-              {el: apply}
-            ,
-              {el: thisPost}
-            ,
-              {el: replies}
-          ]});
-
-        return Menu.menu.addEntry({
+          subEntries: showOptions
+        });
+        Menu.menu.addEntry({
           el: hideStubLink,
           order: 15,
           open(post) {
             if (!post.isReply || post.isClone || !post.isHidden) {
               return false;
             }
-            if (!(PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID}))) {
+            if (!(PostHiding.db.get({ boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID }))) {
               return false;
             }
             return PostHiding.menu.post = post;
           }
         });
       },
-
       hide() {
-        const parent   = this.parentNode;
+        const parent = this.parentNode;
         const thisPost = $$1('input[name=thisPost]', parent).checked;
-        const replies  = $$1('input[name=replies]',  parent).checked;
+        const replies = $$1('input[name=replies]', parent).checked;
         const makeStub = $$1('input[name=makeStub]', parent).checked;
-        const {post}   = PostHiding.menu;
+        const byId = $$1('input[name=byId]', parent)?.checked;
+        const { post } = PostHiding.menu;
+        if (!thisPost && !replies && !byId)
+          return;
         if (thisPost) {
           PostHiding.hide(post, makeStub, replies);
         } else if (replies) {
           Recursive.apply(PostHiding.hide, post, makeStub, true);
           Recursive.add(PostHiding.hide, post, makeStub, true);
-        } else {
-          return;
         }
-        PostHiding.saveHiddenState(post, true, thisPost, makeStub, replies);
-        return $$1.event('CloseMenu');
+        if (byId) {
+          g.posts.forEach((p) => {
+            if (p.info.uniqueID === post.info.uniqueID && p !== post) {
+              PostHiding.hide(p, makeStub, replies);
+              PostHiding.saveHiddenState(p, true, thisPost, makeStub, replies, byId);
+            }
+          });
+        }
+        PostHiding.saveHiddenState(post, true, thisPost, makeStub, replies, byId);
+        $$1.event('CloseMenu');
       },
-
       show() {
-        let data;
-        const parent   = this.parentNode;
+        const parent = this.parentNode;
         const thisPost = $$1('input[name=thisPost]', parent).checked;
-        const replies  = $$1('input[name=replies]',  parent).checked;
-        const {post}   = PostHiding.menu;
+        const replies = $$1('input[name=replies]', parent).checked;
+        const byId = $$1('input[name=byId]', parent)?.checked;
+        const { post } = PostHiding.menu;
+        if (!thisPost && !replies && !byId)
+          return;
         if (thisPost) {
           PostHiding.show(post, replies);
         } else if (replies) {
           Recursive.apply(PostHiding.show, post, true);
-          Recursive.rm(PostHiding.hide, post, true);
-        } else {
-          return;
+          Recursive.rm(PostHiding.hide, post);
         }
-        if (data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID})) {
-          PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies);
+        if (byId) {
+          g.posts.forEach((p) => {
+            if (p.info.uniqueID === post.info.uniqueID && p !== post) {
+              PostHiding.show(p, replies);
+              const data = PostHiding.db.get({ boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID });
+              if (data) {
+                PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies, byId);
+              }
+            }
+          });
         }
-        return $$1.event('CloseMenu');
+        const data = PostHiding.db.get({ boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID });
+        if (data) {
+          PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies, byId);
+        }
+        $$1.event('CloseMenu');
       },
       hideStub() {
         let data;
-        const {post} = PostHiding.menu;
-        if (data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID})) {
+        const { post } = PostHiding.menu;
+        if (data = PostHiding.db.get({ boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID })) {
           PostHiding.show(post, data.hideRecursively);
           PostHiding.hide(post, false, data.hideRecursively);
-          PostHiding.saveHiddenState(post, true, true, false, data.hideRecursively);
+          PostHiding.saveHiddenState(post, true, true, false, data.hideRecursively, data.byId);
         }
         $$1.event('CloseMenu');
       }
     },
-
     makeButton(post, type) {
       const span = $$1.el('span', {
         textContent: type === 'hide' ? '➖︎' : '➕︎',
       });
       const a = $$1.el('a', {
         className: `${type}-reply-button`,
-        href:      'javascript:;'
-      }
-      );
+        href: 'javascript:;'
+      });
       $$1.add(a, span);
       $$1.on(a, 'click', PostHiding.toggle);
       return a;
     },
-
-    saveHiddenState(post, isHiding, thisPost, makeStub, hideRecursively) {
+    saveHiddenState(post, isHiding, thisPost, makeStub, hideRecursively, byId) {
       const data = {
-        boardID:  post.board.ID,
+        boardID: post.board.ID,
         threadID: post.thread.ID,
-        postID:   post.ID
+        postID: post.ID
       };
       if (isHiding) {
         data.val = {
-          thisPost: thisPost !== false, // undefined -> true
+          thisPost: thisPost !== false,
           makeStub,
-          hideRecursively
+          hideRecursively,
+          byId
         };
-        return PostHiding.db.set(data);
+        PostHiding.db.set(data);
       } else {
-        return PostHiding.db.delete(data);
+        PostHiding.db.delete(data);
       }
     },
-
     toggle() {
       const post = Get$1.postFromNode(this);
       PostHiding[(post.isHidden ? 'show' : 'hide')](post);
-      return PostHiding.saveHiddenState(post, post.isHidden);
+      PostHiding.saveHiddenState(post, post.isHidden);
     },
-
-    hide(post, makeStub=Conf['Stubs'], hideRecursively=Conf['Recursive Hiding']) {
-      if (post.isHidden) { return; }
+    hide(post, makeStub = Conf['Stubs'], hideRecursively = Conf['Recursive Hiding']) {
+      if (post.isHidden) {
+        return;
+      }
       post.isHidden = true;
-
       if (hideRecursively) {
         Recursive.apply(PostHiding.hide, post, makeStub, true);
         Recursive.add(PostHiding.hide, post, makeStub, true);
       }
-
       for (var quotelink of Get$1.allQuotelinksLinkingTo(post)) {
         $$1.addClass(quotelink, 'filtered');
       }
-
       if (!makeStub) {
         post.nodes.root.hidden = true;
         return;
       }
-
       const a = PostHiding.makeButton(post, 'show');
       $$1.add(a, $$1.tn(` ${post.info.nameBlock}`));
-      post.nodes.stub = $$1.el('div',
-        {className: 'stub'});
+      post.nodes.stub = $$1.el('div', { className: 'stub' });
       $$1.add(post.nodes.stub, a);
       if (Conf['Menu']) {
         $$1.add(post.nodes.stub, Menu.makeButton(post));
       }
-      return $$1.prepend(post.nodes.root, post.nodes.stub);
+      $$1.prepend(post.nodes.root, post.nodes.stub);
     },
-
-    show(post, showRecursively=Conf['Recursive Hiding']) {
+    show(post, showRecursively = Conf['Recursive Hiding']) {
       if (post.nodes.stub) {
         $$1.rm(post.nodes.stub);
         delete post.nodes.stub;
@@ -4779,7 +4918,7 @@ https://*.hcaptcha.com
   };
 
   var ThreadWatcherPage = `<div class="move">
-  Thread Watcher <a class="refresh" title="Check threads" href="javascript:;">🗘</a>
+  Thread Watcher <a class="refresh" title="Check threads" href="javascript:;" title="refresh">🗘</a>
   <span id="watcher-status"></span>
   <a class="menu-button" href="javascript:;">🞃</a>
   <a class="close" href="javascript:;">×</a>
@@ -5984,16 +6123,16 @@ https://*.hcaptcha.com
       if (!(this.enabled = Conf['Thread Watcher'])) { return; }
 
       this.shortcut = (sc = $$1.el('a', {
-        id:          'watcher-link',
-        textContent: 'Watcher',
-        title:       'Thread Watcher',
-        href:        'javascript:;',
-      }
-      ));
+        id:    'watcher-link',
+        title: 'Thread Watcher',
+        href:  'javascript:;',
+      }));
+      Icon.set(this.shortcut, 'eye', 'watcher');
 
       this.db     = new DataBoard('watchedThreads', this.refresh, true);
       this.dbLM   = new DataBoard('watcherLastModified', null, true);
       this.dialog = UI.dialog('thread-watcher', { innerHTML: ThreadWatcherPage });
+      Icon.set(this.dialog.firstElementChild.firstElementChild, 'refresh');
       this.status = $$1('#watcher-status', this.dialog);
       this.list   = this.dialog.lastElementChild;
       this.refreshButton = $$1('.refresh', this.dialog);
@@ -6026,7 +6165,7 @@ https://*.hcaptcha.com
         this.dialog.hidden = true;
       }
 
-      Header$1.addShortcut('watcher', sc, 510, '👁︎');
+      Header$1.addShortcut('watcher', sc, 510,);
 
       ThreadWatcher.initLastModified();
       ThreadWatcher.fetchAuto();
@@ -6866,60 +7005,6 @@ https://*.hcaptcha.com
     }
   };
   var ThreadWatcher$1 = ThreadWatcher;
-
-  /*
-   * This file has the code for the jsx to { innerHTML: "safe string" }
-   *
-   * Usage: import h from this file.
-   * Attributes are stringified raw, so the names must be like html text: eg class and not className.
-   * Boolean values are stringified as followed: true will mean the attribute is there, false means it will be omitted.
-   * Strings bound to attributes and children will be escaped automatically.
-   * It returns interface EscapedHtml { innerHTML: "safe string", [isEscaped]: true }
-   *
-   * For strings that don't have a parent element you can use fragments: <></>.
-   * Note that you need to import hFragment, which for some reason isn't auto imported on "add all missing imports"
-   */
-  /**
-   * The symbol indicating that a string is safely escaped.
-   * This is a symbol so it can't be faked by a json blob from the internet.
-   */
-  const isEscaped = Symbol('isEscaped');
-  const voidElements = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr',]);
-  const hFragment = Symbol('hFragment');
-  /** Function that jsx/tsx will be compiled to. */
-  function h(tag, attributes, ...children) {
-    let innerHTML = tag === hFragment ? '' : `<${tag}`;
-    if (attributes) {
-      for (const [attribute, value] of Object.entries(attributes)) {
-        if (!value && value !== 0)
-          continue;
-        innerHTML += ` ${attribute}`;
-        if (value === true)
-          continue;
-        innerHTML += `="${E(value.toString())}"`;
-      }
-    }
-    if (tag !== hFragment)
-      innerHTML += '>';
-    const isVoid = tag !== hFragment && voidElements.has(tag);
-    if (isVoid) {
-      if (children.length)
-        throw new TypeError(`${tag} is a void html element and can't have child elements`);
-    } else {
-      for (const child of children) {
-        if (child === null || child === undefined || child === '')
-          continue;
-        if (child instanceof Object && "innerHTML" in child && child[isEscaped]) {
-          innerHTML += child.innerHTML;
-          continue;
-        }
-        innerHTML += E(child.toString());
-      }
-    }
-    if (!isVoid && tag !== hFragment)
-      innerHTML += `</${tag}>`;
-    return { innerHTML, [isEscaped]: true };
-  }
 
   const parseArchivePost = (data) => {
     // https://github.com/eksopl/asagi/blob/v0.4.0b74/src/main/java/net/easymodo/asagi/YotsubaAbstract.java#L82-L129
@@ -7855,11 +7940,10 @@ https://*.hcaptcha.com
       this.button = $$1.el('a', {
         title: 'Refresh',
         href: 'javascript:;',
-        textContent: 'Refresh',
-        className: 'bigger-icon',
       });
+      Icon.set(this.button, 'refresh', 'Refresh');
       $$1.on(this.button, 'click', () => Index.update());
-      Header$1.addShortcut('index-refresh', this.button, 590, '🗘');
+      Header$1.addShortcut('index-refresh', this.button, 590);
 
       // Header "Index Navigation" submenu
       const entries = [];
@@ -10391,6 +10475,7 @@ audio.controls-added {
 }
 #shortcuts {
   float: right;
+  display: flex;
 }
 :root.autohiding-scrollbar #shortcuts {
   margin-right: 12px;
@@ -10426,12 +10511,6 @@ audio.controls-added {
   content: var(--icon);
   font-size: 16px;
   line-height: 12px;
-}
-:root.shortcut-icons #header-bar .icon-shortcut a.bolder-icon::before {
-  font-weight: 1000;
-}
-:root.shortcut-icons #header-bar .icon-shortcut a.bigger-icon::before {
-  font-size: 20px;
 }
 @media (min-width: 1300px) {
   :root.sw-yotsuba.fixed:not(.centered-links) #header-bar {
@@ -11453,7 +11532,7 @@ input[name="Default Volume"] {
 }
 :root:not(.fappeTyme) #shortcut-fappe,
 :root:not(.werkTyme) #shortcut-werk {
-  display: none;
+  display: none !important;
 }
 
 /* Index/Reply Navigation */
@@ -11735,7 +11814,6 @@ input.field.tripped:not(:hover):not(:focus) {
 #file-n-submit, #qr .oekaki {
   display: flex;
   align-items: stretch;
-  height: 25px;
   margin-top: 1px;
 }
 #file-n-submit > input, #qr-draw-button {
@@ -11780,6 +11858,9 @@ input#qr-filename {
 }
 #qr-no-file {
   color: #AAA;
+}
+#qr .oekaki.has-file {
+  height: 25px;
 }
 #qr .oekaki.has-file {
   display: none;
@@ -11837,6 +11918,8 @@ input#qr-filename {
 }
 #qr:not(.has-spoiler) #qr-spoiler-label,
 #file-n-submit:not(.has-file) #qr-spoiler-label,
+#file-n-submit:not(.has-file) #qr-randomize,
+#file-n-submit:not(.has-file) #qr-restore-name,
 .has-file #paste-area,
 .has-file #url-button,
 #file-n-submit:not(.custom-cooldown) #custom-cooldown-button {
@@ -12007,6 +12090,23 @@ a:only-of-type > .remove {
 }
 #char-count.warning {
   color: red;
+}
+#file-n-submit {
+  display: flex;
+  flex-direction: column;
+}
+#file-n-submit .row {
+  display: flex;
+  flex-direction: row;
+}
+#file-n-submit .row.space {
+  justify-content: space-between;
+}
+#file-n-submit a {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1px 3px 0 3px;
 }
 
 /* Menu */
@@ -12401,7 +12501,10 @@ div.post {
   overflow: clip;
   scroll-margin-top: 30px;
 }
-`;
+
+.file svg.icon {
+  height: 12px;
+}`;
 
   var supports = `/* XXX Moved to end of stylesheet to avoid breaking whole stylesheet in Maxthon. */
 @supports (text-decoration-style: dashed) or (-moz-text-decoration-style: dashed) {
@@ -12564,8 +12667,33 @@ div.post {
 }
 `).join(''));
 
+  var iconCss = `/* Icons */
+svg.icon {
+  height: 14px;
+}
+:root.shortcut-icons #shortcuts .shortcut {
+  padding-top: 0;
+  padding-bottom: 0;
+  display: flex;
+  height: 14px;
+  min-width: 16px;
+}
+:root.shortcut-icons #shortcuts .icon--alt-text,
+:root:not(.shortcut-icons) .shortcut svg {
+  display: none;
+}
+:root.shortcut-icons .shortcut.brackets-wrap::before,
+:root.shortcut-icons .shortcut.brackets-wrap::after{
+  display: none;
+}
+@keyframes spin {
+  0% {transform:rotate(0deg);}
+  100% {transform:rotate(359deg);}
+}
+`;
+
   // cSpell:ignore installGentoo, webfont
-  const mainCSS = style + variableBase + yotsuba + yotsubaB + futaba + burichan + tomorrow + photon + spooky;
+  const mainCSS = style + variableBase + yotsuba + yotsubaB + futaba + burichan + tomorrow + photon + spooky + iconCss;
   const faIcons = [
     { name: "audio", data: linkifyAudio },
     { name: "bitchute", data: linkifyBitchute },
@@ -14012,7 +14140,9 @@ $\
         }
       },
       N() { return { innerHTML: E(this.file.name), [isEscaped]: true }; },
-      d() { return h("a", { href: this.file.url, download: this.file.name, class: "download-button" }, "\uD83D\uDCE5\uFE0E"); },
+      d() {
+        return h("a", { href: this.file.url, download: this.file.name, class: "download-button" }, Icon.raw('download'));
+      },
       f() {
         return { innerHTML: "<a href=\"javascript:;\" class=\"quick-filter-md5\">✕</a>", [isEscaped]: true };
       },
@@ -14552,12 +14682,12 @@ $\
       // 4chan X settings link
       const link = $$1.el('a', {
         className: 'settings-link',
-        textContent: 'Settings',
         title: `${meta.name} Settings`,
         href: 'javascript:;'
       });
+      Icon.set(link, 'wrench', 'Settings');
       $$1.on(link, 'click', Settings.open);
-      Header$1.addShortcut('settings', link, 820, '🔧︎');
+      Header$1.addShortcut('settings', link, 820);
       const add = this.addSection;
       add('Main', this.main);
       add('Filter', this.filter);
@@ -15946,12 +16076,12 @@ vp-replace
       const el = $$1.el('a', {
         href: 'javascript:;',
         title: 'Gallery',
-        textContent: 'Gallery',
       });
+      Icon.set(el, 'image', 'Gallery');
 
       $$1.on(el, 'click', this.cb.toggle);
 
-      Header$1.addShortcut('gallery', el, 530, '🖼︎');
+      Header$1.addShortcut('gallery', el, 530);
 
       return Callbacks.Post.push({
         name: 'Gallery',
@@ -17997,28 +18127,41 @@ vp-replace
     }
   };
 
-  /*
-   * decaffeinate suggestions:
-   * DS102: Remove unnecessary code created because of implicit returns
-   * DS207: Consider shorter variations of null checks
-   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
-   */
-
   var QR = {
+    postingIsEnabled: false,
+    // will be set at init
+    captcha: undefined,
+    min_width: 0,
+    min_height: 0,
+    max_width: 0,
+    max_height: 0,
+    max_size: 0,
+    max_size_video: 0,
+    max_comment: 0,
+    max_width_video: 0,
+    max_height_video: 0,
+    max_duration_video: 0,
+    forcedAnon: false,
+    spoiler: false,
+    link: undefined,
+    post: undefined,
+    posts: undefined,
+    nodes: undefined,
+    shortcut: undefined,
+    hasFocus: false,
+    req: undefined,
+    selected: undefined,
     mimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/vnd.adobe.flash.movie', 'application/x-shockwave-flash', 'video/webm'],
-
     validExtension: /\.(jpe?g|png|gif|pdf|swf|webm)$/i,
-
     typeFromExtension: {
-      'jpg':  'image/jpeg',
+      'jpg': 'image/jpeg',
       'jpeg': 'image/jpeg',
-      'png':  'image/png',
-      'gif':  'image/gif',
-      'pdf':  'application/pdf',
-      'swf':  'application/vnd.adobe.flash.movie',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'pdf': 'application/pdf',
+      'swf': 'application/vnd.adobe.flash.movie',
       'webm': 'video/webm'
     },
-
     extensionFromType: {
       'image/jpeg': 'jpg',
       'image/png': 'png',
@@ -18028,135 +18171,124 @@ vp-replace
       'application/x-shockwave-flash': 'swf',
       'video/webm': 'webm'
     },
-
     init() {
       let sc;
-      if (!Conf['Quick Reply']) { return; }
-
+      if (!Conf['Quick Reply']) {
+        return;
+      }
       this.posts = [];
-
       $$1.on(d, '4chanXInitFinished', () => BoardConfig.ready(QR.initReady));
-
       Callbacks.Post.push({
         name: 'Quick Reply',
-        cb:   this.node
+        cb: this.node
       });
-
       this.shortcut = (sc = $$1.el('a', {
-        className: 'disabled bolder-icon bigger-icon',
-        textContent: 'Quick Reply',
+        className: 'disabled',
         title: 'Quick Reply',
         href: 'javascript:;',
       }));
-      $$1.on(sc, 'click', function() {
-        if (!QR.postingIsEnabled) { return; }
+      Icon.set(this.shortcut, 'comment', 'Quick Reply');
+      $$1.on(sc, 'click', function () {
+        if (!QR.postingIsEnabled) {
+          return;
+        }
         if (Conf['Persistent QR'] || !QR.nodes || QR.nodes.el.hidden) {
           QR.open();
-          return QR.nodes.com.focus();
+          QR.nodes.com.focus();
         } else {
-          return QR.close();
+          QR.close();
         }
       });
-
-      return Header$1.addShortcut('qr', sc, 540, '↩');
+      Header$1.addShortcut('qr', sc, 540);
     },
-
     initReady() {
       let origToggle;
       const captchaVersion = $$1('#g-recaptcha, #captcha-forced-noscript') ? 'v2' : 't';
       QR.captcha = Captcha[captchaVersion];
       QR.postingIsEnabled = true;
-
-      const {config} = g.BOARD;
+      const { config } = g.BOARD;
       const prop = (key, def) => +(config[key] ?? def);
-
-      QR.min_width  = prop('min_image_width',  1);
+      QR.min_width = prop('min_image_width', 1);
       QR.min_height = prop('min_image_height', 1);
-      QR.max_width  = (QR.max_height = 10000);
-
-      QR.max_size       = prop('max_filesize',      4194304);
+      QR.max_width = (QR.max_height = 10000);
+      QR.max_size = prop('max_filesize', 4194304);
       QR.max_size_video = prop('max_webm_filesize', QR.max_size);
-      QR.max_comment    = prop('max_comment_chars', 2000);
-
+      QR.max_comment = prop('max_comment_chars', 2000);
       QR.max_width_video = (QR.max_height_video = 2048);
       QR.max_duration_video = prop('max_webm_duration', 120);
-
       QR.forcedAnon = !!config.forced_anon;
-      QR.spoiler    = !!config.spoilers;
-
+      QR.spoiler = !!config.spoilers;
       if (origToggle = $$1.id('togglePostFormLink')) {
-        const link = $$1.el('h1',
-          {className: "qr-link-container"});
+        const link = $$1.el('h1', { className: "qr-link-container" });
         $$1.extend(link, {
-          innerHTML:
-            `<a href="javascript:;" class="qr-link">${g.VIEW === "thread" ? "Reply to Thread" : "Start a Thread"}</a>`
+          innerHTML: `<a href="javascript:;" class="qr-link">${g.VIEW === "thread" ? "Reply to Thread" : "Start a Thread"}</a>`
         });
-
         QR.link = link.firstElementChild;
-        $$1.on(link.firstChild, 'click', function() {
+        $$1.on(link.firstChild, 'click', function () {
           QR.open();
           return QR.nodes.com.focus();
         });
-
         $$1.before(origToggle, link);
         origToggle.firstElementChild.textContent = 'Original Form';
       }
-
       if (g.VIEW === 'thread') {
         let navLinksBot;
-        const linkBot = $$1.el('div',
-          {className: "brackets-wrap qr-link-container-bottom"});
-        $$1.extend(linkBot, {innerHTML: '<a href="javascript:;" class="qr-link-bottom">Reply to Thread</a>'});
-
-        $$1.on(linkBot.firstElementChild, 'click', function() {
+        const linkBot = $$1.el('div', { className: "brackets-wrap qr-link-container-bottom" });
+        $$1.extend(linkBot, { innerHTML: '<a href="javascript:;" class="qr-link-bottom">Reply to Thread</a>' });
+        $$1.on(linkBot.firstElementChild, 'click', function () {
           QR.open();
           return QR.nodes.com.focus();
         });
-
-        if (navLinksBot = $$1('.navLinksBot')) { $$1.prepend(navLinksBot, linkBot); }
+        if (navLinksBot = $$1('.navLinksBot')) {
+          $$1.prepend(navLinksBot, linkBot);
+        }
       }
-
-      $$1.on(d, 'QRGetFile',          QR.getFile);
-      $$1.on(d, 'QRDrawFile',         QR.drawFile);
-      $$1.on(d, 'QRSetFile',          QR.setFile);
-
-      $$1.on(d, 'paste',              QR.paste);
-      $$1.on(d, 'dragover',           QR.dragOver);
-      $$1.on(d, 'drop',               QR.dropFile);
-      $$1.on(d, 'dragstart dragend',  QR.drag);
-
+      $$1.on(d, 'QRGetFile', QR.getFile);
+      $$1.on(d, 'QRDrawFile', QR.drawFile);
+      $$1.on(d, 'QRSetFile', QR.setFile);
+      $$1.on(d, 'paste', QR.paste);
+      $$1.on(d, 'dragover', QR.dragOver);
+      $$1.on(d, 'drop', QR.dropFile);
+      $$1.on(d, 'dragstart dragend', QR.drag);
       $$1.on(d, 'IndexRefreshInternal', QR.generatePostableThreadsList);
       $$1.on(d, 'ThreadUpdate', QR.statusCheck);
-
-      if (!Conf['Persistent QR']) { return; }
+      if (!Conf['Persistent QR']) {
+        return;
+      }
       QR.open();
-      if (Conf['Auto Hide QR']) { return QR.hide(); }
+      if (Conf['Auto Hide QR']) {
+        return QR.hide();
+      }
     },
-
     statusCheck() {
-      if (!QR.nodes) { return; }
-      const {thread} = QR.posts[0];
+      if (!QR.nodes) {
+        return;
+      }
+      const { thread } = QR.posts[0];
       if ((thread !== 'new') && g.threads.get(`${g.BOARD}.${thread}`).isDead) {
         return QR.abort();
       } else {
         return QR.status();
       }
     },
-
     node() {
       $$1.on(this.nodes.quote, 'click', QR.quote);
-      if (this.isFetchedQuote) { return QR.generatePostableThreadsList(); }
+      if (this.isFetchedQuote) {
+        return QR.generatePostableThreadsList();
+      }
     },
-
     open() {
       if (QR.nodes) {
-        if (QR.nodes.el.hidden) { QR.captcha.setup(); }
+        if (QR.nodes.el.hidden) {
+          QR.captcha.setup();
+        }
         QR.nodes.el.hidden = false;
         QR.unhide();
       } else {
         try {
           QR.dialog();
-        } catch (err) {
+        }
+        catch (err) {
           delete QR.nodes;
           Main$1.handleErrors({
             message: 'Quick Reply dialog creation crashed.',
@@ -18167,7 +18299,6 @@ vp-replace
       }
       return $$1.rmClass(QR.shortcut, 'disabled');
     },
-
     close() {
       if (QR.req) {
         QR.abort();
@@ -18186,32 +18317,27 @@ vp-replace
       QR.status();
       return QR.captcha.destroy();
     },
-
     focus() {
-      return $$1.queueTask(function() {
+      return $$1.queueTask(function () {
         if (!QR.inBubble()) {
           QR.hasFocus = d.activeElement && QR.nodes.el.contains(d.activeElement);
           return QR.nodes.el.classList.toggle('focus', QR.hasFocus);
         }
       });
     },
-
     inBubble() {
       const bubbles = $$('iframe[src^="https://www.google.com/recaptcha/api2/frame"]');
       return bubbles.includes(d.activeElement) || bubbles.some(el => (getComputedStyle(el).visibility !== 'hidden') && (el.getBoundingClientRect().bottom > 0));
     },
-
     hide() {
       QR.blur();
       $$1.addClass(QR.nodes.el, 'autohide');
       return QR.nodes.autohide.checked = true;
     },
-
     unhide() {
       $$1.rmClass(QR.nodes.el, 'autohide');
       return QR.nodes.autohide.checked = false;
     },
-
     toggleHide() {
       if (this.checked) {
         return QR.hide();
@@ -18219,29 +18345,28 @@ vp-replace
         return QR.unhide();
       }
     },
-
     blur() {
-      if (QR.nodes.el.contains(d.activeElement)) { return d.activeElement.blur(); }
+      if (QR.nodes.el.contains(d.activeElement)) {
+        return d.activeElement.blur();
+      }
     },
-
     toggleSJIS(e) {
       e.preventDefault();
       Conf['sjisPreview'] = !Conf['sjisPreview'];
       $$1.set('sjisPreview', Conf['sjisPreview']);
       return QR.nodes.el.classList.toggle('sjis-preview', Conf['sjisPreview']);
     },
-
     texPreviewShow() {
-      if ($$1.hasClass(QR.nodes.el, 'tex-preview')) { return QR.texPreviewHide(); }
+      if ($$1.hasClass(QR.nodes.el, 'tex-preview')) {
+        return QR.texPreviewHide();
+      }
       $$1.addClass(QR.nodes.el, 'tex-preview');
       QR.nodes.texPreview.textContent = QR.nodes.com.value;
       return $$1.event('mathjax', null, QR.nodes.texPreview);
     },
-
     texPreviewHide() {
       return $$1.rmClass(QR.nodes.el, 'tex-preview');
     },
-
     addPost() {
       const wasOpen = (QR.nodes && !QR.nodes.el.hidden);
       QR.open();
@@ -18251,19 +18376,16 @@ vp-replace
       }
       return QR.nodes.com.focus();
     },
-
     setCustomCooldown(enabled) {
       Conf['customCooldownEnabled'] = enabled;
       QR.cooldown.customCooldown = enabled;
       return QR.nodes.customCooldown.classList.toggle('disabled', !enabled);
     },
-
     toggleCustomCooldown() {
       const enabled = $$1.hasClass(QR.nodes.customCooldown, 'disabled');
       QR.setCustomCooldown(enabled);
       return $$1.set('customCooldownEnabled', enabled);
     },
-
     error(err, focusOverride) {
       let el;
       QR.open();
@@ -18276,87 +18398,80 @@ vp-replace
       const notice = new Notice('warning', el);
       QR.notifications.push(notice);
       if (!Header$1.areNotificationsEnabled) {
-        if (d.hidden && !QR.cooldown.auto) { return alert(el.textContent); }
+        if (d.hidden && !QR.cooldown.auto) {
+          return alert(el.textContent);
+        }
       } else if (d.hidden || !(focusOverride || d.hasFocus())) {
         const notif = new Notification(el.textContent, {
           body: el.textContent,
           icon: Favicon.logo
-        }
-        );
+        });
         notif.onclick = () => window.focus();
         if ($$1.engine !== 'gecko') {
           // Firefox automatically closes notifications
           // so we can't control the onclose properly.
           notif.onclose = () => notice.close();
-          return notif.onshow  = () => setTimeout(function() {
+          return notif.onshow = () => setTimeout(function () {
             notif.onclose = null;
             return notif.close();
-          }
-          , 7 * SECOND);
+          }, 7 * SECOND);
         }
       }
     },
-
     connectionError() {
-      return $$1.el('span',
-        { innerHTML:
-          'Connection error while posting. ' +
+      return $$1.el('span', { innerHTML: 'Connection error while posting. ' +
           '[<a href="' + E(meta.upstreamFaq) + '#connection-errors" target="_blank">More info</a>]'
-        }
-      );
+      });
     },
-
     notifications: [],
-
     cleanNotifications() {
       for (var notification of QR.notifications) {
         notification.close();
       }
       return QR.notifications = [];
     },
-
     status() {
       let disabled, value;
-      if (!QR.nodes) { return; }
-      const {thread} = QR.posts[0];
+      if (!QR.nodes) {
+        return;
+      }
+      const { thread } = QR.posts[0];
       if ((thread !== 'new') && g.threads.get(`${g.BOARD}.${thread}`).isDead) {
-        value    = 'Dead';
+        value = 'Dead';
         disabled = true;
         QR.cooldown.auto = false;
       }
-
       value = QR.req ?
         QR.req.progress
-      :
-        QR.cooldown.seconds || value;
-
-      const {status} = QR.nodes;
+        :
+          QR.cooldown.seconds || value;
+      const { status } = QR.nodes;
       status.value = !value ?
         'Submit'
-      : QR.cooldown.auto ?
-        `Auto ${value}`
-      :
-        value;
-      return status.disabled = disabled || false;
+        : QR.cooldown.auto ?
+          `Auto ${value}`
+          :
+            value;
+      status.disabled = disabled || false;
     },
-
     openPost() {
       QR.open();
       if (QR.selected.isLocked) {
         const index = QR.posts.indexOf(QR.selected);
-        (QR.posts[index+1] || new QR.post()).select();
+        (QR.posts[index + 1] || new QR.post()).select();
         $$1.addClass(QR.nodes.el, 'dump');
         return QR.cooldown.auto = true;
       }
     },
-
     quote(e) {
       let range;
       e?.preventDefault();
-      if (!QR.postingIsEnabled) { return; }
-      const sel  = d.getSelection();
+      if (!QR.postingIsEnabled) {
+        return;
+      }
+      const sel = d.getSelection();
       const post = Get$1.postFromNode(this);
-      const {root} = post.nodes;
+      const { root } = post.nodes;
       const postRange = new Range();
       postRange.selectNode(root);
       let text = post.board.ID === g.BOARD.ID ? `>>${post}\n` : `>>>/${post.board}/${post}\n`;
@@ -18371,10 +18486,10 @@ vp-replace
           if (range.compareBoundaryPoints(Range.END_TO_END, postRange) > 0) {
             range.setEndAfter(root);
           }
-
-          if (!range.toString().trim()) { continue; }
-
-          var frag  = range.cloneContents();
+          if (!range.toString().trim()) {
+            continue;
+          }
+          var frag = range.cloneContents();
           var ancestor = range.commonAncestorContainer;
           // Quoting the insides of a spoiler/code tag.
           if ($$1.x('ancestor-or-self::*[self::s or contains(@class,"removed-spoiler")]', ancestor)) {
@@ -18389,26 +18504,30 @@ vp-replace
             $$1.replace(node, $$1.tn('\n'));
           }
           for (node of $$('br', frag)) {
-            if (node !== frag.lastChild) { $$1.replace(node, $$1.tn('\n>')); }
+            if (node !== frag.lastChild) {
+              $$1.replace(node, $$1.tn('\n>'));
+            }
           }
           g.SITE.insertTags?.(frag);
           for (node of $$('.linkify[data-original]', frag)) {
             $$1.replace(node, $$1.tn(node.dataset.original));
           }
           for (node of $$('.embedder', frag)) {
-            if (node.previousSibling?.nodeValue === ' ') { $$1.rm(node.previousSibling); }
+            if (node.previousSibling?.nodeValue === ' ') {
+              $$1.rm(node.previousSibling);
+            }
             $$1.rm(node);
           }
           text += `>${frag.textContent.trim()}\n`;
-        } catch (error) { }
+        }
+        catch (error) { }
       }
-
       QR.openPost();
-      const {com, thread} = QR.nodes;
-      if (!com.value) { thread.value = Get$1.threadFromNode(this); }
-
+      const { com, thread } = QR.nodes;
+      if (!com.value) {
+        thread.value = Get$1.threadFromNode(this);
+      }
       const wasOnlyQuotes = QR.selected.isOnlyQuotes();
-
       const caretPos = com.selectionStart;
       // Replace selection for text.
       com.value = com.value.slice(0, caretPos) + text + com.value.slice(com.selectionEnd);
@@ -18416,85 +18535,85 @@ vp-replace
       range = caretPos + text.length;
       com.setSelectionRange(range, range);
       com.focus();
-
       // This allows us to determine if any text other than quotes has been typed.
-      if (wasOnlyQuotes) { QR.selected.quotedText = com.value; }
-
+      if (wasOnlyQuotes) {
+        QR.selected.quotedText = com.value;
+      }
       QR.selected.save(com);
       return QR.selected.save(thread);
     },
-
     characterCount() {
       const counter = QR.nodes.charCount;
-      const count   = QR.nodes.com.value.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
+      const count = QR.nodes.com.value.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
       counter.textContent = count;
-      counter.hidden      = count < (QR.max_comment/2);
+      counter.hidden = count < (QR.max_comment / 2);
       return (count > QR.max_comment ? $$1.addClass : $$1.rmClass)(counter, 'warning');
     },
-
     getFile() {
       return $$1.event('QRFile', QR.selected?.file);
     },
-
     drawFile(e) {
       const file = QR.selected?.file;
-      if (!file || !/^(image|video)\//.test(file.type)) { return; }
+      if (!file || !/^(image|video)\//.test(file.type)) {
+        return;
+      }
       const isVideo = /^video\//.test(file);
       const el = $$1.el((isVideo ? 'video' : 'img'));
       $$1.on(el, 'error', () => QR.openError());
-      $$1.on(el, (isVideo ? 'loadeddata' : 'load'), function() {
+      $$1.on(el, (isVideo ? 'loadeddata' : 'load'), function () {
         e.target.getContext('2d').drawImage(el, 0, 0);
         URL.revokeObjectURL(el.src);
         return $$1.event('QRImageDrawn', null, e.target);
       });
       return el.src = URL.createObjectURL(file);
     },
-
     openError() {
       const div = $$1.el('div');
       $$1.extend(div, {
-        innerHTML:
-          'Could not open file. [<a href="' + E(meta.upstreamFaq) + '#error-reading-metadata" target="_blank">More info</a>]'
+        innerHTML: 'Could not open file. [<a href="' + E(meta.upstreamFaq) + '#error-reading-metadata" target="_blank">More info</a>]'
       });
       return QR.error(div);
     },
-
     setFile(e) {
-      const {file, name, source} = e.detail;
-      if (name != null) { file.name   = name; }
-      if (source != null) { file.source = source; }
+      const { file, name, source } = e.detail;
+      if (name != null) {
+        file.name = name;
+      }
+      if (source != null) {
+        file.source = source;
+      }
       QR.open();
       return QR.handleFiles([file]);
     },
-
     drag(e) {
       // Let it drag anything from the page.
       const toggle = e.type === 'dragstart' ? $$1.off : $$1.on;
       toggle(d, 'dragover', QR.dragOver);
-      return toggle(d, 'drop',     QR.dropFile);
+      return toggle(d, 'drop', QR.dropFile);
     },
-
     dragOver(e) {
       e.preventDefault();
       return e.dataTransfer.dropEffect = 'copy';
-    }, // cursor feedback
-
+    },
     dropFile(e) {
       // Let it only handle files from the desktop.
-      if (!e.dataTransfer.files.length) { return; }
+      if (!e.dataTransfer.files.length) {
+        return;
+      }
       e.preventDefault();
       QR.open();
       return QR.handleFiles(e.dataTransfer.files);
     },
-
     paste(e) {
-      if (!e.clipboardData.items) { return; }
+      if (!e.clipboardData.items) {
+        return;
+      }
       let file = null;
       let score = -1;
       for (var item of e.clipboardData.items) {
         var file2;
         if ((item.kind === 'file') && (file2 = item.getAsFile())) {
-          var score2 = (2*(file2.size <= QR.max_size)) + (file2.type === 'image/png');
+          var score2 = (2 * +(file2.size <= QR.max_size)) + +(file2.type === 'image/png');
           if (score2 > score) {
             file = file2;
             score = score2;
@@ -18502,30 +18621,31 @@ vp-replace
         }
       }
       if (file) {
-        const {type} = file;
-        const blob = new Blob([file], {type});
+        const { type } = file;
+        const blob = new Blob([file], { type });
         blob.name = `${Conf['pastedname']}.${$$1.getOwn(QR.extensionFromType, type) || 'jpg'}`;
         QR.open();
         QR.handleFiles([blob]);
         $$1.addClass(QR.nodes.el, 'dump');
       }
     },
-
     pasteFF() {
-      const {pasteArea} = QR.nodes;
-      if (!pasteArea.childNodes.length) { return; }
+      const { pasteArea } = QR.nodes;
+      if (!pasteArea.childNodes.length) {
+        return;
+      }
       const images = $$('img', pasteArea);
       $$1.rmAll(pasteArea);
       for (var img of images) {
         var m;
-        var {src} = img;
+        var { src } = img;
         if (m = src.match(/data:(image\/(\w+));base64,(.+)/)) {
           var bstr = atob(m[3]);
           var arr = new Uint8Array(bstr.length);
           for (let i = 0; i < bstr.length; i++) {
             arr[i] = bstr.charCodeAt(i);
           }
-          var blob = new Blob([arr], {type: m[1]});
+          var blob = new Blob([arr], { type: m[1] });
           blob.name = `${Conf['pastedname']}.${m[2]}`;
           QR.handleFiles([blob]);
         } else if (/^https?:\/\//.test(src)) {
@@ -18533,15 +18653,16 @@ vp-replace
         }
       }
     },
-
     handleUrl(urlDefault) {
       QR.open();
       QR.selected.preventAutoPost();
-      return CrossOrigin$1.permission(function() {
+      return CrossOrigin$1.permission(function () {
         const url = prompt('Enter a URL:', urlDefault);
-        if (url === null) { return; }
+        if (url === null) {
+          return;
+        }
         QR.nodes.fileButton.focus();
-        return CrossOrigin$1.file(url, function(blob) {
+        return CrossOrigin$1.file(url, function (blob) {
           if (blob && !/^text\//.test(blob.type)) {
             return QR.handleFiles([blob]);
           } else {
@@ -18550,23 +18671,25 @@ vp-replace
         });
       });
     },
-
     handleFiles(files) {
       if (this !== QR) { // file input
-        files  = [...this.files];
+        files = [...this.files];
         this.value = null;
       }
-      if (!files.length) { return; }
+      if (!files.length) {
+        return;
+      }
       QR.cleanNotifications();
       for (var file of files) {
         QR.handleFile(file, files.length);
       }
-      if (files.length !== 1) { $$1.addClass(QR.nodes.el, 'dump'); }
+      if (files.length !== 1) {
+        $$1.addClass(QR.nodes.el, 'dump');
+      }
       if ((d.activeElement === QR.nodes.fileButton) && $$1.hasClass(QR.nodes.fileSubmit, 'has-file')) {
         return QR.nodes.filename.focus();
       }
     },
-
     handleFile(file, nfiles) {
       let post;
       const isText = /^text\//.test(file.type);
@@ -18580,213 +18703,206 @@ vp-replace
       }
       return post[isText ? 'pasteText' : 'setFile'](file);
     },
-
     openFileInput() {
-      if (QR.nodes.fileButton.disabled) { return; }
+      if (QR.nodes.fileButton.disabled) {
+        return;
+      }
       QR.nodes.fileInput.click();
       return QR.nodes.fileButton.focus();
     },
-
     generatePostableThreadsList() {
-      if (!QR.nodes) { return; }
-      const list    = QR.nodes.thread;
+      if (!QR.nodes) {
+        return;
+      }
+      const list = QR.nodes.thread;
       const options = [list.firstElementChild];
       for (var thread of g.BOARD.threads.keys) {
         options.push($$1.el('option', {
           value: thread,
           textContent: `Thread ${thread}`
-        }
-        )
-        );
+        }));
       }
       const val = list.value;
       $$1.rmAll(list);
       $$1.add(list, options);
       list.value = val;
-      if (list.value === val) { return; }
+      if (list.value === val) {
+        return;
+      }
       // Fix the value if the option disappeared.
       list.value = g.VIEW === 'thread' ?
         g.THREADID
-      :
-        'new';
+        :
+          'new';
       return (g.VIEW === 'thread' ? $$1.addClass : $$1.rmClass)(QR.nodes.el, 'reply-to-thread');
     },
-
     dialog() {
       let dialog, event, nodes;
       let name;
       QR.nodes = (nodes = {
-        el: (dialog = UI.dialog('qr',
-          { innerHTML: QuickReplyPage }))
+        el: (dialog = UI.dialog('qr', { innerHTML: QuickReplyPage }))
       });
-
       const setNode = (name, query) => nodes[name] = $$1(query, dialog);
-
-      setNode('move',           '.move');
-      setNode('autohide',       '#autohide');
-      setNode('close',          '.close');
-      setNode('thread',         'select');
-      setNode('form',           'form');
-      setNode('sjisToggle',     '#sjis-toggle');
-      setNode('texButton',      '#tex-preview-button');
-      setNode('name',           '[data-name=name]');
-      setNode('email',          '[data-name=email]');
-      setNode('sub',            '[data-name=sub]');
-      setNode('com',            '[data-name=com]');
-      setNode('charCount',      '#char-count');
-      setNode('texPreview',     '#tex-preview');
-      setNode('dumpList',       '#dump-list');
-      setNode('addPost',        '#add-post');
-      setNode('oekaki',         '.oekaki');
-      setNode('drawButton',     '#qr-draw-button');
-      setNode('fileSubmit',     '#file-n-submit');
-      setNode('fileButton',     '#qr-file-button');
-      setNode('noFile',         '#qr-no-file');
-      setNode('filename',       '#qr-filename');
-      setNode('spoiler',        '#qr-file-spoiler');
-      setNode('oekakiButton',   '#qr-oekaki-button');
-      setNode('fileRM',         '#qr-filerm');
-      setNode('urlButton',      '#url-button');
-      setNode('pasteArea',      '#paste-area');
+      setNode('move', '.move');
+      setNode('autohide', '#autohide');
+      setNode('close', '.close');
+      setNode('thread', 'select');
+      setNode('form', 'form');
+      setNode('sjisToggle', '#sjis-toggle');
+      setNode('texButton', '#tex-preview-button');
+      setNode('name', '[data-name=name]');
+      setNode('email', '[data-name=email]');
+      setNode('sub', '[data-name=sub]');
+      setNode('com', '[data-name=com]');
+      setNode('charCount', '#char-count');
+      setNode('texPreview', '#tex-preview');
+      setNode('dumpList', '#dump-list');
+      setNode('addPost', '#add-post');
+      setNode('oekaki', '.oekaki');
+      setNode('drawButton', '#qr-draw-button');
+      setNode('randomizeButton', '#qr-randomize');
+      setNode('restoreNameButton', '#qr-restore-name');
+      setNode('fileSubmit', '#file-n-submit');
+      setNode('fileButton', '#qr-file-button');
+      setNode('noFile', '#qr-no-file');
+      setNode('filename', '#qr-filename');
+      setNode('spoiler', '#qr-file-spoiler');
+      setNode('oekakiButton', '#qr-oekaki-button');
+      setNode('fileRM', '#qr-filerm');
+      setNode('urlButton', '#url-button');
+      setNode('pasteArea', '#paste-area');
       setNode('customCooldown', '#custom-cooldown-button');
-      setNode('dumpButton',     '#dump-button');
-      setNode('status',         '[type=submit]');
-      setNode('flashTag',       '[name=filetag]');
-      setNode('fileInput',      '[type=file]');
-
-      const {config} = g.BOARD;
-      const {classList} = QR.nodes.el;
-      classList.toggle('forced-anon',  QR.forcedAnon);
-      classList.toggle('has-spoiler',  QR.spoiler);
-      classList.toggle('has-sjis',     !!config.sjis_tags);
-      classList.toggle('has-math',     !!config.math_tags);
+      setNode('dumpButton', '#dump-button');
+      setNode('status', '[type=submit]');
+      setNode('flashTag', '[name=filetag]');
+      setNode('fileInput', '[type=file]');
+      const { config } = g.BOARD;
+      const { classList } = QR.nodes.el;
+      classList.toggle('forced-anon', QR.forcedAnon);
+      classList.toggle('has-spoiler', QR.spoiler);
+      classList.toggle('has-sjis', !!config.sjis_tags);
+      classList.toggle('has-math', !!config.math_tags);
       classList.toggle('sjis-preview', !!config.sjis_tags && Conf['sjisPreview']);
       classList.toggle('show-new-thread-option', Conf['Show New Thread Option in Threads']);
-
       if (parseInt(Conf['customCooldown'], 10) > 0) {
         $$1.addClass(QR.nodes.fileSubmit, 'custom-cooldown');
-        $$1.get('customCooldownEnabled', Conf['customCooldownEnabled'], function({customCooldownEnabled}) {
+        $$1.get('customCooldownEnabled', Conf['customCooldownEnabled'], function ({ customCooldownEnabled }) {
           QR.setCustomCooldown(customCooldownEnabled);
           return $$1.sync('customCooldownEnabled', QR.setCustomCooldown);
         });
       }
-
       QR.flagsInput();
-
-      $$1.on(nodes.autohide,       'change',    QR.toggleHide);
-      $$1.on(nodes.close,          'click',     QR.close);
-      $$1.on(nodes.status,         'click',     QR.submit);
-      $$1.on(nodes.form,           'submit',    QR.submit);
-      $$1.on(nodes.sjisToggle,     'click',     QR.toggleSJIS);
-      $$1.on(nodes.texButton,      'mousedown', QR.texPreviewShow);
-      $$1.on(nodes.texButton,      'mouseup',   QR.texPreviewHide);
-      $$1.on(nodes.addPost,        'click',     () => new QR.post(true));
-      $$1.on(nodes.drawButton,     'click',     QR.oekaki.draw);
-      $$1.on(nodes.fileButton,     'click',     QR.openFileInput);
-      $$1.on(nodes.noFile,         'click',     QR.openFileInput);
-      $$1.on(nodes.filename,       'focus',     function() { return $$1.addClass(this.parentNode, 'focus'); });
-      $$1.on(nodes.filename,       'blur',      function() { return $$1.rmClass(this.parentNode, 'focus'); });
-      $$1.on(nodes.spoiler,        'change',    () => QR.selected.nodes.spoiler.click());
-      $$1.on(nodes.oekakiButton,   'click',     QR.oekaki.button);
-      $$1.on(nodes.fileRM,         'click',     () => QR.selected.rmFile());
-      $$1.on(nodes.urlButton,      'click',     () => QR.handleUrl(''));
-      $$1.on(nodes.customCooldown, 'click',     QR.toggleCustomCooldown);
-      $$1.on(nodes.dumpButton,     'click',     () => nodes.el.classList.toggle('dump'));
-      $$1.on(nodes.fileInput,      'change',    QR.handleFiles);
-
+      $$1.on(nodes.autohide, 'change', QR.toggleHide);
+      $$1.on(nodes.close, 'click', QR.close);
+      $$1.on(nodes.status, 'click', QR.submit);
+      $$1.on(nodes.form, 'submit', QR.submit);
+      $$1.on(nodes.sjisToggle, 'click', QR.toggleSJIS);
+      $$1.on(nodes.texButton, 'mousedown', QR.texPreviewShow);
+      $$1.on(nodes.texButton, 'mouseup', QR.texPreviewHide);
+      $$1.on(nodes.addPost, 'click', () => new QR.post(true));
+      $$1.on(nodes.drawButton, 'click', QR.oekaki.draw);
+      $$1.on(nodes.fileButton, 'click', QR.openFileInput);
+      $$1.on(nodes.noFile, 'click', QR.openFileInput);
+      $$1.on(nodes.randomizeButton, 'click', () => { QR.selected.randomizeName(); });
+      $$1.on(nodes.restoreNameButton, 'click', () => { QR.selected.restoreName(); });
+      $$1.on(nodes.filename, 'focus', function () { return $$1.addClass(this.parentNode, 'focus'); });
+      $$1.on(nodes.filename, 'blur', function () { return $$1.rmClass(this.parentNode, 'focus'); });
+      $$1.on(nodes.spoiler, 'change', () => QR.selected.nodes.spoiler.click());
+      $$1.on(nodes.oekakiButton, 'click', QR.oekaki.button);
+      $$1.on(nodes.fileRM, 'click', () => QR.selected.rmFile());
+      $$1.on(nodes.urlButton, 'click', () => QR.handleUrl(''));
+      $$1.on(nodes.customCooldown, 'click', QR.toggleCustomCooldown);
+      $$1.on(nodes.dumpButton, 'click', () => nodes.el.classList.toggle('dump'));
+      $$1.on(nodes.fileInput, 'change', QR.handleFiles);
       window.addEventListener('focus', QR.focus, true);
-      window.addEventListener('blur',  QR.focus, true);
+      window.addEventListener('blur', QR.focus, true);
       // We don't receive blur events from captcha iframe.
       $$1.on(d, 'click', QR.focus);
-
       // XXX Workaround for image pasting in Firefox, obsolete as of v50.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=906420
       if (($$1.engine === 'gecko') && !window.DataTransferItemList) {
         nodes.pasteArea.hidden = false;
       }
-      new MutationObserver(QR.pasteFF).observe(nodes.pasteArea, {childList: true});
-
+      new MutationObserver(QR.pasteFF).observe(nodes.pasteArea, { childList: true });
       // save selected post's data
       const items = ['thread', 'name', 'email', 'sub', 'com', 'filename', 'flag'];
       let i = 0;
-      const save = function() { return QR.selected.save(this); };
+      const save = function () { QR.selected.save(this); };
       while ((name = items[i++])) {
         var node;
-        if (!(node = nodes[name])) { continue; }
+        if (!(node = nodes[name])) {
+          continue;
+        }
         event = node.nodeName === 'SELECT' ? 'change' : 'input';
         $$1.on(nodes[name], event, save);
       }
-
       // XXX Blink and WebKit treat width and height of <textarea>s as min-width and min-height
       if (($$1.engine === 'gecko') && Conf['Remember QR Size']) {
         $$1.get('QR Size', '', item => nodes.com.style.cssText = item['QR Size']);
-        $$1.on(nodes.com, 'mouseup', function(e) {
-          if (e.button !== 0) { return; }
-          return $$1.set('QR Size', this.style.cssText);
+        $$1.on(nodes.com, 'mouseup', function (e) {
+          if (e.button !== 0) {
+            return;
+          }
+          $$1.set('QR Size', this.style.cssText);
         });
       }
-
       QR.generatePostableThreadsList();
       QR.persona.load();
       new QR.post(true);
       QR.status();
       QR.cooldown.setup();
       QR.captcha.init();
-
       $$1.add(d.body, dialog);
       QR.captcha.setup();
       QR.oekaki.setup();
-
       // Create a custom event when the QR dialog is first initialized.
       // Use it to extend the QR's functionalities, or for XTRM RICE.
-      return $$1.event('QRDialogCreation', null, dialog);
+      $$1.event('QRDialogCreation', null, dialog);
+      Icon.set(nodes.oekakiButton, 'pencil');
+      Icon.set(nodes.urlButton, 'link');
+      Icon.set(nodes.pasteArea, 'clipboard');
+      Icon.set(nodes.customCooldown, 'clock');
+      Icon.set(nodes.randomizeButton, 'shuffle');
+      Icon.set(nodes.restoreNameButton, 'undo');
     },
-
     flags() {
       const select = $$1.el('select', {
-        name:      'flag',
+        name: 'flag',
         className: 'flagSelector'
-      }
-      );
-
-      const addFlag = (value, textContent) => $$1.add(select, $$1.el('option', {value, textContent}));
-
+      });
+      const addFlag = (value, textContent) => $$1.add(select, $$1.el('option', { value, textContent }));
       addFlag('0', (g.BOARD.config.country_flags ? 'Geographic Location' : 'None'));
       for (var value in g.BOARD.config.board_flags) {
         var textContent = g.BOARD.config.board_flags[value];
         addFlag(value, textContent);
       }
-
       return select;
     },
-
     flagsInput() {
-      const {nodes} = QR;
-      if (!nodes) { return; }
+      const { nodes } = QR;
+      if (!nodes) {
+        return;
+      }
       if (nodes.flag) {
         $$1.rm(nodes.flag);
         delete nodes.flag;
       }
-
       if (g.BOARD.config.board_flags) {
         const flag = QR.flags();
-        flag.dataset.name    = 'flag';
+        flag.dataset.name = 'flag';
         flag.dataset.default = '0';
         nodes.flag = flag;
         return $$1.add(nodes.form, flag);
       }
     },
-
     submit(e) {
       let captcha, err, filetag;
       e?.preventDefault();
       const force = e?.shiftKey;
-
       if (QR.req) {
         QR.abort();
         return;
       }
-
       $$1.forceSync('cooldowns');
       if (QR.cooldown.seconds) {
         if (force) {
@@ -18797,7 +18913,6 @@ vp-replace
           return;
         }
       }
-
       const post = QR.posts[0];
       delete post.quotedText;
       post.forceSave();
@@ -18806,7 +18921,6 @@ vp-replace
       if ((g.BOARD.ID === 'f') && (threadID === 'new')) {
         filetag = QR.nodes.flashTag.value;
       }
-
       // prevent errors
       if (threadID === 'new') {
         threadID = null;
@@ -18822,22 +18936,23 @@ vp-replace
       } else if (post.file && thread.fileLimit) {
         err = 'Max limit of image replies has been reached.';
       }
-
       if ((g.BOARD.ID === 'r9k') && !post.com?.match(/[a-z-]/i)) {
-        if (!err) { err = 'Original comment required.'; }
+        if (!err) {
+          err = 'Original comment required.';
+        }
       }
-
       if (QR.captcha.isEnabled && !((QR.captcha === Captcha.v2) && /\b_ct=/.test(d.cookie) && threadID) && !(err && !force)) {
         captcha = QR.captcha.getOne(!!threadID);
         if (QR.captcha === Captcha.v2) {
-          if (!captcha) { captcha = Captcha.cache.request(!!threadID); }
+          if (!captcha) {
+            captcha = Captcha.cache.request(!!threadID);
+          }
         }
         if (!captcha) {
           err = 'No valid captcha.';
           QR.captcha.setup(!QR.cooldown.auto || (d.activeElement === QR.nodes.status));
         }
       }
-
       QR.cleanNotifications();
       if (err && !force) {
         // stop auto-posting
@@ -18846,27 +18961,23 @@ vp-replace
         QR.error(err);
         return;
       }
-
       // Enable auto-posting if we have stuff to post, disable it otherwise.
       QR.cooldown.auto = QR.posts.length > 1;
-
       post.lock();
-
       const formData = {
         MAX_FILE_SIZE: QR.max_size,
-        mode:     'regist',
-        pwd:      QR.persona.getPassword(),
-        resto:    threadID,
-        name:     (!QR.forcedAnon ? post.name : undefined),
-        email:    post.email,
-        sub:      (!QR.forcedAnon && !threadID ? post.sub : undefined),
-        com:      post.com,
-        upfile:   post.file,
+        mode: 'regist',
+        pwd: QR.persona.getPassword(),
+        resto: threadID,
+        name: (!QR.forcedAnon ? post.name : undefined),
+        email: post.email,
+        sub: (!QR.forcedAnon && !threadID ? post.sub : undefined),
+        com: post.com,
+        upfile: post.file,
         filetag,
-        spoiler:  post.spoiler,
-        flag:     post.flag,
+        spoiler: post.spoiler,
+        flag: post.flag,
       };
-
       const options = {
         responseType: 'document',
         withCredentials: true,
@@ -18874,8 +18985,10 @@ vp-replace
         form: $$1.formData(formData)
       };
       if (Conf['Show Upload Progress']) {
-        options.onprogress = function(e) {
-          if (this !== QR.req?.upload) { return; } // aborted
+        options.onprogress = function (e) {
+          if (this !== QR.req?.upload) {
+            return;
+          } // aborted
           if (e.loaded < e.total) {
             // Uploading...
             QR.req.progress = `${Math.round((e.loaded / e.total) * 100)}%`;
@@ -18887,8 +19000,7 @@ vp-replace
           return QR.status();
         };
       }
-
-      let cb = function(response) {
+      let cb = function (response) {
         if (response != null) {
           QR.currentCaptcha = response;
           if (QR.captcha === Captcha.v2) {
@@ -18906,9 +19018,8 @@ vp-replace
           }
         }
         QR.req = $$1.ajax(`https://sys.${location.hostname.split('.')[1]}.org/${g.BOARD}/post`, options);
-        return QR.req.progress = '...';
+        QR.req.progress = '...';
       };
-
       if (typeof captcha === 'function') {
         // Wait for captcha to be verified before submitting post.
         QR.req = {
@@ -18917,52 +19028,55 @@ vp-replace
             if (QR.captcha === Captcha.v2) {
               Captcha.cache.abort();
             }
-            return cb = null;
+            cb = null;
           }
         };
-        captcha(function(response) {
+        captcha(function (response) {
           if ((QR.captcha === Captcha.v2) && Captcha.cache.haveCookie()) {
             cb?.();
-            if (response) { return Captcha.cache.save(response); }
+            if (response) {
+              return Captcha.cache.save(response);
+            }
           } else if (response) {
-            return cb?.(response);
+            cb?.(response);
           } else {
             delete QR.req;
             post.unlock();
             QR.cooldown.auto = !!Captcha.cache.getCount();
-            return QR.status();
+            QR.status();
           }
         });
       } else {
         cb(captcha);
       }
-
       // Starting to upload might take some time.
       // Provide some feedback that we're starting to submit.
-      return QR.status();
+      QR.status();
     },
-
     response() {
       let connErr, err;
-      if (this !== QR.req) { return; } // aborted
+      if (this !== QR.req) {
+        return;
+      } // aborted
       delete QR.req;
-
       const post = QR.posts[0];
       post.unlock();
-
       if (err = this.response?.getElementById('errmsg')) { // error!
         const el = $$1('a', err);
-        if (el) el.target = '_blank'; // duplicate image link
+        if (el)
+          el.target = '_blank'; // duplicate image link
       } else if (connErr = (!this.response || (this.response.title !== 'Post successful!'))) {
         err = QR.connectionError();
-        if ((QR.captcha === Captcha.v2) && QR.currentCaptcha) { Captcha.cache.save(QR.currentCaptcha); }
+        if ((QR.captcha === Captcha.v2) && QR.currentCaptcha) {
+          Captcha.cache.save(QR.currentCaptcha);
+        }
       } else if (this.status !== 200) {
         err = `Error ${this.statusText} (${this.status})`;
       }
-
-      if (!connErr) { QR.captcha.setUsed?.(); }
+      if (!connErr) {
+        QR.captcha.setUsed?.();
+      }
       delete QR.currentCaptcha;
-
       if (err) {
         let m;
         QR.errorCount = (QR.errorCount || 0) + 1;
@@ -19007,16 +19121,12 @@ vp-replace
         QR.error(err);
         return;
       }
-
       delete QR.errorCount;
-
       const h1 = $$1('h1', this.response);
-
       let [_, threadID, postID] = h1.nextSibling.textContent.match(/thread:(\d+),no:(\d+)/);
-      postID   = +postID;
+      postID = +postID;
       threadID = +threadID || postID;
-      const isReply  = threadID !== postID;
-
+      const isReply = threadID !== postID;
       // Post/upload confirmed as successful.
       $$1.event('QRPostSuccessful', {
         boardID: g.BOARD.ID,
@@ -19024,14 +19134,15 @@ vp-replace
         postID
       });
       // XXX deprecated
-      $$1.event('QRPostSuccessful_', {boardID: g.BOARD.ID, threadID, postID});
-
+      $$1.event('QRPostSuccessful_', { boardID: g.BOARD.ID, threadID, postID });
       // Enable auto-posting if we have stuff left to post, disable it otherwise.
       const postsCount = QR.posts.length - 1;
       QR.cooldown.auto = postsCount && isReply;
-
-      const lastPostToThread = !((function() { for (var p of QR.posts.slice(1)) { if (p.thread === post.thread) { return true; } } })());
-
+      const lastPostToThread = !((function () { for (var p of QR.posts.slice(1)) {
+        if (p.thread === post.thread) {
+          return true;
+        }
+      } })());
       if (postsCount) {
         post.rm();
         QR.captcha.setup(d.activeElement === QR.nodes.status);
@@ -19045,26 +19156,19 @@ vp-replace
       } else {
         QR.close();
       }
-
       QR.cleanNotifications();
       if (Conf['Posting Success Notifications']) {
         QR.notifications.push(new Notice('success', h1.textContent, 5));
       }
-
       QR.cooldown.add(threadID, postID);
-
       const URL = threadID === postID ? ( // new thread
-        `${window.location.origin}/${g.BOARD}/thread/${threadID}`
-      ) : (threadID !== g.THREADID) && lastPostToThread && Conf['Open Post in New Tab'] ? ( // replying from the index or a different thread
-        `${window.location.origin}/${g.BOARD}/thread/${threadID}#p${postID}`
-      ) : undefined;
-
+      `${window.location.origin}/${g.BOARD}/thread/${threadID}`) : (threadID !== g.THREADID) && lastPostToThread && Conf['Open Post in New Tab'] ? ( // replying from the index or a different thread
+      `${window.location.origin}/${g.BOARD}/thread/${threadID}#p${postID}`) : undefined;
       if (URL) {
         const open = Conf['Open Post in New Tab'] || postsCount ?
           () => $$1.open(URL)
-        :
-          () => location.href = URL;
-
+          :
+            () => location.href = URL;
         if (threadID === postID) {
           // XXX 4chan sometimes responds before the thread exists.
           QR.waitForThread(URL, open);
@@ -19072,14 +19176,12 @@ vp-replace
           open();
         }
       }
-
-      return QR.status();
+      QR.status();
     },
-
     waitForThread(url, cb) {
       let attempts = 0;
-      var check = function() {
-        return $$1.ajax(url, {
+      var check = function () {
+        $$1.ajax(url, {
           onloadend() {
             attempts++;
             if ((attempts >= 6) || (this.status === 200)) {
@@ -19090,45 +19192,48 @@ vp-replace
           },
           responseType: 'text',
           type: 'HEAD'
-        }
-        );
+        });
       };
-      return check();
+      check();
     },
-
     abort() {
       let oldReq;
       if ((oldReq = QR.req) && !QR.req.isUploadFinished) {
         delete QR.req;
         oldReq.abort();
-        if ((QR.captcha === Captcha.v2) && QR.currentCaptcha) { Captcha.cache.save(QR.currentCaptcha); }
+        if ((QR.captcha === Captcha.v2) && QR.currentCaptcha) {
+          Captcha.cache.save(QR.currentCaptcha);
+        }
         delete QR.currentCaptcha;
         QR.posts[0].unlock();
         QR.cooldown.auto = false;
         QR.notifications.push(new Notice('info', 'QR upload aborted.', 5));
       }
-      return QR.status();
+      QR.status();
     },
-
     cooldown: {
       seconds: 0,
       delays: {
         deletion: 60
-      }, // cooldown for deleting posts/files
-
+      },
+      // set in setup
+      maxDelay: 0,
+      isSetup: false,
+      auto: false,
+      data: {},
       // Called from Main
       init() {
-        if (!Conf['Quick Reply']) { return; }
+        if (!Conf['Quick Reply']) {
+          return;
+        }
         this.data = Conf['cooldowns'];
         this.changes = dict();
-        return $$1.sync('cooldowns', this.sync);
+        $$1.sync('cooldowns', this.sync);
       },
-
       // Called from QR
       setup() {
         // Read cooldown times
         $$1.extend(QR.cooldown.delays, g.BOARD.cooldowns());
-
         // The longest reply cooldown, for use in pruning old reply data
         QR.cooldown.maxDelay = 0;
         for (var type in QR.cooldown.delays) {
@@ -19137,57 +19242,60 @@ vp-replace
             QR.cooldown.maxDelay = Math.max(QR.cooldown.maxDelay, delay);
           }
         }
-
         QR.cooldown.isSetup = true;
-        return QR.cooldown.start();
+        QR.cooldown.start();
       },
-
       start() {
         const { data } = QR.cooldown;
-        if (
-          !Conf['Cooldown'] ||
+        if (!Conf['Cooldown'] ||
           !QR.cooldown.isSetup ||
           !!QR.cooldown.isCounting ||
-          ((Object.keys(data[g.BOARD.ID] || {}).length + Object.keys(data.global || {}).length) <= 0)
-        ) { return; }
+          ((Object.keys(data[g.BOARD.ID] || {}).length + Object.keys(data.global || {}).length) <= 0)) {
+          return;
+        }
         QR.cooldown.isCounting = true;
-        return QR.cooldown.count();
+        QR.cooldown.count();
       },
-
       sync(data) {
         QR.cooldown.data = data || dict();
-        return QR.cooldown.start();
+        QR.cooldown.start();
       },
-
       add(threadID, postID) {
-        if (!Conf['Cooldown']) { return; }
+        if (!Conf['Cooldown']) {
+          return;
+        }
         const start = Date.now();
         const boardID = g.BOARD.ID;
         QR.cooldown.set(boardID, start, { threadID, postID });
-        if (threadID === postID) { QR.cooldown.set('global', start, { boardID, threadID, postID }); }
+        if (threadID === postID) {
+          QR.cooldown.set('global', start, { boardID, threadID, postID });
+        }
         QR.cooldown.save();
-        return QR.cooldown.start();
+        QR.cooldown.start();
       },
-
       addDelay(post, delay) {
-        if (!Conf['Cooldown']) { return; }
+        if (!Conf['Cooldown']) {
+          return;
+        }
         const cooldown = QR.cooldown.categorize(post);
         cooldown.delay = delay;
         QR.cooldown.set(g.BOARD.ID, Date.now(), cooldown);
         QR.cooldown.save();
-        return QR.cooldown.start();
+        QR.cooldown.start();
       },
-
       addMute(delay) {
-        if (!Conf['Cooldown']) { return; }
+        if (!Conf['Cooldown']) {
+          return;
+        }
         QR.cooldown.set(g.BOARD.ID, Date.now(), { type: 'mute', delay });
         QR.cooldown.save();
-        return QR.cooldown.start();
+        QR.cooldown.start();
       },
-
       delete(post) {
         let cooldown;
-        if (!QR.cooldown.data) { return; }
+        if (!QR.cooldown.data) {
+          return;
+        }
         const cooldowns = (QR.cooldown.data[post.board.ID] || (QR.cooldown.data[post.board.ID] = dict()));
         for (var id in cooldowns) {
           cooldown = cooldowns[id];
@@ -19195,11 +19303,12 @@ vp-replace
             QR.cooldown.set(post.board.ID, id, null);
           }
         }
-        return QR.cooldown.save();
+        QR.cooldown.save();
       },
-
       secondsDeletion(post) {
-        if (!QR.cooldown.data || !Conf['Cooldown']) { return 0; }
+        if (!QR.cooldown.data || !Conf['Cooldown']) {
+          return 0;
+        }
         const cooldowns = QR.cooldown.data[post.board.ID] || dict();
         for (var start in cooldowns) {
           var cooldown = cooldowns[start];
@@ -19210,7 +19319,6 @@ vp-replace
         }
         return 0;
       },
-
       categorize(post) {
         if (post.thread === 'new') {
           return { type: 'thread' };
@@ -19221,25 +19329,25 @@ vp-replace
           };
         }
       },
-
       mergeChange(data, scope, id, value) {
         if (value) {
-          return (data[scope] || (data[scope] = dict()))[id] = value;
+          (data[scope] || (data[scope] = dict()))[id] = value;
         } else if (scope in data) {
           delete data[scope][id];
-          if (Object.keys(data[scope]).length === 0) { return delete data[scope]; }
+          if (Object.keys(data[scope]).length === 0)
+            delete data[scope];
         }
       },
-
       set(scope, id, value) {
         QR.cooldown.mergeChange(QR.cooldown.data, scope, id, value);
-        return (QR.cooldown.changes[scope] || (QR.cooldown.changes[scope] = dict()))[id] = value;
+        (QR.cooldown.changes[scope] || (QR.cooldown.changes[scope] = dict()))[id] = value;
       },
-
       save() {
         const { changes } = QR.cooldown;
-        if (!Object.keys(changes).length) { return; }
-        return $$1.get('cooldowns', dict(), function ({ cooldowns }) {
+        if (!Object.keys(changes).length) {
+          return;
+        }
+        $$1.get('cooldowns', dict(), function ({ cooldowns }) {
           for (var scope in QR.cooldown.changes) {
             for (var id in QR.cooldown.changes[scope]) {
               var value = QR.cooldown.changes[scope][id];
@@ -19247,32 +19355,29 @@ vp-replace
             }
             QR.cooldown.data = cooldowns;
           }
-          return $$1.set('cooldowns', cooldowns, () => QR.cooldown.changes = dict());
+          $$1.set('cooldowns', cooldowns, () => QR.cooldown.changes = dict());
         });
       },
-
       clear() {
         QR.cooldown.data = dict();
         QR.cooldown.changes = dict();
         QR.cooldown.auto = false;
         QR.cooldown.update();
-        return $$1.queueTask($$1.delete, 'cooldowns');
+        $$1.queueTask($$1.delete, 'cooldowns');
       },
-
       update() {
         let cooldown;
-        if (!QR.cooldown.isCounting) { return; }
-
+        if (!QR.cooldown.isCounting) {
+          return;
+        }
         let save = false;
         let nCooldowns = 0;
         const now = Date.now();
         const { type, threadID } = QR.cooldown.categorize(QR.posts[0]);
         let seconds = 0;
-
         if (Conf['Cooldown']) {
           for (var scope of [g.BOARD.ID, 'global']) {
             var cooldowns = (QR.cooldown.data[scope] || (QR.cooldown.data[scope] = dict()));
-
             for (var start in cooldowns) {
               cooldown = cooldowns[start];
               start = +start;
@@ -19282,7 +19387,6 @@ vp-replace
                 save = true;
                 continue;
               }
-
               // Explicit delays from error messages
               if (cooldown.delay != null) {
                 if (cooldown.delay <= elapsed) {
@@ -19294,12 +19398,11 @@ vp-replace
                 }
                 continue;
               }
-
               // Clean up expired cooldowns
               var maxDelay = cooldown.threadID !== cooldown.postID ?
                 QR.cooldown.maxDelay
                 :
-                QR.cooldown.delays[scope === 'global' ? 'thread_global' : 'thread'];
+                  QR.cooldown.delays[scope === 'global' ? 'thread_global' : 'thread'];
               if (QR.cooldown.customCooldown) {
                 maxDelay = Math.max(maxDelay, parseInt(Conf['customCooldown'], 10));
               }
@@ -19308,7 +19411,6 @@ vp-replace
                 save = true;
                 continue;
               }
-
               if (((type === 'thread') === (cooldown.threadID === cooldown.postID)) && (cooldown.boardID !== g.BOARD.ID)) {
                 // Only cooldowns relevant to this post can set the seconds variable:
                 //   reply cooldown with a reply, thread cooldown with a thread.
@@ -19316,57 +19418,53 @@ vp-replace
                 var suffix = scope === 'global' ?
                   '_global'
                   :
-                  '';
+                    '';
                 seconds = Math.max(seconds, QR.cooldown.delays[type + suffix] - elapsed);
-
                 // If additional cooldown is enabled, add the configured seconds to the count.
                 if (QR.cooldown.customCooldown) {
                   seconds = Math.max(seconds, parseInt(Conf['customCooldown'], 10) - elapsed);
                 }
               }
             }
-
             nCooldowns += Object.keys(cooldowns).length;
           }
         }
-
-        if (save) { QR.cooldown.save; }
-
+        if (save) {
+          QR.cooldown.save;
+        }
         if (nCooldowns) {
           clearTimeout(QR.cooldown.timeout);
           QR.cooldown.timeout = setTimeout(QR.cooldown.count, SECOND);
         } else {
           delete QR.cooldown.isCounting;
         }
-
         // Update the status when we change posting type.
         // Don't get stuck at some random number.
         // Don't interfere with progress status updates.
         const update = seconds !== QR.cooldown.seconds;
         QR.cooldown.seconds = seconds;
-        if (update) { return QR.status(); }
+        if (update)
+          QR.status();
       },
-
       count() {
         QR.cooldown.update();
-        if ((QR.cooldown.seconds === 0) && QR.cooldown.auto && !QR.req) { return QR.submit(); }
+        if ((QR.cooldown.seconds === 0) && QR.cooldown.auto && !QR.req)
+          QR.submit();
       }
     },
-
     oekaki: {
       menu: {
         init() {
-          if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Edit Link'] || !Conf['Quick Reply']) { return; }
-
+          if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Edit Link'] || !Conf['Quick Reply']) {
+            return;
+          }
           const a = $$1.el('a', {
             className: 'edit-link',
             href: 'javascript:;',
             textContent: 'Edit image'
-          }
-          );
+          });
           $$1.on(a, 'click', this.editFile);
-
-          return Menu.menu.addEntry({
+          Menu.menu.addEntry({
             el: a,
             order: 90,
             open(post) {
@@ -19376,7 +19474,6 @@ vp-replace
             }
           });
         },
-
         editFile() {
           const { post } = QR.oekaki.menu;
           QR.quote.call(post.nodes.post);
@@ -19384,7 +19481,7 @@ vp-replace
           const currentTime = post.file.fullImage?.currentTime || 0;
           return CrossOrigin$1.file(post.file.url, function (blob) {
             if (!blob) {
-              return QR.error("Can't load file.");
+              QR.error("Can't load file.");
             } else if (isVideo) {
               const video = $$1.el('video');
               $$1.on(video, 'loadedmetadata', function () {
@@ -19392,95 +19489,89 @@ vp-replace
                   const canvas = $$1.el('canvas', {
                     width: video.videoWidth,
                     height: video.videoHeight
-                  }
-                  );
+                  });
                   canvas.getContext('2d').drawImage(video, 0, 0);
-                  return canvas.toBlob(function (snapshot) {
+                  canvas.toBlob(function (snapshot) {
                     snapshot.name = post.file.name.replace(/\.\w+$/, '') + '.png';
                     QR.handleFiles([snapshot]);
-                    return QR.oekaki.edit();
+                    QR.oekaki.edit();
                   });
                 });
-                return video.currentTime = currentTime;
+                video.currentTime = currentTime;
               });
               $$1.on(video, 'error', () => QR.openError());
-              return video.src = URL.createObjectURL(blob);
+              video.src = URL.createObjectURL(blob);
             } else {
               blob.name = post.file.name;
               QR.handleFiles([blob]);
-              return QR.oekaki.edit();
+              QR.oekaki.edit();
             }
           });
         }
       },
-
       setup() {
-        return $$1.global(function () {
+        $$1.global(function () {
           const { FCX } = window;
           FCX.oekakiCB = () => window.Tegaki.flatten().toBlob(function (file) {
             const source = `oekaki-${Date.now()}`;
             FCX.oekakiLatest = source;
-            return document.dispatchEvent(new CustomEvent('QRSetFile', {
+            document.dispatchEvent(new CustomEvent('QRSetFile', {
               bubbles: true,
               detail: { file, name: FCX.oekakiName, source }
             }));
           });
           if (window.Tegaki) {
-            return document.querySelector('#qr .oekaki').hidden = false;
+            document.querySelector('#qr .oekaki').hidden = false;
           }
         });
       },
-
       load(cb) {
         if ($$1('script[src^="//s.4cdn.org/js/tegaki"]', d.head)) {
-          return cb();
+          cb();
         } else {
           const style = $$1.el('link', {
             rel: 'stylesheet',
             href: `//s.4cdn.org/css/tegaki.${Date.now()}.css`
-          }
-          );
-          const script = $$1.el('script',
-            { src: `//s.4cdn.org/js/tegaki.min.${Date.now()}.js` });
+          });
+          const script = $$1.el('script', { src: `//s.4cdn.org/js/tegaki.min.${Date.now()}.js` });
           let n = 0;
           const onload = function () {
-            if (++n === 2) { return cb(); }
+            if (++n === 2)
+              cb();
           };
           $$1.on(style, 'load', onload);
           $$1.on(script, 'load', onload);
-          return $$1.add(d.head, [style, script]);
+          $$1.add(d.head, [style, script]);
         }
       },
-
       draw() {
         return $$1.global(function () {
           const { Tegaki, FCX } = window;
-          if (Tegaki.bg) { Tegaki.destroy(); }
+          if (Tegaki.bg) {
+            Tegaki.destroy();
+          }
           FCX.oekakiName = 'tegaki.png';
           return Tegaki.open({
             onDone: FCX.oekakiCB,
-            onCancel() { return Tegaki.bgColor = '#ffffff'; },
+            onCancel() { Tegaki.bgColor = '#ffffff'; },
             width: +document.querySelector('#qr [name=oekaki-width]').value,
             height: +document.querySelector('#qr [name=oekaki-height]').value,
-            bgColor:
-              document.querySelector('#qr [name=oekaki-bg]').checked ?
-                document.querySelector('#qr [name=oekaki-bgcolor]').value
-                :
+            bgColor: document.querySelector('#qr [name=oekaki-bg]').checked ?
+              document.querySelector('#qr [name=oekaki-bgcolor]').value
+              :
                 'transparent'
           });
         });
       },
-
       button() {
         if (QR.selected.file) {
-          return QR.oekaki.edit();
+          QR.oekaki.edit();
         } else {
-          return QR.oekaki.toggle();
+          QR.oekaki.toggle();
         }
       },
-
       edit() {
-        return QR.oekaki.load(() => $$1.global(function () {
+        QR.oekaki.load(() => $$1.global(function () {
           const { Tegaki, FCX } = window;
           const name = document.getElementById('qr-filename').value.replace(/\.\w+$/, '') + '.png';
           const { source } = document.getElementById('file-n-submit').dataset;
@@ -19489,20 +19580,30 @@ vp-replace
             detail: { type: 'warning', content, lifetime: 20 }
           }));
           var cb = function (e) {
-            if (e) { this.removeEventListener('QRMetadata', cb, false); }
+            if (e) {
+              this.removeEventListener('QRMetadata', cb, false);
+            }
             const selected = document.getElementById('selected');
-            if (!selected?.dataset.type) { return error('No file to edit.'); }
-            if (!/^(image|video)\//.test(selected.dataset.type)) { return error('Not an image.'); }
-            if (!selected.dataset.height) { return error('Metadata not available.'); }
+            if (!selected?.dataset.type) {
+              return error('No file to edit.');
+            }
+            if (!/^(image|video)\//.test(selected.dataset.type)) {
+              return error('Not an image.');
+            }
+            if (!selected.dataset.height) {
+              return error('Metadata not available.');
+            }
             if (selected.dataset.height === 'loading') {
               selected.addEventListener('QRMetadata', cb, false);
               return;
             }
-            if (Tegaki.bg) { Tegaki.destroy(); }
+            if (Tegaki.bg) {
+              Tegaki.destroy();
+            }
             FCX.oekakiName = name;
             Tegaki.open({
               onDone: FCX.oekakiCB,
-              onCancel() { return Tegaki.bgColor = '#ffffff'; },
+              onCancel() { Tegaki.bgColor = '#ffffff'; },
               width: +selected.dataset.width,
               height: +selected.dataset.height,
               bgColor: 'transparent'
@@ -19515,9 +19616,8 @@ vp-replace
             canvas.addEventListener('QRImageDrawn', function () {
               this.remove();
               return Tegaki.onOpenImageLoaded.call(this);
-            }
-              , false);
-            return canvas.dispatchEvent(new CustomEvent('QRDrawFile', { bubbles: true }));
+            }, false);
+            canvas.dispatchEvent(new CustomEvent('QRDrawFile', { bubbles: true }));
           };
           if (Tegaki.bg && (Tegaki.onDoneCb === FCX.oekakiCB) && (source === FCX.oekakiLatest)) {
             FCX.oekakiName = name;
@@ -19527,12 +19627,10 @@ vp-replace
           }
         }));
       },
-
       toggle() {
-        return QR.oekaki.load(() => QR.nodes.oekaki.hidden = !QR.nodes.oekaki.hidden);
+        QR.oekaki.load(() => QR.nodes.oekaki.hidden = !QR.nodes.oekaki.hidden);
       }
     },
-
     persona: {
       always: {},
       types: {
@@ -19540,58 +19638,56 @@ vp-replace
         email: [],
         sub: []
       },
-
       init() {
-        if (!Conf['Quick Reply'] && (!Conf['Menu'] || !Conf['Delete Link'])) { return; }
+        if (!Conf['Quick Reply'] && (!Conf['Menu'] || !Conf['Delete Link'])) {
+          return;
+        }
         for (var item of Conf['QR.personas'].split('\n')) {
           QR.persona.parseItem(item.trim());
         }
       },
-
       parseItem(item) {
-        let match, needle, type, val;
-        if (item[0] === '#') { return; }
-        if (!(match = item.match(/(name|options|email|subject|password):"(.*)"/i))) { return; }
-        [match, type, val] = match;
-
+        if (item[0] === '#')
+          return;
+        const regexMatch = item.match(/(name|options|email|subject|password):"(.*)"/i);
+        if (!regexMatch)
+          return;
+        let needle;
+        let [match, type, val] = regexMatch;
         // Don't mix up item settings with val.
         item = item.replace(match, '');
-
         const boards = item.match(/boards:([^;]+)/i)?.[1].toLowerCase() || 'global';
-        if ((boards !== 'global') && (needle = g.BOARD.ID, !boards.split(',').includes(needle))) { return; }
-
-
+        if ((boards !== 'global') && (needle = g.BOARD.ID, !boards.split(',').includes(needle))) {
+          return;
+        }
         if (type === 'password') {
           QR.persona.pwd = val;
           return;
         }
-
-        if (type === 'options') { type = 'email'; }
-        if (type === 'subject') { type = 'sub'; }
-
+        if (type === 'options') {
+          type = 'email';
+        }
+        if (type === 'subject') {
+          type = 'sub';
+        }
         if (/always/i.test(item)) {
           QR.persona.always[type] = val;
         }
-
         if (!QR.persona.types[type].includes(val)) {
-          return QR.persona.types[type].push(val);
+          QR.persona.types[type].push(val);
         }
       },
-
       load() {
         for (var type in QR.persona.types) {
           var arr = QR.persona.types[type];
           var list = $$1(`#list-${type}`, QR.nodes.el);
           for (var val of arr) {
             if (val) {
-              $$1.add(list, $$1.el('option',
-                { textContent: val })
-              );
+              $$1.add(list, $$1.el('option', { textContent: val }));
             }
           }
         }
       },
-
       getPassword() {
         let m;
         if (QR.persona.pwd != null) {
@@ -19602,541 +19698,541 @@ vp-replace
           return '';
         }
       },
-
       get(cb) {
-        return $$1.get('QR.persona', {}, ({ 'QR.persona': persona }) => cb(persona));
+        $$1.get('QR.persona', {}, ({ 'QR.persona': persona }) => cb(persona));
       },
-
       set(post) {
-        return $$1.get('QR.persona', {}, function ({ 'QR.persona': persona }) {
+        $$1.get('QR.persona', {}, function ({ 'QR.persona': persona }) {
           persona = {
             name: post.name,
             flag: post.flag
           };
-          return $$1.set('QR.persona', persona);
+          $$1.set('QR.persona', persona);
         });
       }
     },
-
-    post: class {
-      constructor(select) {
-        this.select = this.select.bind(this);
-        const el = $$1.el('a', {
-          className: 'qr-preview',
-          draggable: true,
-          href: 'javascript:;'
-        }
-        );
-        $$1.extend(el, { innerHTML: '<a class="remove" title="Remove">✕</a><label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label><span></span>' });
-
-        this.nodes = {
-          el,
-          rm: el.firstChild,
-          spoiler: $$1('.qr-preview-spoiler input', el),
-          span: el.lastChild
-        };
-
-        $$1.on(el, 'click', this.select);
-        $$1.on(this.nodes.rm, 'click', e => { e.stopPropagation(); return this.rm(); });
-        $$1.on(this.nodes.spoiler, 'change', e => {
-          this.spoiler = e.target.checked;
-          if (this === QR.selected) { QR.nodes.spoiler.checked = this.spoiler; }
-          return this.preventAutoPost();
-        });
-        for (var label of $$('label', el)) {
-          $$1.on(label, 'click', e => e.stopPropagation());
-        }
-        $$1.add(QR.nodes.dumpList, el);
-
-        for (var event of ['dragStart', 'dragEnter', 'dragLeave', 'dragOver', 'dragEnd', 'drop']) {
-          $$1.on(el, event.toLowerCase(), this[event]);
-        }
-
-        this.thread = g.VIEW === 'thread' ?
-          g.THREADID
-          :
-          'new';
-
-        const prev = QR.posts[QR.posts.length - 1];
-        QR.posts.push(this);
-        this.nodes.spoiler.checked = (this.spoiler = prev && Conf['Remember Spoiler'] ?
-          prev.spoiler
-          :
-          false);
-        QR.persona.get(persona => {
-          this.name = 'name' in QR.persona.always ?
-            QR.persona.always.name
-            : prev ?
-              prev.name
-              :
-              persona.name;
-
-          this.email = 'email' in QR.persona.always ?
-            QR.persona.always.email
-            :
-            '';
-
-          this.sub = 'sub' in QR.persona.always ?
-            QR.persona.always.sub
-            :
-            '';
-
-          if (QR.nodes.flag) {
-            this.flag = (() => {
-              if (prev) {
-                return prev.flag;
-              } else if (persona.flag && persona.flag in g.BOARD.config.board_flags) {
-                return persona.flag;
-              }
-            })();
-          }
-          if (QR.selected === this) { return this.load(); }
-        }); // load persona
-        if (select) { this.select(); }
-        this.unlock();
-        QR.captcha.moreNeeded();
-      }
-
-      rm() {
-        this.delete();
-        const index = QR.posts.indexOf(this);
-        if (QR.posts.length === 1) {
-          new QR.post(true);
-          $$1.rmClass(QR.nodes.el, 'dump');
-        } else if (this === QR.selected) {
-          (QR.posts[index - 1] || QR.posts[index + 1]).select();
-        }
-        QR.posts.splice(index, 1);
-        QR.status();
-        return QR.captcha.updateThread?.();
-      }
-
-      delete() {
-        $$1.rm(this.nodes.el);
-        URL.revokeObjectURL(this.URL);
-        return this.dismissErrors();
-      }
-
-      lock(lock = true) {
-        this.isLocked = lock;
-        if (this !== QR.selected) { return; }
-        for (var name of ['thread', 'name', 'email', 'sub', 'com', 'fileButton', 'filename', 'spoiler', 'flag']) {
-          var node;
-          if ((node = QR.nodes[name])) {
-            node.disabled = lock;
-          }
-        }
-        this.nodes.rm.style.visibility = lock ? 'hidden' : '';
-        this.nodes.spoiler.disabled = lock;
-        return this.nodes.el.draggable = !lock;
-      }
-
-      unlock() {
-        return this.lock(false);
-      }
-
-      select() {
-        if (QR.selected) {
-          QR.selected.nodes.el.removeAttribute('id');
-          QR.selected.forceSave();
-        }
-        QR.selected = this;
-        this.lock(this.isLocked);
-        this.nodes.el.id = 'selected';
-        // Scroll the list to center the focused post.
-        const rectEl = this.nodes.el.getBoundingClientRect();
-        const rectList = this.nodes.el.parentNode.getBoundingClientRect();
-        this.nodes.el.parentNode.scrollLeft += (rectEl.left + (rectEl.width / 2)) - rectList.left - (rectList.width / 2);
-        return this.load();
-      }
-
-      load() {
-        // Load this post's values.
-
-        for (var name of ['thread', 'name', 'email', 'sub', 'com', 'filename', 'flag']) {
-          var node;
-          if (!(node = QR.nodes[name])) { continue; }
-          node.value = this[name] || node.dataset.default || '';
-        }
-
-        (this.thread !== 'new' ? $$1.addClass : $$1.rmClass)(QR.nodes.el, 'reply-to-thread');
-
-        this.showFileData();
-        return QR.characterCount();
-      }
-
-      save(input, forced) {
-        if (input.type === 'checkbox') {
-          this.spoiler = input.checked;
-          return;
-        }
-        const { name } = input.dataset;
-        if (!['thread', 'name', 'email', 'sub', 'com', 'filename', 'flag'].includes(name)) { return; }
-        const prev = this[name] || input.dataset.default || null;
-        this[name] = input.value || input.dataset.default || null;
-        switch (name) {
-          case 'thread':
-            (this.thread !== 'new' ? $$1.addClass : $$1.rmClass)(QR.nodes.el, 'reply-to-thread');
-            QR.status();
-            QR.captcha.updateThread?.();
-            break;
-          case 'com':
-            this.updateComment();
-            break;
-          case 'filename':
-            if (!this.file) { return; }
-            this.saveFilename();
-            this.updateFilename();
-            break;
-          case 'name': case 'flag':
-            if (this[name] !== prev) { // only save manual changes, not values filled in by persona settings
-              QR.persona.set(this);
-            }
-            break;
-        }
-        if (!forced) { return this.preventAutoPost(); }
-      }
-
-      forceSave() {
-        if (this !== QR.selected) { return; }
-        // Do this in case people use extensions
-        // that do not trigger the `input` event.
-        for (var name of ['thread', 'name', 'email', 'sub', 'com', 'filename', 'spoiler', 'flag']) {
-          var node;
-          if (!(node = QR.nodes[name])) { continue; }
-          this.save(node, true);
-        }
-      }
-
-      preventAutoPost() {
-        // Disable auto-posting if you're editing the first post
-        // during the last 5 seconds of the cooldown.
-        if (QR.cooldown.auto && (this === QR.posts[0])) {
-          QR.cooldown.update(); // adding/removing file can change cooldown
-          if (QR.cooldown.seconds <= 5) { return QR.cooldown.auto = false; }
-        }
-      }
-
-      setComment(com) {
-        this.com = com || null;
+  };
+  // moved outside QR for type inference
+  class post {
+    constructor(select) {
+      this.select = this.select.bind(this);
+      const el = $$1.el('a', {
+        className: 'qr-preview',
+        draggable: true,
+        href: 'javascript:;'
+      });
+      $$1.extend(el, { innerHTML: '<a class="remove" title="Remove">✕</a><label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label><span></span>' });
+      this.nodes = {
+        el,
+        rm: el.firstChild,
+        spoiler: $$1('.qr-preview-spoiler input', el),
+        span: el.lastChild,
+      };
+      $$1.on(el, 'click', this.select);
+      $$1.on(this.nodes.rm, 'click', e => { e.stopPropagation(); this.rm(); });
+      $$1.on(this.nodes.spoiler, 'change', e => {
+        this.spoiler = e.target.checked;
         if (this === QR.selected) {
-          QR.nodes.com.value = this.com;
-        }
-        return this.updateComment();
-      }
-
-      updateComment() {
-        if (this === QR.selected) {
-          QR.characterCount();
-        }
-        this.nodes.span.textContent = this.com;
-        QR.captcha.moreNeeded();
-        if (QR.captcha === Captcha.v2) {
-          return Captcha.cache.prerequest();
-        }
-      }
-
-      isOnlyQuotes() {
-        return (this.com || '').trim() === (this.quotedText || '').trim();
-      }
-
-      static rmErrored(e) {
-        e.stopPropagation();
-        for (let i = QR.posts.length - 1; i >= 0; i--) {
-          var errors;
-          var post = QR.posts[i];
-          if ((errors = post.errors)) {
-            for (var error of errors) {
-              if (doc.contains(error)) {
-                post.rm();
-                break;
-              }
-            }
-          }
-        }
-      }
-
-      error(className, message, link) {
-        const div = $$1.el('div', { className });
-        $$1.extend(div, {
-          innerHTML: message + (link ? ` [<a href="${E(link)}" target="_blank">More info</a>]` : '') +
-            `<br>[<a href="javascript:;">delete post</a>] [<a href="javascript:;">delete all</a>]`
-        });
-        (this.errors || (this.errors = [])).push(div);
-        const [rm, rmAll] = $$('a', div);
-        $$1.on(div, 'click', () => {
-          if (QR.posts.includes(this)) { return this.select(); }
-        });
-        $$1.on(rm, 'click', e => {
-          e.stopPropagation();
-          if (QR.posts.includes(this)) { return this.rm(); }
-        });
-        $$1.on(rmAll, 'click', QR.post.rmErrored);
-        return QR.error(div, true);
-      }
-
-      fileError(message, link) {
-        return this.error('file-error', `${this.filename}: ${message}`, link);
-      }
-
-      dismissErrors(test = () => true) {
-        if (this.errors) {
-          for (var error of this.errors) {
-            if (doc.contains(error) && test(error)) {
-              error.parentNode.previousElementSibling.click();
-            }
-          }
-        }
-      }
-
-      setFile(file) {
-        this.file = file;
-        if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f')) {
-          let ext;
-          this.filename = `${Date.now() * 1000 - Math.floor(Math.random() * 365 * DAY * 1000)}`;
-          if (ext = this.file.name.match(QR.validExtension)) { this.filename += ext[0]; }
-        } else {
-          this.filename = this.file.name;
-        }
-        this.filesize = $$1.bytesToString(this.file.size);
-        this.checkSize();
-        $$1.addClass(this.nodes.el, 'has-file');
-        QR.captcha.moreNeeded();
-        URL.revokeObjectURL(this.URL);
-        this.saveFilename();
-        if (this === QR.selected) {
-          this.showFileData();
-        } else {
-          this.updateFilename();
-        }
-        this.rmMetadata();
-        this.nodes.el.dataset.type = this.file.type;
-        this.nodes.el.style.backgroundImage = '';
-        if (!QR.mimeTypes.includes(this.file.type)) {
-          this.fileError('Unsupported file type.');
-        } else if (/^(image|video)\//.test(this.file.type)) {
-          this.readFile();
+          QR.nodes.spoiler.checked = this.spoiler;
         }
         return this.preventAutoPost();
+      });
+      for (var label of $$('label', el)) {
+        $$1.on(label, 'click', e => e.stopPropagation());
       }
-
-      checkSize() {
-        let max = QR.max_size;
-        if (/^video\//.test(this.file.type)) { max = Math.min(max, QR.max_size_video); }
-        if (this.file.size > max) {
-          return this.fileError(`File too large (file: ${this.filesize}, max: ${$$1.bytesToString(max)}).`);
+      $$1.add(QR.nodes.dumpList, el);
+      for (var event of ['dragStart', 'dragEnter', 'dragLeave', 'dragOver', 'dragEnd', 'drop']) {
+        $$1.on(el, event.toLowerCase(), this[event]);
+      }
+      this.thread = g.VIEW === 'thread' ?
+        g.THREADID
+        :
+          'new';
+      const prev = QR.posts[QR.posts.length - 1];
+      QR.posts.push(this);
+      this.nodes.spoiler.checked = (this.spoiler = prev && Conf['Remember Spoiler'] ?
+        prev.spoiler
+        :
+          false);
+      QR.persona.get(persona => {
+        this.name = 'name' in QR.persona.always ?
+          QR.persona.always.name
+          : prev ?
+            prev.name
+            :
+              persona.name;
+        this.email = 'email' in QR.persona.always ?
+          QR.persona.always.email
+          :
+            '';
+        this.sub = 'sub' in QR.persona.always ?
+          QR.persona.always.sub
+          :
+            '';
+        if (QR.nodes.flag) {
+          this.flag = (() => {
+            if (prev) {
+              return prev.flag;
+            } else if (persona.flag && persona.flag in g.BOARD.config.board_flags) {
+              return persona.flag;
+            }
+          })();
+        }
+        if (QR.selected === this)
+          this.load();
+      }); // load persona
+      if (select) {
+        this.select();
+      }
+      this.unlock();
+      QR.captcha.moreNeeded();
+    }
+    rm() {
+      this.delete();
+      const index = QR.posts.indexOf(this);
+      if (QR.posts.length === 1) {
+        new QR.post(true);
+        $$1.rmClass(QR.nodes.el, 'dump');
+      } else if (this === QR.selected) {
+        (QR.posts[index - 1] || QR.posts[index + 1]).select();
+      }
+      QR.posts.splice(index, 1);
+      QR.status();
+      QR.captcha.updateThread?.();
+    }
+    delete() {
+      $$1.rm(this.nodes.el);
+      URL.revokeObjectURL(this.URL);
+      this.dismissErrors();
+    }
+    lock(lock = true) {
+      this.isLocked = lock;
+      if (this !== QR.selected) {
+        return;
+      }
+      for (var name of ['thread', 'name', 'email', 'sub', 'com', 'fileButton', 'filename', 'spoiler', 'flag']) {
+        var node;
+        if ((node = QR.nodes[name])) {
+          node.disabled = lock;
         }
       }
-
-      readFile() {
-        const isVideo = /^video\//.test(this.file.type);
-        const el = $$1.el(isVideo ? 'video' : 'img');
-        if (isVideo && !el.canPlayType(this.file.type)) { return; }
-
-        const event = isVideo ? 'loadeddata' : 'load';
-        var onload = () => {
-          $$1.off(el, event, onload);
-          $$1.off(el, 'error', onerror);
-          this.checkDimensions(el);
-          this.setThumbnail(el);
-          return $$1.event('QRMetadata', null, this.nodes.el);
-        };
-        var onerror = () => {
-          $$1.off(el, event, onload);
-          $$1.off(el, 'error', onerror);
-          this.fileError(`Corrupt ${isVideo ? 'video' : 'image'} or error reading metadata.`, meta.upstreamFaq + '#error-reading-metadata');
-          URL.revokeObjectURL(el.src);
-          // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=1021289
-          this.nodes.el.removeAttribute('data-height');
-          return $$1.event('QRMetadata', null, this.nodes.el);
-        };
-        this.nodes.el.dataset.height = 'loading';
-        $$1.on(el, event, onload);
-        $$1.on(el, 'error', onerror);
-        return el.src = URL.createObjectURL(this.file);
+      this.nodes.rm.style.visibility = lock ? 'hidden' : '';
+      this.nodes.spoiler.disabled = lock;
+      this.nodes.el.draggable = !lock;
+    }
+    unlock() {
+      this.lock(false);
+    }
+    select() {
+      if (QR.selected) {
+        QR.selected.nodes.el.removeAttribute('id');
+        QR.selected.forceSave();
       }
-
-      checkDimensions(el) {
-        let height, width;
-        if (el.tagName === 'IMG') {
-          ({ height, width } = el);
-          this.nodes.el.dataset.height = height;
-          this.nodes.el.dataset.width = width;
-          if ((height > QR.max_height) || (width > QR.max_width)) {
-            this.fileError(`Image too large (image: ${height}x${width}px, max: ${QR.max_height}x${QR.max_width}px)`);
-          }
-          if ((height < QR.min_height) || (width < QR.min_width)) {
-            return this.fileError(`Image too small (image: ${height}x${width}px, min: ${QR.min_height}x${QR.min_width}px)`);
-          }
-        } else {
-          const { videoHeight, videoWidth, duration } = el;
-          this.nodes.el.dataset.height = videoHeight;
-          this.nodes.el.dataset.width = videoWidth;
-          this.nodes.el.dataset.duration = duration;
-          const max_height = Math.min(QR.max_height, QR.max_height_video);
-          const max_width = Math.min(QR.max_width, QR.max_width_video);
-          if ((videoHeight > max_height) || (videoWidth > max_width)) {
-            this.fileError(`Video too large (video: ${videoHeight}x${videoWidth}px, max: ${max_height}x${max_width}px)`);
-          }
-          if ((videoHeight < QR.min_height) || (videoWidth < QR.min_width)) {
-            this.fileError(`Video too small (video: ${videoHeight}x${videoWidth}px, min: ${QR.min_height}x${QR.min_width}px)`);
-          }
-          if (!isFinite(duration)) {
-            this.fileError('Video lacks duration metadata (try remuxing)');
-          } else if (duration > QR.max_duration_video) {
-            this.fileError(`Video too long (video: ${duration}s, max: ${QR.max_duration_video}s)`);
-          }
-          if (BoardConfig.noAudio(g.BOARD.ID) && $$1.hasAudio(el)) {
-            return this.fileError('Audio not allowed');
-          }
+      QR.selected = this;
+      this.lock(this.isLocked);
+      this.nodes.el.id = 'selected';
+      // Scroll the list to center the focused post.
+      const rectEl = this.nodes.el.getBoundingClientRect();
+      const rectList = this.nodes.el.parentNode.getBoundingClientRect();
+      this.nodes.el.parentNode.scrollLeft += (rectEl.left + (rectEl.width / 2)) - rectList.left - (rectList.width / 2);
+      this.load();
+    }
+    load() {
+      // Load this post's values.
+      for (var name of ['thread', 'name', 'email', 'sub', 'com', 'filename', 'flag']) {
+        var node;
+        if (!(node = QR.nodes[name])) {
+          continue;
         }
+        node.value = this[name] || node.dataset.default || '';
       }
-
-      setThumbnail(el) {
-        // Create a redimensioned thumbnail.
-        let height, width;
-        const isVideo = el.tagName === 'VIDEO';
-
-        // Generate thumbnails only if they're really big.
-        // Resized pictures through canvases look like ass,
-        // so we generate thumbnails `s` times bigger then expected
-        // to avoid crappy resized quality.
-        let s = 90 * 2 * window.devicePixelRatio;
-        if (this.file.type === 'image/gif') { s *= 3; } // let them animate
-        if (isVideo) {
-          height = el.videoHeight;
-          width = el.videoWidth;
-        } else {
-          ({ height, width } = el);
-          if ((height < s) || (width < s)) {
-            this.URL = el.src;
-            this.nodes.el.style.backgroundImage = `url(${this.URL})`;
+      (this.thread !== 'new' ? $$1.addClass : $$1.rmClass)(QR.nodes.el, 'reply-to-thread');
+      this.showFileData();
+      QR.characterCount();
+    }
+    save(input, forced) {
+      if (input.type === 'checkbox') {
+        this.spoiler = input.checked;
+        return;
+      }
+      const { name } = input.dataset;
+      if (!['thread', 'name', 'email', 'sub', 'com', 'filename', 'flag'].includes(name)) {
+        return;
+      }
+      const prev = this[name] || input.dataset.default || null;
+      this[name] = input.value || input.dataset.default || null;
+      switch (name) {
+        case 'thread':
+          (this.thread !== 'new' ? $$1.addClass : $$1.rmClass)(QR.nodes.el, 'reply-to-thread');
+          QR.status();
+          QR.captcha.updateThread?.();
+          break;
+        case 'com':
+          this.updateComment();
+          break;
+        case 'filename':
+          if (!this.file) {
             return;
           }
-        }
-
-        if (height <= width) {
-          width = (s / height) * width;
-          height = s;
-        } else {
-          height = (s / width) * height;
-          width = s;
-        }
-        const cv = $$1.el('canvas');
-        cv.height = height;
-        cv.width = width;
-        cv.getContext('2d').drawImage(el, 0, 0, width, height);
-        URL.revokeObjectURL(el.src);
-        return cv.toBlob(blob => {
-          this.URL = URL.createObjectURL(blob);
-          return this.nodes.el.style.backgroundImage = `url(${this.URL})`;
-        });
-      }
-
-      rmFile() {
-        if (this.isLocked) { return; }
-        delete this.file;
-        delete this.filename;
-        delete this.filesize;
-        this.nodes.el.removeAttribute('title');
-        QR.nodes.filename.removeAttribute('title');
-        this.rmMetadata();
-        this.nodes.el.style.backgroundImage = '';
-        $$1.rmClass(this.nodes.el, 'has-file');
-        this.showFileData();
-        URL.revokeObjectURL(this.URL);
-        this.dismissErrors(error => $$1.hasClass(error, 'file-error'));
-        return this.preventAutoPost();
-      }
-
-      rmMetadata() {
-        for (var attr of ['type', 'height', 'width', 'duration']) {
-          // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=1021289
-          this.nodes.el.removeAttribute(`data-${attr}`);
-        }
-      }
-
-      saveFilename() {
-        this.file.newName = (this.filename || '').replace(/[/\\]/g, '-');
-        if (!QR.validExtension.test(this.filename)) {
-          // 4chan will truncate the filename if it has no extension.
-          return this.file.newName += `.${$$1.getOwn(QR.extensionFromType, this.file.type) || 'jpg'}`;
-        }
-      }
-
-      updateFilename() {
-        const long = `${this.filename} (${this.filesize})`;
-        this.nodes.el.title = long;
-        if (this !== QR.selected) { return; }
-        return QR.nodes.filename.title = long;
-      }
-
-      showFileData() {
-        if (this.file) {
+          this.saveFilename();
           this.updateFilename();
-          QR.nodes.filename.value = this.filename;
-          $$1.addClass(QR.nodes.oekaki, 'has-file');
-          $$1.addClass(QR.nodes.fileSubmit, 'has-file');
-        } else {
-          $$1.rmClass(QR.nodes.oekaki, 'has-file');
-          $$1.rmClass(QR.nodes.fileSubmit, 'has-file');
-        }
-        if (this.file?.source != null) {
-          QR.nodes.fileSubmit.dataset.source = this.file.source;
-        } else {
-          QR.nodes.fileSubmit.removeAttribute('data-source');
-        }
-        return QR.nodes.spoiler.checked = this.spoiler;
-      }
-
-      pasteText(file) {
-        this.pasting = true;
-        this.preventAutoPost();
-        const reader = new FileReader();
-        reader.onload = e => {
-          const { result } = e.target;
-          this.setComment((this.com ? `${this.com}\n${result}` : result));
-          return delete this.pasting;
-        };
-        return reader.readAsText(file);
-      }
-
-      dragStart(e) {
-        const { left, top } = this.getBoundingClientRect();
-        e.dataTransfer.setDragImage(this, e.clientX - left, e.clientY - top);
-        return $$1.addClass(this, 'drag');
-      }
-      dragEnd() { return $$1.rmClass(this, 'drag'); }
-      dragEnter() { return $$1.addClass(this, 'over'); }
-      dragLeave() { return $$1.rmClass(this, 'over'); }
-
-      dragOver(e) {
-        e.preventDefault();
-        return e.dataTransfer.dropEffect = 'move';
-      }
-
-      drop() {
-        $$1.rmClass(this, 'over');
-        if (!this.draggable) { return; }
-        const el = $$1('.drag', this.parentNode);
-        const index = el => {
-          for (let i = 0; i < el.parentNode.children.length; i++) {
-            if (el.parentNode.children[i] === el) return i;
+          break;
+        case 'name':
+        case 'flag':
+          if (this[name] !== prev) { // only save manual changes, not values filled in by persona settings
+            QR.persona.set(this);
           }
-          return -1;
-        };
-        const oldIndex = index(el);
-        const newIndex = index(this);
-        if (QR.posts[oldIndex].isLocked || QR.posts[newIndex].isLocked) { return; }
-        (oldIndex < newIndex ? $$1.after : $$1.before)(this, el);
-        const post = QR.posts.splice(oldIndex, 1)[0];
-        QR.posts.splice(newIndex, 0, post);
-        QR.status();
-        return QR.captcha.updateThread?.();
+          break;
+      }
+      if (!forced)
+        this.preventAutoPost();
+    }
+    forceSave() {
+      if (this !== QR.selected) {
+        return;
+      }
+      // Do this in case people use extensions
+      // that do not trigger the `input` event.
+      for (var name of ['thread', 'name', 'email', 'sub', 'com', 'filename', 'spoiler', 'flag']) {
+        var node;
+        if (!(node = QR.nodes[name])) {
+          continue;
+        }
+        this.save(node, true);
       }
     }
-
-  };
+    preventAutoPost() {
+      // Disable auto-posting if you're editing the first post
+      // during the last 5 seconds of the cooldown.
+      if (QR.cooldown.auto && (this === QR.posts[0])) {
+        QR.cooldown.update(); // adding/removing file can change cooldown
+        if (QR.cooldown.seconds <= 5)
+          QR.cooldown.auto = false;
+      }
+    }
+    setComment(com) {
+      this.com = com || null;
+      if (this === QR.selected) {
+        QR.nodes.com.value = this.com;
+      }
+      return this.updateComment();
+    }
+    updateComment() {
+      if (this === QR.selected) {
+        QR.characterCount();
+      }
+      this.nodes.span.textContent = this.com;
+      QR.captcha.moreNeeded();
+      if (QR.captcha === Captcha.v2) {
+        Captcha.cache.prerequest();
+      }
+    }
+    isOnlyQuotes() {
+      return (this.com || '').trim() === (this.quotedText || '').trim();
+    }
+    static rmErrored(e) {
+      e.stopPropagation();
+      for (let i = QR.posts.length - 1; i >= 0; i--) {
+        var errors;
+        var post = QR.posts[i];
+        if ((errors = post.errors)) {
+          for (var error of errors) {
+            if (doc.contains(error)) {
+              post.rm();
+              break;
+            }
+          }
+        }
+      }
+    }
+    error(className, message, link) {
+      const div = $$1.el('div', { className });
+      $$1.extend(div, {
+        innerHTML: message + (link ? ` [<a href="${E(link)}" target="_blank">More info</a>]` : '') +
+          `<br>[<a href="javascript:;">delete post</a>] [<a href="javascript:;">delete all</a>]`
+      });
+      (this.errors || (this.errors = [])).push(div);
+      const [rm, rmAll] = $$('a', div);
+      $$1.on(div, 'click', () => {
+        if (QR.posts.includes(this))
+          this.select();
+      });
+      $$1.on(rm, 'click', e => {
+        e.stopPropagation();
+        if (QR.posts.includes(this))
+          this.rm();
+      });
+      $$1.on(rmAll, 'click', QR.post.rmErrored);
+      QR.error(div, true);
+    }
+    fileError(message, link) {
+      this.error('file-error', `${this.filename}: ${message}`, link);
+    }
+    dismissErrors(test = () => true) {
+      if (this.errors) {
+        for (var error of this.errors) {
+          if (doc.contains(error) && test(error)) {
+            error.parentNode.previousElementSibling.click();
+          }
+        }
+      }
+    }
+    setFile(file) {
+      this.file = file;
+      this.originalName = file.name;
+      if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f')) {
+        this.randomizeName(false);
+      } else {
+        this.filename = this.file.name;
+      }
+      this.filesize = $$1.bytesToString(this.file.size);
+      this.checkSize();
+      $$1.addClass(this.nodes.el, 'has-file');
+      QR.captcha.moreNeeded();
+      URL.revokeObjectURL(this.URL);
+      this.saveFilename();
+      if (this === QR.selected) {
+        this.showFileData();
+      } else {
+        this.updateFilename();
+      }
+      this.rmMetadata();
+      this.nodes.el.dataset.type = this.file.type;
+      this.nodes.el.style.backgroundImage = '';
+      if (!QR.mimeTypes.includes(this.file.type)) {
+        this.fileError('Unsupported file type.');
+      } else if (/^(image|video)\//.test(this.file.type)) {
+        this.readFile();
+      }
+      this.preventAutoPost();
+    }
+    randomizeName(set = true) {
+      this.filename = `${Date.now() * 1000 - Math.floor(Math.random() * 365 * DAY * 1000)}`;
+      const ext = this.file.name.match(QR.validExtension);
+      if (ext)
+        this.filename += ext[0];
+      if (set)
+        QR.nodes.filename.value = this.filename;
+    }
+    restoreName() {
+      QR.nodes.filename.value = this.filename = this.originalName;
+    }
+    checkSize() {
+      let max = QR.max_size;
+      if (/^video\//.test(this.file.type)) {
+        max = Math.min(max, QR.max_size_video);
+      }
+      if (this.file.size > max) {
+        this.fileError(`File too large (file: ${this.filesize}, max: ${$$1.bytesToString(max)}).`);
+      }
+    }
+    readFile() {
+      const isVideo = /^video\//.test(this.file.type);
+      const el = $$1.el(isVideo ? 'video' : 'img');
+      if (isVideo && !el.canPlayType(this.file.type)) {
+        return;
+      }
+      const event = isVideo ? 'loadeddata' : 'load';
+      var onload = () => {
+        $$1.off(el, event, onload);
+        $$1.off(el, 'error', onerror);
+        this.checkDimensions(el);
+        this.setThumbnail(el);
+        $$1.event('QRMetadata', null, this.nodes.el);
+      };
+      var onerror = () => {
+        $$1.off(el, event, onload);
+        $$1.off(el, 'error', onerror);
+        this.fileError(`Corrupt ${isVideo ? 'video' : 'image'} or error reading metadata.`, meta.upstreamFaq + '#error-reading-metadata');
+        URL.revokeObjectURL(el.src);
+        // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=1021289
+        this.nodes.el.removeAttribute('data-height');
+        $$1.event('QRMetadata', null, this.nodes.el);
+      };
+      this.nodes.el.dataset.height = 'loading';
+      $$1.on(el, event, onload);
+      $$1.on(el, 'error', onerror);
+      el.src = URL.createObjectURL(this.file);
+    }
+    checkDimensions(el) {
+      let height, width;
+      if (el.tagName === 'IMG') {
+        ({ height, width } = el);
+        this.nodes.el.dataset.height = height;
+        this.nodes.el.dataset.width = width;
+        if ((height > QR.max_height) || (width > QR.max_width)) {
+          this.fileError(`Image too large (image: ${height}x${width}px, max: ${QR.max_height}x${QR.max_width}px)`);
+        }
+        if ((height < QR.min_height) || (width < QR.min_width)) {
+          this.fileError(`Image too small (image: ${height}x${width}px, min: ${QR.min_height}x${QR.min_width}px)`);
+        }
+      } else {
+        const { videoHeight, videoWidth, duration } = el;
+        this.nodes.el.dataset.height = videoHeight;
+        this.nodes.el.dataset.width = videoWidth;
+        this.nodes.el.dataset.duration = duration;
+        const max_height = Math.min(QR.max_height, QR.max_height_video);
+        const max_width = Math.min(QR.max_width, QR.max_width_video);
+        if ((videoHeight > max_height) || (videoWidth > max_width)) {
+          this.fileError(`Video too large (video: ${videoHeight}x${videoWidth}px, max: ${max_height}x${max_width}px)`);
+        }
+        if ((videoHeight < QR.min_height) || (videoWidth < QR.min_width)) {
+          this.fileError(`Video too small (video: ${videoHeight}x${videoWidth}px, min: ${QR.min_height}x${QR.min_width}px)`);
+        }
+        if (!isFinite(duration)) {
+          this.fileError('Video lacks duration metadata (try remuxing)');
+        } else if (duration > QR.max_duration_video) {
+          this.fileError(`Video too long (video: ${duration}s, max: ${QR.max_duration_video}s)`);
+        }
+        if (BoardConfig.noAudio(g.BOARD.ID) && $$1.hasAudio(el)) {
+          this.fileError('Audio not allowed');
+        }
+      }
+    }
+    setThumbnail(el) {
+      // Create a redimensioned thumbnail.
+      let height, width;
+      const isVideo = el.tagName === 'VIDEO';
+      // Generate thumbnails only if they're really big.
+      // Resized pictures through canvases look like ass,
+      // so we generate thumbnails `s` times bigger then expected
+      // to avoid crappy resized quality.
+      let s = 90 * 2 * window.devicePixelRatio;
+      if (this.file.type === 'image/gif') {
+        s *= 3;
+      } // let them animate
+      if (isVideo) {
+        height = el.videoHeight;
+        width = el.videoWidth;
+      } else {
+        ({ height, width } = el);
+        if ((height < s) || (width < s)) {
+          this.URL = el.src;
+          this.nodes.el.style.backgroundImage = `url(${this.URL})`;
+          return;
+        }
+      }
+      if (height <= width) {
+        width = (s / height) * width;
+        height = s;
+      } else {
+        height = (s / width) * height;
+        width = s;
+      }
+      const cv = $$1.el('canvas');
+      cv.height = height;
+      cv.width = width;
+      cv.getContext('2d').drawImage(el, 0, 0, width, height);
+      URL.revokeObjectURL(el.src);
+      cv.toBlob(blob => {
+        this.URL = URL.createObjectURL(blob);
+        this.nodes.el.style.backgroundImage = `url(${this.URL})`;
+      });
+    }
+    rmFile() {
+      if (this.isLocked) {
+        return;
+      }
+      delete this.file;
+      delete this.filename;
+      delete this.filesize;
+      this.nodes.el.removeAttribute('title');
+      QR.nodes.filename.removeAttribute('title');
+      this.rmMetadata();
+      this.nodes.el.style.backgroundImage = '';
+      $$1.rmClass(this.nodes.el, 'has-file');
+      this.showFileData();
+      URL.revokeObjectURL(this.URL);
+      this.dismissErrors(error => $$1.hasClass(error, 'file-error'));
+      this.preventAutoPost();
+    }
+    rmMetadata() {
+      for (var attr of ['type', 'height', 'width', 'duration']) {
+        // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=1021289
+        this.nodes.el.removeAttribute(`data-${attr}`);
+      }
+    }
+    saveFilename() {
+      this.file.newName = (this.filename || '').replace(/[/\\]/g, '-');
+      if (!QR.validExtension.test(this.filename)) {
+        // 4chan will truncate the filename if it has no extension.
+        this.file.newName += `.${$$1.getOwn(QR.extensionFromType, this.file.type) || 'jpg'}`;
+      }
+    }
+    updateFilename() {
+      const long = `${this.filename} (${this.filesize})`;
+      this.nodes.el.title = long;
+      if (this !== QR.selected) {
+        return;
+      }
+      QR.nodes.filename.title = long;
+    }
+    showFileData() {
+      if (this.file) {
+        this.updateFilename();
+        QR.nodes.filename.value = this.filename;
+        $$1.addClass(QR.nodes.oekaki, 'has-file');
+        $$1.addClass(QR.nodes.fileSubmit, 'has-file');
+      } else {
+        $$1.rmClass(QR.nodes.oekaki, 'has-file');
+        $$1.rmClass(QR.nodes.fileSubmit, 'has-file');
+      }
+      if (this.file?.source != null) {
+        QR.nodes.fileSubmit.dataset.source = this.file.source;
+      } else {
+        QR.nodes.fileSubmit.removeAttribute('data-source');
+      }
+      QR.nodes.spoiler.checked = this.spoiler;
+    }
+    pasteText(file) {
+      this.pasting = true;
+      this.preventAutoPost();
+      const reader = new FileReader();
+      reader.onload = e => {
+        const { result } = e.target;
+        this.setComment((this.com ? `${this.com}\n${result}` : result));
+        delete this.pasting;
+      };
+      reader.readAsText(file);
+    }
+    dragStart(e) {
+      const { left, top } = this.getBoundingClientRect();
+      e.dataTransfer.setDragImage(this, e.clientX - left, e.clientY - top);
+      $$1.addClass(this, 'drag');
+    }
+    dragEnd() { $$1.rmClass(this, 'drag'); }
+    dragEnter() { $$1.addClass(this, 'over'); }
+    dragLeave() { $$1.rmClass(this, 'over'); }
+    dragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+    drop() {
+      $$1.rmClass(this, 'over');
+      if (!this.draggable) {
+        return;
+      }
+      const el = $$1('.drag', this.parentNode);
+      const index = el => {
+        for (let i = 0; i < el.parentNode.children.length; i++) {
+          if (el.parentNode.children[i] === el)
+            return i;
+        }
+        return -1;
+      };
+      const oldIndex = index(el);
+      const newIndex = index(this);
+      if (QR.posts[oldIndex].isLocked || QR.posts[newIndex].isLocked) {
+        return;
+      }
+      (oldIndex < newIndex ? $$1.after : $$1.before)(this, el);
+      const post = QR.posts.splice(oldIndex, 1)[0];
+      QR.posts.splice(newIndex, 0, post);
+      QR.status();
+      QR.captcha.updateThread?.();
+    }
+  }
+  QR.post = post;
 
   /*
    * decaffeinate suggestions:
@@ -22309,7 +22405,8 @@ vp-replace
         const cs = $$1.el('a', { href: 'javascript:;' });
         if (g.VIEW === 'catalog') {
           cs.title = (cs.textContent = 'Catalog Settings');
-          this.addShortcut('native', cs, 810, '🕮︎');
+          Icon.set(cs, 'bookOpen', 'Catalog Settings');
+          this.addShortcut('native', cs, 810);
         } else {
           cs.title = (cs.textContent = '4chan Settings');
           cs.className = 'native-settings';
@@ -22724,15 +22821,11 @@ vp-replace
         return top < 0;
       }
     },
-    addShortcut(id, el, index, icon) {
+    addShortcut(id, el, index) {
       const shortcut = $$1.el('span', {
         id: `shortcut-${id}`,
         className: 'shortcut brackets-wrap'
       });
-      if (icon) {
-        shortcut.style.setProperty('--icon', `"${icon}"`);
-        shortcut.classList.add('icon-shortcut');
-      }
       $$1.add(shortcut, el);
       shortcut.dataset.index = index.toString();
       for (var item of $$('[data-index]', Header.shortcuts)) {
@@ -23358,12 +23451,12 @@ vp-replace
         href: 'javascript:;',
         title: 'Prefetch Images',
         className: 'disabled',
-        innerHTML: 'Prefetch',
       });
+      Icon.set(el, 'bolt', 'Prefetch');
 
       $$1.on(el, 'click', this.toggle);
 
-      return Header$1.addShortcut('prefetch', el, 525, '🗲︎');
+      return Header$1.addShortcut('prefetch', el, 525);
     },
 
     node() {

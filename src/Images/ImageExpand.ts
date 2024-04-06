@@ -281,18 +281,16 @@ var ImageExpand = {
       if (soundUrlMatch) {
         let src = decodeURIComponent(soundUrlMatch[1]);
         if (!src.startsWith('http')) src = `https://${src}`;
-        const audioEl: HTMLAudioElement = $.el('audio', { src });
+        const audioEl = $.el('audio', { src }) as HTMLAudioElement;
         Volume.setup(audioEl);
         if (isVideo) {
           Audio.setupSync(el as HTMLVideoElement, audioEl);
-          if (Conf['Show Controls']) {
-            file.audioSlider = Audio.setupAudioSlider(el as HTMLVideoElement, audioEl);
-            $.after(el.parentElement, file.audioSlider);
-          }
-        } else {
-          audioEl.controls = Conf['Show Controls'];
-          audioEl.autoplay = Conf['Autoplay'];
+          (el as HTMLVideoElement).controls = false;
+          audioEl.loop = true;
         }
+        audioEl.controls = Conf['Show Controls'];
+        audioEl.autoplay = Conf['Autoplay'];
+
         $.after(el, audioEl);
         file.audio = audioEl;
       }
@@ -332,8 +330,8 @@ var ImageExpand = {
   },
 
   setupVideo(post: Post, playing: boolean, controls: boolean) {
-    const {fullImage} = post.file;
-    if (!playing) {
+    const {fullImage, audio} = post.file;
+    if (!playing && !audio) {
       fullImage.controls = controls;
       return;
     }
@@ -345,7 +343,7 @@ var ImageExpand = {
         return post.file.wasPlaying = true;
       }
     });
-    if (controls) {
+    if (controls && !audio) {
       return ImageCommon.addControls(fullImage);
     }
   },

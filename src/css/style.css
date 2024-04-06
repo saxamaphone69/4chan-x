@@ -2383,3 +2383,7 @@ div.post {
   overflow: clip;
   scroll-margin-top: 30px;
 }
+
+.file svg.icon {
+  height: 12px;
+}

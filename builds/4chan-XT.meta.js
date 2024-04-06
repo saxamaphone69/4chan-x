@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.6.0
+// @version      2.7.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -110,4 +110,5 @@
 // @updateURL    https://github.com/TuxedoTako/4chan-xt/releases/latest/download/4chan-XT.meta.js
 // @downloadURL  https://github.com/TuxedoTako/4chan-xt/releases/latest/download/4chan-XT.user.js
 // @icon         data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAACVBMVEUAAGcAAABmzDNZt9VtAAAAAXRSTlMAQObYZgAAAF5JREFUeNrtkTESABAQxPD/R6tsE2dUGYUtFJvLDKf93KevHJAjpBorAQWSBIKqFASC4G0pCAkm4GfaEvgYXl0T6HBaE97f0vmnfYHbZOMLZCx9ISdKWwjOWZSC8GYm4SUGwfYgqI4AAAAASUVORK5CYII=
+// @license      MIT
 // ==/UserScript==

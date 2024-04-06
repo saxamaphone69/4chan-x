@@ -8,7 +8,8 @@ export default {
   transform(code, id) {
     if (id.includes('@fortawesome')) {
       return {
-        code: `export var svgPathData = '${code.match(/svgPathData = '([^']+)';/)[1]}';\n` +
+        code: `// ${id.match(/[\\\/]fa([^\.]+)\.js$/)[1]}\n` +
+          `export var svgPathData = '${code.match(/svgPathData = '([^']+)';/)[1]}';\n` +
           `export var width = ${code.match(/width = (\d+);/)[1]};` +
           `export var height = ${code.match(/height = (\d+);/)[1]};`,
         map: { mappings: '' },

@@ -190,6 +190,7 @@ export default class Post {
       backlinks:    HTMLCollectionOf<HTMLAnchorElement>;
       uniqueIDRoot: any,
       uniqueID:     any,
+      stub?:        HTMLElement,
     };
 
     const nodes: Node & Partial<Record<keyof Post['info'], HTMLElement>> = {

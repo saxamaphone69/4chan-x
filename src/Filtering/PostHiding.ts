@@ -113,8 +113,10 @@ var PostHiding = {
         { el: thisPost },
         { el: replies },
       ];
+      let byId: HTMLElement;
       if (g.BOARD.config.user_ids) {
-        showOptions.push({ el: UI.checkbox('byId', 'By poster id', false) });
+        byId = UI.checkbox('byId', 'By poster id', false);
+        showOptions.push({ el: byId });
       }
 
       Menu.menu.addEntry({
@@ -123,17 +125,17 @@ var PostHiding = {
           textContent: 'Show'
         }),
         order: 20,
-        open(post) {
-          let data;
+        open(post: Post) {
           if (!post.isReply || post.isClone || !post.isHidden) {
             return false;
           }
-          if (!(data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID}))) {
-            return false;
-          }
+          const data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID});
+          if (!data) return false;
+
           PostHiding.menu.post = post;
           thisPost.firstChild.checked = post.isHidden;
-          replies.firstChild.checked  = (data?.hideRecursively != null) ? data.hideRecursively : Conf['Recursive Hiding'];
+          replies.firstChild.checked = data.hideRecursively ?? Conf['Recursive Hiding'];
+          if (byId) byId.firstChild.checked = data.byId;
           return true;
         },
         subEntries: showOptions
@@ -173,13 +175,14 @@ var PostHiding = {
       }
       if (byId) {
         g.posts.forEach((p) => {
-          if (p.info.uniqueID === post.info.uniqueID) {
+          if (p.info.uniqueID === post.info.uniqueID && p !== post) {
             PostHiding.hide(p, makeStub, replies);
+            PostHiding.saveHiddenState(p, true, thisPost, makeStub, replies, byId);
           }
         });
       }
 
-      PostHiding.saveHiddenState(post, true, thisPost, makeStub, replies);
+      PostHiding.saveHiddenState(post, true, thisPost, makeStub, replies, byId);
       $.event('CloseMenu');
     },
 
@@ -200,15 +203,19 @@ var PostHiding = {
       }
       if (byId) {
         g.posts.forEach((p) => {
-          if (p.info.uniqueID === post.info.uniqueID) {
+          if (p.info.uniqueID === post.info.uniqueID && p !== post) {
             PostHiding.show(p, replies);
+            const data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID});
+            if (data) {
+              PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies, byId);
+            }
           }
         });
       }
 
       const data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID})
       if (data) {
-        PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies);
+        PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies, byId);
       }
       $.event('CloseMenu');
     },
@@ -218,7 +225,7 @@ var PostHiding = {
       if (data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID})) {
         PostHiding.show(post, data.hideRecursively);
         PostHiding.hide(post, false, data.hideRecursively);
-        PostHiding.saveHiddenState(post, true, true, false, data.hideRecursively);
+        PostHiding.saveHiddenState(post, true, true, false, data.hideRecursively, data.byId);
       }
       $.event('CloseMenu');
     }
@@ -238,7 +245,14 @@ var PostHiding = {
     return a;
   },
 
-  saveHiddenState(post, isHiding, thisPost, makeStub, hideRecursively) {
+  saveHiddenState(
+    post: Post,
+    isHiding: boolean,
+    thisPost: boolean,
+    makeStub: boolean,
+    hideRecursively: boolean,
+    byId: boolean
+  ) {
     const data = {
       boardID:  post.board.ID,
       threadID: post.thread.ID,
@@ -248,7 +262,8 @@ var PostHiding = {
       data.val = {
         thisPost: thisPost !== false, // undefined -> true
         makeStub,
-        hideRecursively
+        hideRecursively,
+        byId
       };
       PostHiding.db.set(data);
     } else {
