@@ -286,6 +286,7 @@ audio.controls-added {
 :root.centered-links #shortcuts {
   width: 300px;
   text-align: right;
+  justify-content: right;
 }
 :root.centered-links #header-bar {
   text-align: center;
