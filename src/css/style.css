@@ -2380,8 +2380,7 @@ a:only-of-type > .remove {
 
 /* To not scroll posts behind the header */
 div.post {
-  overflow: -moz-hidden-unscrollable;
-  overflow: clip;
+  overflow: auto;
   scroll-margin-top: 30px;
 }
 

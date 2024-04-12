@@ -3,6 +3,17 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### 2.7.1 (2024-04-12)
+
+- Right-align shortcut icons in header when header links are centered.
+  [#45](https://github.com/TuxedoTako/4chan-xt/pull/45)
+- OneeChan compatibility fixes:
+  - Do not apply highlights of your posts and replies when OneeChan is detected since the CSS specificity from XT was
+    higher. [#43](https://github.com/TuxedoTako/4chan-xt/issues/43)
+  - Switched from `overflow: clip;` to `overflow: auto;` on posts.
+    [#44](https://github.com/TuxedoTako/4chan-xt/issues/44)
+- Fixed Expand/Contract All Images icon in the header. [#47](https://github.com/TuxedoTako/4chan-xt/issues/47)
+
 ### 2.7.0 (2024-04-06)
 
 - Re-added font-awesome for the header icons. This time I'm only importing the icons needed instead of the whole icon
@@ -15,7 +26,8 @@ in XT.
 
 ### v2.6.0 (2024-03-30)
 
-- Added an option to Update stats more often and add purge position when a thread is close to getting purged, for anons who manage general threads. [#39](https://github.com/TuxedoTako/4chan-xt/issues/39)
+- Added an option to Update stats more often and add purge position when a thread is close to getting purged, for anons
+  who manage general threads. [#39](https://github.com/TuxedoTako/4chan-xt/issues/39)
 
 ### v2.5.2 (2024-03-06)
 
@@ -74,7 +86,7 @@ in XT.
 
 ### v2.4.0 (2024-01-21)
 
-- Reworded 'Link Title in the catalog' setting's description.
+- Reworded 'Link Title in the catalog' setting's description. [#21](https://github.com/TuxedoTako/4chan-xt/pull/21)
 - Relative times and full time stamps are no longer mutually exclusive. Setting was moved to the Time Formatting section
   of the advanced settings because the other settings because the Main settings only supports boolean settings.
 - Build script: added a transformer on the TypeScript output to keep the script from getting bigger when moving files

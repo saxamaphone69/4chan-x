@@ -15,6 +15,7 @@ import { svgPathData as shuffleSvg, width as shuffleW, height as shuffleH } from
 import { svgPathData as undoSvg, width as undoW, height as undoH } from "@fas/faRotateLeft";
 import { svgPathData as downloadSvg, width as downloadW, height as downloadH } from "@fas/faDownload";
 import { svgPathData as bookOpenSvg, width as bookOpenW, height as bookOpenH } from "@fas/faBookOpen";
+import { svgPathData as shrinkSvg, width as shrinkW, height as shrinkH } from "@fas/faDownLeftAndUpRightToCenter";
 
 
 const toSvg = (svgPathData: string, width: string | number, height: string | number) => {
@@ -38,6 +39,7 @@ const icons = {
    undo:      toSvg(undoSvg, undoW, undoH),
    download:  toSvg(downloadSvg, downloadW, downloadH),
    bookOpen:  toSvg(bookOpenSvg, bookOpenW, bookOpenH),
+   shrink:    toSvg(shrinkSvg, shrinkW, shrinkH),
 } as const;
 
 var Icon = {
