@@ -40,7 +40,7 @@ var ThreadWatcher = {
       title: 'Thread Watcher',
       href:  'javascript:;',
     }));
-    Icon.set(this.shortcut, 'eye', 'watcher');
+    Icon.set(this.shortcut, 'eye', 'Watcher');
 
     this.db     = new DataBoard('watchedThreads', this.refresh, true);
     this.dbLM   = new DataBoard('watcherLastModified', null, true);
