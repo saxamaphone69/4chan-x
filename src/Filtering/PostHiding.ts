@@ -6,10 +6,21 @@ import UI from "../General/UI";
 import { g, Conf, doc } from "../globals/globals";
 import Menu from "../Menu/Menu";
 import $ from "../platform/$";
+import { dict } from "../platform/helpers";
 import Recursive from "./Recursive";
+
+/** Used in DataBoards data */
+interface HideOptions {
+  thisPost: boolean;
+  makeStub: boolean;
+  hideRecursively: boolean;
+  byId?: boolean;
+};
 
 var PostHiding = {
   db: undefined as DataBoard,
+  /** poster Ids to filter */
+  posterIdDb: undefined as DataBoard,
 
   init() {
     if (!['index', 'thread'].includes(g.VIEW) || (!Conf['Reply Hiding Buttons'] && !(Conf['Menu'] && Conf['Reply Hiding Link']))) { return; }
@@ -19,6 +30,7 @@ var PostHiding = {
     }
 
     this.db = new DataBoard('hiddenPosts');
+    this.posterIdDb = new DataBoard('hiddenPosterIds');
     Callbacks.Post.push({
       name: 'Reply Hiding',
       cb:   this.node
@@ -29,11 +41,22 @@ var PostHiding = {
     return !!(PostHiding.db && PostHiding.db.get({boardID, threadID, postID}));
   },
 
-  node() {
-    let data, sa;
-    if (!this.isReply || this.isClone || this.isFetchedQuote) { return; }
+  node(this: Post) {
+    if (!this.isReply || this.isClone || this.isFetchedQuote) return;
 
-    if (data = PostHiding.db.get({boardID: this.board.ID, threadID: this.thread.ID, postID: this.ID})) {
+    let data: HideOptions = PostHiding.db.get({boardID: this.board.ID, threadID: this.thread.ID, postID: this.ID});
+    if (!data && this.info.uniqueID) {
+      const hiddenPosterIds: Record<string, HideOptions> = PostHiding.posterIdDb.get(
+        { boardID: this.board.ID, threadID: this.thread.ID }
+      );
+      if (hiddenPosterIds && this.info.uniqueID in hiddenPosterIds) {
+        data = hiddenPosterIds[this.info.uniqueID];
+        // thisPost is only on the first hidden posts, it shouldn't apply when hiding on poster ID
+        data.thisPost = true;
+      }
+    }
+
+    if (data) {
       if (data.thisPost) {
         PostHiding.hide(this, data.makeStub, data.hideRecursively);
       } else {
@@ -45,7 +68,8 @@ var PostHiding = {
     if (!Conf['Reply Hiding Buttons']) { return; }
 
     const button = PostHiding.makeButton(this, 'hide');
-    if (sa = g.SITE.selectors.sideArrows) {
+    const sa = g.SITE.selectors.sideArrows;
+    if (sa) {
       const sideArrows = $(sa, this.nodes.root);
       $.replace(sideArrows.firstChild, button);
       sideArrows.className = 'replacedSideArrows';
@@ -180,6 +204,13 @@ var PostHiding = {
             PostHiding.saveHiddenState(p, true, thisPost, makeStub, replies, byId);
           }
         });
+        const data: Record<string, HideOptions> = PostHiding.posterIdDb.get(
+          { boardID: post.boardID, threadID: post.threadID, defaultValue: dict() }
+        );
+        if (!(post.info.uniqueID in data)) {
+          data[post.info.uniqueID] = { thisPost, makeStub, hideRecursively: replies };
+          PostHiding.posterIdDb.set({ boardID: post.boardID, threadID: post.threadID, val: data });
+        }
       }
 
       PostHiding.saveHiddenState(post, true, thisPost, makeStub, replies, byId);
@@ -264,7 +295,7 @@ var PostHiding = {
         makeStub,
         hideRecursively,
         byId
-      };
+      } satisfies HideOptions;
       PostHiding.db.set(data);
     } else {
       PostHiding.db.delete(data);

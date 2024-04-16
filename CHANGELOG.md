@@ -3,6 +3,13 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### Unreleased
+
+- Fixed post hiding on poster ID not applying to new posts.
+  [#41 (comment)](https://github.com/TuxedoTako/4chan-xt/issues/41#issuecomment-2057981978)
+- Fixed simicolon in Yotsuba B CSS [#48](https://github.com/TuxedoTako/4chan-xt/pull/48)
+- Capitalized "Watcher" in header for consistency. [#49](https://github.com/TuxedoTako/4chan-xt/pull/49)
+
 ### 2.7.1 (2024-04-12)
 
 - Right-align shortcut icons in header when header links are centered.

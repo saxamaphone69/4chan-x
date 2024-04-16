@@ -41,8 +41,8 @@ export default class Post {
   declare ID:             number;
   declare postID:         number;
   declare threadID:       number;
-  declare boardID:        number | string;
-  declare siteID:         number | string;
+  declare boardID:        string;
+  declare siteID:         string;
   declare fullID:         string;
   declare context:        Post;
   declare isReply:        boolean
