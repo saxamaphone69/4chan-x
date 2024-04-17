@@ -11,7 +11,7 @@ import Recursive from "./Recursive";
 
 /** Used in DataBoards data */
 interface HideOptions {
-  thisPost: boolean;
+  thisPost?: boolean;
   makeStub: boolean;
   hideRecursively: boolean;
   byId?: boolean;
@@ -208,7 +208,7 @@ var PostHiding = {
           { boardID: post.boardID, threadID: post.threadID, defaultValue: dict() }
         );
         if (!(post.info.uniqueID in data)) {
-          data[post.info.uniqueID] = { thisPost, makeStub, hideRecursively: replies };
+          data[post.info.uniqueID] = { makeStub, hideRecursively: replies };
           PostHiding.posterIdDb.set({ boardID: post.boardID, threadID: post.threadID, val: data });
         }
       }
@@ -223,6 +223,7 @@ var PostHiding = {
       const replies  = $('input[name=replies]',  parent).checked;
       const byId     = $('input[name=byId]', parent)?.checked;
       const { post } = PostHiding.menu as { post: Post };
+      const { boardID, threadID, postID } = post;
 
       if (!thisPost && !replies && !byId) return;
 
@@ -236,15 +237,20 @@ var PostHiding = {
         g.posts.forEach((p) => {
           if (p.info.uniqueID === post.info.uniqueID && p !== post) {
             PostHiding.show(p, replies);
-            const data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID});
+            const data = PostHiding.db.get({ boardID, threadID, postID });
             if (data) {
               PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies, byId);
             }
           }
         });
+        const byIdState: Record<string, HideOptions> = PostHiding.posterIdDb.get({ boardID, threadID });
+        if (byIdState && post.info.uniqueID in byIdState) {
+          delete byIdState[post.info.uniqueID];
+          PostHiding.posterIdDb.set({ boardID, threadID, val: byIdState });
+        }
       }
 
-      const data = PostHiding.db.get({boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID})
+      const data = PostHiding.db.get({ boardID, threadID, postID })
       if (data) {
         PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies, byId);
       }
