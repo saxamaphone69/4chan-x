@@ -168,13 +168,17 @@ var CrossOrigin = {
         timeout,
         onload(xhr) {
           try {
-            const response = (() => { switch (responseType) {
-              case 'json':
-                if (xhr.responseText) { return JSON.parse(xhr.responseText); } else { return null; }
-              default:
-                return xhr.responseText;
-            } })();
+            let response = xhr.responseText;
+            if (responseType === 'json') {
+              try {
+                response = JSON.parse(xhr.responseText);
+              } catch (error) {
+                console.error(error);
+              }
+            }
             $.extend(req, {
+              url,
+              headers,
               response,
               status: xhr.status,
               statusText: xhr.statusText,

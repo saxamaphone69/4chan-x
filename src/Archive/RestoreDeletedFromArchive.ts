@@ -17,6 +17,17 @@ const RestoreDeletedFromArchive = {
     const encryptionOK = url.startsWith('https://');
     if (encryptionOK || Conf['Exempt Archives from Encryption']) {
       CrossOrigin.cache(url, function (this: XMLHttpRequest) {
+        if (this.status >= 400) {
+          const domain = new URL(url).origin;
+          new Notice('error', $.el('div', {
+              innerHTML: 'There was an error while fetching from the archive. See the console for details.<br />' +
+                'Some archive check the browser first before checking content, you might need to open the archive ' +
+                `first to get past the browser check: <a href="${domain}">${domain}</a><br />If that doesn't work,` +
+                ' try a different archive under Settings > Advanced > Archives > Thread fetching.'
+            }));
+          console.error(this);
+          return;
+        }
         let nrRestored = 0;
         const archivePosts = this.response[g.threadID.toString()].posts as Record<string, RawArchivePost>;
         for (const [postID, raw] of Object.entries(archivePosts)) {

@@ -3,12 +3,19 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
-### Unreleased
+### 2.8.0 (2024-04-18)
 
 - Fixed post hiding on poster ID not applying to new posts.
   [#41 (comment)](https://github.com/TuxedoTako/4chan-xt/issues/41#issuecomment-2057981978)
-- Fixed simicolon in Yotsuba B CSS [#48](https://github.com/TuxedoTako/4chan-xt/pull/48)
-- Capitalized "Watcher" in header for consistency. [#49](https://github.com/TuxedoTako/4chan-xt/pull/49)
+- Fixed semicolon in Yotsuba B CSS [#48](https://github.com/TuxedoTako/4chan-xt/pull/48)
+- Capitalized "Watcher" in the header for consistency. [#49](https://github.com/TuxedoTako/4chan-xt/pull/49)
+- To address the restore from archive issues [#51](https://github.com/TuxedoTako/4chan-xt/issues/51):
+  - Added an error message when fetching fails instead of failing silently.
+  - Added option to select archive to fetch from.
+- Counting poster IDs is now used as a fallback for the missing IP count.
+  [#52](https://github.com/TuxedoTako/4chan-xt/issues/52)
+- Trying to fetch the captcha in /biz/ without verified email verification now shows the error to the user instead of
+  failing silently. [#53](https://github.com/TuxedoTako/4chan-xt/issues/53)
 
 ### 2.7.1 (2024-04-12)
 

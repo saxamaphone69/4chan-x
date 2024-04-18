@@ -134,6 +134,12 @@ var QR = {
     });
 
     Header.addShortcut('qr', sc, 540);
+
+    window.addEventListener('message', event => {
+      if (event.data?.twister?.error) {
+        QR.error($.el('div', { innerHTML: event.data.twister.error }));
+      }
+    });
   },
 
   initReady() {

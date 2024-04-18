@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.7.1",
-    "date": "2024-04-12T14:57:11Z"
+    "version": "2.8.0",
+    "date": "2024-04-18T13:55:46Z"
   };
 
   var meta = {
@@ -1978,132 +1978,139 @@ https://*.hcaptcha.com
   const DAY = HOUR * 24;
   const platform = window.GM_xmlhttpRequest ? 'userscript' : 'crx';
 
-  /*
-   * decaffeinate suggestions:
-   * DS102: Remove unnecessary code created because of implicit returns
-   * DS104: Avoid inline assignments
-   * DS206: Consider reworking classes to avoid initClass
-   * DS207: Consider shorter variations of null checks
-   * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
+  /**
+   * This class handles data related to specific threads or posts. This data is automatically cleaned up when the thread
+   * ages out.
+   * TODO At this moment, .get and .set aren't fully typed yet.
    */
   class DataBoard {
-    static initClass() {
-      this.keys = ['hiddenThreads', 'hiddenPosts', 'lastReadPosts', 'yourPosts', 'watchedThreads', 'watcherLastModified', 'customTitles'];
-    }
-
-    constructor(key, sync, dontClean) {
+    constructor(key, sync, dontClean = false) {
       this.changes = [];
       this.onSync = this.onSync.bind(this);
       this.key = key;
       this.initData(Conf[this.key]);
       $$1.sync(this.key, this.onSync);
-      if (!dontClean) { this.clean(); }
-      if (!sync) { return; }
+      if (!dontClean)
+        this.clean();
+      if (!sync)
+        return;
       // Chrome also fires the onChanged callback on the current tab,
       // so we only start syncing when we're ready.
       var init = () => {
         $$1.off(d, '4chanXInitFinished', init);
-        return this.sync = sync;
+        this.sync = sync;
       };
       $$1.on(d, '4chanXInitFinished', init);
     }
-
     initData(data) {
       let boards;
       this.data = data;
       if (this.data.boards) {
         let lastChecked;
-        ({boards, lastChecked} = this.data);
-        this.data['4chan.org'] = {boards, lastChecked};
+        ({ boards, lastChecked } = this.data);
+        this.data['4chan.org'] = { boards, lastChecked };
         delete this.data.boards;
         delete this.data.lastChecked;
       }
       return this.data[g.SITE.ID] || (this.data[g.SITE.ID] = { boards: dict() });
     }
-
     save(change, cb) {
       change();
       this.changes.push(change);
-      return $$1.get(this.key, { boards: dict() }, items => {
-        if (!this.changes.length) { return; }
+      return $$1.get(this.key, { boards: dict() }, (items) => {
+        if (!this.changes.length) {
+          return;
+        }
         const needSync = ((items[this.key].version || 0) > (this.data.version || 0));
         if (needSync) {
           this.initData(items[this.key]);
-          for (change of this.changes) { change(); }
+          for (change of this.changes) {
+            change();
+          }
         }
         this.changes = [];
         this.data.version = (this.data.version || 0) + 1;
         return $$1.set(this.key, this.data, () => {
-          if (needSync) { this.sync?.(); }
+          if (needSync) {
+            this.sync?.();
+          }
           return cb?.();
         });
       });
     }
-
     forceSync(cb) {
-      return $$1.get(this.key, { boards: dict() }, items => {
+      return $$1.get(this.key, { boards: dict() }, (items) => {
         if ((items[this.key].version || 0) > (this.data.version || 0)) {
           this.initData(items[this.key]);
-          for (var change of this.changes) { change(); }
+          for (var change of this.changes) {
+            change();
+          }
           this.sync?.();
         }
         return cb?.();
       });
     }
-
-    delete({siteID, boardID, threadID, postID}, cb) {
-      if (!siteID) { siteID = g.SITE.ID; }
-      if (!this.data[siteID]) { return; }
-      return this.save(() => {
-        if (postID) {
-          if (!this.data[siteID].boards[boardID]?.[threadID]) { return; }
-          delete this.data[siteID].boards[boardID][threadID][postID];
-          return this.deleteIfEmpty({siteID, boardID, threadID});
-        } else if (threadID) {
-          if (!this.data[siteID].boards[boardID]) { return; }
-          delete this.data[siteID].boards[boardID][threadID];
-          return this.deleteIfEmpty({siteID, boardID});
-        } else {
-          return delete this.data[siteID].boards[boardID];
-        }
+    delete({ siteID, boardID, threadID, postID }, cb) {
+      if (!siteID) {
+        siteID = g.SITE.ID;
       }
-      , cb);
+      if (!this.data[siteID]) {
+        return;
+      }
+      this.save(() => {
+        if (postID) {
+          if (!this.data[siteID].boards[boardID]?.[threadID]) {
+            return;
+          }
+          delete this.data[siteID].boards[boardID][threadID][postID];
+          this.deleteIfEmpty({ siteID, boardID, threadID });
+        } else if (threadID) {
+          if (!this.data[siteID].boards[boardID]) {
+            return;
+          }
+          delete this.data[siteID].boards[boardID][threadID];
+          this.deleteIfEmpty({ siteID, boardID });
+        } else {
+          delete this.data[siteID].boards[boardID];
+        }
+      }, cb);
     }
-
-    deleteIfEmpty({siteID, boardID, threadID}) {
-      if (!this.data[siteID]) { return; }
+    deleteIfEmpty({ siteID, boardID, threadID }) {
+      if (!this.data[siteID]) {
+        return;
+      }
       if (threadID) {
         if (!Object.keys(this.data[siteID].boards[boardID][threadID]).length) {
           delete this.data[siteID].boards[boardID][threadID];
-          return this.deleteIfEmpty({siteID, boardID});
+          this.deleteIfEmpty({ siteID, boardID });
         }
       } else if (!Object.keys(this.data[siteID].boards[boardID]).length) {
-        return delete this.data[siteID].boards[boardID];
+        delete this.data[siteID].boards[boardID];
       }
     }
-
     set(data, cb) {
-      return this.save(() => {
-        return this.setUnsafe(data);
-      }
-      , cb);
+      this.save(() => {
+        this.setUnsafe(data);
+      }, cb);
     }
-
-    setUnsafe({siteID, boardID, threadID, postID, val}) {
-      if (!siteID) { siteID = g.SITE.ID; }
-      if (!this.data[siteID]) { this.data[siteID] = { boards: dict() }; }
+    setUnsafe({ siteID, boardID, threadID, postID, val }) {
+      if (!siteID) {
+        siteID = g.SITE.ID;
+      }
+      if (!this.data[siteID])
+        this.data[siteID] = { boards: dict() };
+      const boards = this.data[siteID].boards;
       if (postID !== undefined) {
         let base;
-        return (((base = this.data[siteID].boards[boardID] || (this.data[siteID].boards[boardID] = dict())))[threadID] || (base[threadID] = dict()))[postID] = val;
+        (((base = boards[boardID] || (boards[boardID] = dict())))[threadID] || (base[threadID] = dict()))[postID] = val;
       } else if (threadID !== undefined) {
-        return (this.data[siteID].boards[boardID] || (this.data[siteID].boards[boardID] = dict()))[threadID] = val;
+        (boards[boardID] || (boards[boardID] = dict()))[threadID] = val;
       } else {
-        return this.data[siteID].boards[boardID] = val;
+        boards[boardID] = val;
       }
     }
-
-    extend({siteID, boardID, threadID, postID, val}, cb) {
-      return this.save(() => {
+    extend({ siteID, boardID, threadID, postID, val }, cb) {
+      this.save(() => {
         const oldVal = this.get({ siteID, boardID, threadID, postID, defaultValue: dict() });
         for (var key in val) {
           var subVal = val[key];
@@ -2113,26 +2120,24 @@ https://*.hcaptcha.com
             oldVal[key] = subVal;
           }
         }
-        return this.setUnsafe({siteID, boardID, threadID, postID, val: oldVal});
-      }
-      , cb);
+        this.setUnsafe({ siteID, boardID, threadID, postID, val: oldVal });
+      }, cb);
     }
-
-    setLastChecked(key='lastChecked') {
-      return this.save(() => {
-        return this.data[key] = Date.now();
+    setLastChecked(key = 'lastChecked') {
+      this.save(() => {
+        this.data[key] = Date.now();
       });
     }
-
-    get({siteID, boardID, threadID, postID, defaultValue}) {
+    get({ siteID, boardID, threadID, postID, defaultValue }) {
       let board, val;
-      if (!siteID) { siteID = g.SITE.ID; }
+      if (!siteID) {
+        siteID = g.SITE.ID;
+      }
       if (board = this.data[siteID]?.boards[boardID]) {
         let thread;
         if (threadID == null) {
           if (postID != null) {
             for (thread = 0; thread < board.length; thread++) {
-              board[thread];
               if (postID in thread) {
                 val = thread[postID];
                 break;
@@ -2142,21 +2147,16 @@ https://*.hcaptcha.com
             val = board;
           }
         } else if (thread = board[threadID]) {
-          val = (postID != null) ?
-            thread[postID]
-          :
-            thread;
+          val = (postID != null) ? thread[postID] : thread;
         }
       }
       return val || defaultValue;
     }
-
     clean() {
       let boardID, middle;
       const siteID = g.SITE.ID;
       for (boardID in this.data[siteID].boards) {
-        this.data[siteID].boards[boardID];
-        this.deleteIfEmpty({siteID, boardID});
+        this.deleteIfEmpty({ siteID, boardID });
       }
       const now = Date.now();
       if (now - (2 * HOUR) >= ((middle = this.data[siteID].lastChecked || 0)) || middle > now) {
@@ -2166,54 +2166,73 @@ https://*.hcaptcha.com
         }
       }
     }
-
     ajaxClean(boardID) {
       const that = this;
       const siteID = g.SITE.ID;
-      const threadsList = g.SITE.urls.threadsListJSON?.({siteID, boardID});
-      if (!threadsList) { return; }
-      return $$1.cache(threadsList, function() {
-        if (this.status !== 200) { return; }
-        const archiveList = g.SITE.urls.archiveListJSON?.({siteID, boardID});
-        if (!archiveList) { return that.ajaxCleanParse(boardID, this.response); }
+      const threadsList = g.SITE.urls.threadsListJSON?.({ siteID, boardID });
+      if (!threadsList) {
+        return;
+      }
+      $$1.cache(threadsList, function () {
+        if (this.status !== 200) {
+          return;
+        }
+        const archiveList = g.SITE.urls.archiveListJSON?.({ siteID, boardID });
+        if (!archiveList)
+          return that.ajaxCleanParse(boardID, this.response);
         const response1 = this.response;
-        return $$1.cache(archiveList, function() {
-          if ((this.status !== 200) && (!!g.SITE.archivedBoardsKnown || (this.status !== 404))) { return; }
-          return that.ajaxCleanParse(boardID, response1, this.response);
+        $$1.cache(archiveList, function () {
+          if ((this.status !== 200) && (!!g.SITE.archivedBoardsKnown || (this.status !== 404))) {
+            return;
+          }
+          that.ajaxCleanParse(boardID, response1, this.response);
         });
       });
     }
-
     ajaxCleanParse(boardID, response1, response2) {
       let board, ID;
       const siteID = g.SITE.ID;
-      if (!(board = this.data[siteID].boards[boardID])) { return; }
+      if (!(board = this.data[siteID].boards[boardID]))
+        return;
       const threads = dict();
       if (response1) {
         for (var page of response1) {
           for (var thread of page.threads) {
             ID = thread.no;
-            if (ID in board) { threads[ID] = board[ID]; }
+            if (ID in board) {
+              threads[ID] = board[ID];
+            }
           }
         }
       }
       if (response2) {
         for (ID of response2) {
-          if (ID in board) { threads[ID] = board[ID]; }
+          if (ID in board)
+            threads[ID] = board[ID];
         }
       }
       this.data[siteID].boards[boardID] = threads;
-      this.deleteIfEmpty({siteID, boardID});
-      return $$1.set(this.key, this.data);
+      this.deleteIfEmpty({ siteID, boardID });
+      $$1.set(this.key, this.data);
     }
-
     onSync(data) {
-      if ((data.version || 0) <= (this.data.version || 0)) { return; }
+      if ((data.version || 0) <= (this.data.version || 0)) {
+        return;
+      }
       this.initData(data);
-      return this.sync?.();
+      this.sync?.();
     }
   }
-  DataBoard.initClass();
+  DataBoard.keys = [
+    'hiddenThreads',
+    'hiddenPosts',
+    'hiddenPosterIds',
+    'lastReadPosts',
+    'yourPosts',
+    'watchedThreads',
+    'watcherLastModified',
+    'customTitles',
+  ];
 
   class SimpleDict {
     constructor() {
@@ -4467,6 +4486,8 @@ https://*.hcaptcha.com
 
   var PostHiding = {
     db: undefined,
+    /** poster Ids to filter */
+    posterIdDb: undefined,
     init() {
       if (!['index', 'thread'].includes(g.VIEW) || (!Conf['Reply Hiding Buttons'] && !(Conf['Menu'] && Conf['Reply Hiding Link']))) {
         return;
@@ -4475,6 +4496,7 @@ https://*.hcaptcha.com
         $$1.addClass(doc, "reply-hide");
       }
       this.db = new DataBoard('hiddenPosts');
+      this.posterIdDb = new DataBoard('hiddenPosterIds');
       Callbacks.Post.push({
         name: 'Reply Hiding',
         cb: this.node
@@ -4484,11 +4506,18 @@ https://*.hcaptcha.com
       return !!(PostHiding.db && PostHiding.db.get({ boardID, threadID, postID }));
     },
     node() {
-      let data, sa;
-      if (!this.isReply || this.isClone || this.isFetchedQuote) {
+      if (!this.isReply || this.isClone || this.isFetchedQuote)
         return;
+      let data = PostHiding.db.get({ boardID: this.board.ID, threadID: this.thread.ID, postID: this.ID });
+      if (!data && this.info.uniqueID) {
+        const hiddenPosterIds = PostHiding.posterIdDb.get({ boardID: this.board.ID, threadID: this.thread.ID });
+        if (hiddenPosterIds && this.info.uniqueID in hiddenPosterIds) {
+          data = hiddenPosterIds[this.info.uniqueID];
+          // thisPost is only on the first hidden posts, it shouldn't apply when hiding on poster ID
+          data.thisPost = true;
+        }
       }
-      if (data = PostHiding.db.get({ boardID: this.board.ID, threadID: this.thread.ID, postID: this.ID })) {
+      if (data) {
         if (data.thisPost) {
           PostHiding.hide(this, data.makeStub, data.hideRecursively);
         } else {
@@ -4500,7 +4529,8 @@ https://*.hcaptcha.com
         return;
       }
       const button = PostHiding.makeButton(this, 'hide');
-      if (sa = g.SITE.selectors.sideArrows) {
+      const sa = g.SITE.selectors.sideArrows;
+      if (sa) {
         const sideArrows = $$1(sa, this.nodes.root);
         $$1.replace(sideArrows.firstChild, button);
         sideArrows.className = 'replacedSideArrows';
@@ -4625,6 +4655,11 @@ https://*.hcaptcha.com
               PostHiding.saveHiddenState(p, true, thisPost, makeStub, replies, byId);
             }
           });
+          const data = PostHiding.posterIdDb.get({ boardID: post.boardID, threadID: post.threadID, defaultValue: dict() });
+          if (!(post.info.uniqueID in data)) {
+            data[post.info.uniqueID] = { makeStub, hideRecursively: replies };
+            PostHiding.posterIdDb.set({ boardID: post.boardID, threadID: post.threadID, val: data });
+          }
         }
         PostHiding.saveHiddenState(post, true, thisPost, makeStub, replies, byId);
         $$1.event('CloseMenu');
@@ -4635,6 +4670,7 @@ https://*.hcaptcha.com
         const replies = $$1('input[name=replies]', parent).checked;
         const byId = $$1('input[name=byId]', parent)?.checked;
         const { post } = PostHiding.menu;
+        const { boardID, threadID, postID } = post;
         if (!thisPost && !replies && !byId)
           return;
         if (thisPost) {
@@ -4647,14 +4683,19 @@ https://*.hcaptcha.com
           g.posts.forEach((p) => {
             if (p.info.uniqueID === post.info.uniqueID && p !== post) {
               PostHiding.show(p, replies);
-              const data = PostHiding.db.get({ boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID });
+              const data = PostHiding.db.get({ boardID, threadID, postID });
               if (data) {
                 PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies, byId);
               }
             }
           });
+          const byIdState = PostHiding.posterIdDb.get({ boardID, threadID });
+          if (byIdState && post.info.uniqueID in byIdState) {
+            delete byIdState[post.info.uniqueID];
+            PostHiding.posterIdDb.set({ boardID, threadID, val: byIdState });
+          }
         }
-        const data = PostHiding.db.get({ boardID: post.board.ID, threadID: post.thread.ID, postID: post.ID });
+        const data = PostHiding.db.get({ boardID, threadID, postID });
         if (data) {
           PostHiding.saveHiddenState(post, !(thisPost && replies), !thisPost, data.makeStub, !replies, byId);
         }
@@ -6130,7 +6171,7 @@ https://*.hcaptcha.com
         title: 'Thread Watcher',
         href:  'javascript:;',
       }));
-      Icon.set(this.shortcut, 'eye', 'watcher');
+      Icon.set(this.shortcut, 'eye', 'Watcher');
 
       this.db     = new DataBoard('watchedThreads', this.refresh, true);
       this.dbLM   = new DataBoard('watcherLastModified', null, true);
@@ -9502,6 +9543,7 @@ https://*.hcaptcha.com
   <table id="archive-table">
     <thead>
       <th>Thread redirection</th>
+      <th>Thread fetching</th>
       <th>Post fetching</th>
       <th>File redirection</th>
     </thead>
@@ -12627,7 +12669,7 @@ div.post {
   --xt-dead-link: #34345C;
   --xt-qr-link-border: rgb(199, 203, 225) rgb(199, 203, 225) rgb(184, 188, 210);
   --xt-qr-bg: linear-gradient(#E5E9FF, #D6DAF0) repeat scroll 0% 0% transparent;
-  --xt-menu-fg: #000,
+  --xt-menu-fg: #000;
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(214, 218, 240, 0.5);
   }
@@ -15602,13 +15644,17 @@ vp-replace
         for (boardID of boards) {
           o = archBoards[boardID] || (archBoards[boardID] = {
             thread: [],
+            threadJSON: [],
             post: [],
             file: []
           });
+          if (!o.threadJSON)
+            o.threadJSON = [];
           var archive = [uid ?? name, name];
           o.thread.push(archive);
           if (software === 'foolfuuka') {
             o.post.push(archive);
+            o.threadJSON.push(archive);
           }
           if (files.includes(boardID)) {
             o.file.push(archive);
@@ -15626,7 +15672,7 @@ vp-replace
           selected: boardID === g.BOARD.ID
         }));
         o = archBoards[boardID];
-        for (var item of ['thread', 'post', 'file']) {
+        for (var item of ['thread', 'threadJSON', 'post', 'file']) {
           $$1.add(row, Settings.addArchiveCell(boardID, o, item));
         }
         rows.push(row);
@@ -18203,6 +18249,11 @@ vp-replace
         }
       });
       Header$1.addShortcut('qr', sc, 540);
+      window.addEventListener('message', event => {
+        if (event.data?.twister?.error) {
+          QR.error($$1.el('div', { innerHTML: event.data.twister.error }));
+        }
+      });
     },
     initReady() {
       let origToggle;
@@ -20403,13 +20454,17 @@ vp-replace
           timeout,
           onload(xhr) {
             try {
-              const response = (() => { switch (responseType) {
-                case 'json':
-                  if (xhr.responseText) { return JSON.parse(xhr.responseText); } else { return null; }
-                default:
-                  return xhr.responseText;
-              } })();
+              let response = xhr.responseText;
+              if (responseType === 'json') {
+                try {
+                  response = JSON.parse(xhr.responseText);
+                } catch (error) {
+                  console.error(error);
+                }
+              }
               $$1.extend(req, {
+                url,
+                headers,
                 response,
                 status: xhr.status,
                 statusText: xhr.statusText,
@@ -25231,7 +25286,19 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       const {thread, postCountEl, fileCountEl, ipCountEl} = ThreadStats;
       postCountEl.textContent = ThreadStats.postCount;
       fileCountEl.textContent = ThreadStats.fileCount;
-      if (ipCountEl) ipCountEl.textContent = thread.ipCount ?? '?';
+      if (ipCountEl) {
+        if (thread.ipCount) {
+          ipCountEl.textContent = thread.ipCount;
+        } else if (g.BOARD?.config.user_ids) {
+          const IDs = new Set();
+          g.posts.forEach(post => {
+            IDs.add(post.info.uniqueID);
+          });
+          ipCountEl.textContent = IDs.size;
+        } else {
+          ipCountEl.textContent = '?';
+        }
+      }
       postCountEl.classList.toggle('warning', (thread.postLimit && !thread.isSticky));
       fileCountEl.classList.toggle('warning', (thread.fileLimit && !thread.isSticky));
     },
@@ -25880,6 +25947,17 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       const encryptionOK = url.startsWith('https://');
       if (encryptionOK || Conf['Exempt Archives from Encryption']) {
         CrossOrigin$1.cache(url, function () {
+          if (this.status >= 400) {
+            const domain = new URL(url).origin;
+            new Notice('error', $$1.el('div', {
+              innerHTML: 'There was an error while fetching from the archive. See the console for details.<br />' +
+                'Some archive check the browser first before checking content, you might need to open the archive ' +
+                `first to get past the browser check: <a href="${domain}">${domain}</a><br />If that doesn't work,` +
+                ' try a different archive under Settings > Advanced > Archives > Thread fetching.'
+            }));
+            console.error(this);
+            return;
+          }
           let nrRestored = 0;
           const archivePosts = this.response[g.threadID.toString()].posts;
           for (const [postID, raw] of Object.entries(archivePosts)) {

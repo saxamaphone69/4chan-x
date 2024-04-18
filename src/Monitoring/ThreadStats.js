@@ -105,7 +105,19 @@ var ThreadStats = {
     const {thread, postCountEl, fileCountEl, ipCountEl} = ThreadStats;
     postCountEl.textContent = ThreadStats.postCount;
     fileCountEl.textContent = ThreadStats.fileCount;
-    if (ipCountEl) ipCountEl.textContent = thread.ipCount ?? '?';
+    if (ipCountEl) {
+      if (thread.ipCount) {
+        ipCountEl.textContent = thread.ipCount;
+      } else if (g.BOARD?.config.user_ids) {
+        const IDs = new Set();
+        g.posts.forEach(post => {
+          IDs.add(post.info.uniqueID);
+        });
+        ipCountEl.textContent = IDs.size;
+      } else {
+        ipCountEl.textContent = '?';
+      }
+    }
     postCountEl.classList.toggle('warning', (thread.postLimit && !thread.isSticky));
     fileCountEl.classList.toggle('warning', (thread.fileLimit && !thread.isSticky));
   },

@@ -993,12 +993,17 @@ vp-replace
       for (boardID of boards) {
         o = archBoards[boardID] || (archBoards[boardID] = {
           thread: [],
+          threadJSON: [],
           post:   [],
           file:   []
         });
+        if (!o.threadJSON) o.threadJSON = [];
         var archive = [uid ?? name, name];
         o.thread.push(archive);
-        if (software === 'foolfuuka') { o.post.push(archive); }
+        if (software === 'foolfuuka') {
+          o.post.push(archive);
+          o.threadJSON.push(archive);
+        }
         if (files.includes(boardID)) { o.file.push(archive); }
       }
     }
@@ -1017,7 +1022,9 @@ vp-replace
       }));
 
       o = archBoards[boardID];
-      for (var item of ['thread', 'post', 'file']) { $.add(row, Settings.addArchiveCell(boardID, o, item)); }
+      for (var item of ['thread', 'threadJSON', 'post', 'file']) {
+        $.add(row, Settings.addArchiveCell(boardID, o, item));
+      }
       rows.push(row);
     }
 
