@@ -112,6 +112,7 @@
     "@types/node": "^18.14.5",
     "@violentmonkey/types": "^0.1.5",
     "chrome-webstore-upload": "^1.0.0",
+    "magic-string": "^0.30.10",
     "rollup": "^3.17.2",
     "rollup-plugin-cleanup": "^3.2.1",
     "tslib": "^2.5.0",
@@ -139,6 +140,11 @@
   "type": "module",
   "scripts": {
     "build": "node ./tools/rollup",
-    "build:min": "node ./tools/rollup -min"
+    "build:min": "node ./tools/rollup -min -platform=userscript",
+    "build:userscript": "node ./tools/rollup -platform=userscript",
+    "build:crx": "node ./tools/rollup -platform=crx",
+    "build:userscript:min": "node ./tools/rollup -min -platform=userscript",
+    "build:crx:min": "node ./tools/rollup -min -platform=crx",
+    "build:all": "node ./tools/rollup -min -platform=userscript && node ./tools/rollup -platform=userscript && node ./tools/rollup -platform=crx"
   }
 }

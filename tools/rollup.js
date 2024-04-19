@@ -12,28 +12,27 @@ import terser from '@rollup/plugin-terser';
 import fixTsOutputFormat from './fix-ts-output-format.js';
 import cleanup from 'rollup-plugin-cleanup';
 import alias from '@rollup/plugin-alias';
+import platformSpecific from './rollup-plugin-platform-specific.js';
+import removeDecaffeinateComments from './rollup-plugin-remove-decaffeinate-comments.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const buildDir = resolve(__dirname, '../builds/');
 
-let channel = '';
-
-if (process.argv.includes('-beta')) {
-  channel = '-beta';
-} else if (process.argv.includes('-noupdate')) {
-  channel = '-noupdate';
-}
 const minify = process.argv.includes('-min');
 const noFormat = process.argv.includes('-no-format');
+const platform = /** @type {'crx'|'userscript'} */ (process.argv.find(arg => arg.startsWith('-platform='))?.slice(10));
+if (platform !== undefined && platform !== 'crx' && platform !== 'userscript') {
+  throw new Error('incorrect value for the platform argument');
+}
 
 (async () => {
   const packageJson = JSON.parse(await readFile(resolve(__dirname, '../package.json'), 'utf-8'));
 
-  const fileName = `${packageJson.meta.path}${channel}${minify ? '.min' : ''}.user.js`;
-  const metaFileName = `${packageJson.meta.path}${channel}${minify ? '.min' : ''}.meta.js`;
+  const fileName = `${packageJson.meta.path}${minify ? '.min' : ''}.user.js`;
+  const metaFileName = `${packageJson.meta.path}${minify ? '.min' : ''}.meta.js`;
 
-  const metadata = await generateMetadata(packageJson, channel, fileName, metaFileName);
+  const metadata = await generateMetadata(packageJson, fileName, metaFileName);
 
   const license = await readFile(resolve(__dirname, '../LICENSE'), 'utf8');
 
@@ -44,6 +43,19 @@ const noFormat = process.argv.includes('-no-format');
   const bundle = await rollup({
     input: resolve(__dirname, '../src/main/Main.js'),
     plugins: [
+      platform ? platformSpecific({
+        platform,
+        include: [
+          // Only files that actually have platform specific code.
+          "**/src/main/Main.js",
+          "**/src/platform/$.ts",
+          "**/src/platform/CrossOrigin.js",
+        ],
+        minify
+      }) : undefined,
+      noFormat || minify ? undefined : removeDecaffeinateComments({
+        include: ["**/*.js", "**/*.ts", "**/*.tsx"],
+      }),
       typescript(),
       alias({
         entries: [
@@ -101,11 +113,11 @@ const noFormat = process.argv.includes('-no-format');
         }
       }),
       faFix,
-      cleanup({
-        extensions: ['js', 'ts', 'tsx', 'json', 'html', 'css'],
+      noFormat ? undefined : cleanup({
+        extensions: minify ? ['html', 'css'] : ['js', 'ts', 'tsx', 'json', 'html', 'css'],
         comments: 'all',
         lineEndings: 'unix',
-        maxEmptyLines: 2,
+        maxEmptyLines: 1,
         sourcemap: minify,
       }),
     ].filter(Boolean)
@@ -123,39 +135,43 @@ const noFormat = process.argv.includes('-no-format');
   };
 
   // user script
-  await bundle.write({
-    ...sharedBundleOpts,
-    banner: (metadata + license).replace(/\r\n/g, '\n'),
-    // file: '../builds/test/rollupOutput.js',
-    file: resolve(buildDir, fileName),
-    plugins: minify ? [terser({
-      format: {
-        max_line_len: 1000,
-        comments: /^(?: ==\/?UserScript==| @|!)|license|\bcc\b|copyright/i,
-      },
-    })] : [],
-    sourcemap: minify,
-  });
+  if (platform !== 'crx') {
+    await bundle.write({
+      ...sharedBundleOpts,
+      banner: (metadata + license).replace(/\r\n/g, '\n'),
+      // file: '../builds/test/rollupOutput.js',
+      file: resolve(buildDir, fileName),
+      plugins: minify ? [terser({
+        format: {
+          max_line_len: 1000,
+          comments: /^(?: ==\/?UserScript==| @|!)|license|\bcc\b|copyright/i,
+        },
+      })] : [],
+      sourcemap: minify,
+    });
 
-  await writeFile(resolve(buildDir, metaFileName), metadata);
+    await writeFile(resolve(buildDir, metaFileName), metadata);
+  }
 
   // chrome extension
-  const crxDir = resolve(buildDir, 'crx');
-  await bundle.write({
-    ...sharedBundleOpts,
-    banner: license.replace(/\r\n/g, '\n'),
-    file: resolve(crxDir, 'script.js'),
-  });
+  if (platform !== 'userscript') {
+    const crxDir = resolve(buildDir, 'crx');
+    await bundle.write({
+      ...sharedBundleOpts,
+      banner: license.replace(/\r\n/g, '\n'),
+      file: resolve(crxDir, 'script.js'),
+    });
 
-  await copyFile(resolve(__dirname, '../src/meta/eventPage.js'), resolve(crxDir, 'eventPage.js'));
+    await copyFile(resolve(__dirname, '../src/meta/eventPage.js'), resolve(crxDir, 'eventPage.js'));
 
-  await writeFile(
-    resolve(crxDir, 'manifest.json'),
-    // There's no auto update for the extension.
-    generateManifestJson(packageJson, version, channel || '-noupdate'),
-  );
+    await writeFile(
+      resolve(crxDir, 'manifest.json'),
+      // There's no auto update for the extension.
+      generateManifestJson(packageJson, version),
+    );
 
-  for (const file of ['icon16.png', 'icon48.png', 'icon128.png']) {
-    await copyFile(resolve(__dirname, '../src/meta/', file), resolve(crxDir, file));
-  };
+    for (const file of ['icon16.png', 'icon48.png', 'icon128.png']) {
+      await copyFile(resolve(__dirname, '../src/meta/', file), resolve(crxDir, file));
+    };
+  }
 })();

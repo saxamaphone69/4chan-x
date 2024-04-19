@@ -32,7 +32,7 @@ export default function fixTsOutputFormat(opts) {
         return {
           code: code
             .replace(/^ {4,}/gm, (match) => match.slice(0, match.length / 2))
-            .replace(/\}\r?\n *else/g, '} else'),
+            .replace(/\}\r?\n *(else|catch|finally)/g, '} $1'),
           map: { mappings: '' }
         };
       }

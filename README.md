@@ -14,6 +14,16 @@ There are known issues with updating user script trough github: [#34](https://gi
 [violentmonkey#1673](https://github.com/violentmonkey/violentmonkey/issues/1673), but Greasy Fork doesn't allow the
 minified version. Automatic updates are supported for the user script version, but not the chrome extension.
 
+## Build from source
+
+The simplest build is as easy as `npm install` `npm run build`, but there are some options:
+
+- `-min`: Minified output.
+- `-platform=userscript`, `-platform=crx`: Only builds for one platform, and removes code related to only the other.
+  Note that without this, the code is only build once without this optimization for both.
+- `-no-format` Skips some formatting like switching the indent from the TypeScript output bach from 4 to 2, and removing
+  the decaffeinate suggestions comments. Might speed up the build, but the result is larger.
+
 ## TODO
 
 <details>
@@ -78,7 +88,7 @@ minified version. Automatic updates are supported for the user script version, b
 
 ---
 
-Original readme:
+# Original readme:
 
 ![screenshot](https://ccd0.github.io/4chan-x/img/screenshot.png)
 # 4chan X

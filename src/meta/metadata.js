@@ -6,19 +6,18 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default async function generateMetadata(packageJson, channel, fileName, metaFileName) {
+export default async function generateMetadata(packageJson, fileName, metaFileName) {
   const meta = packageJson.meta;
 
   const versionFile = await readFile(resolve(__dirname, '../../version.json'));
   const version = JSON.parse(versionFile.toString());
 
-  const iconFile = await readFile(resolve(__dirname, './icon48.png'));
-  const icon = Buffer.from(iconFile).toString('base64');
+  const icon = await readFile(resolve(__dirname, './icon48.png'));
 
   const archives = JSON.parse(await readFile(resolve(__dirname, '../Archive/archives.json'), { encoding: 'utf-8' }));
 
   let output = `// ==UserScript==
-// @name         ${meta.name}${channel === '-beta' ? ' beta' : ''}
+// @name         ${meta.name}
 // @version      ${version.version}
 // @minGMVer     ${meta.min.greasemonkey}
 // @minFFVer     ${meta.min.firefox}
@@ -78,15 +77,11 @@ export default async function generateMetadata(packageJson, channel, fileName, m
     return '// @grant        ' + grant;
   }).join('\n');
 
-  output += '\n// @run-at       document-start';
-
-  if (channel !== '-noupdate') {
-    output += `
-// @updateURL    ${meta.downloads}/latest/download/${metaFileName}
-// @downloadURL  ${meta.downloads}/latest/download/${fileName}`;
-  }
   output += `
-// @icon         data:image/png;base64,${icon}
+// @run-at       document-start
+// @updateURL    ${meta.downloads}/latest/download/${metaFileName}
+// @downloadURL  ${meta.downloads}/latest/download/${fileName}
+// @icon         data:image/png;base64,${icon.toString('base64')}
 // @license      MIT
 // ==/UserScript==
 `;

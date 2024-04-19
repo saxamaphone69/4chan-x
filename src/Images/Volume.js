@@ -91,7 +91,7 @@ var Volume = {
     if (g.SITE.noAudio?.(this.board)) { return; }
     for (var file of this.files) {
       if (file.isVideo) {
-        if (file.thumb) { $.on(file.thumb,                                'wheel', Volume.wheel.bind(Header.hover)); }
+        if (file.thumb) { $.on(file.thumb, 'wheel', Volume.wheel.bind(Header.hover)); }
         $.on(($('.file-info', file.text) || file.link), 'wheel', Volume.wheel.bind(file.thumbLink));
       }
     }

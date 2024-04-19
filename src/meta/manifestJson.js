@@ -1,4 +1,4 @@
-export default function generateManifestJson(p, version, channel) {
+export default function generateManifestJson(p, version) {
   const manifest = {
     "name": p.meta.name,
     "version": version.version,
@@ -33,10 +33,8 @@ export default function generateManifestJson(p, version, channel) {
     }
   };
 
-  if (channel !== '-noupdate') {
-    manifest.update_url = `${p.meta.downloads}updates${channel}.xml`;
-    manifest.applications.gecko.update_url = `${p.meta.downloads}updates${channel}.json`;
-  }
+  // manifest.update_url = `${p.meta.downloads}updates${channel}.xml`;
+  // manifest.applications.gecko.update_url = `${p.meta.downloads}updates${channel}.json`;
 
   return JSON.stringify(manifest, undefined, 2);
 }
