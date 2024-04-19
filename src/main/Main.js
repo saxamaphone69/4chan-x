@@ -317,9 +317,6 @@ var Main = {
       return window.FCX = {};});
     Main.jsEnabled = $.hasClass(doc, 'js-enabled');
 
-    // XXX https://bugs.chromium.org/p/chromium/issues/detail?id=920638
-    $.ajaxPageInit?.();
-
     $.extend(g, Main.parseURL());
     if (g.boardID) { g.BOARD = new Board(g.boardID); }
 

@@ -105,7 +105,6 @@ body.hasDropDownNav{
 }
 /* Make long filenames wrap properly: https://github.com/ccd0/4chan-x/issues/1082 */
 :root.sw-yotsuba .post > .file {
-  /* currently nonstandard but may be added: https://lists.w3.org/Archives/Public/www-style/2016Mar/0352.html, https://bugzilla.mozilla.org/show_bug.cgi?id=1296042 */
   word-break: break-word;
 }
 :root.sw-yotsuba:not(.ua-webkit):not(.ua-blink) .fileText {

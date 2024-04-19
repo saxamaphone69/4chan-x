@@ -124,10 +124,6 @@ const Config = {
         true,
         'Rewrite the URL of the current page, removing slugs and excess slashes, and changing /res/ to /thread/.'
       ],
-      'Work around CORB Bug': [
-        true,
-        'Leave this checked until your garbage browser is fixed.'
-      ],
       'Disable Autoplaying Sounds': [
         false,
         'Prevent sounds on the page from autoplaying.'

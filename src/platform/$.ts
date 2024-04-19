@@ -10,7 +10,6 @@
 
 import Notice from "../classes/Notice";
 import { c, Conf, d, doc, g } from "../globals/globals";
-import CrossOrigin from "./CrossOrigin";
 import { debounce, dict, MINUTE, platform, SECOND } from "./helpers";
 
 // not chainable
@@ -69,17 +68,11 @@ $.ajax = (function() {
     pageXHR = XMLHttpRequest;
   }
 
-  const r = (function (url, options={}) {
+  return function (url, options={}) {
     if (options.responseType == null) { options.responseType = 'json'; }
     if (!options.type) { options.type = (options.form && 'post') || 'get'; }
     // XXX https://forums.lanik.us/viewtopic.php?f=64&t=24173&p=78310
     url = url.replace(/^((?:https?:)?\/\/(?:\w+\.)?(?:4chan|4channel|4cdn)\.org)\/adv\//, '$1//adv/');
-    if (platform === 'crx') {
-      // XXX https://bugs.chromium.org/p/chromium/issues/detail?id=920638
-      if (Conf['Work around CORB Bug'] && g.SITE.software === 'yotsuba' && !options.testCORB && FormData.prototype.entries) {
-        return $.ajaxPage(url, options);
-      }
-    }
     const {onloadend, timeout, responseType, withCredentials, type, onprogress, form, headers} = options;
     const r = new pageXHR();
     try {
@@ -93,14 +86,6 @@ $.ajax = (function() {
       $.extend(r.upload, {onprogress});
       // connection error or content blocker
       $.on(r, 'error', function() { if (!r.status) { return c.warn(`4chan X failed to load: ${url}`); } });
-      if (platform === 'crx') {
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=920638
-        $.on(r, 'load', () => {
-          if (!Conf['Work around CORB Bug'] && r.readyState === 4 && r.status === 200 && r.statusText === '' && r.response === null) {
-            $.set('Work around CORB Bug', (Conf['Work around CORB Bug'] = Date.now()));
-          }
-        });
-      }
       r.send(form);
     } catch (err) {
       // XXX Some content blockers in Firefox (e.g. Adblock Plus and NoScript) throw an exception instead of simulating a connection error.
@@ -110,108 +95,7 @@ $.ajax = (function() {
       $.queueTask($.event, 'loadend', null, r);
     }
     return r;
-  });
-
-  if (platform === 'userscript') {
-    return r;
-  } else {
-    // # XXX https://bugs.chromium.org/p/chromium/issues/detail?id=920638
-    let requestID = 0;
-    const requests = dict();
-
-    $.ajaxPageInit = function() {
-      $.global(function() {
-        window.FCX.requests = Object.create(null);
-
-        document.addEventListener('4chanXAjax', function(e) {
-          let fd, r;
-          const {url, timeout, responseType, withCredentials, type, onprogress, form, headers, id} = e.detail;
-          window.FCX.requests[id] = (r = new XMLHttpRequest());
-          r.open(type || 'GET', url, true);
-          const object = headers || {};
-          for (var key in object) {
-            var value = object[key];
-            r.setRequestHeader(key, value);
-          }
-          r.responseType = responseType === 'document' ? 'text' : responseType;
-          r.timeout = timeout;
-          r.withCredentials = withCredentials;
-          if (onprogress) {
-            r.upload.onprogress = function(e) {
-              const {loaded, total} = e;
-              const detail = {loaded, total, id};
-              return document.dispatchEvent(new CustomEvent('4chanXAjaxProgress', {bubbles: true, detail}));
-            };
-          }
-          r.onloadend = function() {
-            delete window.FCX.requests[id];
-            let {status, statusText, response} = this;
-            const responseHeaderString: string = this.getAllResponseHeaders();
-            if (typeof response === 'string' && responseHeaderString.match(/content-type: application\/json/i)) {
-              response = JSON.parse(response);
-            }
-            const detail = {status, statusText, response, responseHeaderString, id};
-            return document.dispatchEvent(new CustomEvent('4chanXAjaxLoadend', {bubbles: true, detail}));
-          };
-          // connection error or content blocker
-          r.onerror = function() {
-            if (!r.status) { return console.warn(`4chan X failed to load: ${url}`); }
-          };
-          if (form) {
-            fd = new FormData();
-            for (var entry of form) {
-              fd.append(entry[0], entry[1]);
-            }
-          } else {
-            fd = null;
-          }
-          return r.send(fd);
-      }
-        , false);
-
-      return document.addEventListener('4chanXAjaxAbort', function(e) {
-        let r;
-        if (!(r = window.FCX.requests[e.detail.id])) { return; }
-        return r.abort();
-      }
-      , false);
-    });
-
-    $.on(d, '4chanXAjaxProgress', function(e) {
-      let req;
-      if (!(req = requests[e.detail.id])) { return; }
-      return req.upload.onprogress.call(req.upload, e.detail);
-    });
-
-    return $.on(d, '4chanXAjaxLoadend', function(e) {
-      let req;
-      if (!(req = requests[e.detail.id])) { return; }
-      delete requests[e.detail.id];
-      if (e.detail.status) {
-        for (var key of ['status', 'statusText', 'response', 'responseHeaderString']) {
-          req[key] = e.detail[key];
-        }
-        if (req.responseType === 'document') {
-          req.response = new DOMParser().parseFromString(e.detail.response, 'text/html');
-        }
-      }
-      return req.onloadend();
-    });
   };
-
-  return $.ajaxPage = function(url, options={}) {
-      let req;
-      let {onloadend, timeout, responseType, withCredentials, type, onprogress, form, headers} = options;
-        const id = requestID++;
-        requests[id] = (req = new CrossOrigin.Request());
-      $.extend(req, {responseType, onloadend});
-      req.upload = {onprogress};
-      req.abort = () => $.event('4chanXAjaxAbort', {id});
-        if (form) { form = Array.from(form.entries()); }
-      $.event('4chanXAjax', {url, timeout, responseType, withCredentials, type, onprogress: !!onprogress, form, headers, id});
-        return req;
-    };
-  }
 })();
 
 // Status Code 304: Not modified

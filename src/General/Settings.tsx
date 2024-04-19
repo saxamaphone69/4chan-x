@@ -251,9 +251,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     if ($.perProtocolSettings || (location.protocol !== 'https:')) {
       $('div[data-name="Redirect to HTTPS"]', section).hidden = true;
     }
-    if (platform !== 'crx') {
-      $('div[data-name="Work around CORB Bug"]', section).hidden = true;
-    }
 
     $.get(items, function(items) {
       for (key in items) {
