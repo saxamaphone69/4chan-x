@@ -91,7 +91,9 @@ import Get from "../General/Get";
 import { dict, platform } from "../platform/helpers";
 import Polyfill from "../General/Polyfill";
 import RestoreDeletedFromArchive from "../Archive/RestoreDeletedFromArchive";
-// import Test from "../General/Test";
+// #region tests_enabled
+import Test from "../General/Test";
+// #endregion
 
 /*
  * decaffeinate suggestions:
@@ -975,6 +977,6 @@ User agent: ${navigator.userAgent}\
 export default Main;
 $.ready(() => Main.init());
 
-// <% if (readJSON('/.tests_enabled')) { %>
-// Main.features.push(['Build Test', Test]);
-// <% } %>
+// #region tests_enabled
+Main.features.push(['Build Test', Test]);
+// #endregion

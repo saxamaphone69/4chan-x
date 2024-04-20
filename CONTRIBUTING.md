@@ -19,13 +19,16 @@ If you're reporting a bug, the more detail you can give, the better. If I can't 
 ### Get started
 
 - Install [git](https://git-scm.com/), [node.js](https://nodejs.org/), and [npm](https://www.npmjs.com/).
-- Clone 4chan X: `git clone https://github.com/TuxedoTako/4chan-xt.git`<br>(If this is taking too long, you can add `--depth 100` to fetch only recent history.)
+- Clone 4chan XT: `git clone https://github.com/TuxedoTako/4chan-xt.git`
+  - If this is taking too long, you can add `--depth 100` to fetch only recent history.
+  - Alternatively, if you already have a local 4chan X repo, you can add XT as a remote:
+    `git remote add xt https://github.com/TuxedoTako/4chan-xt.git`
 - Open the directory: `cd 4chan-xt`
 - Fetch needed dependencies with: `npm install`
 
 ### Build
 
-- Build with `npm run build`.
+- Build with `npm run build`. Options are in the readme.
 
 ### Contribute
 

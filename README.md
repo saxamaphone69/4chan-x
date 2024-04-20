@@ -21,8 +21,9 @@ The simplest build is as easy as `npm install` `npm run build`, but there are so
 - `-min`: Minified output.
 - `-platform=userscript`, `-platform=crx`: Only builds for one platform, and removes code related to only the other.
   Note that without this, the code is only build once without this optimization for both.
-- `-no-format` Skips some formatting like switching the indent from the TypeScript output bach from 4 to 2, and removing
+- `-no-format` Skips some formatting like switching the indent from the TypeScript output back from 4 to 2, and removing
   the decaffeinate suggestions comments. Might speed up the build, but the result is larger.
+- `-test` Include tests in build.
 
 ## TODO
 
@@ -34,7 +35,8 @@ The simplest build is as easy as `npm install` `npm run build`, but there are so
     - this uses the typescript compiler to compile the jsx
     - render code is in [src/globals/jsx.ts](./src/globals/jsx.ts)
   - [x] binary files are included as base64 in the bundle step, they do need explicit imports
-  - [ ] \<% if (readJSON('/.tests_enabled')) { %\>, are these still used?
+  - [x] `<% if (readJSON('/.tests_enabled')) { %>`
+    - replaced by `// #region tests_enabled` `// #endregion`
 - build script
   - [x] userscript
   - [ ] .crx extension

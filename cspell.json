@@ -25,6 +25,7 @@
     "yotsuba"
   ],
   "ignoreWords": [
+    "endregion",
     "fappe",
     "recursives",
     "Tyme",

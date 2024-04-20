@@ -14,6 +14,7 @@ import cleanup from 'rollup-plugin-cleanup';
 import alias from '@rollup/plugin-alias';
 import platformSpecific from './rollup-plugin-platform-specific.js';
 import removeDecaffeinateComments from './rollup-plugin-remove-decaffeinate-comments.js';
+import removeTestCode from './rollup-plugin-remove-test-code.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -25,6 +26,7 @@ const platform = /** @type {'crx'|'userscript'} */ (process.argv.find(arg => arg
 if (platform !== undefined && platform !== 'crx' && platform !== 'userscript') {
   throw new Error('incorrect value for the platform argument');
 }
+const buildForTest = process.argv.includes('-test');
 
 (async () => {
   const packageJson = JSON.parse(await readFile(resolve(__dirname, '../package.json'), 'utf-8'));
@@ -53,6 +55,15 @@ if (platform !== undefined && platform !== 'crx' && platform !== 'userscript') {
         ],
         minify
       }) : undefined,
+      buildForTest ? undefined : removeTestCode({
+        include: [
+          // Only files that actually have test code.
+          "**/src/main/Main.js",
+          "**/src/classes/Post.ts",
+          "**/src/Linkification/Linkify.js",
+        ],
+        sourceMap: minify,
+      }),
       noFormat || minify ? undefined : removeDecaffeinateComments({
         include: ["**/*.js", "**/*.ts", "**/*.tsx"],
       }),
