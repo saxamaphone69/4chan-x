@@ -11,6 +11,7 @@
 import Notice from "../classes/Notice";
 import { c, Conf, d, doc, g } from "../globals/globals";
 import { debounce, dict, MINUTE, platform, SECOND } from "./helpers";
+import meta from '../../package.json';
 
 // not chainable
 const $ = (selector, root = document.body) => root.querySelector(selector);
@@ -85,7 +86,7 @@ $.ajax = (function() {
       $.extend(r, {onloadend, timeout, responseType, withCredentials});
       $.extend(r.upload, {onprogress});
       // connection error or content blocker
-      $.on(r, 'error', function() { if (!r.status) { return c.warn(`4chan X failed to load: ${url}`); } });
+      $.on(r, 'error', function() { if (!r.status) { c.warn(`${meta.name} failed to load: ${url}`); } });
       r.send(form);
     } catch (err) {
       // XXX Some content blockers in Firefox (e.g. Adblock Plus and NoScript) throw an exception instead of simulating a connection error.
@@ -514,7 +515,7 @@ if (platform === 'crx') {
     } catch (error) {}
     if (!$.crxWarningShown) {
       const msg = $.el('div',
-        {innerHTML: '4chan X seems to have been updated. You will need to <a href="javascript:;">reload</a> the page.'});
+        {innerHTML: `${meta.name} seems to have been updated. You will need to <a href="javascript:;">reload</a> the page.`});
       $.on($('a', msg), 'click', () => location.reload());
       new Notice('warning', msg);
       $.crxWarningShown = true;

@@ -148,7 +148,7 @@ var Main = {
       if (Main.expectInitFinished) {
         return delete Main.expectInitFinished;
       } else {
-        new Notice('error', 'Error: Multiple copies of 4chan X are enabled.');
+        new Notice('error', `Error: Multiple copies of ${meta.name} or 4chan X are enabled.`);
         return $.addClass(doc, 'tainted');
       }
     });
@@ -770,7 +770,7 @@ var Main = {
     // Detect conflicts with 4chan X v2
     let error;
     if (d.body && $.hasClass(d.body, 'fourchan_x') && !$.hasClass(doc, 'tainted')) {
-      new Notice('error', 'Error: Multiple copies of 4chan X are enabled.');
+      new Notice('error', `Error: Multiple copies of ${meta.name} or 4chan X are enabled.`);
       $.addClass(doc, 'tainted');
     }
 

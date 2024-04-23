@@ -1,6 +1,10 @@
 /* Icons */
 svg.icon {
   height: 14px;
+
+  /* resolve conflict with catalog css */
+  position: static;
+  width: auto;
 }
 :root.shortcut-icons #shortcuts .shortcut {
   padding-top: 0;

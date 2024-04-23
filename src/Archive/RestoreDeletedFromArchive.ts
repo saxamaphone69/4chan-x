@@ -16,7 +16,7 @@ const RestoreDeletedFromArchive = {
     }
     const encryptionOK = url.startsWith('https://');
     if (encryptionOK || Conf['Exempt Archives from Encryption']) {
-      CrossOrigin.ajax(url, function (this: XMLHttpRequest) {
+      CrossOrigin.ajax(url, { onloadend(this: XMLHttpRequest) {
         if (this.status >= 400) {
           const domain = new URL(url).origin;
           new Notice('error', $.el('div', {
@@ -61,7 +61,7 @@ const RestoreDeletedFromArchive = {
         }
 
         new Notice('info', msg, 3);
-      });
+      }});
     }
   },
 

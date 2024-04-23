@@ -68,6 +68,9 @@
   border-color: rgb(40, 41, 42);
   background: unset;
 }
+:root.tomorrow #qr select > option {
+  background-color: var(--xt-background);
+}
 :root.tomorrow #qr-filename {
   color: rgb(197,200,198);
 }

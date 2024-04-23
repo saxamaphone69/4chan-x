@@ -3,6 +3,16 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### 2.8.1 (2024-04-23)
+
+- Fixed quick reply modal putting icon buttons in the wrong place in the catalog.
+  [#54](https://github.com/TuxedoTako/4chan-xt/issues/54)
+- Removed 'Work around CORB Bug', which was fixed in chrome 85, while this script is 90 and up.
+  - Because this meant a file had a dependency less, which in combination with the circular dependencies, caused some
+    files to be in a different order in the output, and caused some common variables to not have `$1` appended. So sorry
+    for the giant diff.
+- Code specific for the userscript isn't in the chrome extension anymore and vice versa.
+
 ### 2.8.0 (2024-04-18)
 
 - Fixed post hiding on poster ID not applying to new posts.
