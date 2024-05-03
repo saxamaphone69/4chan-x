@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.8.1",
-    "date": "2024-04-23T17:15:09Z"
+    "version": "2.8.2",
+    "date": "2024-05-03T17:28:53Z"
   };
 
   var meta = {
@@ -8253,6 +8253,101 @@ svg.icon {
   }
   PostClone.suffix = 0;
 
+  var BoardConfig = {
+    cbs: [],
+
+    init() {
+      let middle;
+      if (g.SITE.software !== 'yotsuba') { return; }
+      const now = Date.now();
+      if (now - (2 * HOUR) >= ((middle = Conf['boardConfig'].lastChecked || 0)) || middle > now) {
+        return $.ajax(`${location.protocol}//a.4cdn.org/boards.json`,
+          {onloadend: this.load});
+      } else {
+        const {boards} = Conf['boardConfig'];
+        return this.set(boards);
+      }
+    },
+
+    load() {
+      let boards;
+      if ((this.status === 200) && this.response && this.response.boards) {
+        boards = dict();
+        for (var board of this.response.boards) {
+          boards[board.board] = board;
+        }
+        $.set('boardConfig', {boards, lastChecked: Date.now()});
+      } else {
+        ({boards} = Conf['boardConfig']);
+        const err = (() => { switch (this.status) {
+          case 0:   return 'Connection Error';
+          case 200: return 'Invalid Data';
+          default:          return `Error ${this.statusText} (${this.status})`;
+        } })();
+        new Notice('warning', `Failed to load board configuration. ${err}`, 20);
+      }
+      return BoardConfig.set(boards);
+    },
+
+    set(boards) {
+      this.boards = boards;
+      for (var ID in g.boards) {
+        var board = g.boards[ID];
+        board.config = this.boards[ID] || {};
+      }
+      for (var cb of this.cbs) {
+        $.queueTask(cb);
+      }
+    },
+
+    ready(cb) {
+      if (this.boards) {
+        return cb();
+      } else {
+        return this.cbs.push(cb);
+      }
+    },
+
+    sfwBoards(sfw) {
+      return (() => {
+        const result = [];
+        const object = this.boards || Conf['boardConfig'].boards;
+        for (var board in object) {
+          var data = object[board];
+          if (!!data.ws_board === sfw) {
+            result.push(board);
+          }
+        }
+        return result;
+      })();
+    },
+
+    isSFW(board) {
+      return !!(this.boards || Conf['boardConfig'].boards)[board]?.ws_board;
+    },
+
+    domain(board) {
+      // return `boards.${BoardConfig.isSFW(board) ? '4channel' : '4chan'}.org`;
+      return 'boards.4chan.org';
+    },
+
+    isArchived(board) {
+      // assume archive exists if no data available to prevent cleaning of archived threads
+      const data = (this.boards || Conf['boardConfig'].boards)[board];
+      return !data || data.is_archived;
+    },
+
+    noAudio(boardID) {
+      if (g.SITE.software !== 'yotsuba') { return false; }
+      const boards = this.boards || Conf['boardConfig'].boards;
+      return boards && boards[boardID] && !boards[boardID].webm_audio;
+    },
+
+    title(boardID) {
+      return (this.boards || Conf['boardConfig'].boards)?.[boardID]?.title || '';
+    }
+  };
+
   var Menu = {
     init() {
       if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu']) { return; }
@@ -8409,10 +8504,10 @@ svg.icon {
     },
     menu: {
       post: undefined,
-      init() {
-        if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Reply Hiding Link']) {
+      async init() {
+        if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Reply Hiding Link'])
           return;
-        }
+        await new Promise(res => BoardConfig.ready(res));
         // Hide
         let applyHide = $.el('a', {
           textContent: 'Apply',
@@ -8838,101 +8933,6 @@ svg.icon {
 </div>
 <div id="watched-threads"></div>
 `;
-
-  var BoardConfig = {
-    cbs: [],
-
-    init() {
-      let middle;
-      if (g.SITE.software !== 'yotsuba') { return; }
-      const now = Date.now();
-      if (now - (2 * HOUR) >= ((middle = Conf['boardConfig'].lastChecked || 0)) || middle > now) {
-        return $.ajax(`${location.protocol}//a.4cdn.org/boards.json`,
-          {onloadend: this.load});
-      } else {
-        const {boards} = Conf['boardConfig'];
-        return this.set(boards);
-      }
-    },
-
-    load() {
-      let boards;
-      if ((this.status === 200) && this.response && this.response.boards) {
-        boards = dict();
-        for (var board of this.response.boards) {
-          boards[board.board] = board;
-        }
-        $.set('boardConfig', {boards, lastChecked: Date.now()});
-      } else {
-        ({boards} = Conf['boardConfig']);
-        const err = (() => { switch (this.status) {
-          case 0:   return 'Connection Error';
-          case 200: return 'Invalid Data';
-          default:          return `Error ${this.statusText} (${this.status})`;
-        } })();
-        new Notice('warning', `Failed to load board configuration. ${err}`, 20);
-      }
-      return BoardConfig.set(boards);
-    },
-
-    set(boards) {
-      this.boards = boards;
-      for (var ID in g.boards) {
-        var board = g.boards[ID];
-        board.config = this.boards[ID] || {};
-      }
-      for (var cb of this.cbs) {
-        $.queueTask(cb);
-      }
-    },
-
-    ready(cb) {
-      if (this.boards) {
-        return cb();
-      } else {
-        return this.cbs.push(cb);
-      }
-    },
-
-    sfwBoards(sfw) {
-      return (() => {
-        const result = [];
-        const object = this.boards || Conf['boardConfig'].boards;
-        for (var board in object) {
-          var data = object[board];
-          if (!!data.ws_board === sfw) {
-            result.push(board);
-          }
-        }
-        return result;
-      })();
-    },
-
-    isSFW(board) {
-      return !!(this.boards || Conf['boardConfig'].boards)[board]?.ws_board;
-    },
-
-    domain(board) {
-      // return `boards.${BoardConfig.isSFW(board) ? '4channel' : '4chan'}.org`;
-      return 'boards.4chan.org';
-    },
-
-    isArchived(board) {
-      // assume archive exists if no data available to prevent cleaning of archived threads
-      const data = (this.boards || Conf['boardConfig'].boards)[board];
-      return !data || data.is_archived;
-    },
-
-    noAudio(boardID) {
-      if (g.SITE.software !== 'yotsuba') { return false; }
-      const boards = this.boards || Conf['boardConfig'].boards;
-      return boards && boards[boardID] && !boards[boardID].webm_audio;
-    },
-
-    title(boardID) {
-      return (this.boards || Conf['boardConfig'].boards)?.[boardID]?.title || '';
-    }
-  };
 
   class Board {
     toString() { return this.ID; }
@@ -11171,7 +11171,6 @@ svg.icon {
     parent: dict(),
     children: dict(),
     inserted: dict(),
-    lastID: 0,
     toggleThreading() {
       this.setThreadingState(!Conf['Thread Quotes']);
     },
@@ -11200,35 +11199,10 @@ svg.icon {
         }
       });
     },
-    /**
-    * @param retroactive Whether the function is ran retroactively on posts connected to one restored from an archive.
-    * If it's not passed, a post that isn't the newest post triggers this function is called again with parent and child
-    * posts to insert it in the thread.
-    */
-    node(retroactive = false) {
+    node() {
       let parent;
       if (this.isFetchedQuote || this.isClone || !this.isReply) {
         return;
-      }
-      if (!retroactive) {
-        if (this.ID < QuoteThreading.lastID) {
-          // Post was inserted from archive, it might be higher up in a chain
-          for (const backLink of this.nodes.backlinks) {
-            const [, board, number] = backLink.href.match(/\/([a-z]+)\/thread\/\d+#p(\d+)$/);
-            QuoteThreading.node.call(g.posts.get(`${board}.${number}`), true);
-          }
-          if (this.quotes.length) {
-            // Rethread to put the children in the right place.
-            QuoteThreading.shouldReThread();
-            for (var quote of this.quotes) {
-              const parent = g.posts.get(quote);
-              if (parent)
-                QuoteThreading.node.call(parent, true);
-            }
-          }
-        } else {
-          QuoteThreading.lastID = this.ID;
-        }
       }
       const parents = new Set();
       let lastParent = null;
@@ -11357,17 +11331,6 @@ svg.icon {
       Unread.setLine(true);
       Unread.read();
       Unread.update();
-    },
-    rethreadQueued: false,
-    /** When a post from the archive has an existing child post, the threading has to be re-run. */
-    shouldReThread() {
-      if (this.rethreadQueued || !Conf['Thread Quotes'])
-        return;
-      Promise.resolve().then(() => {
-        this.rethread();
-        this.rethreadQueued = false;
-      });
-      this.rethreadQueued = true;
     },
   };
 

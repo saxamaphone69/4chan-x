@@ -3,6 +3,13 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### 2.8.2 (2024-05-03)
+
+- PostHiding now waits for the board config, so the option to hide by poster ID should always appear on boards with
+  those. [#41 (comment)](https://github.com/TuxedoTako/4chan-xt/issues/41#issuecomment-2087805190)
+- Restoring deleted posts from archives when reply threading is active no longer recalculates the threads. Turning reply
+  threading off and on again still works. [#55](https://github.com/TuxedoTako/4chan-xt/issues/55)
+
 ### 2.8.1 (2024-04-23)
 
 - Fixed quick reply modal putting icon buttons in the wrong place in the catalog.

@@ -1,6 +1,7 @@
 import Callbacks from "../classes/Callbacks";
 import DataBoard from "../classes/DataBoard";
 import type Post from "../classes/Post";
+import BoardConfig from "../General/BoardConfig";
 import Get from "../General/Get";
 import UI from "../General/UI";
 import { g, Conf, doc } from "../globals/globals";
@@ -81,8 +82,10 @@ var PostHiding = {
   menu: {
     post: undefined as Post,
 
-    init() {
-      if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Reply Hiding Link']) { return; }
+    async init() {
+      if (!['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Reply Hiding Link']) return;
+
+      await new Promise(res => BoardConfig.ready(res));
 
       // Hide
       let applyHide = $.el('a', {

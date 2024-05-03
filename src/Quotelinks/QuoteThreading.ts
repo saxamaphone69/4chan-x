@@ -54,7 +54,6 @@ var QuoteThreading = {
   parent:   dict(),
   children: dict(),
   inserted: dict(),
-  lastID: 0,
 
   toggleThreading() {
     this.setThreadingState(!Conf['Thread Quotes']);
@@ -86,35 +85,9 @@ var QuoteThreading = {
     });
   },
 
-  /**
-   * @param retroactive Whether the function is ran retroactively on posts connected to one restored from an archive.
-   * If it's not passed, a post that isn't the newest post triggers this function is called again with parent and child
-   * posts to insert it in the thread.
-   */
-  node(this: Post, retroactive = false) {
+  node(this: Post) {
     let parent;
     if (this.isFetchedQuote || this.isClone || !this.isReply) { return; }
-
-    if (!retroactive) {
-      if (this.ID < QuoteThreading.lastID) {
-        // Post was inserted from archive, it might be higher up in a chain
-        for (const backLink of this.nodes.backlinks) {
-          const [, board, number] = backLink.href.match(/\/([a-z]+)\/thread\/\d+#p(\d+)$/);
-          QuoteThreading.node.call(g.posts.get(`${board}.${number}`), true);
-        }
-
-        if (this.quotes.length) {
-          // Rethread to put the children in the right place.
-          QuoteThreading.shouldReThread();
-          for (var quote of this.quotes) {
-            const parent = g.posts.get(quote);
-            if (parent) QuoteThreading.node.call(parent, true);
-          }
-        }
-      } else {
-        QuoteThreading.lastID = this.ID;
-      }
-    }
 
     const parents = new Set();
     let lastParent = null;
@@ -233,18 +206,6 @@ var QuoteThreading = {
     Unread.setLine(true);
     Unread.read();
     Unread.update();
-  },
-
-  rethreadQueued: false,
-
-  /** When a post from the archive has an existing child post, the threading has to be re-run. */
-  shouldReThread() {
-    if (this.rethreadQueued || !Conf['Thread Quotes']) return;
-    Promise.resolve().then(() => {
-      this.rethread();
-      this.rethreadQueued = false
-    });
-    this.rethreadQueued = true;
   },
 };
 export default QuoteThreading;
