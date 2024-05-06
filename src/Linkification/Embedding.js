@@ -592,30 +592,51 @@ var Embedding = {
     , {
       key: 'Twitter',
       regExp: /^\w+:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w+\/status\/\d+)/,
-      style: 'border: none; width: 550px; height: 250px; overflow: hidden; resize: both;',
+      style: '',
       el(a) {
-        const el = $.el('iframe');
-        $.on(el, 'load', function() {
-          return this.contentWindow.postMessage({element: 't', query: 'height'}, 'https://twitframe.com');
-        });
-        var onMessage = function(e) {
-          if ((e.source === el.contentWindow) && (e.origin === 'https://twitframe.com')) {
-            $.off(window, 'message', onMessage);
-            return (cont || el).style.height = `${+$.minmax(e.data.height, 250, 0.8 * doc.clientHeight)}px`;
+          // Can't use fetch: I couldn't figure out how to get async to work here
+          // synchronous XHR is not necessarily the best but it doesn't seem to matter much in practice.
+          // If fxtwitter adds an iframe embed then all of this can go away:
+          // https://github.com/FixTweet/FxTwitter/issues/774
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", `https://api.fxtwitter.com/${a.dataset.uid}`, false);
+          xhr.send(null);
+          const {tweet} = JSON.parse(xhr.response);
+
+          const mediaItems = tweet?.media?.all || [];
+          let media = ''
+          for (let i = 0; i < mediaItems.length; i++) {
+            const mediaItem = mediaItems[i];
+            switch (mediaItem.type) {
+              case 'photo':
+                media += `<a target="_blank" href="${mediaItem.url}"><img src="${mediaItem.url}" style="max-width: 80vw; max-height: 80vh;"></a>`
+                break;
+              case 'video':
+              case 'gif':
+                media += `<video controls="" preload="auto" src="${mediaItem.url}" style="max-width: 80vw; max-height: 80vh;"${(mediaItem.type == 'gif' ? ' loop' : '')}></video>`
+                break;
+              default:
+                break;
+            }
           }
-        };
-        $.on(window, 'message', onMessage);
-        el.src = `https://twitframe.com/show?url=https://twitter.com/${a.dataset.uid}`;
-        if ($.engine === 'gecko') {
-          // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=680823
-          el.style.cssText = 'border: none; width: 100%; height: 100%;';
-          var cont = $.el('div');
-          $.add(cont, el);
-          return cont;
-        } else {
-          return el;
-        }
-      }
+
+          let {created_at} = tweet;
+          created_at = new Date(created_at);
+          created_at = created_at.toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+          const innerHTML = `
+          <blockquote class="twitter-tweet">
+            <p lang="${tweet.lang}" dir="ltr">${E(tweet.text)}</p>
+            ${media}
+            <hr/>
+            &mdash; ${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${created_at}
+            <br/>
+            🗨️${tweet?.replies || 0}&nbsp;🔄${tweet?.retweets || 0}&nbsp;❤️${tweet?.likes || 0}
+          </blockquote>
+          `
+
+          return $.el('div', { innerHTML })
+      },
     }
     , {
       key: 'VidLii',
