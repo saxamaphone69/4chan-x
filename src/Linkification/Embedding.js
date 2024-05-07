@@ -604,29 +604,56 @@ var Embedding = {
               const req = await fetch(`https://api.fxtwitter.com/${a.dataset.uid}`);
               const {tweet} = await req.json();
 
-              const mediaItems = tweet?.media?.all || [];
-              let media = ''
-              for (let i = 0; i < mediaItems.length; i++) {
-                const mediaItem = mediaItems[i];
-                const media_item_url = E(mediaItem.url);
-                switch (mediaItem.type) {
-                  case 'photo':
-                    media += `<a target="_blank" href="${media_item_url}"><img src="${media_item_url}" style="max-width: 80vw; max-height: 80vh;"></a>`
-                    break;
-                  case 'video':
-                  case 'gif':
-                    media += `<video controls="" preload="auto" src="${media_item_url}" style="max-width: 80vw; max-height: 80vh;"${(mediaItem.type == 'gif' ? ' loop' : '')}></video>`
-                    break;
-                  default:
-                    break;
-                }
+              function renderMedia(tweet) {
+                const mediaItems = tweet?.media?.all || [];
+                let media = ''
+                let photos = 1;
+                for (let i = 0; i < mediaItems.length; i++) {
+                  const mediaItem = mediaItems[i];
+                  const media_item_url = E(mediaItem.url);
+                  switch (mediaItem.type) {
+                    case 'photo':
+                      media += `<a target="_blank" href="${E(tweet.url)}/photo/${photos}"><img src="${media_item_url}" style="max-width: 80vw; max-height: 80vh;"></a>`
+                      photos += 1;
+                      break;
+                    case 'video':
+                    case 'gif':
+                      media += `<video controls="" preload="auto" src="${media_item_url}" style="max-width: 80vw; max-height: 80vh;"${(mediaItem.type == 'gif' ? ' loop' : '')}></video>`
+                      break;
+                    default:
+                      break;
+                  }
+              }
+              return media;
             }
 
-            const created_at = new Date(tweet.created_at).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            function renderDate(tweet) {
+              return new Date(tweet.created_at).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+
+            const media = renderMedia(tweet);
+            let quote = ''
+            if (tweet?.quote) {
+              quote = `<hr/><blockquote>
+                <div style="display: flex;padding-bottom: 1em;">
+                  <a href="${E(tweet.quote.url)}">
+                  <div>
+                    <img src="${E(tweet.quote.author.avatar_url)}" style="width: 24px;transform: translateX(-50%) translateY(-50%);border-radius: 9999px;">
+                  </div>
+                  <div style="margin: -2.25em 0 0 1em;">${E(tweet.quote.author.name)} (@${E(tweet.quote.author.screen_name)}) ${renderDate(tweet.quote)}</div>
+                  </a>
+                </div>
+                <p lang="${tweet.quote?.lang || 'en'}" dir="ltr" style="margin-top: 0">${E(tweet.quote.text)}</p>
+                ${renderMedia(tweet.quote)}
+              </blockquote>`
+            }
+
+            const created_at = renderDate(tweet);
 
             const innerHTML = `
               <p lang="${tweet.lang}" dir="ltr">${E(tweet.text)}</p>
               ${media}
+              ${quote}
               <hr/>
               &mdash; ${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${created_at}
               <br/>
