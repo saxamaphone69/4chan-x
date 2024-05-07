@@ -242,6 +242,10 @@ var Embedding = {
       :
         'border: none; width: 640px; height: 360px;';
 
+      if (el.onload instanceof Function && el.tagName == 'DIV') {
+        el.onload();
+      }
+
       return container;
     },
 
@@ -594,48 +598,47 @@ var Embedding = {
       regExp: /^\w+:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w+\/status\/\d+)/,
       style: '',
       el(a) {
-          // Can't use fetch: I couldn't figure out how to get async to work here
-          // synchronous XHR is not necessarily the best but it doesn't seem to matter much in practice.
-          // If fxtwitter adds an iframe embed then all of this can go away:
-          // https://github.com/FixTweet/FxTwitter/issues/774
-          const xhr = new XMLHttpRequest();
-          xhr.open("GET", `https://api.fxtwitter.com/${a.dataset.uid}`, false);
-          xhr.send(null);
-          const {tweet} = JSON.parse(xhr.response);
+          const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
+          el.onload = function() {
+            (async function() {
+              const req = await fetch(`https://api.fxtwitter.com/${a.dataset.uid}`);
+              const {tweet} = await req.json();
 
-          const mediaItems = tweet?.media?.all || [];
-          let media = ''
-          for (let i = 0; i < mediaItems.length; i++) {
-            const mediaItem = mediaItems[i];
-            switch (mediaItem.type) {
-              case 'photo':
-                media += `<a target="_blank" href="${mediaItem.url}"><img src="${mediaItem.url}" style="max-width: 80vw; max-height: 80vh;"></a>`
-                break;
-              case 'video':
-              case 'gif':
-                media += `<video controls="" preload="auto" src="${mediaItem.url}" style="max-width: 80vw; max-height: 80vh;"${(mediaItem.type == 'gif' ? ' loop' : '')}></video>`
-                break;
-              default:
-                break;
+              const mediaItems = tweet?.media?.all || [];
+              let media = ''
+              for (let i = 0; i < mediaItems.length; i++) {
+                const mediaItem = mediaItems[i];
+                const media_item_url = E(mediaItem.url);
+                switch (mediaItem.type) {
+                  case 'photo':
+                    media += `<a target="_blank" href="${media_item_url}"><img src="${media_item_url}" style="max-width: 80vw; max-height: 80vh;"></a>`
+                    break;
+                  case 'video':
+                  case 'gif':
+                    media += `<video controls="" preload="auto" src="${media_item_url}" style="max-width: 80vw; max-height: 80vh;"${(mediaItem.type == 'gif' ? ' loop' : '')}></video>`
+                    break;
+                  default:
+                    break;
+                }
             }
-          }
 
-          let {created_at} = tweet;
-          created_at = new Date(created_at);
-          created_at = created_at.toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const created_at = new Date(tweet.created_at).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-          const innerHTML = `
-          <blockquote class="twitter-tweet">
-            <p lang="${tweet.lang}" dir="ltr">${E(tweet.text)}</p>
-            ${media}
-            <hr/>
-            &mdash; ${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${created_at}
-            <br/>
-            🗨️${tweet?.replies || 0}&nbsp;🔄${tweet?.retweets || 0}&nbsp;❤️${tweet?.likes || 0}
-          </blockquote>
-          `
+            const innerHTML = `
+              <p lang="${tweet.lang}" dir="ltr">${E(tweet.text)}</p>
+              ${media}
+              <hr/>
+              &mdash; ${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${created_at}
+              <br/>
+              🗨️${tweet?.replies || 0}&nbsp;🔄${tweet?.retweets || 0}&nbsp;❤️${tweet?.likes || 0}
+            `
 
-          return $.el('div', { innerHTML })
+            // @ts-ignore
+            el.firstChild.innerHTML = innerHTML;
+
+          })();
+        }
+        return el;
       },
     }
     , {
