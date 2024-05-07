@@ -644,6 +644,10 @@ var Embedding = {
               return poll;
             }
 
+            function processText(text) {
+              return text.split('\n').map(txt => E(txt) + "<br/>").join('');
+            }
+
             const media = renderMedia(tweet);
             let quote = ''
             if (tweet?.quote) {
@@ -657,7 +661,7 @@ var Embedding = {
                   <div style="margin: -2.25em 0 0 1em;">${E(tweet.quote.author.name)} (@${E(tweet.quote.author.screen_name)}) ${renderDate(tweet.quote)}</div>
                   </a>
                 </div>
-                <p lang="${E(tweet.quote?.lang || 'en')}" dir="ltr" style="margin-top: 0">${E(tweet.quote.text)}</p>
+                <p lang="${E(tweet.quote?.lang || 'en')}" dir="ltr" style="margin-top: 0">${processText(tweet.quote.text)}</p>
                 ${renderMedia(tweet.quote)}
                 ${quote_poll}
               </blockquote>`
@@ -676,7 +680,7 @@ var Embedding = {
             Icon.set(heartIcon, "heart", "");
 
             const innerHTML = `
-              <p lang="${E(tweet.lang || 'en')}" dir="ltr">${E(tweet.text)}</p>
+              <p lang="${E(tweet.lang || 'en')}" dir="ltr">${processText(tweet.text)}</p>
               ${media}
               ${poll}
               ${quote}
