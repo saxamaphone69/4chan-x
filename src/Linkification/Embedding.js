@@ -9,6 +9,8 @@ import $$ from '../platform/$$';
 import CrossOrigin from '../platform/CrossOrigin';
 import { dict } from '../platform/helpers';
 import EmbeddingPage from './Embedding/Embed.html';
+import Icon from "../Icons/icon";
+import Linkify from './Linkify';
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -645,7 +647,7 @@ var Embedding = {
             const media = renderMedia(tweet);
             let quote = ''
             if (tweet?.quote) {
-              const quote_poll = (tweet?.quote?.poll) ? renderPoll(tweet.quote.poll) : ''
+              const quote_poll = (tweet?.quote?.poll) ? renderPoll(tweet.quote) : ''
               quote = `<hr/><blockquote>
                 <div style="display: flex;padding-bottom: 1em;">
                   <a href="${E(tweet.quote.url)}">
@@ -655,7 +657,7 @@ var Embedding = {
                   <div style="margin: -2.25em 0 0 1em;">${E(tweet.quote.author.name)} (@${E(tweet.quote.author.screen_name)}) ${renderDate(tweet.quote)}</div>
                   </a>
                 </div>
-                <p lang="${tweet.quote?.lang || 'en'}" dir="ltr" style="margin-top: 0">${E(tweet.quote.text)}</p>
+                <p lang="${E(tweet.quote?.lang || 'en')}" dir="ltr" style="margin-top: 0">${E(tweet.quote.text)}</p>
                 ${renderMedia(tweet.quote)}
                 ${quote_poll}
               </blockquote>`
@@ -664,19 +666,29 @@ var Embedding = {
             const poll = (tweet?.poll) ? renderPoll(tweet) : '';
             const created_at = renderDate(tweet);
 
+            const commentIcon = document.createElement('i');
+            const shuffleIcon = document.createElement('i');
+            const heartIcon = document.createElement('i');
+            heartIcon.style.color = '#dc2d44';
+
+            Icon.set(commentIcon, "comment", "");
+            Icon.set(shuffleIcon, "shuffle", "");
+            Icon.set(heartIcon, "heart", "");
+
             const innerHTML = `
-              <p lang="${tweet.lang}" dir="ltr">${E(tweet.text)}</p>
+              <p lang="${E(tweet.lang || 'en')}" dir="ltr">${E(tweet.text)}</p>
               ${media}
               ${poll}
               ${quote}
               <hr/>
               &mdash; ${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${created_at}
               <br/>
-              🗨️${tweet?.replies || 0}&nbsp;🔄${tweet?.retweets || 0}&nbsp;❤️${tweet?.likes || 0}
+              ${commentIcon.outerHTML}${+tweet?.replies || 0}&nbsp;${shuffleIcon.outerHTML}${+tweet?.retweets || 0}&nbsp;${heartIcon.outerHTML}${+tweet?.likes || 0}
             `
 
             // @ts-ignore
             el.firstChild.innerHTML = innerHTML;
+            Linkify.process(el.firstChild);
 
           })();
         }
