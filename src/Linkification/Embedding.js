@@ -631,9 +631,21 @@ var Embedding = {
               return new Date(tweet.created_at).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             }
 
+            function renderPoll(tweet) {
+              let poll = '<ul>'
+              tweet.poll.choices.forEach(choice => {
+                poll += `
+                    <li>${E(choice.label)} / ${E(choice.percentage)}%</li>
+                `
+              })
+              poll += `</ul>${+tweet.poll.total_votes || 0}&nbsp;votes &CenterDot; ${E(tweet.poll.time_left_en || '')}`
+              return poll;
+            }
+
             const media = renderMedia(tweet);
             let quote = ''
             if (tweet?.quote) {
+              const quote_poll = (tweet?.quote?.poll) ? renderPoll(tweet.quote.poll) : ''
               quote = `<hr/><blockquote>
                 <div style="display: flex;padding-bottom: 1em;">
                   <a href="${E(tweet.quote.url)}">
@@ -645,14 +657,17 @@ var Embedding = {
                 </div>
                 <p lang="${tweet.quote?.lang || 'en'}" dir="ltr" style="margin-top: 0">${E(tweet.quote.text)}</p>
                 ${renderMedia(tweet.quote)}
+                ${quote_poll}
               </blockquote>`
             }
 
+            const poll = (tweet?.poll) ? renderPoll(tweet) : '';
             const created_at = renderDate(tweet);
 
             const innerHTML = `
               <p lang="${tweet.lang}" dir="ltr">${E(tweet.text)}</p>
               ${media}
+              ${poll}
               ${quote}
               <hr/>
               &mdash; ${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${created_at}
