@@ -650,7 +650,7 @@ var Embedding = {
                 return replies;
               }
 
-              const replies = await getReplies(tweet);
+              const replies = (!shouldResolveReplies) ? [] : await getReplies(tweet);
 
               function renderMedia(tweet) {
                 const mediaItems = tweet?.media?.all || [];
