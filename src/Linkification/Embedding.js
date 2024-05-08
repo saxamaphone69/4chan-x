@@ -731,7 +731,7 @@ var Embedding = {
             let repliesText = '';
             if (replies.length > 1) {
               repliesText = "<em>Replying To</em><br/>"
-              for (let i = 1; i < replies.length; i++) {
+              for (let i = replies.length-1; i > 0; i--) {
                 repliesText += renderQuote(replies[i], true);
               }
             }
