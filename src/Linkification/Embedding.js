@@ -603,7 +603,8 @@ var Embedding = {
           const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
           el.onload = function() {
             (async function() {
-              const req = await fetch(`https://api.fxtwitter.com/${a.dataset.uid}`);
+              const shouldTranslate = Conf['Translate non-English Tweets to English'];
+              const req = await fetch(`https://api.fxtwitter.com/${a.dataset.uid}${(shouldTranslate) ? '/en' : ''}`);
               const {tweet} = await req.json();
 
               function renderMedia(tweet) {
@@ -679,11 +680,22 @@ var Embedding = {
             Icon.set(shuffleIcon, "shuffle", "");
             Icon.set(heartIcon, "heart", "");
 
+            let translation = '';
+            if (shouldTranslate && tweet?.translation?.source_lang != tweet?.translation?.target_lang) {
+              const translated_from = E(tweet?.translation?.source_lang_en || '');
+              translation = `
+                <hr/>
+                <p>Translated from ${translated_from}</p>
+                <p lang="en" dir="ltr">${processText(tweet?.translation?.text || '')}</p>
+              `
+            }
+
             const innerHTML = `
               <p lang="${E(tweet.lang || 'en')}" dir="ltr">${processText(tweet.text)}</p>
               ${media}
               ${poll}
               ${quote}
+              ${translation}
               <hr/>
               &mdash; ${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${created_at}
               <br/>
