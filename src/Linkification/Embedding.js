@@ -672,10 +672,24 @@ var Embedding = {
               return text.split('\n').map(txt => E(txt) + "<br/>").join('');
             }
 
+            function renderTranslation(tweet) {
+              if (tweet?.translation?.source_lang == tweet?.translation?.target_lang) {
+                return '';
+              }
+              const translated_from = E(tweet?.translation?.source_lang_en || '');
+              return `
+                <hr/>
+                <p>Translated from ${translated_from}</p>
+                <p lang="en" dir="ltr">${processText(tweet?.translation?.text || '')}</p>
+              `
+            }
+
             const media = renderMedia(tweet);
             let quote = ''
             if (tweet?.quote) {
               const quote_poll = (tweet?.quote?.poll) ? renderPoll(tweet.quote) : ''
+              const quote_translation = (shouldTranslate) ? renderTranslation(tweet.quote) : '';
+
               quote = `<hr/><blockquote>
                 <div style="display: flex;padding-bottom: 1em;">
                   <a href="${E(tweet.quote.url)}">
@@ -688,6 +702,7 @@ var Embedding = {
                 <p lang="${E(tweet.quote?.lang || 'en')}" dir="ltr" style="margin-top: 0">${processText(tweet.quote.text)}</p>
                 ${renderMedia(tweet.quote)}
                 ${quote_poll}
+                ${quote_translation}
               </blockquote>`
             }
 
@@ -703,15 +718,7 @@ var Embedding = {
             Icon.set(shuffleIcon, "shuffle", "");
             Icon.set(heartIcon, "heart", "");
 
-            let translation = '';
-            if (shouldTranslate && tweet?.translation?.source_lang != tweet?.translation?.target_lang) {
-              const translated_from = E(tweet?.translation?.source_lang_en || '');
-              translation = `
-                <hr/>
-                <p>Translated from ${translated_from}</p>
-                <p lang="en" dir="ltr">${processText(tweet?.translation?.text || '')}</p>
-              `
-            }
+            const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
 
             const innerHTML = `
               <p lang="${E(tweet.lang || 'en')}" dir="ltr">${processText(tweet.text)}</p>
