@@ -332,6 +332,15 @@ const Config = {
         true,
         'Enable loading audio from [sound=] file names. This audio is fetched from third parties.'
       ],
+      'Embed Tweets inline with fxTwitter': [
+        true,
+        'Replaces Twitframe with simpler inline embedded Tweets'
+      ],
+      'Translate non-English Tweets to English': [
+        false,
+        'Asks fxTwitter to translate tweets. The translation is only displayed if the source language is not en',
+        1
+      ]
     },
 
     'Menu': {
