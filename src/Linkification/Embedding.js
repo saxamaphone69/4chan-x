@@ -598,8 +598,31 @@ var Embedding = {
     , {
       key: 'Twitter',
       regExp: /^\w+:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w+\/status\/\d+)/,
-      style: '',
+      style: 'border: none; width: 550px; height: 250px; overflow: hidden; resize: both;',
       el(a) {
+          if (!Conf['Embed Tweets inline with fxTwitter']) {
+            const el = $.el('iframe');
+            $.on(el, 'load', function() {
+              return this.contentWindow.postMessage({element: 't', query: 'height'}, 'https://twitframe.com');
+            });
+            var onMessage = function(e) {
+              if ((e.source === el.contentWindow) && (e.origin === 'https://twitframe.com')) {
+                $.off(window, 'message', onMessage);
+                return (cont || el).style.height = `${+$.minmax(e.data.height, 250, 0.8 * doc.clientHeight)}px`;
+              }
+           };
+           $.on(window, 'message', onMessage);
+           el.src = `https://twitframe.com/show?url=https://twitter.com/${a.dataset.uid}`;
+           if ($.engine === 'gecko') {
+             // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=680823
+             el.style.cssText = 'border: none; width: 100%; height: 100%;';
+             var cont = $.el('div');
+             $.add(cont, el);
+             return cont;
+           } else {
+             return el;
+             }
+          }
           const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
           el.onload = function() {
             (async function() {
@@ -704,6 +727,8 @@ var Embedding = {
 
             // @ts-ignore
             el.firstChild.innerHTML = innerHTML;
+            // @ts-ignore
+            el.style = '';
             Linkify.process(el.firstChild);
 
           })();
