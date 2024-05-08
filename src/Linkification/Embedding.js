@@ -627,8 +627,30 @@ var Embedding = {
           el.onload = function() {
             (async function() {
               const shouldTranslate = Conf['Translate non-English Tweets to English'];
+              const shouldResolveReplies = Conf['Resolve Tweet Replies'];
+              const shouldResolveAllReplies = Conf['Resolve all Tweet Replies'];
               const req = await fetch(`https://api.fxtwitter.com/${a.dataset.uid}${(shouldTranslate) ? '/en' : ''}`);
               const {tweet} = await req.json();
+
+              async function getReplies(tweet) {
+                if (!tweet?.replying_to_status) {
+                  return [];
+                }
+                const max_replies = (shouldResolveAllReplies) ? Number.MAX_SAFE_INTEGER : 1;
+                let replies = [];
+                replies.push(tweet);;
+                for (let i = 0; i < max_replies; i++) {
+                  const replyReq = await fetch(`https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${(shouldTranslate) ? '/en' : ''}`);
+                  const replyRes = await replyReq.json();
+                  replies.push(replyRes.tweet);
+                  if (!replyRes.tweet?.replying_to_status) {
+                    break;
+                  }
+                }
+                return replies;
+              }
+
+              const replies = await getReplies(tweet);
 
               function renderMedia(tweet) {
                 const mediaItems = tweet?.media?.all || [];
@@ -684,27 +706,38 @@ var Embedding = {
               `
             }
 
-            const media = renderMedia(tweet);
-            let quote = ''
-            if (tweet?.quote) {
-              const quote_poll = (tweet?.quote?.poll) ? renderPoll(tweet.quote) : ''
-              const quote_translation = (shouldTranslate) ? renderTranslation(tweet.quote) : '';
+            function renderQuote(tweet, renderNested = false) {
+              const quote_nested = (tweet?.quote && renderNested) ? renderQuote(tweet.quote, false) : '';
+              const quote_poll = (tweet?.poll) ? renderPoll(tweet) : ''
+              const quote_translation = (shouldTranslate) ? renderTranslation(tweet) : '';
 
-              quote = `<hr/><blockquote>
+              return `<hr/><blockquote>
                 <div style="display: flex;padding-bottom: 1em;">
-                  <a href="${E(tweet.quote.url)}">
+                  <a href="${E(tweet.url)}">
                   <div>
-                    <img src="${E(tweet.quote.author.avatar_url)}" style="width: 24px;transform: translateX(-50%) translateY(-50%);border-radius: 9999px;">
+                    <img src="${E(tweet.author.avatar_url)}" style="width: 24px;transform: translateX(-50%) translateY(-50%);border-radius: 9999px;">
                   </div>
-                  <div style="margin: -2.25em 0 0 1em;">${E(tweet.quote.author.name)} (@${E(tweet.quote.author.screen_name)}) ${renderDate(tweet.quote)}</div>
+                  <div style="margin: -2.25em 0 0 1em;">${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${renderDate(tweet)}</div>
                   </a>
                 </div>
-                <p lang="${E(tweet.quote?.lang || 'en')}" dir="ltr" style="margin-top: 0">${processText(tweet.quote.text)}</p>
-                ${renderMedia(tweet.quote)}
+                <p lang="${E(tweet?.lang || 'en')}" dir="ltr" style="margin-top: 0">${processText(tweet.text)}</p>
+                ${renderMedia(tweet)}
                 ${quote_poll}
+                ${quote_nested}
                 ${quote_translation}
               </blockquote>`
             }
+
+            let repliesText = '';
+            if (replies.length > 1) {
+              repliesText = "<em>Replying To</em><br/>"
+              for (let i = 1; i < replies.length; i++) {
+                repliesText += renderQuote(replies[i], true);
+              }
+            }
+
+            const media = renderMedia(tweet);
+            const quote = (tweet?.quote) ? renderQuote(tweet.quote) : ''
 
             const poll = (tweet?.poll) ? renderPoll(tweet) : '';
             const created_at = renderDate(tweet);
@@ -721,6 +754,7 @@ var Embedding = {
             const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
 
             const innerHTML = `
+              ${repliesText}
               <p lang="${E(tweet.lang || 'en')}" dir="ltr">${processText(tweet.text)}</p>
               ${media}
               ${poll}

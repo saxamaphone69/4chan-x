@@ -183,6 +183,16 @@ const Config = {
         false,
         'Asks fxTwitter to translate tweets. The translation is only displayed if the source language is not en',
         3
+      ],
+      'Resolve Tweet Replies': [
+        false,
+        '',
+        3
+      ],
+      'Resolve all Tweet Replies': [
+        false,
+        'Resolves the entire conversation',
+        4
       ]
     },
 
