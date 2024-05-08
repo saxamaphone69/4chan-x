@@ -615,7 +615,7 @@ var Embedding = {
                   const media_item_url = E(mediaItem.url);
                   switch (mediaItem.type) {
                     case 'photo':
-                      media += `<a target="_blank" href="${E(tweet.url)}/photo/${photos}"><img src="${media_item_url}" style="max-width: 80vw; max-height: 80vh;"></a>`
+                      media += `<a target="_blank" href="${E(tweet.url)}/photo/${photos}"><img src="${media_item_url}" referrerpolicy="no-referrer" style="max-width: 80vw; max-height: 80vh;"></a>`
                       photos += 1;
                       break;
                     case 'video':
