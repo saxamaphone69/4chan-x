@@ -196,6 +196,7 @@ var Embedding = {
         id: 'ihover'
       }
       );
+      el.setAttribute("referrerpolicy", "no-referrer")
       $.add(Header.hover, el);
       return UI.hover({
         root: link,
@@ -666,7 +667,7 @@ var Embedding = {
     }
     , {
       key: 'YouTube',
-      regExp: /^\w+:\/\/(?:youtu.be\/|[\w.]*youtube[\w.]*\/.*(?:v=|\bembed\/|\bv\/|live\/))([\w\-]{11})(.*)/,
+      regExp: /^\w+:\/\/(?:youtu.be\/|[\w.]*youtube[\w.]*\/.*(?:v=|\bembed\/|\bv\/|shorts\/|live\/))([\w\-]{11})(.*)/,
       el(a) {
         let start = a.dataset.options.match(/\b(?:star)?t\=(\w+)/);
         if (start) { start = start[1]; }
