@@ -51,7 +51,7 @@ const buildForTest = process.argv.includes('-test');
           // Only files that actually have platform specific code.
           "**/src/main/Main.js",
           "**/src/platform/$.ts",
-          "**/src/platform/CrossOrigin.js",
+          "**/src/platform/CrossOrigin.ts",
         ],
         minify
       }) : undefined,
