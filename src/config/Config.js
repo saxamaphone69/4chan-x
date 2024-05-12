@@ -173,6 +173,26 @@ const Config = {
         false,
         'Embed content in a frame that remains in place when the page is scrolled.',
         2
+      ],
+      'Embed Tweets inline with fxTwitter': [
+        true,
+        'Replaces Twitframe with simpler inline embedded Tweets',
+        2
+      ],
+      'Translate non-English Tweets to English': [
+        false,
+        'Asks fxTwitter to translate tweets. The translation is only displayed if the source language is not en',
+        3
+      ],
+      'Resolve Tweet Replies': [
+        false,
+        '',
+        3
+      ],
+      'Resolve all Tweet Replies': [
+        false,
+        'Resolves the entire conversation',
+        4
       ]
     },
 

@@ -9,6 +9,8 @@ import $$ from '../platform/$$';
 import CrossOrigin from '../platform/CrossOrigin';
 import { dict } from '../platform/helpers';
 import EmbeddingPage from './Embedding/Embed.html';
+import Icon from "../Icons/icon";
+import Linkify from './Linkify';
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -242,6 +244,10 @@ var Embedding = {
         type.style
       :
         'border: none; width: 640px; height: 360px;';
+
+      if (el.onload instanceof Function && el.tagName == 'DIV') {
+        el.onload();
+      }
 
       return container;
     },
@@ -595,28 +601,182 @@ var Embedding = {
       regExp: /^\w+:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w+\/status\/\d+)/,
       style: 'border: none; width: 550px; height: 250px; overflow: hidden; resize: both;',
       el(a) {
-        const el = $.el('iframe');
-        $.on(el, 'load', function() {
-          return this.contentWindow.postMessage({element: 't', query: 'height'}, 'https://twitframe.com');
-        });
-        var onMessage = function(e) {
-          if ((e.source === el.contentWindow) && (e.origin === 'https://twitframe.com')) {
-            $.off(window, 'message', onMessage);
-            return (cont || el).style.height = `${+$.minmax(e.data.height, 250, 0.8 * doc.clientHeight)}px`;
+          if (!Conf['Embed Tweets inline with fxTwitter']) {
+            const el = $.el('iframe');
+            $.on(el, 'load', function() {
+              return this.contentWindow.postMessage({element: 't', query: 'height'}, 'https://twitframe.com');
+            });
+            var onMessage = function(e) {
+              if ((e.source === el.contentWindow) && (e.origin === 'https://twitframe.com')) {
+                $.off(window, 'message', onMessage);
+                return (cont || el).style.height = `${+$.minmax(e.data.height, 250, 0.8 * doc.clientHeight)}px`;
+              }
+           };
+           $.on(window, 'message', onMessage);
+           el.src = `https://twitframe.com/show?url=https://twitter.com/${a.dataset.uid}`;
+           if ($.engine === 'gecko') {
+             // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=680823
+             el.style.cssText = 'border: none; width: 100%; height: 100%;';
+             var cont = $.el('div');
+             $.add(cont, el);
+             return cont;
+           } else {
+             return el;
+             }
           }
-        };
-        $.on(window, 'message', onMessage);
-        el.src = `https://twitframe.com/show?url=https://twitter.com/${a.dataset.uid}`;
-        if ($.engine === 'gecko') {
-          // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=680823
-          el.style.cssText = 'border: none; width: 100%; height: 100%;';
-          var cont = $.el('div');
-          $.add(cont, el);
-          return cont;
-        } else {
-          return el;
+          const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
+          el.onload = function() {
+            (async function() {
+              const shouldTranslate = Conf['Translate non-English Tweets to English'];
+              const shouldResolveReplies = Conf['Resolve Tweet Replies'];
+              const shouldResolveAllReplies = Conf['Resolve all Tweet Replies'];
+              const req = await fetch(`https://api.fxtwitter.com/${a.dataset.uid}${(shouldTranslate) ? '/en' : ''}`);
+              const {tweet} = await req.json();
+
+              async function getReplies(tweet) {
+                if (!tweet?.replying_to_status) {
+                  return [];
+                }
+                const max_replies = (shouldResolveAllReplies) ? Number.MAX_SAFE_INTEGER : 1;
+                let replies = [];
+                replies.push(tweet);;
+                for (let i = 0; i < max_replies; i++) {
+                  const replyReq = await fetch(`https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${(shouldTranslate) ? '/en' : ''}`);
+                  const replyRes = await replyReq.json();
+                  replies.push(replyRes.tweet);
+                  if (!replyRes.tweet?.replying_to_status) {
+                    break;
+                  }
+                }
+                return replies;
+              }
+
+              const replies = (!shouldResolveReplies) ? [] : await getReplies(tweet);
+
+              function renderMedia(tweet) {
+                const mediaItems = tweet?.media?.all || [];
+                let media = ''
+                let photos = 1;
+                for (let i = 0; i < mediaItems.length; i++) {
+                  const mediaItem = mediaItems[i];
+                  const media_item_url = E(mediaItem.url);
+                  switch (mediaItem.type) {
+                    case 'photo':
+                      media += `<a target="_blank" href="${E(tweet.url)}/photo/${photos}"><img src="${media_item_url}" referrerpolicy="no-referrer" style="max-width: 80vw; max-height: 80vh;"></a>`
+                      photos += 1;
+                      break;
+                    case 'video':
+                    case 'gif':
+                      media += `<video controls="" preload="auto" src="${media_item_url}" style="max-width: 80vw; max-height: 80vh;"${(mediaItem.type == 'gif' ? ' loop' : '')}></video>`
+                      break;
+                    default:
+                      break;
+                  }
+              }
+              return media;
+            }
+
+            function renderDate(tweet) {
+              return new Date(tweet.created_at).toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+
+            function renderPoll(tweet) {
+              let poll = '<ul>'
+              tweet.poll.choices.forEach(choice => {
+                poll += `
+                    <li>${E(choice.label)} / ${E(choice.percentage)}%</li>
+                `
+              })
+              poll += `</ul>${+tweet.poll.total_votes || 0}&nbsp;votes &CenterDot; ${E(tweet.poll.time_left_en || '')}`
+              return poll;
+            }
+
+            function processText(text) {
+              return text.split('\n').map(txt => E(txt) + "<br/>").join('');
+            }
+
+            function renderTranslation(tweet) {
+              if (tweet?.translation?.source_lang == tweet?.translation?.target_lang) {
+                return '';
+              }
+              const translated_from = E(tweet?.translation?.source_lang_en || '');
+              return `
+                <hr/>
+                <p>Translated from ${translated_from}</p>
+                <p lang="en" dir="ltr">${processText(tweet?.translation?.text || '')}</p>
+              `
+            }
+
+            function renderQuote(tweet, renderNested = false) {
+              const quote_nested = (tweet?.quote && renderNested) ? renderQuote(tweet.quote, false) : '';
+              const quote_poll = (tweet?.poll) ? renderPoll(tweet) : ''
+              const quote_translation = (shouldTranslate) ? renderTranslation(tweet) : '';
+
+              return `<hr/><blockquote>
+                <div style="display: flex;padding-bottom: 1em;">
+                  <a href="${E(tweet.url)}">
+                  <div>
+                    <img src="${E(tweet.author.avatar_url)}" style="width: 24px;transform: translateX(-50%) translateY(-50%);border-radius: 9999px;">
+                  </div>
+                  <div style="margin: -2.25em 0 0 1em;">${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${renderDate(tweet)}</div>
+                  </a>
+                </div>
+                <p lang="${E(tweet?.lang || 'en')}" dir="ltr" style="margin-top: 0">${processText(tweet.text)}</p>
+                ${renderMedia(tweet)}
+                ${quote_poll}
+                ${quote_nested}
+                ${quote_translation}
+              </blockquote>`
+            }
+
+            let repliesText = '';
+            if (replies.length > 1) {
+              repliesText = "<em>Replying To</em><br/>"
+              for (let i = replies.length-1; i > 0; i--) {
+                repliesText += renderQuote(replies[i], true);
+              }
+            }
+
+            const media = renderMedia(tweet);
+            const quote = (tweet?.quote) ? renderQuote(tweet.quote) : ''
+
+            const poll = (tweet?.poll) ? renderPoll(tweet) : '';
+            const created_at = renderDate(tweet);
+
+            const commentIcon = document.createElement('i');
+            const shuffleIcon = document.createElement('i');
+            const heartIcon = document.createElement('i');
+            heartIcon.style.color = '#dc2d44';
+
+            Icon.set(commentIcon, "comment", "");
+            Icon.set(shuffleIcon, "shuffle", "");
+            Icon.set(heartIcon, "heart", "");
+
+            const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
+
+            const innerHTML = `
+              ${repliesText}
+              <p lang="${E(tweet.lang || 'en')}" dir="ltr">${processText(tweet.text)}</p>
+              ${media}
+              ${poll}
+              ${quote}
+              ${translation}
+              <hr/>
+              &mdash; ${E(tweet.author.name)} (@${E(tweet.author.screen_name)}) ${created_at}
+              <br/>
+              ${commentIcon.outerHTML}${+tweet?.replies || 0}&nbsp;${shuffleIcon.outerHTML}${+tweet?.retweets || 0}&nbsp;${heartIcon.outerHTML}${+tweet?.likes || 0}
+            `
+
+            // @ts-ignore
+            el.firstChild.innerHTML = innerHTML;
+            // @ts-ignore
+            el.style = '';
+            Linkify.process(el.firstChild);
+
+          })();
         }
-      }
+        return el;
+      },
     }
     , {
       key: 'VidLii',
