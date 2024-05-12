@@ -10,6 +10,18 @@ import { dict, platform } from "./helpers";
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
+export interface CrossOriginAjaxOptions {
+  /** called with the returned object as `this` on success or error/abort/timeout. */
+  onloadend?: (this: XMLHttpRequest) => void,
+  /** time limit for request */
+  timeout?: number,
+  /** expected response type, 'json' by default; 'json' and 'text' supported */
+  responseType?: 'json' | 'text',
+  /** request headers */
+  headers?: Record<string, string>;
+}
+
+
 let eventPageRequest;
 if (platform === 'crx') {
   eventPageRequest = (function () {
@@ -148,19 +160,19 @@ var CrossOrigin = {
   //   `response` - decoded response body
   //   `abort` - function for aborting the request (silently fails on some platforms)
   //   `getResponseHeader` - function for reading response headers
-  ajax(url, options={}) {
+  ajax(url: string, options: CrossOriginAjaxOptions ={}) {
     let gmReq;
     let {onloadend, timeout, responseType, headers} = options;
     if (responseType == null) { responseType = 'json'; }
-
-    if ((window.GM?.xmlHttpRequest == null) && (typeof window.GM_xmlhttpRequest === 'undefined' || window.GM_xmlhttpRequest === null)) {
-      return $.ajax(url, options);
-    }
 
     const req = new CrossOrigin.Request();
     req.onloadend = onloadend;
 
     if (platform === 'userscript') {
+      if (window.GM?.xmlHttpRequest == null && window.GM_xmlhttpRequest == null) {
+        return $.ajax(url, options);
+      }
+
       const gmOptions = {
         method: 'GET',
         url,
@@ -216,9 +228,19 @@ var CrossOrigin = {
     return req;
   },
 
+  ajaxPromise(url: string, options: Omit<CrossOriginAjaxOptions, 'onloadend'> = {}): Promise<XMLHttpRequest> {
+    return new Promise((resolve) => CrossOrigin.ajax(url, { ...options, onloadend() { resolve(this); } }))
+  },
+
   cache(url, cb) {
     return $.cache(url, cb,
       {ajax: CrossOrigin.ajax});
+  },
+
+  cachePromise(url: string) : Promise<XMLHttpRequest> {
+    return new Promise(resolve => {
+      CrossOrigin.cache(url, function() { resolve(this); });
+    })
   },
 
   permission(cb, cbFail, origins) {

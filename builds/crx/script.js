@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.8.2",
-    "date": "2024-05-03T17:28:53Z"
+    "version": "2.9.0",
+    "date": "2024-05-12T19:04:53Z"
   };
 
   var meta = {
@@ -465,6 +465,26 @@ div.boardTitle {
           false,
           'Embed content in a frame that remains in place when the page is scrolled.',
           2
+        ],
+        'Embed Tweets inline with fxTwitter': [
+          true,
+          'Replaces Twitframe with simpler inline embedded Tweets',
+          2
+        ],
+        'Translate non-English Tweets to English': [
+          false,
+          'Asks fxTwitter to translate tweets. The translation is only displayed if the source language is not en',
+          3
+        ],
+        'Resolve Tweet Replies': [
+          false,
+          '',
+          3
+        ],
+        'Resolve all Tweet Replies': [
+          false,
+          'Resolves the entire conversation',
+          4
         ]
       },
 
@@ -2960,13 +2980,6 @@ https://*.hcaptcha.com
 :root.burichan.anonymize $site$info$name::before {
   font-size: 12pt;
 }
-
-
-/* Watcher Favicon */
-:root.burichan .watch-thread-link
-{
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(0,0,0)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
-}
 `;
 
   var futaba = `:root.futaba {
@@ -2984,18 +2997,12 @@ https://*.hcaptcha.com
   --xt-entry-size: 12pt;
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(240, 224, 214, 0.5);
+  --xt-watcher: #800000;
 }
 
 /* Anonymize */
 :root.futaba.anonymize $site$info$name::before {
   font-size: 12pt;
-}
-
-
-/* Watcher Favicon */
-:root.futaba .watch-thread-link
-{
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(128,0,0)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
 }
 `;
 
@@ -3218,17 +3225,12 @@ https://*.hcaptcha.com
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(221, 221, 221, 0.5);
   --xt-watcher-quoting-you: #00F;
+  --xt-watcher: #333;
 }
 
 /* 4chan style fixes */
 :root.photon #arc-list tr:nth-of-type(odd) span.quote {
   color: #C0E17A;
-}
-
-/* Watcher Favicon */
-:root.photon .watch-thread-link
-{
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(51,51,51)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
 }
 `;
 
@@ -3275,6 +3277,7 @@ https://*.hcaptcha.com
   --xt-qr-bg: linear-gradient(#262435, #171526) repeat scroll 0% 0% transparent;
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(23, 21, 38, 0.5);
+  --xt-watcher: #fe9600;
 
   --xt-unread-line: rgb(197, 200, 198);
   --xt-filter-highlight: rgba(145, 182, 214, .5);
@@ -3331,12 +3334,6 @@ https://*.hcaptcha.com
 :root.spooky .unread-line {
   visibility: visible;
   opacity: 1;
-}
-
-/* Watcher Favicon */
-:root.spooky .watch-thread-link
-{
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(254,150,0)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
 }
 `;
 
@@ -4516,18 +4513,21 @@ textarea.copy-text-element {
   padding: 0px 4px;
 }
 .watch-thread-link {
-  padding-top: 18px;
   width: 18px;
-  height: 0px;
-  display: inline-block;
-  background-repeat: no-repeat;
+  height: 18px;
+  background: none;
+  border: none;
+  padding: 2px;
   opacity: 0.2;
-  position: relative;
-  top: 1px;
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(0,0,0)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
+  filter: none;
+  cursor: pointer;
+  color: var(--xt-watcher, #000);
 }
 .watch-thread-link.watched {
   opacity: 1;
+}
+:root.oneechan .watch-thread-link > svg {
+  display: none;
 }
 
 
@@ -5757,6 +5757,7 @@ div.post {
   --xt-menu-fg: #C5C8C6;
   --xt-entry-focus-bg: rgba(0, 0, 0, .33);
   --xt-unread: rgba(40, 42, 46, 0.5);
+  --xt-watcher: #c5c8c6;
 
   --xt-unread-line: rgb(197, 200, 198);
   --xt-filter-highlight: rgba(145, 182, 214, .5);
@@ -5817,12 +5818,6 @@ div.post {
 :root.tomorrow #qr-filename {
   color: rgb(197,200,198);
 }
-
-/* Watcher Favicon */
-:root.tomorrow .watch-thread-link
-{
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(197,200,198)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
-}
 `;
 
   var www = `#captcha-cnt {
@@ -5853,12 +5848,6 @@ div.post {
   --xt-menu-fg: #000;
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(214, 218, 240, 0.5);
-  }
-
-/* Watcher Favicon */
-:root.yotsuba-b .watch-thread-link
-{
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(0,0,0)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
 }
 `;
 
@@ -5875,12 +5864,7 @@ div.post {
   --xt-qr-bg: linear-gradient(#FFEFE5, #F0E0D6) repeat scroll 0% 0% transparent;
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(240, 224, 214, 0.5);
-}
-
-/* Watcher Favicon */
-:root.yotsuba .watch-thread-link
-{
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(128,0,0)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
+  --xt-watcher: #800000;
 }
 `;
 
@@ -5996,67 +5980,71 @@ svg.icon {
   };
 
   // Image
-  var svgPathData$f = 'M448 80c8.8 0 16 7.2 16 16V415.8l-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3V96c0-8.8 7.2-16 16-16H448zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z';
-  var width$f = 512;var height$f = 512;
+  var svgPathData$g = 'M448 80c8.8 0 16 7.2 16 16V415.8l-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3V96c0-8.8 7.2-16 16-16H448zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z';
+  var width$g = 512;var height$g = 512;
 
   // Eye
-  var svgPathData$e = 'M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z';
-  var width$e = 576;var height$e = 512;
+  var svgPathData$f = 'M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z';
+  var width$f = 576;var height$f = 512;
 
   // UpRightAndDownLeftFromCenter
-  var svgPathData$d = 'M344 0H488c13.3 0 24 10.7 24 24V168c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39-87 87c-9.4 9.4-24.6 9.4-33.9 0l-32-32c-9.4-9.4-9.4-24.6 0-33.9l87-87L327 41c-6.9-6.9-8.9-17.2-5.2-26.2S334.3 0 344 0zM168 512H24c-13.3 0-24-10.7-24-24V344c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39 87-87c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8z';
-  var width$d = 512;var height$d = 512;
+  var svgPathData$e = 'M344 0H488c13.3 0 24 10.7 24 24V168c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39-87 87c-9.4 9.4-24.6 9.4-33.9 0l-32-32c-9.4-9.4-9.4-24.6 0-33.9l87-87L327 41c-6.9-6.9-8.9-17.2-5.2-26.2S334.3 0 344 0zM168 512H24c-13.3 0-24-10.7-24-24V344c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39 87-87c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8z';
+  var width$e = 512;var height$e = 512;
 
   // Comment
-  var svgPathData$c = 'M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9c.1-.2 .2-.3 .3-.5z';
-  var width$c = 512;var height$c = 512;
+  var svgPathData$d = 'M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9c.1-.2 .2-.3 .3-.5z';
+  var width$d = 512;var height$d = 512;
 
   // Rotate
-  var svgPathData$b = 'M142.9 142.9c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5c0 0 0 0 0 0H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8zM16 312v7.6 .7V440c0 9.7 5.8 18.5 14.8 22.2s19.3 1.7 26.2-5.2l41.6-41.6c87.6 86.5 228.7 86.2 315.8-1c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.2 62.2-162.7 62.5-225.3 1L185 329c6.9-6.9 8.9-17.2 5.2-26.2s-12.5-14.8-22.2-14.8H48.4h-.7H40c-13.3 0-24 10.7-24 24z';
-  var width$b = 512;var height$b = 512;
+  var svgPathData$c = 'M142.9 142.9c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5c0 0 0 0 0 0H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8zM16 312v7.6 .7V440c0 9.7 5.8 18.5 14.8 22.2s19.3 1.7 26.2-5.2l41.6-41.6c87.6 86.5 228.7 86.2 315.8-1c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.2 62.2-162.7 62.5-225.3 1L185 329c6.9-6.9 8.9-17.2 5.2-26.2s-12.5-14.8-22.2-14.8H48.4h-.7H40c-13.3 0-24 10.7-24 24z';
+  var width$c = 512;var height$c = 512;
 
   // Wrench
-  var svgPathData$a = 'M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
-  var width$a = 512;var height$a = 512;
+  var svgPathData$b = 'M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
+  var width$b = 512;var height$b = 512;
 
   // Bolt
-  var svgPathData$9 = 'M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z';
-  var width$9 = 448;var height$9 = 512;
+  var svgPathData$a = 'M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z';
+  var width$a = 448;var height$a = 512;
 
   // Pencil
-  var svgPathData$8 = 'M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z';
-  var width$8 = 512;var height$8 = 512;
+  var svgPathData$9 = 'M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z';
+  var width$9 = 512;var height$9 = 512;
 
   // Clipboard
-  var svgPathData$7 = 'M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z';
-  var width$7 = 384;var height$7 = 512;
+  var svgPathData$8 = 'M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z';
+  var width$8 = 384;var height$8 = 512;
 
   // Clock
-  var svgPathData$6 = 'M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z';
-  var width$6 = 512;var height$6 = 512;
+  var svgPathData$7 = 'M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z';
+  var width$7 = 512;var height$7 = 512;
 
   // Link
-  var svgPathData$5 = 'M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z';
-  var width$5 = 640;var height$5 = 512;
+  var svgPathData$6 = 'M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z';
+  var width$6 = 640;var height$6 = 512;
 
   // Shuffle
-  var svgPathData$4 = 'M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160H352c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96h32V64c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V416H352c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8h32V320c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z';
-  var width$4 = 512;var height$4 = 512;
+  var svgPathData$5 = 'M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160H352c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96h32V64c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V416H352c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8h32V320c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z';
+  var width$5 = 512;var height$5 = 512;
 
   // RotateLeft
-  var svgPathData$3 = 'M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z';
-  var width$3 = 512;var height$3 = 512;
+  var svgPathData$4 = 'M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z';
+  var width$4 = 512;var height$4 = 512;
 
   // Download
-  var svgPathData$2 = 'M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
-  var width$2 = 512;var height$2 = 512;
+  var svgPathData$3 = 'M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
+  var width$3 = 512;var height$3 = 512;
 
   // BookOpen
-  var svgPathData$1 = 'M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5V78.6c0-4.2-1.6-8.4-5-11C247.4 52 202.4 32 144 32C93.5 32 46.3 45.3 18.1 56.1C6.8 60.5 0 71.7 0 83.8V454.1c0 11.9 12.8 20.2 24.1 16.5C55.6 460.1 105.5 448 144 448c33.9 0 79 14 105.6 23.5zm76.8 0C353 462 398.1 448 432 448c38.5 0 88.4 12.1 119.9 22.6c11.3 3.8 24.1-4.6 24.1-16.5V83.8c0-12.1-6.8-23.3-18.1-27.6C529.7 45.3 482.5 32 432 32c-58.4 0-103.4 20-123 35.6c-3.3 2.6-5 6.8-5 11V456c0 11.4 11.7 19.3 22.4 15.5z';
-  var width$1 = 576;var height$1 = 512;
+  var svgPathData$2 = 'M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5V78.6c0-4.2-1.6-8.4-5-11C247.4 52 202.4 32 144 32C93.5 32 46.3 45.3 18.1 56.1C6.8 60.5 0 71.7 0 83.8V454.1c0 11.9 12.8 20.2 24.1 16.5C55.6 460.1 105.5 448 144 448c33.9 0 79 14 105.6 23.5zm76.8 0C353 462 398.1 448 432 448c38.5 0 88.4 12.1 119.9 22.6c11.3 3.8 24.1-4.6 24.1-16.5V83.8c0-12.1-6.8-23.3-18.1-27.6C529.7 45.3 482.5 32 432 32c-58.4 0-103.4 20-123 35.6c-3.3 2.6-5 6.8-5 11V456c0 11.4 11.7 19.3 22.4 15.5z';
+  var width$2 = 576;var height$2 = 512;
 
   // DownLeftAndUpRightToCenter
-  var svgPathData = 'M439 7c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H296c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39L439 7zM72 272H216c13.3 0 24 10.7 24 24V440c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39L73 505c-9.4 9.4-24.6 9.4-33.9 0L7 473c-9.4-9.4-9.4-24.6 0-33.9l87-87L55 313c-6.9-6.9-8.9-17.2-5.2-26.2s12.5-14.8 22.2-14.8z';
+  var svgPathData$1 = 'M439 7c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H296c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39L439 7zM72 272H216c13.3 0 24 10.7 24 24V440c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39L73 505c-9.4 9.4-24.6 9.4-33.9 0L7 473c-9.4-9.4-9.4-24.6 0-33.9l87-87L55 313c-6.9-6.9-8.9-17.2-5.2-26.2s12.5-14.8 22.2-14.8z';
+  var width$1 = 512;var height$1 = 512;
+
+  // Heart
+  var svgPathData = 'M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z';
   var width = 512;var height = 512;
 
   const toSvg = (svgPathData, width, height) => {
@@ -6064,22 +6052,23 @@ svg.icon {
       `<path d="${svgPathData}" fill="currentColor" /></svg>`;
   };
   const icons = {
-    image: toSvg(svgPathData$f, width$f, height$f),
-    eye: toSvg(svgPathData$e, width$e, height$e),
-    expand: toSvg(svgPathData$d, width$d, height$d),
-    comment: toSvg(svgPathData$c, width$c, height$c),
-    refresh: toSvg(svgPathData$b, width$b, height$b),
-    wrench: toSvg(svgPathData$a, width$a, height$a),
-    bolt: toSvg(svgPathData$9, width$9, height$9),
-    link: toSvg(svgPathData$5, width$5, height$5),
-    pencil: toSvg(svgPathData$8, width$8, height$8),
-    clipboard: toSvg(svgPathData$7, width$7, height$7),
-    clock: toSvg(svgPathData$6, width$6, height$6),
-    shuffle: toSvg(svgPathData$4, width$4, height$4),
-    undo: toSvg(svgPathData$3, width$3, height$3),
-    download: toSvg(svgPathData$2, width$2, height$2),
-    bookOpen: toSvg(svgPathData$1, width$1, height$1),
-    shrink: toSvg(svgPathData, width, height),
+    image: toSvg(svgPathData$g, width$g, height$g),
+    eye: toSvg(svgPathData$f, width$f, height$f),
+    expand: toSvg(svgPathData$e, width$e, height$e),
+    comment: toSvg(svgPathData$d, width$d, height$d),
+    refresh: toSvg(svgPathData$c, width$c, height$c),
+    wrench: toSvg(svgPathData$b, width$b, height$b),
+    bolt: toSvg(svgPathData$a, width$a, height$a),
+    link: toSvg(svgPathData$6, width$6, height$6),
+    pencil: toSvg(svgPathData$9, width$9, height$9),
+    clipboard: toSvg(svgPathData$8, width$8, height$8),
+    clock: toSvg(svgPathData$7, width$7, height$7),
+    shuffle: toSvg(svgPathData$5, width$5, height$5),
+    undo: toSvg(svgPathData$4, width$4, height$4),
+    download: toSvg(svgPathData$3, width$3, height$3),
+    bookOpen: toSvg(svgPathData$2, width$2, height$2),
+    shrink: toSvg(svgPathData$1, width$1, height$1),
+    heart: toSvg(svgPathData, width, height)
   };
   var Icon = {
     /** Sets an icon in an HTML element */
@@ -10083,11 +10072,11 @@ svg.icon {
       if (this.isClone) {
         toggler = $('.watch-thread-link', this.nodes.info);
       } else {
-        toggler = $.el('a', {
-          href: 'javascript:;',
+        toggler = $.el('button', {
+          type: 'button',
           className: 'watch-thread-link'
-        }
-        );
+        });
+        Icon.set(toggler, 'heart');
         $.before($('input', this.nodes.info), toggler);
       }
       const siteID = g.SITE.ID;
@@ -13944,18 +13933,304 @@ svg.icon {
 <div id="media-embed"><div></div></div>
 `;
 
+  var Linkify = {
+    init() {
+      if (!['index', 'thread', 'archive'].includes(g.VIEW) || !Conf['Linkify']) { return; }
+
+      if (Conf['Comment Expansion']) {
+        ExpandComment.callbacks.push(this.node);
+      }
+
+      Callbacks.Post.push({
+        name: 'Linkify',
+        cb:   this.node
+      });
+
+      return Embedding.init();
+    },
+
+    node() {
+      let link;
+      if (this.isClone) { return Embedding.events(this); }
+      if (!Linkify.regString.test(this.info.comment)) { return; }
+      for (link of $$('a', this.nodes.comment)) {
+        if (g.SITE.isLinkified?.(link)) {
+          $.addClass(link, 'linkify');
+          if (ImageHost.useFaster) { ImageHost.fixLinks([link]); }
+          Embedding.process(link, this);
+        }
+      }
+      const links = Linkify.process(this.nodes.comment);
+      if (ImageHost.useFaster) { ImageHost.fixLinks(links); }
+      for (link of links) { Embedding.process(link, this); }
+    },
+
+    process(node) {
+      let length;
+      const test     = /[^\s"]+/g;
+      const space    = /[\s"]/;
+      const snapshot = $.X('.//br|.//text()', node);
+      let i = 0;
+      const links = [];
+      while ((node = snapshot.snapshotItem(i++))) {
+        var result;
+        var {data} = node;
+        if (!data || (node.parentElement.nodeName === "A")) { continue; }
+
+        while ((result = test.exec(data))) {
+          var {index} = result;
+          var endNode = node;
+          var word    = result[0];
+          // End of node, not necessarily end of space-delimited string
+          if ((length = index + word.length) === data.length) {
+            var saved;
+            test.lastIndex = 0;
+
+            while (saved = snapshot.snapshotItem(i++)) {
+              var end;
+              if ((saved.nodeName === 'BR') || ((saved.parentElement.nodeName === 'P') && !saved.previousSibling)) {
+                var part1, part2;
+                if (
+                  // link deliberately split
+                  (part1 = word.match(/(https?:\/\/)?([a-z\d-]+\.)*[a-z\d-]+$/i)) &&
+                  (part2 = snapshot.snapshotItem(i)?.data?.match(/^(\.[a-z\d-]+)*\//i)) &&
+                  ((part1[0] + part2[0]).search(Linkify.regString) === 0)
+                ) {
+                  continue;
+                } else {
+                  break;
+                }
+              }
+
+              if ((saved.parentElement.nodeName === "A") && !Linkify.regString.test(word)) {
+                break;
+              }
+
+              endNode  = saved;
+              ({data}   = saved);
+
+              if (end = space.exec(data)) {
+                // Set our snapshot and regex to start on this node at this position when the loop resumes
+                word += data.slice(0, end.index);
+                test.lastIndex = (length = end.index);
+                i--;
+                break;
+              } else {
+                ({length} = data);
+                word    += data;
+              }
+            }
+          }
+
+          if (Linkify.regString.test(word)) {
+            links.push(Linkify.makeRange(node, endNode, index, length));
+
+          }
+
+          if (!test.lastIndex || (node !== endNode)) { break; }
+        }
+      }
+
+      i = links.length;
+      while (i--) {
+        links[i] = Linkify.makeLink(links[i]);
+      }
+      return links;
+    },
+
+    regString: new RegExp(`(\
+\
+(https?|mailto|git|magnet|ftp|irc):(\
+[a-z\\d%/?]\
+)\
+|\
+([-a-z\\d]+[.])+(\
+aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post|pro|tel|travel|xxx|xyz|edu|gov|mil|[a-z]{2}\
+)([:/]|(?![^\\s"]))\
+|\
+[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\
+|\
+[-\\w\\d.@]+@[a-z\\d.-]+\\.[a-z\\d]\
+)`, 'i'),
+
+    makeRange(startNode, endNode, startOffset, endOffset) {
+      const range = document.createRange();
+      range.setStart(startNode, startOffset);
+      range.setEnd(endNode,   endOffset);
+      return range;
+    },
+
+    makeLink(range) {
+      let t;
+      let encodedDomain;
+      let text = range.toString();
+
+      // Clean start of range
+      let i = text.search(Linkify.regString);
+
+      if (i > 0) {
+        text = text.slice(i);
+        while ((range.startOffset + i) >= range.startContainer.data.length) { i--; }
+
+        if (i) { range.setStart(range.startContainer, range.startOffset + i); }
+      }
+
+      // Clean end of range
+      i = 0;
+      while (/[)\]}>.,]/.test(t = text.charAt(text.length - (1 + i)))) {
+        if (!/[.,]/.test(t) && !((text.match(/[()\[\]{}<>]/g)).length % 2)) { break; }
+        i++;
+      }
+
+      if (i) {
+        text = text.slice(0, -i);
+        while ((range.endOffset - i) < 0) { i--; }
+
+        if (i) {
+          range.setEnd(range.endContainer, range.endOffset - i);
+        }
+      }
+
+      // Make our link 'valid' if it is formatted incorrectly.
+      if (!/((mailto|magnet):|.+:\/\/)/.test(text)) {
+        text = (
+          /@/.test(text) ?
+            'mailto:'
+          :
+            'http://'
+        ) + text;
+      }
+
+      // Decode percent-encoded characters in domain so that they behave consistently across browsers.
+      if (encodedDomain = text.match(/^(https?:\/\/[^/]*%[0-9a-f]{2})(.*)$/i)) {
+        text = encodedDomain[1].replace(/%([0-9a-f]{2})/ig, function(x, y) {
+          if (y === '25') { return x; } else { return String.fromCharCode(parseInt(y, 16)); }
+        }) + encodedDomain[2];
+      }
+
+      const a = $.el('a', {
+        className: 'linkify',
+        rel:       'noreferrer noopener',
+        target:    '_blank',
+        href:      text
+      }
+      );
+
+      // Insert the range into the anchor, the anchor into the range's DOM location, and destroy the range.
+      $.add(a, range.extractContents());
+      range.insertNode(a);
+
+      return a;
+    }
+  };
+
+  var Time = {
+    init() {
+      if (!['index', 'thread', 'archive'].includes(g.VIEW) || !Conf['Time Formatting']) {
+        return;
+      }
+      Callbacks.Post.push({
+        name: 'Time Formatting',
+        cb: this.node
+      });
+    },
+    node() {
+      if (!this.info.date || this.isClone) {
+        return;
+      }
+      const { textContent } = this.nodes.date;
+      this.nodes.date.textContent = textContent.match(/^\s*/)[0] + Time.format(this.info.date) + textContent.match(/\s*$/)[0];
+    },
+    format(date, formatString = Conf['time']) {
+      return formatString.replace(/%(.)/g, function (s, c) {
+        if ($.hasOwn(Time.formatters, c)) {
+          return Time.formatters[c].call(date);
+        } else {
+          return s;
+        }
+      });
+    },
+    zeroPad(n) { if (n < 10) {
+      return `0${n}`;
+    } else {
+      return n;
+    } },
+    // Setting up the formatter takes more time than actually formatting the date,
+    // So while setting up this cache is a bit more code, it's faster at runtime
+    formatterCache: new Map(),
+    formatters: {
+      a() {
+        let formatter = Time.formatterCache.get('a');
+        if (!formatter) {
+          // || undefined to fall back to browser locale, an empty string gives an error
+          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { weekday: 'short' });
+          Time.formatterCache.set('a', formatter);
+        }
+        return formatter.format(this);
+      },
+      A() {
+        let formatter = Time.formatterCache.get('A');
+        if (!formatter) {
+          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { weekday: 'long' });
+          Time.formatterCache.set('A', formatter);
+        }
+        return formatter.format(this);
+      },
+      b() {
+        let formatter = Time.formatterCache.get('b');
+        if (!formatter) {
+          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { month: 'short' });
+          Time.formatterCache.set('b', formatter);
+        }
+        return formatter.format(this);
+      },
+      B() {
+        let formatter = Time.formatterCache.get('B');
+        if (!formatter) {
+          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { month: 'long' });
+          Time.formatterCache.set('B', formatter);
+        }
+        return formatter.format(this);
+      },
+      d() { return Time.zeroPad(this.getDate()); },
+      e() { return this.getDate(); },
+      H() { return Time.zeroPad(this.getHours()); },
+      I() { return Time.zeroPad((this.getHours() % 12) || 12); },
+      k() { return this.getHours(); },
+      l() { return (this.getHours() % 12) || 12; },
+      m() { return Time.zeroPad(this.getMonth() + 1); },
+      M() { return Time.zeroPad(this.getMinutes()); },
+      p() {
+        let formatter = Time.formatterCache.get('p');
+        if (!formatter) {
+          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { hour: 'numeric', hour12: true });
+          Time.formatterCache.set('p', formatter);
+        }
+        const parts = formatter.formatToParts(this);
+        return parts.find((entry) => entry.type === 'dayPeriod').value;
+      },
+      P() { return Time.formatters.p.call(this).toLowerCase(); },
+      S() { return Time.zeroPad(this.getSeconds()); },
+      y() { return this.getFullYear().toString().slice(2); },
+      Y() { return this.getFullYear(); },
+      '%'() { return '%'; }
+    },
+  };
+
   var Embedding = {
     init() {
-      if (!['index', 'thread', 'archive'].includes(g.VIEW) || !Conf['Linkify'] || (!Conf['Embedding'] && !Conf['Link Title'] && !Conf['Cover Preview'])) { return; }
+      if (!['index', 'thread', 'archive'].includes(g.VIEW) || !Conf['Linkify'] || (!Conf['Embedding'] && !Conf['Link Title'] && !Conf['Cover Preview'])) {
+        return;
+      }
       this.types = dict();
-      for (var type of this.ordered_types) { this.types[type.key] = type; }
-
+      for (var type of this.ordered_types) {
+        this.types[type.key] = type;
+      }
       if (Conf['Embedding'] && (g.VIEW !== 'archive')) {
-        this.dialog = UI.dialog('embedding',
-          { innerHTML: EmbeddingPage });
+        this.dialog = UI.dialog('embedding', { innerHTML: EmbeddingPage });
         this.media = $('#media-embed', this.dialog);
         $.one(d, '4chanXInitFinished', this.ready);
-        $.on(d, 'IndexRefreshInternal', () => g.posts.forEach(function(post) {
+        $.on(d, 'IndexRefreshInternal', () => g.posts.forEach(function (post) {
           for (post of [post, ...post.clones]) {
             for (var embed of post.nodes.embedlinks) {
               Embedding.cb.catalogRemove.call(embed);
@@ -13964,7 +14239,7 @@ svg.icon {
         }));
       }
       if (Embedding.shouldFetchTitles()) {
-        $.on(d, '4chanXInitFinished PostsInserted', function() {
+        $.on(d, '4chanXInitFinished PostsInserted', function () {
           for (const service of Object.values(Embedding.types)) {
             if (service.title?.batchSize) {
               Embedding.flushTitles(service.title);
@@ -13973,16 +14248,19 @@ svg.icon {
         });
       }
     },
-
     events(post) {
       let el, i, items;
-      if (g.VIEW === 'archive') { return; }
+      if (g.VIEW === 'archive') {
+        return;
+      }
       if (Conf['Embedding']) {
         i = 0;
         items = (post.nodes.embedlinks = $$('.embedder', post.nodes.comment));
         while ((el = items[i++])) {
           $.on(el, 'click', Embedding.cb.click);
-          if ($.hasClass(el, 'embedded')) { Embedding.cb.toggle.call(el); }
+          if ($.hasClass(el, 'embedded')) {
+            Embedding.cb.toggle.call(el);
+          }
         }
       }
       if (Conf['Cover Preview']) {
@@ -13997,49 +14275,51 @@ svg.icon {
         return;
       }
     },
-
     process(link, post) {
       let data;
-      if (!Conf['Embedding'] && !Conf['Link Title'] && !Conf['Cover Preview']) { return; }
-      if ($.x('ancestor::pre', link)) { return; }
+      if (!Conf['Embedding'] && !Conf['Link Title'] && !Conf['Cover Preview']) {
+        return;
+      }
+      if ($.x('ancestor::pre', link)) {
+        return;
+      }
       if (data = Embedding.services(link)) {
         data.post = post;
-        if (Conf['Embedding'] && (g.VIEW !== 'archive')) { Embedding.embed(data); }
-        if (Embedding.shouldFetchTitles()) Embedding.title(data);
-        if (Conf['Cover Preview'] && (g.VIEW !== 'archive')) { return Embedding.preview(data); }
-      }
-    },
-
-    services(link) {
-      const {href} = link;
-      for (var type of Embedding.ordered_types) {
-        var match;
-        if (match = type.regExp.exec(href)) {
-          return {key: type.key, uid: match[1], options: match[2], link};
+        if (Conf['Embedding'] && (g.VIEW !== 'archive')) {
+          Embedding.embed(data);
+        }
+        if (Embedding.shouldFetchTitles())
+          Embedding.title(data);
+        if (Conf['Cover Preview'] && (g.VIEW !== 'archive')) {
+          return Embedding.preview(data);
         }
       }
     },
-
-    embed(data) {
-      const {key, uid, options, link, post} = data;
-      const {href} = link;
-
-      $.addClass(link, key.toLowerCase());
-
-      const embed = $.el('a', {
-        className:   'embedder',
-        href:        'javascript:;'
+    services(link) {
+      const { href } = link;
+      for (var type of Embedding.ordered_types) {
+        var match;
+        if (match = type.regExp.exec(href)) {
+          return { key: type.key, uid: match[1], options: match[2], link };
+        }
       }
-      ,
-        {innerHTML: '(<span>un</span>embed)'});
-
-      const object = {key, uid, options, href};
-      for (var name in object) { var value = object[name]; embed.dataset[name] = value; }
-
+    },
+    embed(data) {
+      const { key, uid, options, link, post } = data;
+      const { href } = link;
+      $.addClass(link, key.toLowerCase());
+      const embed = $.el('a', {
+        className: 'embedder',
+        href: 'javascript:;'
+      }, { innerHTML: '(<span>un</span>embed)' });
+      const object = { key, uid, options, href };
+      for (var name in object) {
+        var value = object[name];
+        embed.dataset[name] = value;
+      }
       $.on(embed, 'click', Embedding.cb.click);
       $.after(link, [$.tn(' '), embed]);
       post.nodes.embedlinks.push(embed);
-
       if (Conf['Auto-embed'] && !Conf['Floating Embeds'] && !post.isFetchedQuote) {
         if ($.hasClass(doc, 'catalog-mode')) {
           return $.addClass(embed, 'embed-removed');
@@ -14048,27 +14328,28 @@ svg.icon {
         }
       }
     },
-
     ready() {
-      if (!Main$1.isThisPageLegit()) { return; }
+      if (!Main$1.isThisPageLegit()) {
+        return;
+      }
       $.addClass(Embedding.dialog, 'empty');
-      $.on($('.close', Embedding.dialog), 'click',     Embedding.closeFloat);
-      $.on($('.move',  Embedding.dialog), 'mousedown', Embedding.dragEmbed);
-      $.on($('.jump',  Embedding.dialog), 'click', function() {
-        if (doc.contains(Embedding.lastEmbed)) { return Header$1.scrollTo(Embedding.lastEmbed); }
+      $.on($('.close', Embedding.dialog), 'click', Embedding.closeFloat);
+      $.on($('.move', Embedding.dialog), 'mousedown', Embedding.dragEmbed);
+      $.on($('.jump', Embedding.dialog), 'click', function () {
+        if (doc.contains(Embedding.lastEmbed)) {
+          return Header$1.scrollTo(Embedding.lastEmbed);
+        }
       });
       return $.add(d.body, Embedding.dialog);
     },
-
     closeFloat() {
       delete Embedding.lastEmbed;
       $.addClass(Embedding.dialog, 'empty');
       return $.replace(Embedding.media.firstChild, $.el('div'));
     },
-
     dragEmbed() {
       // only webkit can handle a blocking div
-      const {style} = Embedding.media;
+      const { style } = Embedding.media;
       if (Embedding.dragEmbed.mouseup) {
         $.off(d, 'mouseup', Embedding.dragEmbed);
         Embedding.dragEmbed.mouseup = false;
@@ -14079,11 +14360,12 @@ svg.icon {
       Embedding.dragEmbed.mouseup = true;
       return style.pointerEvents = 'none';
     },
-
     title(data) {
       let service;
-      const {key, uid, options, link, post} = data;
-      if (!(service = Embedding.types[key].title)) { return; }
+      const { key, uid, options, link, post } = data;
+      if (!(service = Embedding.types[key].title)) {
+        return;
+      }
       $.addClass(link, key.toLowerCase());
       if (service.batchSize) {
         (service.queue || (service.queue = [])).push(data);
@@ -14091,38 +14373,43 @@ svg.icon {
           return Embedding.flushTitles(service);
         }
       } else {
-        return CrossOrigin$1.cache(service.api(uid), (function() { return Embedding.cb.title(this, data); }));
+        return CrossOrigin$1.cache(service.api(uid), (function () { return Embedding.cb.title(this, data); }));
       }
     },
-
     flushTitles(service) {
       let data;
-      const {queue} = service;
-      if (!queue?.length) { return; }
+      const { queue } = service;
+      if (!queue?.length) {
+        return;
+      }
       service.queue = [];
-      const cb = function() {
-        for (data of queue) { Embedding.cb.title(this, data); }
+      const cb = function () {
+        for (data of queue) {
+          Embedding.cb.title(this, data);
+        }
       };
       return CrossOrigin$1.cache(service.api((() => {
         const result = [];
-        for (data of queue) {         result.push(data.uid);
+        for (data of queue) {
+          result.push(data.uid);
         }
         return result;
       })()), cb);
     },
-
     preview(data) {
       let service;
-      const {key, uid, link} = data;
-      if (!(service = Embedding.types[key].preview)) { return; }
-      return $.on(link, 'mouseover', function(e) {
+      const { key, uid, link } = data;
+      if (!(service = Embedding.types[key].preview)) {
+        return;
+      }
+      return $.on(link, 'mouseover', function (e) {
         const src = service.url(uid);
-        const {height} = service;
+        const { height } = service;
         const el = $.el('img', {
           src,
           id: 'ihover'
-        }
-        );
+        });
+        el.setAttribute("referrerpolicy", "no-referrer");
         $.add(Header$1.hover, el);
         return UI.hover({
           root: link,
@@ -14133,13 +14420,14 @@ svg.icon {
         });
       });
     },
-
     cb: {
       click(e) {
         e.preventDefault();
         if (!$.hasClass(this, 'embedded') && (Conf['Floating Embeds'] || $.hasClass(doc, 'catalog-mode'))) {
           let div;
-          if (!(div = Embedding.media.firstChild)) { return; }
+          if (!(div = Embedding.media.firstChild)) {
+            return;
+          }
           $.replace(div, Embedding.cb.embed(this));
           Embedding.lastEmbed = Get.postFromNode(this).nodes.root;
           return $.rmClass(Embedding.dialog, 'empty');
@@ -14147,7 +14435,6 @@ svg.icon {
           return Embedding.cb.toggle.call(this);
         }
       },
-
       toggle() {
         if ($.hasClass(this, "embedded")) {
           $.rm(this.nextElementSibling);
@@ -14156,22 +14443,18 @@ svg.icon {
         }
         return $.toggleClass(this, 'embedded');
       },
-
       embed(a) {
         // We create an element to embed
         let el, type;
-        const container = $.el('div', {className: 'media-embed'});
+        const container = $.el('div', { className: 'media-embed' });
         $.add(container, (el = (type = Embedding.types[a.dataset.key]).el(a)));
-
         // Set style values.
         el.style.cssText = (type.style != null) ?
           type.style
-        :
-          'border: none; width: 640px; height: 360px;';
-
+          :
+            'border: none; width: 640px; height: 360px;';
         return container;
       },
-
       catalogRemove() {
         const isCatalog = $.hasClass(doc, 'catalog-mode');
         if ((isCatalog && $.hasClass(this, 'embedded')) || (!isCatalog && $.hasClass(this, 'embed-removed'))) {
@@ -14179,84 +14462,84 @@ svg.icon {
           return $.toggleClass(this, 'embed-removed');
         }
       },
-
       title(req, data) {
         let text;
-        const {key, uid, options, link, post} = data;
+        const { key, uid, options, link, post } = data;
         const service = Embedding.types[key].title;
-
-        let {status} = req;
+        let { status } = req;
         if ([200, 304].includes(status) && service.status) {
           status = service.status(req.response)[0];
         }
-
-        if (!status) { return; }
-
-        text = `[${key}] ${(() => { switch (status) {
-        case 200: case 304:
-          text = service.text(req.response, uid);
-          if (typeof text === 'string') {
-            return text;
-          } else {
-            return text = link.textContent;
-          }
-        case 404:
-          return "Not Found";
-        case 403: case 401:
-          return "Forbidden or Private";
-        default:
-          return `${status}'d`;
-      } })()
-      }`;
-
+        if (!status) {
+          return;
+        }
+        text = `[${key}] ${(() => {
+        switch (status) {
+          case 200:
+          case 304:
+            text = service.text(req.response, uid);
+            if (typeof text === 'string') {
+              return text;
+            } else {
+              return text = link.textContent;
+            }
+          case 404:
+            return "Not Found";
+          case 403:
+          case 401:
+            return "Forbidden or Private";
+          default:
+            return `${status}'d`;
+        }
+      })()}`;
         link.dataset.original = link.textContent;
         link.textContent = text;
         for (var post2 of post.clones) {
           for (var link2 of $$('a.linkify', post2.nodes.comment)) {
             if (link2.href === link.href) {
-              if (link2.dataset.original == null) { link2.dataset.original = link2.textContent; }
+              if (link2.dataset.original == null) {
+                link2.dataset.original = link2.textContent;
+              }
               link2.textContent = text;
             }
           }
         }
       }
     },
-
     ordered_types: [{
         key: 'audio',
         regExp: /^[^?#]+\.(?:mp3|m4a|oga|wav|flac)(?:[?#]|$)/i,
         style: '',
         el(a) {
           return $.el('audio', {
-            controls:    true,
-            preload:     'auto',
-            src:         a.dataset.href
-          }
-          );
+            controls: true,
+            preload: 'auto',
+            src: a.dataset.href
+          });
         }
-      }
-      , {
+      },
+      {
         key: 'image',
         regExp: /^[^?#]+\.(?:gif|png|jpg|jpeg|bmp|webp)(?::\w+)?(?:[?#]|$)/i,
         style: '',
         el(a) {
           const hrefEsc = E(a.dataset.href);
-          return $.el('div', { innerHTML: `<a target="_blank" href="${hrefEsc}"><img src="${hrefEsc}" style="max-width: 80vw; max-height: 80vh;"></a>`});
+          return $.el('div', { innerHTML: `<a target="_blank" href="${hrefEsc}"><img src="${hrefEsc}" style="max-width: 80vw; max-height: 80vh;"></a>` });
         }
-      }
-      , {
+      },
+      {
         key: 'video',
         regExp: /^[^?#]+\.(?:og[gv]|webm|mp4)(?:[?#]|$)/i,
         style: 'max-width: 80vw; max-height: 80vh;',
         el(a) {
           const el = $.el('video', {
-            hidden:   true,
+            hidden: true,
             controls: true,
-            preload:  'auto',
-            src:      a.dataset.href,
-            loop:     ImageHost.test(a.dataset.href.split('/')[2])
+            preload: 'auto',
+            src: a.dataset.href,
+            loop: ImageHost.test(a.dataset.href.split('/')[2])
           });
-          $.on(el, 'loadedmetadata', function() {
+          $.on(el, 'loadedmetadata', function () {
             if ((el.videoHeight === 0) && el.parentNode) {
               return $.replace(el, Embedding.types.audio.el(a));
             } else {
@@ -14265,50 +14548,46 @@ svg.icon {
           });
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'PeerTube',
         regExp: /^(\w+:\/\/[^\/]+\/videos\/watch\/\w{8}-\w{4}-\w{4}-\w{4}-\w{12})(.*)/,
         el(a) {
           let start;
           const options = (start = a.dataset.options.match(/[?&](start=\w+)/)) ? `?${start[1]}` : '';
-          const el = $.el('iframe',
-            {src: a.dataset.uid.replace('/videos/watch/', '/videos/embed/') + options});
+          const el = $.el('iframe', { src: a.dataset.uid.replace('/videos/watch/', '/videos/embed/') + options });
           el.setAttribute("allowfullscreen", "true");
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'BitChute',
-        regExp:  /^\w+:\/\/(?:www\.)?bitchute\.com\/video\/([\w\-]+)/,
+        regExp: /^\w+:\/\/(?:www\.)?bitchute\.com\/video\/([\w\-]+)/,
         el(a) {
-          const el = $.el('iframe',
-            {src: `https://www.bitchute.com/embed/${a.dataset.uid}/`});
+          const el = $.el('iframe', { src: `https://www.bitchute.com/embed/${a.dataset.uid}/` });
           el.setAttribute("allowfullscreen", "true");
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'Clyp',
         regExp: /^\w+:\/\/(?:www\.)?clyp\.it\/(\w{8})/,
         style: 'border: 0; width: 640px; height: 160px;',
         el(a) {
-          return $.el('iframe',
-            {src: `https://clyp.it/${a.dataset.uid}/widget`});
+          return $.el('iframe', { src: `https://clyp.it/${a.dataset.uid}/widget` });
         },
         title: {
           api(uid) { return `https://api.clyp.it/oembed?url=https://clyp.it/${uid}`; },
           text(_) { return _.title; }
         }
-      }
-      , {
+      },
+      {
         key: 'Dailymotion',
-        regExp:  /^\w+:\/\/(?:(?:www\.)?dailymotion\.com\/(?:embed\/)?video|dai\.ly)\/([A-Za-z0-9]+)[^?]*(.*)/,
+        regExp: /^\w+:\/\/(?:(?:www\.)?dailymotion\.com\/(?:embed\/)?video|dai\.ly)\/([A-Za-z0-9]+)[^?]*(.*)/,
         el(a) {
           let start;
           const options = (start = a.dataset.options.match(/[?&](start=\d+)/)) ? `?${start[1]}` : '';
-          const el = $.el('iframe',
-            {src: `//www.dailymotion.com/embed/video/${a.dataset.uid}${options}`});
+          const el = $.el('iframe', { src: `//www.dailymotion.com/embed/video/${a.dataset.uid}${options}` });
           el.setAttribute("allowfullscreen", "true");
           return el;
         },
@@ -14320,34 +14599,31 @@ svg.icon {
           url(uid) { return `https://www.dailymotion.com/thumbnail/video/${uid}`; },
           height: 240
         }
-      }
-      , {
+      },
+      {
         key: 'Gfycat',
         regExp: /^\w+:\/\/(?:www\.)?gfycat\.com\/(?:iframe\/)?(\w+)/,
         el(a) {
-          const el = $.el('iframe',
-            {src: `//gfycat.com/ifr/${a.dataset.uid}`});
+          const el = $.el('iframe', { src: `//gfycat.com/ifr/${a.dataset.uid}` });
           el.setAttribute("allowfullscreen", "true");
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'Gist',
         regExp: /^\w+:\/\/gist\.github\.com\/[\w\-]+\/(\w+)/,
         style: '',
-        el: (function() {
+        el: (function () {
           let counter = 0;
-          return function(a) {
+          return function (a) {
             const el = $.el('pre', {
               hidden: true,
               id: `gist-embed-${counter++}`
-            }
-            );
-            CrossOrigin$1.cache(`https://api.github.com/gists/${a.dataset.uid}`, function() {
+            });
+            CrossOrigin$1.cache(`https://api.github.com/gists/${a.dataset.uid}`, function () {
               el.textContent = Object.values(this.response.files)[0].content;
               el.className = 'prettyprint';
-              $.global(() => window.prettyPrint?.((function() {}), document.getElementById(document.currentScript.dataset.id).parentNode)
-              , {id: el.id});
+              $.global(() => window.prettyPrint?.((function () { }), document.getElementById(document.currentScript.dataset.id).parentNode), { id: el.id });
               return el.hidden = false;
             });
             return el;
@@ -14355,136 +14631,137 @@ svg.icon {
         })(),
         title: {
           api(uid) { return `https://api.github.com/gists/${uid}`; },
-          text({files}) {
-            for (var file in files) { if (files.hasOwnProperty(file)) { return file; } }
+          text({ files }) {
+            for (var file in files) {
+              if (files.hasOwnProperty(file)) {
+                return file;
+              }
+            }
           }
         }
-      }
-      , {
+      },
+      {
         key: 'InstallGentoo',
         regExp: /^\w+:\/\/paste\.installgentoo\.com\/view\/(?:raw\/|download\/|embed\/)?(\w+)/,
         el(a) {
-          return $.el('iframe',
-            {src: `https://paste.installgentoo.com/view/embed/${a.dataset.uid}`});
+          return $.el('iframe', { src: `https://paste.installgentoo.com/view/embed/${a.dataset.uid}` });
         }
-      }
-      , {
+      },
+      {
         key: 'LiveLeak',
         regExp: /^\w+:\/\/(?:\w+\.)?liveleak\.com\/.*\?.*[tif]=(\w+)/,
         el(a) {
-          const el = $.el('iframe',
-            {src: `https://www.liveleak.com/e/${a.dataset.uid}`,});
+          const el = $.el('iframe', { src: `https://www.liveleak.com/e/${a.dataset.uid}`, });
           el.setAttribute("allowfullscreen", "true");
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'Loopvid',
         regExp: /^\w+:\/\/(?:www\.)?loopvid.appspot.com\/#?((?:pf|kd|lv|gd|gh|db|dx|nn|cp|wu|ig|ky|mf|m2|pc|1c|pi|ni|wl|ko|mm|ic|gc)\/[\w\-\/]+(?:,[\w\-\/]+)*|fc\/\w+\/\d+|https?:\/\/.+)/,
         style: 'max-width: 80vw; max-height: 80vh;',
         el(a) {
           const el = $.el('video', {
             controls: true,
-            preload:  'auto',
-            loop:     true
-          }
-          );
+            preload: 'auto',
+            loop: true
+          });
           if (/^http/.test(a.dataset.uid)) {
-            $.add(el, $.el('source', {src: a.dataset.uid}));
+            $.add(el, $.el('source', { src: a.dataset.uid }));
             return el;
           }
           const [_, host, names] = a.dataset.uid.match(/(\w+)\/(.*)/);
-          const types = (() => { switch (host) {
-            case 'gd': case 'wu': case 'fc': return [''];
-            case 'gc': return ['giant', 'fat', 'zippy'];
-            default: return ['.webm', '.mp4'];
-          } })();
+          const types = (() => {
+            switch (host) {
+              case 'gd':
+              case 'wu':
+              case 'fc': return [''];
+              case 'gc': return ['giant', 'fat', 'zippy'];
+              default: return ['.webm', '.mp4'];
+            }
+          })();
           for (var name of names.split(',')) {
             for (var type of types) {
               var base = `${name}${type}`;
-              var urls = (() => { switch (host) {
-                // list from src/common.py at http://loopvid.appspot.com/source.html
-                case 'pf': return [`https://kastden.org/_loopvid_media/pf/${base}`, `https://web.archive.org/web/2/http://a.pomf.se/${base}`];
-                case 'kd': return [`https://kastden.org/loopvid/${base}`];
-                case 'lv': return [`https://lv.kastden.org/${base}`];
-                case 'gd': return [`https://docs.google.com/uc?export=download&id=${base}`];
-                case 'gh': return [`https://googledrive.com/host/${base}`];
-                case 'db': return [`https://dl.dropboxusercontent.com/u/${base}`];
-                case 'dx': return [`https://dl.dropboxusercontent.com/${base}`];
-                case 'nn': return [`https://kastden.org/_loopvid_media/nn/${base}`];
-                case 'cp': return [`https://copy.com/${base}`];
-                case 'wu': return [`http://webmup.com/${base}/vid.webm`];
-                case 'ig': return [`https://i.imgur.com/${base}`];
-                case 'ky': return [`https://kastden.org/_loopvid_media/ky/${base}`];
-                case 'mf': return [`https://kastden.org/_loopvid_media/mf/${base}`, `https://web.archive.org/web/2/https://d.maxfile.ro/${base}`];
-                case 'm2': return [`https://kastden.org/_loopvid_media/m2/${base}`];
-                case 'pc': return [`https://kastden.org/_loopvid_media/pc/${base}`, `https://web.archive.org/web/2/http://a.pomf.cat/${base}`];
-                case '1c': return [`http://b.1339.cf/${base}`];
-                case 'pi': return [`https://kastden.org/_loopvid_media/pi/${base}`, `https://web.archive.org/web/2/https://u.pomf.is/${base}`];
-                case 'ni': return [`https://kastden.org/_loopvid_media/ni/${base}`, `https://web.archive.org/web/2/https://u.nya.is/${base}`];
-                case 'wl': return [`http://webm.land/media/${base}`];
-                case 'ko': return [`https://kordy.kastden.org/loopvid/${base}`];
-                case 'mm': return [`https://kastden.org/_loopvid_media/mm/${base}`, `https://web.archive.org/web/2/https://my.mixtape.moe/${base}`];
-                case 'ic': return [`https://media.8ch.net/file_store/${base}`];
-                case 'fc': return [`//${ImageHost.host()}/${base}.webm`];
-                case 'gc': return [`https://${type}.gfycat.com/${name}.webm`];
-              } })();
-
+              var urls = (() => {
+                switch (host) {
+                  // list from src/common.py at http://loopvid.appspot.com/source.html
+                  case 'pf': return [`https://kastden.org/_loopvid_media/pf/${base}`, `https://web.archive.org/web/2/http://a.pomf.se/${base}`];
+                  case 'kd': return [`https://kastden.org/loopvid/${base}`];
+                  case 'lv': return [`https://lv.kastden.org/${base}`];
+                  case 'gd': return [`https://docs.google.com/uc?export=download&id=${base}`];
+                  case 'gh': return [`https://googledrive.com/host/${base}`];
+                  case 'db': return [`https://dl.dropboxusercontent.com/u/${base}`];
+                  case 'dx': return [`https://dl.dropboxusercontent.com/${base}`];
+                  case 'nn': return [`https://kastden.org/_loopvid_media/nn/${base}`];
+                  case 'cp': return [`https://copy.com/${base}`];
+                  case 'wu': return [`http://webmup.com/${base}/vid.webm`];
+                  case 'ig': return [`https://i.imgur.com/${base}`];
+                  case 'ky': return [`https://kastden.org/_loopvid_media/ky/${base}`];
+                  case 'mf': return [`https://kastden.org/_loopvid_media/mf/${base}`, `https://web.archive.org/web/2/https://d.maxfile.ro/${base}`];
+                  case 'm2': return [`https://kastden.org/_loopvid_media/m2/${base}`];
+                  case 'pc': return [`https://kastden.org/_loopvid_media/pc/${base}`, `https://web.archive.org/web/2/http://a.pomf.cat/${base}`];
+                  case '1c': return [`http://b.1339.cf/${base}`];
+                  case 'pi': return [`https://kastden.org/_loopvid_media/pi/${base}`, `https://web.archive.org/web/2/https://u.pomf.is/${base}`];
+                  case 'ni': return [`https://kastden.org/_loopvid_media/ni/${base}`, `https://web.archive.org/web/2/https://u.nya.is/${base}`];
+                  case 'wl': return [`http://webm.land/media/${base}`];
+                  case 'ko': return [`https://kordy.kastden.org/loopvid/${base}`];
+                  case 'mm': return [`https://kastden.org/_loopvid_media/mm/${base}`, `https://web.archive.org/web/2/https://my.mixtape.moe/${base}`];
+                  case 'ic': return [`https://media.8ch.net/file_store/${base}`];
+                  case 'fc': return [`//${ImageHost.host()}/${base}.webm`];
+                  case 'gc': return [`https://${type}.gfycat.com/${name}.webm`];
+                }
+              })();
               for (var url of urls) {
-                $.add(el, $.el('source', {src: url}));
+                $.add(el, $.el('source', { src: url }));
               }
             }
           }
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'Openings.moe',
         regExp: /^\w+:\/\/openings.moe\/\?video=([^.&=]+)/,
         style: 'width: 1280px; height: 720px; max-width: 80vw; max-height: 80vh;',
         el(a) {
-          const el = $.el('iframe',
-            {src: `https://openings.moe/?video=${a.dataset.uid}`,});
+          const el = $.el('iframe', { src: `https://openings.moe/?video=${a.dataset.uid}`, });
           el.setAttribute("allowfullscreen", "true");
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'Pastebin',
         regExp: /^\w+:\/\/(?:\w+\.)?pastebin\.com\/(?!u\/)(?:[\w.]+(?:\/|\?i\=))?(\w+)/,
         el(a) {
-          return $.el('iframe',
-            {src: `//pastebin.com/embed_iframe.php?i=${a.dataset.uid}`});
+          return $.el('iframe', { src: `//pastebin.com/embed_iframe.php?i=${a.dataset.uid}` });
         }
-      }
-      , {
+      },
+      {
         key: 'SoundCloud',
         regExp: /^\w+:\/\/(?:www\.)?(?:soundcloud\.com\/|snd\.sc\/)([\w\-\/]+)/,
         style: 'border: 0; width: 500px; height: 400px;',
         el(a) {
-          return $.el('iframe',
-            {src: `https://w.soundcloud.com/player/?visual=true&show_comments=false&url=https%3A%2F%2Fsoundcloud.com%2F${encodeURIComponent(a.dataset.uid)}`});
+          return $.el('iframe', { src: `https://w.soundcloud.com/player/?visual=true&show_comments=false&url=https%3A%2F%2Fsoundcloud.com%2F${encodeURIComponent(a.dataset.uid)}` });
         },
         title: {
           api(uid) { return `${location.protocol}//soundcloud.com/oembed?format=json&url=https%3A%2F%2Fsoundcloud.com%2F${encodeURIComponent(uid)}`; },
           text(_) { return _.title; }
         }
-      }
-      , {
+      },
+      {
         key: 'StrawPoll',
         regExp: /^\w+:\/\/(?:www\.)?strawpoll\.me\/(?:embed_\d+\/)?(\d+(?:\/r)?)/,
         style: 'border: 0; width: 600px; height: 406px;',
         el(a) {
-          return $.el('iframe',
-            {src: `https://www.strawpoll.me/embed_1/${a.dataset.uid}`});
+          return $.el('iframe', { src: `https://www.strawpoll.me/embed_1/${a.dataset.uid}` });
         }
-      }
-      , {
+      },
+      {
         key: 'Streamable',
         regExp: /^\w+:\/\/(?:www\.)?streamable\.com\/(\w+)/,
         el(a) {
-          const el = $.el('iframe',
-            {src: `https://streamable.com/o/${a.dataset.uid}`});
+          const el = $.el('iframe', { src: `https://streamable.com/o/${a.dataset.uid}` });
           el.setAttribute("allowfullscreen", "true");
           return el;
         },
@@ -14492,8 +14769,8 @@ svg.icon {
           api(uid) { return `https://api.streamable.com/oembed?url=https://streamable.com/${uid}`; },
           text(_) { return _.title; }
         }
-      }
-      , {
+      },
+      {
         key: 'TwitchTV',
         regExp: /^\w+:\/\/(?:www\.|secure\.|clips\.|m\.)?twitch\.tv\/(\w[^#\&\?]*)/,
         el(a) {
@@ -14509,57 +14786,193 @@ svg.icon {
               url += `&time=${time[1]}`;
             }
           }
-          const el = $.el('iframe',
-            {src: url});
+          const el = $.el('iframe', { src: url });
           el.setAttribute("allowfullscreen", "true");
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'Twitter',
         regExp: /^\w+:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w+\/status\/\d+)/,
         style: 'border: none; width: 550px; height: 250px; overflow: hidden; resize: both;',
         el(a) {
-          const el = $.el('iframe');
-          $.on(el, 'load', function() {
-            return this.contentWindow.postMessage({element: 't', query: 'height'}, 'https://twitframe.com');
-          });
-          var onMessage = function(e) {
-            if ((e.source === el.contentWindow) && (e.origin === 'https://twitframe.com')) {
-              $.off(window, 'message', onMessage);
-              return (cont || el).style.height = `${+$.minmax(e.data.height, 250, 0.8 * doc.clientHeight)}px`;
+          if (!Conf['Embed Tweets inline with fxTwitter']) {
+            const el = $.el('iframe');
+            $.on(el, 'load', function () {
+              return this.contentWindow.postMessage({ element: 't', query: 'height' }, 'https://twitframe.com');
+            });
+            var onMessage = function (e) {
+              if ((e.source === el.contentWindow) && (e.origin === 'https://twitframe.com')) {
+                $.off(window, 'message', onMessage);
+                return (cont || el).style.height = `${+$.minmax(e.data.height, 250, 0.8 * doc.clientHeight)}px`;
+              }
+            };
+            $.on(window, 'message', onMessage);
+            el.src = `https://twitframe.com/show?url=https://twitter.com/${a.dataset.uid}`;
+            if ($.engine === 'gecko') {
+              // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=680823
+              el.style.cssText = 'border: none; width: 100%; height: 100%;';
+              var cont = $.el('div');
+              $.add(cont, el);
+              return cont;
+            } else {
+              return el;
             }
-          };
-          $.on(window, 'message', onMessage);
-          el.src = `https://twitframe.com/show?url=https://twitter.com/${a.dataset.uid}`;
-          if ($.engine === 'gecko') {
-            // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=680823
-            el.style.cssText = 'border: none; width: 100%; height: 100%;';
-            var cont = $.el('div');
-            $.add(cont, el);
-            return cont;
-          } else {
-            return el;
           }
-        }
-      }
-      , {
+          const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
+          const shouldTranslate = Conf['Translate non-English Tweets to English'];
+          const shouldResolveReplies = Conf['Resolve Tweet Replies'];
+          const shouldResolveAllReplies = Conf['Resolve all Tweet Replies'];
+          CrossOrigin$1.cachePromise(`https://api.fxtwitter.com/${a.dataset.uid}${(shouldTranslate) ? '/en' : ''}`).then(async (req) => {
+            if (req.status === 404) {
+              el.textContent = '404: tweet not found';
+              return;
+            }
+            const { tweet } = req.response;
+            async function getReplies(tweet) {
+              if (!tweet?.replying_to_status) {
+                return [];
+              }
+              const max_replies = (shouldResolveAllReplies) ? Number.MAX_SAFE_INTEGER : 1;
+              let replies = [];
+              replies.push(tweet);
+              for (let i = 0; i < max_replies; i++) {
+                const replyReq = await CrossOrigin$1.cachePromise(`https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${(shouldTranslate) ? '/en' : ''}`);
+                const replyRes = replyReq.response;
+                replies.push(replyRes.tweet);
+                if (!replyRes.tweet?.replying_to_status) {
+                  break;
+                }
+              }
+              return replies;
+            }
+            const replies = (!shouldResolveReplies) ? [] : await getReplies(tweet);
+            function renderMedia(tweet) {
+              const mediaItems = tweet?.media?.all || [];
+              let media = [];
+              let photos = 1;
+              for (let i = 0; i < mediaItems.length; i++) {
+                const mediaItem = mediaItems[i];
+                switch (mediaItem.type) {
+                  case 'photo':
+                    media.push(h("a", { target: "_blank", href: `${tweet.url}/photo/${photos}` },
+                      h("img", { src: mediaItem.url, referrerpolicy: "no-referrer", style: "max-width: 80vw; max-height: 80vh;" })));
+                    photos += 1;
+                    break;
+                  case 'video':
+                  case 'gif':
+                    media.push(h("video", { controls: true, preload: "auto", src: mediaItem.url, style: "max-width: 80vw; max-height: 80vh;", loop: mediaItem.type === 'gif' }));
+                    break;
+                }
+              }
+              return media;
+            }
+            function renderDate(tweet) {
+              return Time.format(new Date(tweet.created_at));
+            }
+            function renderPoll(tweet) {
+              // u00A0 is nbsp, u00B7 is &CenterDot;
+              return h(hFragment, null,
+                h("ul", null, ...tweet.poll.choices.map(choice => h("li", null,
+                  choice.label,
+                  " / ",
+                  choice.percentage,
+                  "%"))),
+                `${tweet.poll.total_votes || 0}\u00A0votes \u00B7 ${tweet.poll.time_left_en || ''}`);
+            }
+            function renderTranslation(tweet) {
+              if (tweet?.translation?.source_lang === tweet?.translation?.target_lang) {
+                return '';
+              }
+              return h(hFragment, null,
+                h("hr", null),
+                h("p", null,
+                  "Translated from ",
+                  tweet?.translation?.source_lang_en || ''),
+                h("p", { lang: "en", dir: "ltr" }, tweet?.translation?.text || ''));
+            }
+            function renderQuote(tweet, renderNested = false) {
+              const quote_nested = (tweet?.quote && renderNested) ? renderQuote(tweet.quote, false) : '';
+              const quote_poll = (tweet?.poll) ? renderPoll(tweet) : '';
+              const quote_translation = (shouldTranslate) ? renderTranslation(tweet) : '';
+              return h(hFragment, null,
+                h("hr", null),
+                h("blockquote", null,
+                  h("div", { style: "display: flex;padding-bottom: 1em;" },
+                    h("a", { href: tweet.url },
+                      h("div", null,
+                        h("img", { src: tweet.author.avatar_url, style: "width: 24px;transform: translateX(-50%) translateY(-50%);border-radius: 9999px;" })),
+                      h("div", { style: "margin: -2.25em 0 0 1em;" },
+                        tweet.author.name,
+                        " (@",
+                        tweet.author.screen_name,
+                        ") ",
+                        renderDate(tweet)))),
+                  h("p", { lang: tweet?.lang || 'en', dir: "ltr", style: "margin-top: 0" }, tweet.text),
+                  ...renderMedia(tweet),
+                  quote_poll,
+                  quote_nested,
+                  quote_translation));
+            }
+            let repliesJsx = [];
+            if (replies.length > 1) {
+              repliesJsx.push({ innerHTML: "<em>Replying To</em><br/>", [isEscaped]: true });
+              for (let i = replies.length - 1; i > 0; i--) {
+                repliesJsx.push(renderQuote(replies[i], true));
+              }
+            }
+            const media = renderMedia(tweet);
+            const quote = (tweet?.quote) ? renderQuote(tweet.quote) : '';
+            const poll = (tweet?.poll) ? renderPoll(tweet) : '';
+            const created_at = renderDate(tweet);
+            const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
+            const innerHTML = h(hFragment, null,
+              ...repliesJsx,
+              h("p", { lang: tweet.lang || 'en', dir: "ltr" }, tweet.text),
+              ...media,
+              poll,
+              translation,
+              quote,
+              h("hr", null),
+              "\u2014 ",
+              tweet.author.name,
+              " (@",
+              tweet.author.screen_name,
+              ") ",
+              created_at,
+              h("br", null),
+              Icon.raw("comment"),
+              tweet?.replies || 0,
+              "\u00A0",
+              Icon.raw("shuffle"),
+              tweet?.retweets || 0,
+              "\u00A0",
+              Icon.raw("heart"),
+              tweet?.likes || 0);
+            // @ts-ignore
+            el.firstChild.innerHTML = innerHTML.innerHTML;
+            // @ts-ignore
+            el.style = 'white-space: pre-line';
+            Linkify.process(el.firstChild);
+          });
+          return el;
+        },
+      },
+      {
         key: 'VidLii',
-        regExp:  /^\w+:\/\/(?:www\.)?vidlii\.com\/watch\?v=(\w{11})/,
+        regExp: /^\w+:\/\/(?:www\.)?vidlii\.com\/watch\?v=(\w{11})/,
         style: 'border: none; width: 640px; height: 392px;',
         el(a) {
-          const el = $.el('iframe',
-            {src: `https://www.vidlii.com/embed?v=${a.dataset.uid}&a=0`});
+          const el = $.el('iframe', { src: `https://www.vidlii.com/embed?v=${a.dataset.uid}&a=0` });
           el.setAttribute("allowfullscreen", "true");
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'Vimeo',
-        regExp:  /^\w+:\/\/(?:www\.)?vimeo\.com\/(\d+)/,
+        regExp: /^\w+:\/\/(?:www\.)?vimeo\.com\/(\d+)/,
         el(a) {
-          const el = $.el('iframe',
-            {src: `//player.vimeo.com/video/${a.dataset.uid}?wmode=opaque`});
+          const el = $.el('iframe', { src: `//player.vimeo.com/video/${a.dataset.uid}?wmode=opaque` });
           el.setAttribute("allowfullscreen", "true");
           return el;
         },
@@ -14567,17 +14980,16 @@ svg.icon {
           api(uid) { return `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${uid}`; },
           text(_) { return _.title; }
         }
-      }
-      , {
+      },
+      {
         key: 'Vine',
         regExp: /^\w+:\/\/(?:www\.)?vine\.co\/v\/(\w+)/,
         style: 'border: none; width: 500px; height: 500px;',
         el(a) {
-          return $.el('iframe',
-            {src: `https://vine.co/v/${a.dataset.uid}/card`});
+          return $.el('iframe', { src: `https://vine.co/v/${a.dataset.uid}/card` });
         }
-      }
-      , {
+      },
+      {
         key: 'Vocaroo',
         regExp: /^\w+:\/\/(?:(?:www\.|old\.)?vocaroo\.com|voca\.ro)\/((?:i\/)?\w+)/,
         style: '',
@@ -14589,19 +15001,20 @@ svg.icon {
           el.src = `https://vocaroo.com/embed/${a.dataset.uid.replace(/^i\//, '')}?autoplay=0`;
           return el;
         }
-      }
-      , {
+      },
+      {
         key: 'YouTube',
-        regExp: /^\w+:\/\/(?:youtu.be\/|[\w.]*youtube[\w.]*\/.*(?:v=|\bembed\/|\bv\/|live\/))([\w\-]{11})(.*)/,
+        regExp: /^\w+:\/\/(?:youtu.be\/|[\w.]*youtube[\w.]*\/.*(?:v=|\bembed\/|\bv\/|shorts\/|live\/))([\w\-]{11})(.*)/,
         el(a) {
           let start = a.dataset.options.match(/\b(?:star)?t\=(\w+)/);
-          if (start) { start = start[1]; }
+          if (start) {
+            start = start[1];
+          }
           if (start && !/^\d+$/.test(start)) {
             start += ' 0h0m0s';
             start = (3600 * start.match(/(\d+)h/)[1]) + (60 * start.match(/(\d+)m/)[1]) + (1 * start.match(/(\d+)s/)[1]);
           }
-          const el = $.el('iframe',
-            {src: `//www.youtube.com/embed/${a.dataset.uid}?rel=0&wmode=opaque${start ? '&start=' + start : ''}`});
+          const el = $.el('iframe', { src: `//www.youtube.com/embed/${a.dataset.uid}?rel=0&wmode=opaque${start ? '&start=' + start : ''}` });
           el.setAttribute("allowfullscreen", "true");
           return el;
         },
@@ -14621,12 +15034,12 @@ svg.icon {
           url(uid) { return `https://img.youtube.com/vi/${uid}/0.jpg`; },
           height: 360
         }
-      }
-    ],
-
+      }],
     shouldFetchTitles() {
-      if(!Conf['Link Title']) return false;
-      if (Conf['Link Title in the catalog']) return true;
+      if (!Conf['Link Title'])
+        return false;
+      if (Conf['Link Title in the catalog'])
+        return true;
       return g.VIEW !== 'catalog' && !(g.VIEW === 'index' && Conf['Index Mode'] === 'catalog');
     },
   };
@@ -18011,9 +18424,10 @@ svg.icon {
 
     eventPageRequest = (function () {
       const callbacks = [];
-      chrome.runtime.onMessage.addListener(function(response) {
+      chrome.runtime.onMessage.addListener(function (response) {
         callbacks[response.id](response.data);
-        return delete callbacks[response.id];});
+        return delete callbacks[response.id];
+      });
       return (params, cb) => chrome.runtime.sendMessage(params, id => callbacks[id] = cb);
     })();
 
@@ -18022,22 +18436,24 @@ svg.icon {
       // XXX https://forums.lanik.us/viewtopic.php?f=64&t=24173&p=78310
       url = url.replace(/^((?:https?:)?\/\/(?:\w+\.)?(?:4chan|4channel|4cdn)\.org)\/adv\//, '$1//adv/');
 
-      eventPageRequest({type: 'ajax', url, headers, responseType: 'arraybuffer'}, function({response, responseHeaderString}) {
-        if (response) { response = new Uint8Array(response); }
-        return cb(response, responseHeaderString);
-      });
+        eventPageRequest({ type: 'ajax', url, headers, responseType: 'arraybuffer' }, function ({ response, responseHeaderString }) {
+          if (response) {
+            response = new Uint8Array(response);
+          }
+          return cb(response, responseHeaderString);
+        });
 
     },
-
     file(url, cb) {
-      return CrossOrigin.binary(url, function(data, headers) {
-        if (data == null) { return cb(null); }
+      return CrossOrigin.binary(url, function (data, headers) {
+        if (data == null) {
+          return cb(null);
+        }
         let name = url.match(/([^\/?#]+)\/*(?:$|[?#])/)?.[1];
-        const contentType        = headers.match(/Content-Type:\s*(.*)/i)?.[1];
+        const contentType = headers.match(/Content-Type:\s*(.*)/i)?.[1];
         const contentDisposition = headers.match(/Content-Disposition:\s*(.*)/i)?.[1];
         let mime = contentType?.match(/[^;]*/)[0] || 'application/octet-stream';
-        const match =
-          contentDisposition?.match(/\bfilename\s*=\s*"((\\"|[^"])+)"/i)?.[1] ||
+        const match = contentDisposition?.match(/\bfilename\s*=\s*"((\\"|[^"])+)"/i)?.[1] ||
           contentType?.match(/\bname\s*=\s*"((\\"|[^"])+)"/i)?.[1];
         if (match) {
           name = match.replace(/\\"/g, '"');
@@ -18046,13 +18462,12 @@ svg.icon {
           // In JS Blocker (Safari) content type comes back as 'text/plain; charset=x-user-defined'; guess from filename instead.
           mime = $.getOwn(QR.typeFromExtension, name.match(/[^.]*$/)[0].toLowerCase()) || 'application/octet-stream';
         }
-        const blob = new Blob([data], {type: mime});
+        const blob = new Blob([data], { type: mime });
         blob.name = name;
         return cb(blob);
       });
     },
-
-    Request: (function() {
+    Request: (function () {
       const Request = class Request {
         static initClass() {
           this.prototype.status = 0;
@@ -18067,20 +18482,19 @@ svg.icon {
               var i;
               if ((i = header.indexOf(':')) >= 0) {
                 var key = header.slice(0, i).trim().toLowerCase();
-                var val = header.slice(i+1).trim();
+                var val = header.slice(i + 1).trim();
                 this.responseHeaders[key] = val;
               }
             }
           }
           return this.responseHeaders?.[headerName.toLowerCase()] ?? null;
         }
-        abort() {}
-        onloadend() {}
+        abort() { }
+        onloadend() { }
       };
       Request.initClass();
       return Request;
     })(),
-
     // Attempts to fetch `url` using cross-origin privileges, if available.
     // Interface is a subset of that of $.ajax.
     // Options:
@@ -18094,18 +18508,15 @@ svg.icon {
     //   `response` - decoded response body
     //   `abort` - function for aborting the request (silently fails on some platforms)
     //   `getResponseHeader` - function for reading response headers
-    ajax(url, options={}) {
-      let {onloadend, timeout, responseType, headers} = options;
-      if (responseType == null) { responseType = 'json'; }
-
-      if ((window.GM?.xmlHttpRequest == null) && (typeof window.GM_xmlhttpRequest === 'undefined' || window.GM_xmlhttpRequest === null)) {
-        return $.ajax(url, options);
+    ajax(url, options = {}) {
+      let { onloadend, timeout, responseType, headers } = options;
+      if (responseType == null) {
+        responseType = 'json';
       }
-
       const req = new CrossOrigin.Request();
       req.onloadend = onloadend;
 
-        eventPageRequest({type: 'ajax', url, responseType, headers, timeout}, function(result) {
+        eventPageRequest({ type: 'ajax', url, responseType, headers, timeout }, function (result) {
           if (result.status) {
             $.extend(req, result);
           }
@@ -18114,15 +18525,20 @@ svg.icon {
 
       return req;
     },
-
-    cache(url, cb) {
-      return $.cache(url, cb,
-        {ajax: CrossOrigin.ajax});
+    ajaxPromise(url, options = {}) {
+      return new Promise((resolve) => CrossOrigin.ajax(url, { ...options, onloadend() { resolve(this); } }));
     },
-
+    cache(url, cb) {
+      return $.cache(url, cb, { ajax: CrossOrigin.ajax });
+    },
+    cachePromise(url) {
+      return new Promise(resolve => {
+        CrossOrigin.cache(url, function () { resolve(this); });
+      });
+    },
     permission(cb, cbFail, origins) {
 
-        return eventPageRequest({type: 'permission', origins}, function(result) {
+        return eventPageRequest({ type: 'permission', origins }, function (result) {
           if (result) {
             return cb();
           } else {
@@ -19626,99 +20042,6 @@ $\
     }
   };
 
-  var Time = {
-    init() {
-      if (!['index', 'thread', 'archive'].includes(g.VIEW) || !Conf['Time Formatting']) {
-        return;
-      }
-      Callbacks.Post.push({
-        name: 'Time Formatting',
-        cb: this.node
-      });
-    },
-    node() {
-      if (!this.info.date || this.isClone) {
-        return;
-      }
-      const { textContent } = this.nodes.date;
-      this.nodes.date.textContent = textContent.match(/^\s*/)[0] + Time.format(Conf['time'], this.info.date) + textContent.match(/\s*$/)[0];
-    },
-    format(formatString, date) {
-      return formatString.replace(/%(.)/g, function (s, c) {
-        if ($.hasOwn(Time.formatters, c)) {
-          return Time.formatters[c].call(date);
-        } else {
-          return s;
-        }
-      });
-    },
-    zeroPad(n) { if (n < 10) {
-      return `0${n}`;
-    } else {
-      return n;
-    } },
-    // Setting up the formatter takes more time than actually formatting the date,
-    // So while setting up this cache is a bit more code, it's faster at runtime
-    formatterCache: new Map(),
-    formatters: {
-      a() {
-        let formatter = Time.formatterCache.get('a');
-        if (!formatter) {
-          // || undefined to fall back to browser locale, an empty string gives an error
-          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { weekday: 'short' });
-          Time.formatterCache.set('a', formatter);
-        }
-        return formatter.format(this);
-      },
-      A() {
-        let formatter = Time.formatterCache.get('A');
-        if (!formatter) {
-          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { weekday: 'long' });
-          Time.formatterCache.set('A', formatter);
-        }
-        return formatter.format(this);
-      },
-      b() {
-        let formatter = Time.formatterCache.get('b');
-        if (!formatter) {
-          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { month: 'short' });
-          Time.formatterCache.set('b', formatter);
-        }
-        return formatter.format(this);
-      },
-      B() {
-        let formatter = Time.formatterCache.get('B');
-        if (!formatter) {
-          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { month: 'long' });
-          Time.formatterCache.set('B', formatter);
-        }
-        return formatter.format(this);
-      },
-      d() { return Time.zeroPad(this.getDate()); },
-      e() { return this.getDate(); },
-      H() { return Time.zeroPad(this.getHours()); },
-      I() { return Time.zeroPad((this.getHours() % 12) || 12); },
-      k() { return this.getHours(); },
-      l() { return (this.getHours() % 12) || 12; },
-      m() { return Time.zeroPad(this.getMonth() + 1); },
-      M() { return Time.zeroPad(this.getMinutes()); },
-      p() {
-        let formatter = Time.formatterCache.get('p');
-        if (!formatter) {
-          formatter = Intl.DateTimeFormat(Conf['timeLocale'] || undefined, { hour: 'numeric', hour12: true });
-          Time.formatterCache.set('p', formatter);
-        }
-        const parts = formatter.formatToParts(this);
-        return parts.find((entry) => entry.type === 'dayPeriod').value;
-      },
-      P() { return Time.formatters.p.call(this).toLowerCase(); },
-      S() { return Time.zeroPad(this.getSeconds()); },
-      y() { return this.getFullYear().toString().slice(2); },
-      Y() { return this.getFullYear(); },
-      '%'() { return '%'; }
-    },
-  };
-
   var Settings = {
     dialog: undefined,
     init() {
@@ -20731,7 +21054,7 @@ vp-replace
       return Header$1.generateBoardList(this.value);
     },
     time() {
-      return this.nextElementSibling.textContent = Time.format(this.value, new Date());
+      return this.nextElementSibling.textContent = Time.format(new Date(), this.value);
     },
     timeLocale() {
       return Settings.time.call($('[name=time]', Settings.dialog));
@@ -22897,197 +23220,6 @@ vp-replace
     }
   };
 
-  var Linkify = {
-    init() {
-      if (!['index', 'thread', 'archive'].includes(g.VIEW) || !Conf['Linkify']) { return; }
-
-      if (Conf['Comment Expansion']) {
-        ExpandComment.callbacks.push(this.node);
-      }
-
-      Callbacks.Post.push({
-        name: 'Linkify',
-        cb:   this.node
-      });
-
-      return Embedding.init();
-    },
-
-    node() {
-      let link;
-      if (this.isClone) { return Embedding.events(this); }
-      if (!Linkify.regString.test(this.info.comment)) { return; }
-      for (link of $$('a', this.nodes.comment)) {
-        if (g.SITE.isLinkified?.(link)) {
-          $.addClass(link, 'linkify');
-          if (ImageHost.useFaster) { ImageHost.fixLinks([link]); }
-          Embedding.process(link, this);
-        }
-      }
-      const links = Linkify.process(this.nodes.comment);
-      if (ImageHost.useFaster) { ImageHost.fixLinks(links); }
-      for (link of links) { Embedding.process(link, this); }
-    },
-
-    process(node) {
-      let length;
-      const test     = /[^\s"]+/g;
-      const space    = /[\s"]/;
-      const snapshot = $.X('.//br|.//text()', node);
-      let i = 0;
-      const links = [];
-      while ((node = snapshot.snapshotItem(i++))) {
-        var result;
-        var {data} = node;
-        if (!data || (node.parentElement.nodeName === "A")) { continue; }
-
-        while ((result = test.exec(data))) {
-          var {index} = result;
-          var endNode = node;
-          var word    = result[0];
-          // End of node, not necessarily end of space-delimited string
-          if ((length = index + word.length) === data.length) {
-            var saved;
-            test.lastIndex = 0;
-
-            while (saved = snapshot.snapshotItem(i++)) {
-              var end;
-              if ((saved.nodeName === 'BR') || ((saved.parentElement.nodeName === 'P') && !saved.previousSibling)) {
-                var part1, part2;
-                if (
-                  // link deliberately split
-                  (part1 = word.match(/(https?:\/\/)?([a-z\d-]+\.)*[a-z\d-]+$/i)) &&
-                  (part2 = snapshot.snapshotItem(i)?.data?.match(/^(\.[a-z\d-]+)*\//i)) &&
-                  ((part1[0] + part2[0]).search(Linkify.regString) === 0)
-                ) {
-                  continue;
-                } else {
-                  break;
-                }
-              }
-
-              if ((saved.parentElement.nodeName === "A") && !Linkify.regString.test(word)) {
-                break;
-              }
-
-              endNode  = saved;
-              ({data}   = saved);
-
-              if (end = space.exec(data)) {
-                // Set our snapshot and regex to start on this node at this position when the loop resumes
-                word += data.slice(0, end.index);
-                test.lastIndex = (length = end.index);
-                i--;
-                break;
-              } else {
-                ({length} = data);
-                word    += data;
-              }
-            }
-          }
-
-          if (Linkify.regString.test(word)) {
-            links.push(Linkify.makeRange(node, endNode, index, length));
-
-          }
-
-          if (!test.lastIndex || (node !== endNode)) { break; }
-        }
-      }
-
-      i = links.length;
-      while (i--) {
-        links[i] = Linkify.makeLink(links[i]);
-      }
-      return links;
-    },
-
-    regString: new RegExp(`(\
-\
-(https?|mailto|git|magnet|ftp|irc):(\
-[a-z\\d%/?]\
-)\
-|\
-([-a-z\\d]+[.])+(\
-aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post|pro|tel|travel|xxx|xyz|edu|gov|mil|[a-z]{2}\
-)([:/]|(?![^\\s"]))\
-|\
-[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\\.[\\d]{1,3}\
-|\
-[-\\w\\d.@]+@[a-z\\d.-]+\\.[a-z\\d]\
-)`, 'i'),
-
-    makeRange(startNode, endNode, startOffset, endOffset) {
-      const range = document.createRange();
-      range.setStart(startNode, startOffset);
-      range.setEnd(endNode,   endOffset);
-      return range;
-    },
-
-    makeLink(range) {
-      let t;
-      let encodedDomain;
-      let text = range.toString();
-
-      // Clean start of range
-      let i = text.search(Linkify.regString);
-
-      if (i > 0) {
-        text = text.slice(i);
-        while ((range.startOffset + i) >= range.startContainer.data.length) { i--; }
-
-        if (i) { range.setStart(range.startContainer, range.startOffset + i); }
-      }
-
-      // Clean end of range
-      i = 0;
-      while (/[)\]}>.,]/.test(t = text.charAt(text.length - (1 + i)))) {
-        if (!/[.,]/.test(t) && !((text.match(/[()\[\]{}<>]/g)).length % 2)) { break; }
-        i++;
-      }
-
-      if (i) {
-        text = text.slice(0, -i);
-        while ((range.endOffset - i) < 0) { i--; }
-
-        if (i) {
-          range.setEnd(range.endContainer, range.endOffset - i);
-        }
-      }
-
-      // Make our link 'valid' if it is formatted incorrectly.
-      if (!/((mailto|magnet):|.+:\/\/)/.test(text)) {
-        text = (
-          /@/.test(text) ?
-            'mailto:'
-          :
-            'http://'
-        ) + text;
-      }
-
-      // Decode percent-encoded characters in domain so that they behave consistently across browsers.
-      if (encodedDomain = text.match(/^(https?:\/\/[^/]*%[0-9a-f]{2})(.*)$/i)) {
-        text = encodedDomain[1].replace(/%([0-9a-f]{2})/ig, function(x, y) {
-          if (y === '25') { return x; } else { return String.fromCharCode(parseInt(y, 16)); }
-        }) + encodedDomain[2];
-      }
-
-      const a = $.el('a', {
-        className: 'linkify',
-        rel:       'noreferrer noopener',
-        target:    '_blank',
-        href:      text
-      }
-      );
-
-      // Insert the range into the anchor, the anchor into the range's DOM location, and destroy the range.
-      $.add(a, range.extractContents());
-      range.insertNode(a);
-
-      return a;
-    }
-  };
-
   const ArchiveLink = {
     init() {
       if ((g.SITE.software !== 'yotsuba') || !['index', 'thread'].includes(g.VIEW) || !Conf['Menu'] || !Conf['Archive Link']) { return; }
@@ -24949,8 +25081,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       const encryptionOK = url.startsWith('https://');
       if (encryptionOK || Conf['Exempt Archives from Encryption']) {
         CrossOrigin$1.ajax(url, { onloadend() {
-            if (this.status >= 400) {
-              const domain = new URL(url).origin;
+            if (this.status < 200 || this.status >= 400) {
+              const domain = E(new URL(url).origin);
               new Notice('error', $.el('div', {
                 innerHTML: 'There was an error while fetching from the archive. See the console for details.<br />' +
                   'Some archive check the browser first before checking content, you might need to open the archive ' +
@@ -25365,11 +25497,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
 }\
 `;
         if ($.luma(rgb) < 100) {
-          css += `\
-.watch-thread-link {
-  background-image: url("data:image/svg+xml,<svg viewBox='0 0 26 26' preserveAspectRatio='true' xmlns='http://www.w3.org/2000/svg'><path fill='rgb(200,200,200)' d='M24.132,7.971c-2.203-2.205-5.916-2.098-8.25,0.235L15.5,8.588l-0.382-0.382c-2.334-2.333-6.047-2.44-8.25-0.235c-2.204,2.203-2.098,5.916,0.235,8.249l8.396,8.396l8.396-8.396C26.229,13.887,26.336,10.174,24.132,7.971z'/></svg>");
-}\
-`;
+          css += '.watch-thread-link { --xt-watcher: #c8c8c8 }';
         }
         Main.bgColorStyle.textContent = css;
         return $.after($.id('fourchanx-css'), Main.bgColorStyle);

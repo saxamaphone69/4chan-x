@@ -140,11 +140,11 @@ var ThreadWatcher = {
     if (this.isClone) {
       toggler = $('.watch-thread-link', this.nodes.info);
     } else {
-      toggler = $.el('a', {
-        href: 'javascript:;',
+      toggler = $.el('button', {
+        type: 'button',
         className: 'watch-thread-link'
-      }
-      );
+      });
+      Icon.set(toggler, 'heart');
       $.before($('input', this.nodes.info), toggler);
     }
     const siteID = g.SITE.ID;

@@ -15,10 +15,10 @@ var Time = {
   node() {
     if (!this.info.date || this.isClone) { return; }
     const {textContent} = this.nodes.date;
-    this.nodes.date.textContent = textContent.match(/^\s*/)[0] + Time.format(Conf['time'], this.info.date) + textContent.match(/\s*$/)[0];
+    this.nodes.date.textContent = textContent.match(/^\s*/)[0] + Time.format(this.info.date) + textContent.match(/\s*$/)[0];
   },
 
-  format(formatString: string, date: Date) {
+  format(date: Date, formatString: string = Conf['time']) {
     return formatString.replace(/%(.)/g, function(s, c) {
       if ($.hasOwn(Time.formatters, c)) {
         return Time.formatters[c].call(date);

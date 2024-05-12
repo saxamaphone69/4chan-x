@@ -1099,7 +1099,7 @@ vp-replace
   },
 
   time() {
-    return this.nextElementSibling.textContent = Time.format(this.value, new Date());
+    return this.nextElementSibling.textContent = Time.format(new Date(), this.value);
   },
 
   timeLocale() {

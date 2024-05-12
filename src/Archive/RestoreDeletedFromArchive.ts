@@ -1,6 +1,6 @@
 import Redirect from './Redirect';
 import Notice from '../classes/Notice';
-import { Conf, g } from '../globals/globals';
+import { Conf, g, E } from '../globals/globals';
 import CrossOrigin from '../platform/CrossOrigin';
 import $ from '../platform/$';
 import Header from '../General/Header';
@@ -17,8 +17,8 @@ const RestoreDeletedFromArchive = {
     const encryptionOK = url.startsWith('https://');
     if (encryptionOK || Conf['Exempt Archives from Encryption']) {
       CrossOrigin.ajax(url, { onloadend(this: XMLHttpRequest) {
-        if (this.status >= 400) {
-          const domain = new URL(url).origin;
+        if (this.status < 200 || this.status >= 400) {
+          const domain = E(new URL(url).origin);
           new Notice('error', $.el('div', {
               innerHTML: 'There was an error while fetching from the archive. See the console for details.<br />' +
                 'Some archive check the browser first before checking content, you might need to open the archive ' +

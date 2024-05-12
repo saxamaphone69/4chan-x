@@ -3,6 +3,16 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### 2.9.0 (2024-05-12)
+
+- FxTwitter embeds. Has some extra functionality in the settings. Twitframe is also still available in the settings.
+  [#57](https://github.com/TuxedoTako/4chan-xt/pull/57)
+- Fixed youtube shorts embeds. [#58](https://github.com/TuxedoTako/4chan-xt/pull/58)
+- Fixed the extension version not displaying the error message in case fetching the thread from an external archive
+  failed. [#8 \(comment\)](https://github.com/TuxedoTako/4chan-xt/issues/8#issuecomment-2105740679)
+- Button to watch threads now uses an svg icon instead of a background image, and is now a button instead of an anchor.
+  This should only be important if you use custom css to style it.
+
 ### 2.8.2 (2024-05-03)
 
 - PostHiding now waits for the board config, so the option to hide by poster ID should always appear on boards with
