@@ -802,8 +802,7 @@ var QR = {
       $.on(nodes[name], event, save);
     }
 
-    // XXX Blink and WebKit treat width and height of <textarea>s as min-width and min-height
-    if (($.engine === 'gecko') && Conf['Remember QR Size']) {
+    if (Conf['Remember QR Size']) {
       $.get('QR Size', '', item => nodes.com.style.cssText = item['QR Size']);
       $.on(nodes.com, 'mouseup', function(e) {
         if (e.button !== 0) { return; }
