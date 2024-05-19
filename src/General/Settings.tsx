@@ -245,9 +245,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     addCheckboxes($('div[data-name="JSON Index"] > .suboption-list', section), Config.Index);
 
     // Unsupported options
-    if ($.engine !== 'gecko') {
-      $('div[data-name="Remember QR Size"]', section).hidden = true;
-    }
     if ($.perProtocolSettings || (location.protocol !== 'https:')) {
       $('div[data-name="Redirect to HTTPS"]', section).hidden = true;
     }
