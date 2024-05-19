@@ -9,10 +9,8 @@ import $$ from '../platform/$$';
 import CrossOrigin from '../platform/CrossOrigin';
 import { dict } from '../platform/helpers';
 import EmbeddingPage from './Embedding/Embed.html';
-import Icon from "../Icons/icon";
-import Linkify from './Linkify';
-import h, { type EscapedHtml, hFragment, isEscaped } from '../globals/jsx';
-import Time from '../Miscellaneous/Time';
+import EmbedFxTwitter from './Embedding/FxTwitter';
+
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -622,146 +620,7 @@ var Embedding = {
             return el;
           }
         }
-        const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
-        const shouldTranslate: boolean = Conf['Translate non-English Tweets to English'];
-        const shouldResolveReplies: boolean = Conf['Resolve Tweet Replies'];
-        const shouldResolveAllReplies: boolean = Conf['Resolve all Tweet Replies'];
-        CrossOrigin.cachePromise(
-          `https://api.fxtwitter.com/${a.dataset.uid}${(shouldTranslate) ? '/en' : ''}`
-        ).then(async req => {
-          if (req.status === 404) {
-            el.textContent = '404: tweet not found';
-            return;
-          }
-
-          const {tweet} = req.response;
-
-          async function getReplies(tweet) {
-            if (!tweet?.replying_to_status) {
-              return [];
-            }
-            const max_replies = (shouldResolveAllReplies) ? Number.MAX_SAFE_INTEGER : 1;
-            let replies = [];
-            replies.push(tweet);;
-            for (let i = 0; i < max_replies; i++) {
-              const replyReq = await CrossOrigin.cachePromise(
-                `https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${(shouldTranslate) ? '/en' : ''}`
-              );
-              const replyRes = replyReq.response;
-              replies.push(replyRes.tweet);
-              if (!replyRes.tweet?.replying_to_status) {
-                break;
-              }
-            }
-            return replies;
-          }
-
-          const replies = (!shouldResolveReplies) ? [] : await getReplies(tweet);
-
-          function renderMedia(tweet) {
-            const mediaItems = tweet?.media?.all || [];
-            let media = [];
-            let photos = 1;
-            for (let i = 0; i < mediaItems.length; i++) {
-              const mediaItem = mediaItems[i];
-              switch (mediaItem.type) {
-                case 'photo':
-                  media.push(<a target="_blank" href={`${tweet.url}/photo/${photos}`}>
-                    <img src={mediaItem.url} referrerpolicy="no-referrer" style="max-width: 80vw; max-height: 80vh;" />
-                  </a>);
-                  photos += 1;
-                  break;
-                case 'video':
-                case 'gif':
-                  media.push(<video controls={true} preload="auto" src={mediaItem.url} style="max-width: 80vw; max-height: 80vh;" loop={mediaItem.type === 'gif'} />)
-                  break;
-              }
-            }
-            return media;
-          }
-
-          function renderDate(tweet) {
-            return Time.format(new Date(tweet.created_at));
-          }
-
-          function renderPoll(tweet): EscapedHtml {
-            // u00A0 is nbsp, u00B7 is &CenterDot;
-            return <>
-              <ul>{...tweet.poll.choices.map(choice => <li>{choice.label} / {choice.percentage}%</li>)}</ul>
-              {`${tweet.poll.total_votes || 0}\u00A0votes \u00B7 ${tweet.poll.time_left_en || ''}`}
-            </>
-          }
-
-          function renderTranslation(tweet): EscapedHtml | '' {
-            if (tweet?.translation?.source_lang === tweet?.translation?.target_lang) {
-              return '';
-            }
-            return <>
-              <hr/>
-              <p>Translated from {tweet?.translation?.source_lang_en || ''}</p>
-              <p lang="en" dir="ltr">{tweet?.translation?.text || ''}</p>
-            </>
-          }
-
-          function renderQuote(tweet, renderNested = false): EscapedHtml {
-            const quote_nested = (tweet?.quote && renderNested) ? renderQuote(tweet.quote, false) : '';
-            const quote_poll = (tweet?.poll) ? renderPoll(tweet) : ''
-            const quote_translation = (shouldTranslate) ? renderTranslation(tweet) : '';
-
-            return <><hr/><blockquote>
-              <div style="display: flex;padding-bottom: 1em;">
-                <a href={tweet.url}>
-                <div>
-                  <img src={tweet.author.avatar_url} style="width: 24px;transform: translateX(-50%) translateY(-50%);border-radius: 9999px;" />
-                </div>
-                <div style="margin: -2.25em 0 0 1em;">{tweet.author.name} (@{tweet.author.screen_name}) {renderDate(tweet)}</div>
-                </a>
-              </div>
-              <p lang={tweet?.lang || 'en'} dir="ltr" style="margin-top: 0">{tweet.text}</p>
-              {...renderMedia(tweet)}
-              {quote_poll}
-              {quote_nested}
-              {quote_translation}
-            </blockquote></>
-          }
-
-          let repliesJsx: EscapedHtml[] = [];
-          if (replies.length > 1) {
-            repliesJsx.push({innerHTML: "<em>Replying To</em><br/>", [isEscaped]: true });
-            for (let i = replies.length-1; i > 0; i--) {
-              repliesJsx.push(renderQuote(replies[i], true));
-            }
-          }
-
-          const media = renderMedia(tweet);
-          const quote = (tweet?.quote) ? renderQuote(tweet.quote) : ''
-
-          const poll = (tweet?.poll) ? renderPoll(tweet) : '';
-          const created_at = renderDate(tweet);
-
-          const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
-
-          const innerHTML = <>
-            {...repliesJsx}
-            <p lang={tweet.lang || 'en'} dir="ltr">{tweet.text}</p>
-            {...media}
-            {poll}
-            {translation}
-            {quote}
-            <hr/>
-            &mdash; {tweet.author.name} (@{tweet.author.screen_name}) {created_at}
-            <br/>
-            {Icon.raw("comment")}{tweet?.replies || 0}&nbsp;{Icon.raw("shuffle")}{tweet?.retweets || 0}&nbsp;{Icon.raw("heart")}{tweet?.likes || 0}
-          </>;
-
-          // @ts-ignore
-          el.firstChild.innerHTML = innerHTML.innerHTML;
-          // @ts-ignore
-          el.style = 'white-space: pre-line';
-          Linkify.process(el.firstChild);
-
-        });
-        return el;
+        return EmbedFxTwitter(a);
       },
     }
     , {

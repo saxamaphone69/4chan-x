@@ -40,7 +40,9 @@ import { icons } from './style';
 import { g } from '../globals/globals';
 import iconCss from '../Icons/icons.css';
 
-const mainCSS = style + variableBase + yotsuba +yotsubaB+futaba+burichan+tomorrow + photon + spooky + iconCss;
+import fxTwitterCss from '../Linkification/Embedding/FxTwitter.css';
+
+const mainCSS = style + variableBase + yotsuba +yotsubaB+futaba+burichan+tomorrow + photon + spooky + iconCss + fxTwitterCss;
 const faIcons: { name: string, data: string }[] = [
   { name: "audio", data: linkifyAudio },
   { name: "bitchute", data: linkifyBitchute },
