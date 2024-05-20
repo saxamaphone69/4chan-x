@@ -3,6 +3,20 @@
 4chan XT uses a different user script namespace, so to migrate you need to export settings from 4chan X, and import them
 in XT.
 
+### 2.10.0 (2024-05-20)
+
+- Improve FxTwitter embeds. [#60](https://github.com/TuxedoTako/4chan-xt/issues/60)
+  - Improve style.
+  - Link @names and #hashtags.
+  - Move some settings to the advanced setting: you can now choose which language to translate into instead of English
+    or nothing.
+- Remember QR size option is no longer Firefox only. [#61](https://github.com/TuxedoTako/4chan-xt/pull/61)
+- CSS custom properties, also known as CSS variables, used by 4chan XT are now documented in
+  [src/css/README.md](./src/css/README.md).
+- Now that 4chan redirects to https, http support is dropped.
+  [#61 \(comment\)](https://github.com/TuxedoTako/4chan-xt/pull/61#issuecomment-2119154714)
+- Also dropped 4channel.org in the list of supported sites.
+
 ### 2.9.0 (2024-05-12)
 
 - FxTwitter embeds. Has some extra functionality in the settings. Twitframe is also still available in the settings.

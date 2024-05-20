@@ -714,11 +714,6 @@ if (platform === 'crx') {
 
     $.clear = cb => GM.listValues().then(keys => $.delete(keys.map(key => key.replace(g.NAMESPACE, '')), cb)).catch( () => $.delete(Object.keys(Conf).concat(['previousversion', 'QR Size', 'QR.persona']), cb));
   } else {
-
-    if (typeof GM_deleteValue === 'undefined' || GM_deleteValue === null) {
-      $.perProtocolSettings = true;
-    }
-
     if (typeof GM_deleteValue !== 'undefined' && GM_deleteValue !== null) {
       $.getValue   = GM_getValue;
       $.listValues = () => GM_listValues(); // error when called if missing

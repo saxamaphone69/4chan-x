@@ -22,6 +22,8 @@
   --xt-watched-border: rgb(64, 192, 255);
   --xt-qphl: rgba(145, 182, 214, .8);
   --xt-highlight-side-arrow: rgb(155, 185, 210);
+
+  --xt-fxt-fg: #c5c8c6;
 }
 
 /* 4chan style fixes */

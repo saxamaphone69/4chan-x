@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.9.0",
-    "date": "2024-05-12T19:04:53Z"
+    "version": "2.10.0",
+    "date": "2024-05-20T15:56:31Z"
   };
 
   var meta = {
@@ -108,81 +108,7 @@
    "alternatives": "https://www.4chan-x.net/4chan_alternatives.html",
    "appid": "lacclbnghgdicfifcamcmcnilckjamag",
    "appidGecko": "4chan-x@4chan-x.net",
-   "chromeStoreID": "ohnjgmpcibpbafdlkimncjhflgedgpam",
    "recaptchaKey": "6Ldp2bsSAAAAAAJ5uyx_lx34lJeEpTLVkP5k04qc",
-   "distBranch": "gh-pages",
-   "includes_only": [
-    "*://boards.4chan.org/*",
-    "*://sys.4chan.org/*",
-    "*://www.4chan.org/*",
-    "*://boards.4channel.org/*",
-    "*://sys.4channel.org/*",
-    "*://www.4channel.org/*",
-    "*://i.4cdn.org/*",
-    "*://is.4chan.org/*",
-    "*://is2.4chan.org/*",
-    "*://is.4channel.org/*",
-    "*://is2.4channel.org/*"
-   ],
-   "matches_only": [
-    "*://*.4chan.org/*",
-    "*://*.4channel.org/*",
-    "*://*.4cdn.org/*"
-   ],
-   "matches": [
-    "https://erischan.org/*",
-    "https://www.erischan.org/*",
-    "https://fufufu.moe/*",
-    "https://gnfos.com/*",
-    "https://himasugi.blog/*",
-    "https://www.himasugi.blog/*",
-    "https://kakashinenpo.com/*",
-    "https://www.kakashinenpo.com/*",
-    "https://kissu.moe/*",
-    "https://www.kissu.moe/*",
-    "https://lainchan.org/*",
-    "https://www.lainchan.org/*",
-    "https://merorin.com/*",
-    "https://ota-ch.com/*",
-    "https://www.ota-ch.com/*",
-    "https://ponyville.us/*",
-    "https://www.ponyville.us/*",
-    "https://smuglo.li/*",
-    "https://notso.smuglo.li/*",
-    "https://smugloli.net/*",
-    "https://smug.nepu.moe/*",
-    "https://sportschan.org/*",
-    "https://www.sportschan.org/*",
-    "https://sushigirl.us/*",
-    "https://www.sushigirl.us/*",
-    "https://tvch.moe/*"
-   ],
-   "matches_extra": [],
-   "exclude_matches": [
-    "*://www.4chan.org/advertise",
-    "*://www.4chan.org/advertise?*",
-    "*://www.4chan.org/donate",
-    "*://www.4chan.org/donate?*",
-    "*://www.4channel.org/advertise",
-    "*://www.4channel.org/advertise?*",
-    "*://www.4channel.org/donate",
-    "*://www.4channel.org/donate?*"
-   ],
-   "grants": [
-    "GM_getValue",
-    "GM_setValue",
-    "GM_deleteValue",
-    "GM_listValues",
-    "GM_addValueChangeListener",
-    "GM_openInTab",
-    "GM_xmlhttpRequest",
-    "GM.getValue",
-    "GM.setValue",
-    "GM.deleteValue",
-    "GM.listValues",
-    "GM.openInTab",
-    "GM.xmlHttpRequest"
-   ],
    "min": {
     "chrome": "90",
     "firefox": "74",
@@ -297,10 +223,6 @@ div.boardTitle {
   const Config = {
     main: {
       'Miscellaneous': {
-        'Redirect to HTTPS': [
-          true,
-          'Redirect to the HTTPS version of 4chan.'
-        ],
         'JSON Index': [
           true,
           'Replace the original board index with one supporting searching, sorting, infinite scrolling, and a catalog mode.'
@@ -466,26 +388,6 @@ div.boardTitle {
           'Embed content in a frame that remains in place when the page is scrolled.',
           2
         ],
-        'Embed Tweets inline with fxTwitter': [
-          true,
-          'Replaces Twitframe with simpler inline embedded Tweets',
-          2
-        ],
-        'Translate non-English Tweets to English': [
-          false,
-          'Asks fxTwitter to translate tweets. The translation is only displayed if the source language is not en',
-          3
-        ],
-        'Resolve Tweet Replies': [
-          false,
-          '',
-          3
-        ],
-        'Resolve all Tweet Replies': [
-          false,
-          'Resolves the entire conversation',
-          4
-        ]
       },
 
       'Filtering': {
@@ -1526,7 +1428,12 @@ https://*.hcaptcha.com
 
     'Prerequest Captcha': false,
 
-    'PSAseen': [[]]
+    'PSAseen': [[]],
+
+    XEmbedder: 'fxt',
+    fxtLang: '',
+    fxtUrl: 'https://api.fxtwitter.com',
+    fxtMaxReplies: 5,
   };
 
   // This file was created because these functions on $ were sometimes not initialized yet because of circular
@@ -2621,6 +2528,26 @@ https://*.hcaptcha.com
   <div>List of known banners, used for click-to-change feature.</div>
   <textarea hidden name="knownBanners" class="field" spellcheck="false"></textarea>
 </fieldset>
+
+<fieldset>
+  <legend>X (formerly Twitter) embeds</legend>
+  <div>Only applies if embeds are enabled in the main settings</div>
+  <label>Service to use for embeds
+    <select name="XEmbedder">
+      <option value="fxt">FxTwitter</option>
+      <option value="tf">Twitframe</option>
+    </select>
+  </label><br />
+  <label>
+    Language to translate FxTwitter embeds to, as a two character ISO code, like <code>en</code>.
+    Leave empty for no translation.
+    <input name="fxtLang" maxlength="2" />
+  </label><br />
+  <label>FxTwitter endpoint <input name="fxtUrl" type="url" /></label><br />
+  <label>FxTwitter maximum amount of replies include
+    <input name="fxtMaxReplies" type="number" min="0" step="1" max="100" />
+  </label>
+</fieldset>
 `;
 
   var KeybindsPage = `<div class="warning"><code>Keybinds</code> are disabled.</div>
@@ -2998,6 +2925,8 @@ https://*.hcaptcha.com
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(240, 224, 214, 0.5);
   --xt-watcher: #800000;
+
+  --xt-fxt-fg: #800000;
 }
 
 /* Anonymize */
@@ -3226,6 +3155,8 @@ https://*.hcaptcha.com
   --xt-unread: rgba(221, 221, 221, 0.5);
   --xt-watcher-quoting-you: #00F;
   --xt-watcher: #333;
+
+  --xt-fxt-fg: #333;
 }
 
 /* 4chan style fixes */
@@ -3283,6 +3214,8 @@ https://*.hcaptcha.com
   --xt-filter-highlight: rgba(145, 182, 214, .5);
   --xt-qphl: rgba(145, 182, 214, .8);
   --xt-highlight-side-arrow: rgb(155, 185, 210);
+
+  --xt-fxt-fg: #f0f8ffd1;
 }
 
 /* 4chan style fixes */
@@ -5765,6 +5698,8 @@ div.post {
   --xt-watched-border: rgb(64, 192, 255);
   --xt-qphl: rgba(145, 182, 214, .8);
   --xt-highlight-side-arrow: rgb(155, 185, 210);
+
+  --xt-fxt-fg: #c5c8c6;
 }
 
 /* 4chan style fixes */
@@ -5865,6 +5800,8 @@ div.post {
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(240, 224, 214, 0.5);
   --xt-watcher: #800000;
+
+  --xt-fxt-fg: #800000;
 }
 `;
 
@@ -5906,8 +5843,146 @@ svg.icon {
 }
 `;
 
+  var fxTwitterCss = `:root {
+  --xt-fxt-bg: var(--xt-background);
+  --xt-fxt-border: var(--xt-border);
+}
+
+.fxt-card {
+  color: var(--xt-fxt-fg, #000);
+  background-color: var(--xt-fxt-bg, #000);
+  padding: 16px;
+  border: 1px solid var(--xt-fxt-border);
+  border-radius: 12px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  white-space: pre-line;
+  word-break: break-word;
+}
+.fxt-meta {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+.fxt-meta_profile {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+.fxt-meta_profile img {
+  height: 48px;
+  width: 48px;
+  aspect-ratio: 1;
+  border-radius: 100%;
+  overflow: hidden;
+}
+.fxt-meta_author {
+  display: flex;
+  flex-direction: column;
+}
+.fxt-meta_author_username {
+  font-weight: bold;
+}
+.fxt-stats_meta {
+  padding-top: 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  gap: 8px;
+}
+.fxt-stats_meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fxt-poll {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.fxt-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 75%;
+  height: 24px;
+}
+.fxt-choice.highlight {
+  font-weight: bold;
+}
+
+.fxt-choice_label {
+  margin-left: 6px;
+  z-index: 1;
+}
+.fxt-choice_percentage {
+  margin-right: 6px;
+  z-index: 1;
+}
+.fxt-choice .bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 24px;
+  border-radius: 4px;
+  background-color: currentColor;
+  opacity: .3;
+  z-index: 0;
+}
+
+.fxt-total-votes {
+  font-size: 75%;
+  opacity: .5;
+}
+.fxt-media {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.fxt-media :is(img, video) {
+  display: block;
+  max-width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+.fxt-media_container {
+  display: grid;
+  gap: 0;
+  grid-template-columns: 1fr;
+}
+.fxt-media_container.fxt-media-multiple {
+  gap: 4px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.fxt-quote {
+  border: 1px solid var(--xt-fxt-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.fxt-quote .fxt-meta_profile img {
+  height: 24px;
+  width: 24px;
+}
+
+.fxt-quote .fxt-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+}
+`;
+
   // cSpell:ignore installGentoo, webfont
-  const mainCSS = style + variableBase + yotsuba + yotsubaB + futaba + burichan + tomorrow + photon + spooky + iconCss;
+  const mainCSS = style + variableBase + yotsuba + yotsubaB + futaba + burichan + tomorrow + photon + spooky + iconCss + fxTwitterCss;
   const faIcons = [
     { name: "audio", data: linkifyAudio },
     { name: "bitchute", data: linkifyBitchute },
@@ -14217,6 +14292,166 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     },
   };
 
+  function EmbedFxTwitter(a) {
+    const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
+    const shouldTranslate = Conf.fxtLang ? `/${Conf.fxtLang}` : '';
+    CrossOrigin$1.cachePromise(`${Conf.fxtUrl}/${a.dataset.uid}${shouldTranslate}`).then(async (req) => {
+      if (req.status === 404) {
+        el.textContent = '404: tweet not found';
+        return;
+      }
+      const { tweet } = req.response;
+      console.log(tweet);
+      async function getReplies(tweet) {
+        if (!tweet?.replying_to_status) {
+          return [];
+        }
+        const max_replies = +Conf.fxtMaxReplies;
+        let replies = [];
+        replies.push(tweet);
+        for (let i = 0; i < max_replies; i++) {
+          const replyReq = await CrossOrigin$1.cachePromise(`https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${shouldTranslate}`);
+          const replyRes = replyReq.response;
+          replies.push(replyRes.tweet);
+          if (!replyRes.tweet?.replying_to_status) {
+            break;
+          }
+        }
+        return replies;
+      }
+      const replies = (+Conf.fxtMaxReplies) === 0 ? [] : await getReplies(tweet);
+      function renderMedia(tweet) {
+        return tweet.media?.all?.map(media => {
+          switch (media.type) {
+            case 'photo':
+              return h("div", { class: "fxt-media" },
+                h("a", { href: media.url, target: "_blank", referrerpolicy: "no-referrer" },
+                  h("img", { src: media.url, alt: media.altText, width: media.width, height: media.height, referrerpolicy: "no-referrer" })));
+            case 'video':
+            case 'gif':
+              return h("div", { class: "fxt-media" },
+                h("video", { controls: true, width: media.width, height: media.height, poster: media.thumbnail_url, preload: "meta" },
+                  h("source", { src: media.url, type: media.format })));
+            default:
+              console.warn(`FxTwitter media type ${media.type} not recognized`);
+          }
+        }) || [];
+      }
+      function renderDate(tweet) {
+        return Time.format(new Date(tweet.created_at));
+      }
+      function renderPoll(tweet) {
+        let maxPercentage = 0;
+        let maxChoiceIndex = -1;
+        tweet.poll.choices.forEach((choice, index) => {
+          if (choice.percentage > maxPercentage) {
+            maxPercentage = choice.percentage;
+            maxChoiceIndex = index;
+          }
+        });
+        return h("div", { class: "fxt-poll" },
+          ...tweet.poll.choices.map((choice, index) => h("div", { class: `fxt-choice ${index === maxChoiceIndex ? 'highlight' : ''}` },
+            h("span", { class: "choice_label" }, choice.label),
+            h("span", { class: "choice_percentage" },
+              choice.percentage,
+              "%"),
+            h("div", { class: "bar", style: `width: ${choice.percentage}%` }))),
+          h("div", { class: "total-votes" },
+            tweet.poll.total_votes.toLocaleString(),
+            " votes"));
+      }
+      function renderTranslation(tweet) {
+        if (!tweet?.translation?.target_lang || tweet?.translation?.source_lang === tweet?.translation?.target_lang) {
+          return '';
+        }
+        return h(hFragment, null,
+          h("hr", null),
+          h("p", null,
+            "Translated from ",
+            tweet.translation.source_lang_en),
+          h("p", { lang: tweet.translation.target_lang }, ...renderText(tweet.translation.text)));
+      }
+      function renderMeta(tweet) {
+        return h("div", { class: "fxt-meta" },
+          h("a", { class: "fxt-meta_profile", href: tweet.author.url, title: tweet.author.description, target: "_blank", referrerpolicy: "no-referrer" },
+            h("img", { src: tweet.author.avatar_url, referrerpolicy: "no-referrer" }),
+            h("div", { class: "fxt-meta_author" },
+              h("span", { class: "fxt-meta_author_username" }, tweet.author.name),
+              h("span", { class: "fxt-meta_author_account" },
+                "@",
+                tweet.author.screen_name))),
+          h("a", { href: tweet.url, title: "Open tweet in a new tab", target: "_blank", referrerpolicy: "no-referrer" }, Icon.raw('link')));
+      }
+      function renderText(inputText) {
+        const result = [];
+        let endLast = 0;
+        for (const match of inputText.matchAll(/(?:@|\#)\w+/g)) {
+          result.push(inputText.slice(endLast, match.index), h("a", { href: `https://x.com/${match[0].startsWith('#') ? 'hashtag/' : ''}${match[0].slice(1)}`, target: "_blank", referrerpolicy: "no-referrer" }, match[0]));
+          endLast = match.index + match[0].length;
+        }
+        result.push(inputText.slice(endLast));
+        return result;
+      }
+      function renderQuote(tweet, renderNested = false) {
+        const quote_nested = (tweet?.quote && renderNested) ? renderQuote(tweet.quote, false) : '';
+        const quote_poll = (tweet?.poll) ? renderPoll(tweet) : '';
+        const quote_translation = renderTranslation(tweet);
+        const media = tweet.media?.all ? renderMedia(tweet) : [];
+        return h("div", { class: "fxt-quote" },
+          renderMeta(tweet),
+          h("div", { class: "fxt-text", lang: tweet.lang },
+            ...renderText(tweet.text),
+            quote_translation),
+          h("div", { class: `fxt-media_container ${tweet.media?.all?.length > 1 ? 'fxt-media-multiple' : ''}` },
+            quote_poll,
+            ...media),
+          quote_nested);
+      }
+      let repliesJsx = [];
+      if (replies.length > 1) {
+        repliesJsx.push({ innerHTML: "<em>Replying To</em><br/>", [isEscaped]: true });
+        for (let i = replies.length - 1; i > 0; i--) {
+          repliesJsx.push(renderQuote(replies[i], true));
+        }
+      }
+      const media = renderMedia(tweet);
+      const quote = (tweet?.quote) ? renderQuote(tweet.quote) : '';
+      const poll = (tweet?.poll) ? renderPoll(tweet) : '';
+      const created_at = renderDate(tweet);
+      const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
+      const innerHTML = h("article", { class: "fxt-card" },
+        renderMeta(tweet),
+        h("div", { class: "fxt-text", lang: tweet.lang },
+          ...renderText(tweet.text),
+          translation),
+        h("div", { class: `fxt-media_container ${tweet.media?.all?.length > 1 ? 'fxt-media-multiple' : ''}` },
+          poll,
+          ...media),
+        quote,
+        h("div", { class: "fxt-stats" },
+          h("div", { class: "fxt-stats_time" }, created_at),
+          h("div", { class: "fxt-stats_meta" },
+            h("span", { class: "fxt-likes" },
+              Icon.raw("comment"),
+              tweet.likes.toLocaleString()),
+            h("span", { class: "fxt-reposts" },
+              Icon.raw("shuffle"),
+              tweet.retweets.toLocaleString()),
+            h("span", { class: "fxt-replies" },
+              Icon.raw("heart"),
+              tweet.replies.toLocaleString()))));
+      el.innerHTML = innerHTML.innerHTML;
+      for (const textEl of el.getElementsByClassName('fxt-text')) {
+        Linkify.process(textEl);
+      }
+      el.style.resize = null;
+      el.style.height = 'fit-content';
+      el.style.width = 'fit-content';
+      el.style.overflow = 'auto';
+    });
+    return el;
+  }
+
   var Embedding = {
     init() {
       if (!['index', 'thread', 'archive'].includes(g.VIEW) || !Conf['Linkify'] || (!Conf['Embedding'] && !Conf['Link Title'] && !Conf['Cover Preview'])) {
@@ -14796,7 +15031,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         regExp: /^\w+:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w+\/status\/\d+)/,
         style: 'border: none; width: 550px; height: 250px; overflow: hidden; resize: both;',
         el(a) {
-          if (!Conf['Embed Tweets inline with fxTwitter']) {
+          if (Conf.XEmbedder === 'tf') {
             const el = $.el('iframe');
             $.on(el, 'load', function () {
               return this.contentWindow.postMessage({ element: 't', query: 'height' }, 'https://twitframe.com');
@@ -14819,143 +15054,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
               return el;
             }
           }
-          const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
-          const shouldTranslate = Conf['Translate non-English Tweets to English'];
-          const shouldResolveReplies = Conf['Resolve Tweet Replies'];
-          const shouldResolveAllReplies = Conf['Resolve all Tweet Replies'];
-          CrossOrigin$1.cachePromise(`https://api.fxtwitter.com/${a.dataset.uid}${(shouldTranslate) ? '/en' : ''}`).then(async (req) => {
-            if (req.status === 404) {
-              el.textContent = '404: tweet not found';
-              return;
-            }
-            const { tweet } = req.response;
-            async function getReplies(tweet) {
-              if (!tweet?.replying_to_status) {
-                return [];
-              }
-              const max_replies = (shouldResolveAllReplies) ? Number.MAX_SAFE_INTEGER : 1;
-              let replies = [];
-              replies.push(tweet);
-              for (let i = 0; i < max_replies; i++) {
-                const replyReq = await CrossOrigin$1.cachePromise(`https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${(shouldTranslate) ? '/en' : ''}`);
-                const replyRes = replyReq.response;
-                replies.push(replyRes.tweet);
-                if (!replyRes.tweet?.replying_to_status) {
-                  break;
-                }
-              }
-              return replies;
-            }
-            const replies = (!shouldResolveReplies) ? [] : await getReplies(tweet);
-            function renderMedia(tweet) {
-              const mediaItems = tweet?.media?.all || [];
-              let media = [];
-              let photos = 1;
-              for (let i = 0; i < mediaItems.length; i++) {
-                const mediaItem = mediaItems[i];
-                switch (mediaItem.type) {
-                  case 'photo':
-                    media.push(h("a", { target: "_blank", href: `${tweet.url}/photo/${photos}` },
-                      h("img", { src: mediaItem.url, referrerpolicy: "no-referrer", style: "max-width: 80vw; max-height: 80vh;" })));
-                    photos += 1;
-                    break;
-                  case 'video':
-                  case 'gif':
-                    media.push(h("video", { controls: true, preload: "auto", src: mediaItem.url, style: "max-width: 80vw; max-height: 80vh;", loop: mediaItem.type === 'gif' }));
-                    break;
-                }
-              }
-              return media;
-            }
-            function renderDate(tweet) {
-              return Time.format(new Date(tweet.created_at));
-            }
-            function renderPoll(tweet) {
-              // u00A0 is nbsp, u00B7 is &CenterDot;
-              return h(hFragment, null,
-                h("ul", null, ...tweet.poll.choices.map(choice => h("li", null,
-                  choice.label,
-                  " / ",
-                  choice.percentage,
-                  "%"))),
-                `${tweet.poll.total_votes || 0}\u00A0votes \u00B7 ${tweet.poll.time_left_en || ''}`);
-            }
-            function renderTranslation(tweet) {
-              if (tweet?.translation?.source_lang === tweet?.translation?.target_lang) {
-                return '';
-              }
-              return h(hFragment, null,
-                h("hr", null),
-                h("p", null,
-                  "Translated from ",
-                  tweet?.translation?.source_lang_en || ''),
-                h("p", { lang: "en", dir: "ltr" }, tweet?.translation?.text || ''));
-            }
-            function renderQuote(tweet, renderNested = false) {
-              const quote_nested = (tweet?.quote && renderNested) ? renderQuote(tweet.quote, false) : '';
-              const quote_poll = (tweet?.poll) ? renderPoll(tweet) : '';
-              const quote_translation = (shouldTranslate) ? renderTranslation(tweet) : '';
-              return h(hFragment, null,
-                h("hr", null),
-                h("blockquote", null,
-                  h("div", { style: "display: flex;padding-bottom: 1em;" },
-                    h("a", { href: tweet.url },
-                      h("div", null,
-                        h("img", { src: tweet.author.avatar_url, style: "width: 24px;transform: translateX(-50%) translateY(-50%);border-radius: 9999px;" })),
-                      h("div", { style: "margin: -2.25em 0 0 1em;" },
-                        tweet.author.name,
-                        " (@",
-                        tweet.author.screen_name,
-                        ") ",
-                        renderDate(tweet)))),
-                  h("p", { lang: tweet?.lang || 'en', dir: "ltr", style: "margin-top: 0" }, tweet.text),
-                  ...renderMedia(tweet),
-                  quote_poll,
-                  quote_nested,
-                  quote_translation));
-            }
-            let repliesJsx = [];
-            if (replies.length > 1) {
-              repliesJsx.push({ innerHTML: "<em>Replying To</em><br/>", [isEscaped]: true });
-              for (let i = replies.length - 1; i > 0; i--) {
-                repliesJsx.push(renderQuote(replies[i], true));
-              }
-            }
-            const media = renderMedia(tweet);
-            const quote = (tweet?.quote) ? renderQuote(tweet.quote) : '';
-            const poll = (tweet?.poll) ? renderPoll(tweet) : '';
-            const created_at = renderDate(tweet);
-            const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
-            const innerHTML = h(hFragment, null,
-              ...repliesJsx,
-              h("p", { lang: tweet.lang || 'en', dir: "ltr" }, tweet.text),
-              ...media,
-              poll,
-              translation,
-              quote,
-              h("hr", null),
-              "\u2014 ",
-              tweet.author.name,
-              " (@",
-              tweet.author.screen_name,
-              ") ",
-              created_at,
-              h("br", null),
-              Icon.raw("comment"),
-              tweet?.replies || 0,
-              "\u00A0",
-              Icon.raw("shuffle"),
-              tweet?.retweets || 0,
-              "\u00A0",
-              Icon.raw("heart"),
-              tweet?.likes || 0);
-            // @ts-ignore
-            el.firstChild.innerHTML = innerHTML.innerHTML;
-            // @ts-ignore
-            el.style = 'white-space: pre-line';
-            Linkify.process(el.firstChild);
-          });
-          return el;
+          return EmbedFxTwitter(a);
         },
       },
       {
@@ -15034,7 +15133,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           url(uid) { return `https://img.youtube.com/vi/${uid}/0.jpg`; },
           height: 360
         }
-      }],
+      }
+    ],
     shouldFetchTitles() {
       if (!Conf['Link Title'])
         return false;
@@ -17022,8 +17122,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         event = node.nodeName === 'SELECT' ? 'change' : 'input';
         $.on(nodes[name], event, save);
       }
-      // XXX Blink and WebKit treat width and height of <textarea>s as min-width and min-height
-      if (($.engine === 'gecko') && Conf['Remember QR Size']) {
+      if (Conf['Remember QR Size']) {
         $.get('QR Size', '', item => nodes.com.style.cssText = item['QR Size']);
         $.on(nodes.com, 'mouseup', function (e) {
           if (e.button !== 0) {
@@ -20231,13 +20330,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         $.add(section, fs);
       }
       addCheckboxes($('div[data-name="JSON Index"] > .suboption-list', section), Config.Index);
-      // Unsupported options
-      if ($.engine !== 'gecko') {
-        $('div[data-name="Remember QR Size"]', section).hidden = true;
-      }
-      if ($.perProtocolSettings || (location.protocol !== 'https:')) {
-        $('div[data-name="Redirect to HTTPS"]', section).hidden = true;
-      }
       $.get(items, function (items) {
         for (key in items) {
           var val = items[key];
@@ -20796,6 +20888,11 @@ vp-replace
       }
       if (compareString < '00002.00003.00006.00000') {
         set('RelativeTime', data['Relative Post Dates'] ? (data['Relative Date Title'] ? 'Hover' : 'Show') : 'No');
+      }
+      if (compareString === '00002.00009.00000.00000') {
+        set('XEmbedder', data['Embed Tweets inline with fxTwitter'] ? 'fxt' : 'tf');
+        set('fxtMaxReplies', data['Resolve Tweet Replies'] ? (data['Resolve all Tweet Replies'] ? 100 : 1) : 0);
+        set('fxtLang', data['Translate non-English Tweets to English'] ? 'en' : '');
       }
       return changes;
     },
@@ -25275,10 +25372,6 @@ vp-replace
       for (key in Conf) { items[key] = undefined; }
       items['previousversion'] = undefined;
       return ($.getSync || $.get)(items, function(items) {
-        if (!$.perProtocolSettings && /\.4chan(?:nel)?\.org$/.test(location.hostname) && (items['Redirect to HTTPS'] ?? Conf['Redirect to HTTPS']) && (location.protocol !== 'https:')) {
-          location.replace('https://' + location.host + location.pathname + location.search + location.hash);
-          return;
-        }
         return $.asap(docSet, function() {
 
           // Don't hide the local storage warning behind a settings panel.

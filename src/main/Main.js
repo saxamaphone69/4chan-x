@@ -237,10 +237,6 @@ var Main = {
     for (key in Conf) { items[key] = undefined; }
     items['previousversion'] = undefined;
     return ($.getSync || $.get)(items, function(items) {
-      if (!$.perProtocolSettings && /\.4chan(?:nel)?\.org$/.test(location.hostname) && (items['Redirect to HTTPS'] ?? Conf['Redirect to HTTPS']) && (location.protocol !== 'https:')) {
-        location.replace('https://' + location.host + location.pathname + location.search + location.hash);
-        return;
-      }
       return $.asap(docSet, function() {
 
         // Don't hide the local storage warning behind a settings panel.

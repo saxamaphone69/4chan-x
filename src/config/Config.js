@@ -5,10 +5,6 @@ import meta from '../../package.json';
 const Config = {
   main: {
     'Miscellaneous': {
-      'Redirect to HTTPS': [
-        true,
-        'Redirect to the HTTPS version of 4chan.'
-      ],
       'JSON Index': [
         true,
         'Replace the original board index with one supporting searching, sorting, infinite scrolling, and a catalog mode.'
@@ -174,26 +170,6 @@ const Config = {
         'Embed content in a frame that remains in place when the page is scrolled.',
         2
       ],
-      'Embed Tweets inline with fxTwitter': [
-        true,
-        'Replaces Twitframe with simpler inline embedded Tweets',
-        2
-      ],
-      'Translate non-English Tweets to English': [
-        false,
-        'Asks fxTwitter to translate tweets. The translation is only displayed if the source language is not en',
-        3
-      ],
-      'Resolve Tweet Replies': [
-        false,
-        '',
-        3
-      ],
-      'Resolve all Tweet Replies': [
-        false,
-        'Resolves the entire conversation',
-        4
-      ]
     },
 
     'Filtering': {
@@ -1234,6 +1210,11 @@ https://*.hcaptcha.com
 
   'Prerequest Captcha': false,
 
-  'PSAseen': [[]]
+  'PSAseen': [[]],
+
+  XEmbedder: 'fxt',
+  fxtLang: '',
+  fxtUrl: 'https://api.fxtwitter.com',
+  fxtMaxReplies: 5,
 };
 export default Config;

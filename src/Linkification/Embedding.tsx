@@ -597,7 +597,7 @@ var Embedding = {
       regExp: /^\w+:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(\w+\/status\/\d+)/,
       style: 'border: none; width: 550px; height: 250px; overflow: hidden; resize: both;',
       el(a) {
-        if (!Conf['Embed Tweets inline with fxTwitter']) {
+        if (Conf.XEmbedder === 'tf') {
           const el = $.el('iframe');
           $.on(el, 'load', function() {
             return this.contentWindow.postMessage({element: 't', query: 'height'}, 'https://twitframe.com');

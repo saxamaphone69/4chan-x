@@ -18,6 +18,8 @@
   --xt-filter-highlight: rgba(145, 182, 214, .5);
   --xt-qphl: rgba(145, 182, 214, .8);
   --xt-highlight-side-arrow: rgb(155, 185, 210);
+
+  --xt-fxt-fg: #f0f8ffd1;
 }
 
 /* 4chan style fixes */

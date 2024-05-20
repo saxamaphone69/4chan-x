@@ -26,10 +26,10 @@ import Unread from '../Monitoring/Unread';
 import $$ from '../platform/$$';
 import $ from '../platform/$';
 import meta from '../../package.json';
-import { c, Conf, d, doc, E, g } from '../globals/globals';
+import { c, Conf, d, doc, g } from '../globals/globals';
 import Header from './Header';
 import h, { hFragment } from '../globals/jsx';
-import { dict, platform } from '../platform/helpers';
+import { dict } from '../platform/helpers';
 import Icon from '../Icons/icon';
 
 var Settings = {
@@ -243,11 +243,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       $.add(section, fs);
     }
     addCheckboxes($('div[data-name="JSON Index"] > .suboption-list', section), Config.Index);
-
-    // Unsupported options
-    if ($.perProtocolSettings || (location.protocol !== 'https:')) {
-      $('div[data-name="Redirect to HTTPS"]', section).hidden = true;
-    }
 
     $.get(items, function(items) {
       for (key in items) {
@@ -813,6 +808,11 @@ vp-replace
     }
     if (compareString < '00002.00003.00006.00000') {
       set('RelativeTime', data['Relative Post Dates'] ? (data['Relative Date Title'] ? 'Hover' : 'Show') : 'No');
+    }
+    if (compareString === '00002.00009.00000.00000') {
+      set('XEmbedder', data['Embed Tweets inline with fxTwitter'] ? 'fxt' : 'tf');
+      set('fxtMaxReplies', data['Resolve Tweet Replies'] ? (data['Resolve all Tweet Replies'] ? 100 : 1) : 0);
+      set('fxtLang', data['Translate non-English Tweets to English'] ? 'en' : '');
     }
     return changes;
   },

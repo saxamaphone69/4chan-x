@@ -13,6 +13,8 @@
   --xt-unread: rgba(221, 221, 221, 0.5);
   --xt-watcher-quoting-you: #00F;
   --xt-watcher: #333;
+
+  --xt-fxt-fg: #333;
 }
 
 /* 4chan style fixes */

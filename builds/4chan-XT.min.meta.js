@@ -1,33 +1,17 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.9.0
+// @version      2.10.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
 // @description  4chan XT is a script that adds various features to anonymous imageboards.
 // @license      MIT; https://github.com/TuxedoTako/4chan-xt/blob/project-XT/LICENSE
-// @include      http://boards.4chan.org/*
 // @include      https://boards.4chan.org/*
-// @include      http://sys.4chan.org/*
 // @include      https://sys.4chan.org/*
-// @include      http://www.4chan.org/*
 // @include      https://www.4chan.org/*
-// @include      http://boards.4channel.org/*
-// @include      https://boards.4channel.org/*
-// @include      http://sys.4channel.org/*
-// @include      https://sys.4channel.org/*
-// @include      http://www.4channel.org/*
-// @include      https://www.4channel.org/*
-// @include      http://i.4cdn.org/*
 // @include      https://i.4cdn.org/*
-// @include      http://is.4chan.org/*
 // @include      https://is.4chan.org/*
-// @include      http://is2.4chan.org/*
 // @include      https://is2.4chan.org/*
-// @include      http://is.4channel.org/*
-// @include      https://is.4channel.org/*
-// @include      http://is2.4channel.org/*
-// @include      https://is2.4channel.org/*
 // @include      https://erischan.org/*
 // @include      https://www.erischan.org/*
 // @include      https://fufufu.moe/*
@@ -54,22 +38,10 @@
 // @include      https://sushigirl.us/*
 // @include      https://www.sushigirl.us/*
 // @include      https://tvch.moe/*
-// @exclude      http://www.4chan.org/advertise
 // @exclude      https://www.4chan.org/advertise
-// @exclude      http://www.4chan.org/advertise?*
 // @exclude      https://www.4chan.org/advertise?*
-// @exclude      http://www.4chan.org/donate
 // @exclude      https://www.4chan.org/donate
-// @exclude      http://www.4chan.org/donate?*
 // @exclude      https://www.4chan.org/donate?*
-// @exclude      http://www.4channel.org/advertise
-// @exclude      https://www.4channel.org/advertise
-// @exclude      http://www.4channel.org/advertise?*
-// @exclude      https://www.4channel.org/advertise?*
-// @exclude      http://www.4channel.org/donate
-// @exclude      https://www.4channel.org/donate
-// @exclude      http://www.4channel.org/donate?*
-// @exclude      https://www.4channel.org/donate?*
 // @connect      4chan.org
 // @connect      4channel.org
 // @connect      4cdn.org

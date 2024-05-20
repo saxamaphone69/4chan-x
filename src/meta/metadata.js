@@ -27,27 +27,11 @@ export default async function generateMetadata(packageJson, fileName, metaFileNa
 `;
 
   output += (function () {
-    function expand(items, regex, substitutions) {
-      var results = [];
-      items.forEach(function (item) {
-        if (regex.test(item)) {
-          substitutions.forEach(function (s) {
-            results.push(item.replace(regex, s));
-          });
-        } else {
-          results.push(item);
-        }
-      });
-      return results;
-    }
-    function expandMatches(matches) {
-      return expand(matches, /^\*/, ['http', 'https']);
-    }
     return [].concat(
-      expandMatches(meta.includes_only.concat(meta.matches, meta.matches_extra)).map(function (match) {
+      meta.includes_only.concat(meta.matches, meta.matches_extra).map(function (match) {
         return '// @include      ' + match;
       }),
-      expandMatches(meta.exclude_matches).map(function (match) {
+      meta.exclude_matches.map(function (match) {
         return '// @exclude      ' + match;
       })
     ).join('\n');

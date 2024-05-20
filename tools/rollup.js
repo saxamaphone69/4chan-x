@@ -111,8 +111,14 @@ const buildForTest = process.argv.includes('-test');
         include: "**/package.json",
         wrap: false,
         transformer(input) {
-          const data = JSON.parse(input);
-          return `export default ${JSON.stringify(data.meta, undefined, 1)};`;
+          const meta = JSON.parse(input).meta;
+          meta.includes_only = undefined;
+          meta.matches_only = undefined;
+          meta.matches = undefined;
+          meta.matches_extra = undefined;
+          meta.exclude_matches = undefined;
+          meta.grants = undefined;
+          return `export default ${JSON.stringify(meta, undefined, 1)};`;
         }
       }),
       inlineFile({
