@@ -2376,7 +2376,7 @@ a:only-of-type > .remove {
   100% {transform:rotate(359deg);}
 }
 
-.spin {
+.spin > .icon {
   animation:spin 2s infinite linear;
 }
 
