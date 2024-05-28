@@ -371,7 +371,7 @@ export var drag = function (e) {
   style.left   = left;
   style.right  = right;
   style.top    = top;
-  return style.bottom = bottom;
+  style.bottom = bottom;
 };
 
 export var touchend = function (e) {
@@ -391,7 +391,17 @@ export var dragend = function () {
     $.off(d, 'mousemove', this.move);
     $.off(d, 'mouseup',   this.up);
   }
-  return $.set(`${this.id}.position`, this.style.cssText);
+  if (this.style.length === 2) { // assume only left or right and top or bottom
+    $.set(`${this.id}.position`, this.style.cssText);
+  } else { // only include position data.
+    const { left, right, top, bottom } = this.style;
+    let position = '';
+    if (left) position += `left:${left};`;
+    if (right) position += `right:${right};`;
+    if (top) position += `top:${top};`;
+    if (bottom) position += `bottom:${bottom};`;
+    $.set(`${this.id}.position`, position);
+  }
 };
 
 const hoverstart = function ({ root, el, latestEvent, endEvents, height, width, cb, noRemove }) {

@@ -36,7 +36,7 @@ export default function setupFileInliner(packageJson) {
             code = opts.transformer(code);
           }
           if (wrap) {
-            code = escape(code);
+            code = escape(code.trim());
             code = code.replace(/<%= meta\.(\w+) %>/g, (match, $1) => {
               return escape(packageJson.meta[$1]);
             });

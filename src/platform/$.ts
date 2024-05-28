@@ -243,8 +243,7 @@ $.hasClass = (el, className) => el.classList.contains(className);
 
 $.rm = el => el?.remove();
 
-$.rmAll = root => // https://gist.github.com/MayhemYDG/8646194
-root.textContent = null;
+$.rmAll = root => root.textContent = null;
 
 $.tn = s => d.createTextNode(s);
 

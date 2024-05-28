@@ -267,7 +267,12 @@ var Filter = {
   },
 
   node(this: Post) {
-    if (this.isClone) { return; }
+    if (
+      this.isClone ||
+      // Happens when hovering over a dead link in the catalog.
+      (!this.isReply && !this.thread.nodes.root)
+    ) return;
+
     const {hide, stub, hl, noti} = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
     if (hide) {
       if (this.isReply) {

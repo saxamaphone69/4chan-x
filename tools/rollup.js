@@ -85,6 +85,11 @@ const buildForTest = process.argv.includes('-test');
       }),
       inlineFile({
         include: ["**/*.html"],
+        transformer(html) {
+          if (!minify) return html;
+
+          return html.replace(/\n */g, ' ');
+        },
       }),
       inlineFile({
         include: ["**/*.css"],
