@@ -3,12 +3,13 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
-### Unreleased
+### 2.10.1 (2024-06-01)
 
-- Fix quick reply dialog remembering styles outside it's position after dragging.
-  [#62](https://github.com/TuxedoTako/4chan-xt/issues/62)
 - Address wobbly spin animation. [#65](https://github.com/TuxedoTako/4chan-xt/pull/65)
 - Remove dead link to Mayhem archive documentation. [#66](https://github.com/TuxedoTako/4chan-xt/pull/66)
+- Switch menu-button to FA icon. [#68](https://github.com/TuxedoTako/4chan-xt/pull/68)
+- Fix quick reply dialog remembering styles outside it's position after dragging.
+  [#62](https://github.com/TuxedoTako/4chan-xt/issues/62)
 - Fix errors when hovering over a dead link to a post that would be filtered in the archive.
 
 ### 2.10.0 (2024-05-20)

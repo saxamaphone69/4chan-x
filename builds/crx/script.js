@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.10.0",
-    "date": "2024-05-20T15:56:31Z"
+    "version": "2.10.1",
+    "date": "2024-06-01T14:17:03Z"
   };
 
   var meta = {
@@ -215,8 +215,7 @@ div.boardTitle {
 :root.tomorrow div.boardTitle {
   font-family: sans-serif !important;
   text-shadow: 1px 1px 1px rgba(167,170,168,0.6);
-}
-`;
+}`;
 
   var banners = ["0.jpg", "1.jpg", "2.jpg", "4.jpg", "6.jpg", "7.jpg", "8.jpg", "9.jpg", "10.jpg", "11.jpg", "12.jpg", "13.jpg", "14.jpg", "16.jpg", "17.jpg", "18.jpg", "19.jpg", "20.jpg", "21.jpg", "22.jpg", "24.jpg", "25.jpg", "26.jpg", "28.jpg", "29.jpg", "33.jpg", "38.jpg", "39.jpg", "43.jpg", "44.jpg", "45.jpg", "46.jpg", "47.jpg", "52.jpg", "54.jpg", "57.jpg", "59.jpg", "60.jpg", "61.jpg", "64.jpg", "66.jpg", "67.jpg", "69.jpg", "71.jpg", "72.jpg", "76.jpg", "77.jpg", "81.jpg", "82.jpg", "83.jpg", "84.jpg", "88.jpg", "90.jpg", "91.jpg", "96.jpg", "98.jpg", "99.jpg", "100.jpg", "104.jpg", "106.jpg", "116.jpg", "119.jpg", "137.jpg", "140.jpg", "148.jpg", "149.jpg", "150.jpg", "154.jpg", "156.jpg", "157.jpg", "158.jpg", "159.jpg", "161.jpg", "162.jpg", "164.jpg", "165.jpg", "166.jpg", "167.jpg", "168.jpg", "169.jpg", "170.jpg", "171.jpg", "172.jpg", "173.jpg", "174.jpg", "175.jpg", "176.jpg", "178.jpg", "179.jpg", "180.jpg", "181.jpg", "182.jpg", "183.jpg", "186.jpg", "189.jpg", "190.jpg", "192.jpg", "193.jpg", "194.jpg", "197.jpg", "198.jpg", "200.jpg", "201.jpg", "202.jpg", "203.jpg", "205.jpg", "206.jpg", "207.jpg", "208.jpg", "210.jpg", "213.jpg", "214.jpg", "215.jpg", "216.jpg", "218.jpg", "219.jpg", "220.jpg", "221.jpg", "222.jpg", "223.jpg", "224.jpg", "227.jpg", "0.png", "1.png", "2.png", "3.png", "5.png", "6.png", "9.png", "10.png", "11.png", "12.png", "14.png", "16.png", "19.png", "20.png", "21.png", "22.png", "23.png", "24.png", "26.png", "27.png", "28.png", "29.png", "30.png", "31.png", "32.png", "33.png", "34.png", "37.png", "39.png", "40.png", "41.png", "42.png", "43.png", "44.png", "45.png", "48.png", "49.png", "50.png", "51.png", "52.png", "53.png", "57.png", "58.png", "59.png", "64.png", "66.png", "67.png", "68.png", "69.png", "70.png", "71.png", "72.png", "76.png", "78.png", "79.png", "81.png", "82.png", "85.png", "86.png", "87.png", "89.png", "95.png", "98.png", "100.png", "101.png", "102.png", "105.png", "106.png", "107.png", "109.png", "110.png", "111.png", "112.png", "113.png", "114.png", "115.png", "116.png", "118.png", "119.png", "120.png", "121.png", "122.png", "123.png", "126.png", "128.png", "130.png", "134.png", "136.png", "138.png", "139.png", "140.png", "142.png", "145.png", "146.png", "149.png", "150.png", "151.png", "152.png", "153.png", "154.png", "155.png", "156.png", "157.png", "158.png", "159.png", "160.png", "163.png", "164.png", "165.png", "166.png", "167.png", "168.png", "169.png", "170.png", "171.png", "172.png", "173.png", "174.png", "178.png", "179.png", "180.png", "181.png", "182.png", "184.png", "186.png", "188.png", "190.png", "192.png", "193.png", "194.png", "195.png", "196.png", "197.png", "198.png", "200.png", "202.png", "203.png", "205.png", "206.png", "207.png", "209.png", "212.png", "213.png", "214.png", "216.png", "217.png", "218.png", "219.png", "220.png", "221.png", "222.png", "223.png", "224.png", "225.png", "226.png", "229.png", "231.png", "232.png", "233.png", "234.png", "235.png", "237.png", "238.png", "239.png", "240.png", "241.png", "242.png", "244.png", "245.png", "246.png", "247.png", "248.png", "249.png", "250.png", "253.png", "254.png", "255.png", "256.png", "257.png", "258.png", "259.png", "260.png", "262.png", "268.png", "0.gif", "1.gif", "2.gif", "3.gif", "4.gif", "5.gif", "6.gif", "7.gif", "8.gif", "9.gif", "10.gif", "12.gif", "13.gif", "14.gif", "15.gif", "16.gif", "18.gif", "19.gif", "20.gif", "21.gif", "22.gif", "23.gif", "24.gif", "28.gif", "29.gif", "30.gif", "33.gif", "34.gif", "35.gif", "36.gif", "37.gif", "39.gif", "40.gif", "42.gif", "44.gif", "45.gif", "46.gif", "48.gif", "50.gif", "52.gif", "54.gif", "55.gif", "57.gif", "58.gif", "59.gif", "60.gif", "61.gif", "63.gif", "64.gif", "66.gif", "67.gif", "68.gif", "69.gif", "70.gif", "72.gif", "73.gif", "75.gif", "76.gif", "77.gif", "78.gif", "80.gif", "81.gif", "82.gif", "83.gif", "86.gif", "87.gif", "88.gif", "92.gif", "93.gif", "94.gif", "95.gif", "96.gif", "97.gif", "98.gif", "99.gif", "100.gif", "101.gif", "102.gif", "103.gif", "104.gif", "105.gif", "106.gif", "108.gif", "109.gif", "110.gif", "111.gif", "112.gif", "113.gif", "115.gif", "116.gif", "117.gif", "118.gif", "119.gif", "120.gif", "122.gif", "123.gif", "124.gif", "127.gif", "129.gif", "130.gif", "131.gif", "134.gif", "135.gif", "136.gif", "138.gif", "139.gif", "141.gif", "144.gif", "146.gif", "148.gif", "149.gif", "153.gif", "154.gif", "155.gif", "157.gif", "158.gif", "159.gif", "160.gif", "161.gif", "162.gif", "164.gif", "166.gif", "167.gif", "168.gif", "169.gif", "170.gif", "171.gif", "172.gif", "173.gif", "174.gif", "175.gif", "176.gif", "177.gif", "178.gif", "181.gif", "182.gif", "183.gif", "185.gif", "186.gif", "187.gif", "188.gif", "189.gif", "190.gif", "191.gif", "192.gif", "193.gif", "195.gif", "196.gif", "197.gif", "200.gif", "201.gif", "202.gif", "203.gif", "204.gif", "205.gif", "206.gif", "207.gif", "208.gif", "209.gif", "210.gif", "211.gif", "212.gif", "213.gif", "214.gif", "215.gif", "216.gif", "217.gif", "219.gif", "220.gif", "221.gif", "222.gif", "224.gif", "225.gif", "226.gif", "227.gif", "228.gif", "230.gif", "232.gif", "233.gif", "234.gif", "235.gif", "238.gif", "240.gif", "241.gif", "243.gif", "244.gif", "245.gif", "246.gif", "247.gif", "249.gif", "250.gif", "251.gif", "253.gif"];
 
@@ -1713,8 +1712,7 @@ https://*.hcaptcha.com
   $.toggleClass = (el, className) => el.classList.toggle(className);
   $.hasClass = (el, className) => el.classList.contains(className);
   $.rm = el => el?.remove();
-  $.rmAll = root => // https://gist.github.com/MayhemYDG/8646194
-   root.textContent = null;
+  $.rmAll = root => root.textContent = null;
   $.tn = s => d.createTextNode(s);
   $.frag = () => d.createDocumentFragment();
   $.nodes = function (nodes) {
@@ -2307,8 +2305,7 @@ https://*.hcaptcha.com
     Types can also be combined with a <code>+</code> sign; this indicates the filter applies to the given fields joined by newlines.<br>
     For example: <code>type:filename+filesize+dimensions;</code>.<br>
   </li>
-</ul>
-`;
+</ul>`;
 
   var SaucePage = `<div class="warning"><code>Sauce</code> is disabled.</div>
 <input id="sauce-doc-expand" type="checkbox" hidden>
@@ -2334,8 +2331,7 @@ https://*.hcaptcha.com
   <div>You can specify the applicable file types by appending <code>;types:[extension1],[extension2]</code>.</div>
   <div>You can specify a regular expression the filename must match by appending <code>;regexp:[regular expression]</code>.</div>
 </div>
-<textarea hidden name="sauces" class="field" spellcheck="false"></textarea>
-`;
+<textarea hidden name="sauces" class="field" spellcheck="false"></textarea>`;
 
   var AdvancedPage = `<fieldset>
   <legend>Archives</legend>
@@ -2352,7 +2348,7 @@ https://*.hcaptcha.com
   </table>
   <br>
   <div>
-    <b>Archive Lists</b>: Each line below should be an archive list in <a href="https://github.com/MayhemYDG/archives.json/blob/gh-pages/CONTRIBUTING.md" target="_blank">this format</a> or a URL to load an archive list from.<br>
+    <b>Archive Lists</b>: Each line below should be an archive list in <a href="https://github.com/4chenz/archives.json/blob/gh-pages/CONTRIBUTING.md" target="_blank">this format</a> or a URL to load an archive list from.<br>
     Archive properties can be overriden by another item with the same <code>uid</code> (or if absent, its <code>name</code>).
   </div>
   <textarea hidden name="archiveLists" class="field" spellcheck="false"></textarea>
@@ -2547,16 +2543,14 @@ https://*.hcaptcha.com
   <label>FxTwitter maximum amount of replies include
     <input name="fxtMaxReplies" type="number" min="0" step="1" max="100" />
   </label>
-</fieldset>
-`;
+</fieldset>`;
 
   var KeybindsPage = `<div class="warning"><code>Keybinds</code> are disabled.</div>
 <div>Allowed keys: <kbd>a-z</kbd>, <kbd>0-9</kbd>, <kbd>Ctrl</kbd>, <kbd>Shift</kbd>, <kbd>Alt</kbd>, <kbd>Meta</kbd>, <kbd>Enter</kbd>, <kbd>Esc</kbd>, <kbd>Up</kbd>, <kbd>Down</kbd>, <kbd>Right</kbd>, <kbd>Left</kbd>.</div>
 <div>Press <kbd>Backspace</kbd> to disable a keybind.</div>
 <table><tbody>
   <tr><th>Actions</th><th>Keybinds</th></tr>
-</tbody></table>
-`;
+</tbody></table>`;
 
   var FilterSelectPage = `<select name="filter">
   <option value="guide">Guide</option>
@@ -2576,8 +2570,7 @@ https://*.hcaptcha.com
   <option value="filesize">Filesize</option>
   <option value="MD5">Image MD5</option>
   </select>
-<div></div>
-`;
+<div></div>`;
 
   /**
    * This class handles data related to specific threads or posts. This data is automatically cleaned up when the thread
@@ -2906,8 +2899,7 @@ https://*.hcaptcha.com
 /* Anonymize */
 :root.burichan.anonymize $site$info$name::before {
   font-size: 12pt;
-}
-`;
+}`;
 
   var futaba = `:root.futaba {
   --xt-background: #F0E0D6;
@@ -2932,8 +2924,7 @@ https://*.hcaptcha.com
 /* Anonymize */
 :root.futaba.anonymize $site$info$name::before {
   font-size: 12pt;
-}
-`;
+}`;
 
   var linkifyAudio = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAAXNSR0IArs4c6QAAAMBQTFRFAAAAAEmSADyHADN6CEOPKmWmADiKNV6lZoO5E2asU3u8B02hXYTAFXK8BEakS3i7MGS0E1mwZYzHSHjCYIrLIGDICFPDHXrIFWnBEGDDdZzWB1G2UYHMH4DPBU60EYrSSX7PGofXfajkeaPgQHzVSoHSDmHLF3vRjLbtea3sa6rsXJ3oSaHrYZXhW5blIKzwPZrqVozbKp7sRonfHpjoJ4vhRHrQLn/eNXnaJ33fNnHMJGvUFG3ZI2THBlPGAU2+9r1cgwAAACh0Uk5TAAcRGSIrO0RQUF9qdnl5hISEiaSoqqqxssnPz9DY2ery+vv7/P39/p/dKS0AAACXSURBVHjaXdDZEoIwDAXQVMuiIFrcd1FQWSqiouD6/38ltVNkel+SnMnkIfAPwrrZBB5Ft3uzlZs9Bnyuewml9HzLnwISP4hSZz4clxujVkNBAETAVeVNpy9BW8BdhpcMbw6oPPphoE027g80u8s21HUQ5gzMvX9gYGXH+EIK8MLotMUAeLpbElTAIo0dC1hqwIth4MoTvt45DOQxQMWhAAAAAElFTkSuQmCC';
 
@@ -3162,8 +3153,7 @@ https://*.hcaptcha.com
 /* 4chan style fixes */
 :root.photon #arc-list tr:nth-of-type(odd) span.quote {
   color: #C0E17A;
-}
-`;
+}`;
 
   var report = `#g-recaptcha,
 :root:not(.js-enabled) #captchaContainerAlt {
@@ -3267,8 +3257,7 @@ https://*.hcaptcha.com
 :root.spooky .unread-line {
   visibility: visible;
   opacity: 1;
-}
-`;
+}`;
 
   var style = `/* General */
 .dialog {
@@ -4150,11 +4139,8 @@ div[data-checked="false"] > .suboption-list {
   vertical-align: text-top;
   padding-left: 2px;
 }
-.catalog-stats > .menu-button {
-  font-weight: normal;
-}
-.catalog-stats > .menu-button > i::before {
-  line-height: 11px;
+.catalog-stats > .menu-button > svg.icon {
+  height: 10px;
 }
 .catalog-stats {
   font-size: 10px;
@@ -5280,11 +5266,8 @@ a:only-of-type > .remove {
   margin: 2px;
   vertical-align: middle;
 }
-.postInfo > .menu-button,
-#thread-watcher .menu-button {
-  width: 18px;
-  height: 15px;
-  text-align: center;
+.postInfo > .menu-button {
+  margin: 0 5px;
 }
 #menu {
   position: fixed;
@@ -5648,7 +5631,7 @@ a:only-of-type > .remove {
   100% {transform:rotate(359deg);}
 }
 
-.spin {
+.spin > .icon {
   animation:spin 2s infinite linear;
 }
 
@@ -5671,8 +5654,7 @@ div.post {
     text-decoration-style: dashed;
     border-bottom: none;
   }
-}
-`;
+}`;
 
   var tomorrow = `:root.tomorrow {
   --xt-background: #282A2E;
@@ -5752,8 +5734,7 @@ div.post {
 }
 :root.tomorrow #qr-filename {
   color: rgb(197,200,198);
-}
-`;
+}`;
 
   var www = `#captcha-cnt {
   height: auto;
@@ -5765,8 +5746,7 @@ div.post {
   height: auto !important;
   margin: 0 !important;
   font-size: 0;
-}
-`;
+}`;
 
   var yotsubaB = `:root.yotsuba-b {
   --xt-background: #D6DAF0;
@@ -5783,8 +5763,7 @@ div.post {
   --xt-menu-fg: #000;
   --xt-entry-focus-bg: rgba(255, 255, 255, .33);
   --xt-unread: rgba(214, 218, 240, 0.5);
-}
-`;
+}`;
 
   var yotsuba = `:root.yotsuba {
   --xt-background: #F0E0D6;
@@ -5802,8 +5781,7 @@ div.post {
   --xt-watcher: #800000;
 
   --xt-fxt-fg: #800000;
-}
-`;
+}`;
 
   // == Create CSS for Link Title Favicons == //
   const icons$1 = (data) => ('/* Link Title Favicons */\n' +
@@ -5840,8 +5818,7 @@ svg.icon {
 @keyframes spin {
   0% {transform:rotate(0deg);}
   100% {transform:rotate(359deg);}
-}
-`;
+}`;
 
   var fxTwitterCss = `:root {
   --xt-fxt-bg: var(--xt-background);
@@ -5978,8 +5955,7 @@ svg.icon {
   align-items: center;
   gap: 8px;
   padding: 4px;
-}
-`;
+}`;
 
   // cSpell:ignore installGentoo, webfont
   const mainCSS = style + variableBase + yotsuba + yotsubaB + futaba + burichan + tomorrow + photon + spooky + iconCss + fxTwitterCss;
@@ -6055,95 +6031,100 @@ svg.icon {
   };
 
   // Image
-  var svgPathData$g = 'M448 80c8.8 0 16 7.2 16 16V415.8l-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3V96c0-8.8 7.2-16 16-16H448zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z';
-  var width$g = 512;var height$g = 512;
+  var svgPathData$h = 'M448 80c8.8 0 16 7.2 16 16V415.8l-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3V96c0-8.8 7.2-16 16-16H448zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z';
+  var width$h = 512;var height$h = 512;
 
   // Eye
-  var svgPathData$f = 'M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z';
-  var width$f = 576;var height$f = 512;
+  var svgPathData$g = 'M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z';
+  var width$g = 576;var height$g = 512;
 
   // UpRightAndDownLeftFromCenter
-  var svgPathData$e = 'M344 0H488c13.3 0 24 10.7 24 24V168c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39-87 87c-9.4 9.4-24.6 9.4-33.9 0l-32-32c-9.4-9.4-9.4-24.6 0-33.9l87-87L327 41c-6.9-6.9-8.9-17.2-5.2-26.2S334.3 0 344 0zM168 512H24c-13.3 0-24-10.7-24-24V344c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39 87-87c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8z';
-  var width$e = 512;var height$e = 512;
+  var svgPathData$f = 'M344 0H488c13.3 0 24 10.7 24 24V168c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39-87 87c-9.4 9.4-24.6 9.4-33.9 0l-32-32c-9.4-9.4-9.4-24.6 0-33.9l87-87L327 41c-6.9-6.9-8.9-17.2-5.2-26.2S334.3 0 344 0zM168 512H24c-13.3 0-24-10.7-24-24V344c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39 87-87c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8z';
+  var width$f = 512;var height$f = 512;
 
   // Comment
-  var svgPathData$d = 'M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9c.1-.2 .2-.3 .3-.5z';
-  var width$d = 512;var height$d = 512;
+  var svgPathData$e = 'M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9c.1-.2 .2-.3 .3-.5z';
+  var width$e = 512;var height$e = 512;
 
   // Rotate
-  var svgPathData$c = 'M142.9 142.9c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5c0 0 0 0 0 0H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8zM16 312v7.6 .7V440c0 9.7 5.8 18.5 14.8 22.2s19.3 1.7 26.2-5.2l41.6-41.6c87.6 86.5 228.7 86.2 315.8-1c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.2 62.2-162.7 62.5-225.3 1L185 329c6.9-6.9 8.9-17.2 5.2-26.2s-12.5-14.8-22.2-14.8H48.4h-.7H40c-13.3 0-24 10.7-24 24z';
-  var width$c = 512;var height$c = 512;
+  var svgPathData$d = 'M142.9 142.9c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5c0 0 0 0 0 0H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8zM16 312v7.6 .7V440c0 9.7 5.8 18.5 14.8 22.2s19.3 1.7 26.2-5.2l41.6-41.6c87.6 86.5 228.7 86.2 315.8-1c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.2 62.2-162.7 62.5-225.3 1L185 329c6.9-6.9 8.9-17.2 5.2-26.2s-12.5-14.8-22.2-14.8H48.4h-.7H40c-13.3 0-24 10.7-24 24z';
+  var width$d = 512;var height$d = 512;
 
   // Wrench
-  var svgPathData$b = 'M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
-  var width$b = 512;var height$b = 512;
+  var svgPathData$c = 'M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
+  var width$c = 512;var height$c = 512;
 
   // Bolt
-  var svgPathData$a = 'M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z';
-  var width$a = 448;var height$a = 512;
+  var svgPathData$b = 'M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z';
+  var width$b = 448;var height$b = 512;
 
   // Pencil
-  var svgPathData$9 = 'M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z';
-  var width$9 = 512;var height$9 = 512;
+  var svgPathData$a = 'M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z';
+  var width$a = 512;var height$a = 512;
 
   // Clipboard
-  var svgPathData$8 = 'M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z';
-  var width$8 = 384;var height$8 = 512;
+  var svgPathData$9 = 'M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z';
+  var width$9 = 384;var height$9 = 512;
 
   // Clock
-  var svgPathData$7 = 'M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z';
-  var width$7 = 512;var height$7 = 512;
+  var svgPathData$8 = 'M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z';
+  var width$8 = 512;var height$8 = 512;
 
   // Link
-  var svgPathData$6 = 'M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z';
-  var width$6 = 640;var height$6 = 512;
+  var svgPathData$7 = 'M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z';
+  var width$7 = 640;var height$7 = 512;
 
   // Shuffle
-  var svgPathData$5 = 'M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160H352c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96h32V64c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V416H352c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8h32V320c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z';
-  var width$5 = 512;var height$5 = 512;
+  var svgPathData$6 = 'M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160H352c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96h32V64c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V416H352c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8h32V320c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z';
+  var width$6 = 512;var height$6 = 512;
 
   // RotateLeft
-  var svgPathData$4 = 'M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z';
-  var width$4 = 512;var height$4 = 512;
+  var svgPathData$5 = 'M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z';
+  var width$5 = 512;var height$5 = 512;
 
   // Download
-  var svgPathData$3 = 'M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
-  var width$3 = 512;var height$3 = 512;
+  var svgPathData$4 = 'M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
+  var width$4 = 512;var height$4 = 512;
 
   // BookOpen
-  var svgPathData$2 = 'M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5V78.6c0-4.2-1.6-8.4-5-11C247.4 52 202.4 32 144 32C93.5 32 46.3 45.3 18.1 56.1C6.8 60.5 0 71.7 0 83.8V454.1c0 11.9 12.8 20.2 24.1 16.5C55.6 460.1 105.5 448 144 448c33.9 0 79 14 105.6 23.5zm76.8 0C353 462 398.1 448 432 448c38.5 0 88.4 12.1 119.9 22.6c11.3 3.8 24.1-4.6 24.1-16.5V83.8c0-12.1-6.8-23.3-18.1-27.6C529.7 45.3 482.5 32 432 32c-58.4 0-103.4 20-123 35.6c-3.3 2.6-5 6.8-5 11V456c0 11.4 11.7 19.3 22.4 15.5z';
-  var width$2 = 576;var height$2 = 512;
+  var svgPathData$3 = 'M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5V78.6c0-4.2-1.6-8.4-5-11C247.4 52 202.4 32 144 32C93.5 32 46.3 45.3 18.1 56.1C6.8 60.5 0 71.7 0 83.8V454.1c0 11.9 12.8 20.2 24.1 16.5C55.6 460.1 105.5 448 144 448c33.9 0 79 14 105.6 23.5zm76.8 0C353 462 398.1 448 432 448c38.5 0 88.4 12.1 119.9 22.6c11.3 3.8 24.1-4.6 24.1-16.5V83.8c0-12.1-6.8-23.3-18.1-27.6C529.7 45.3 482.5 32 432 32c-58.4 0-103.4 20-123 35.6c-3.3 2.6-5 6.8-5 11V456c0 11.4 11.7 19.3 22.4 15.5z';
+  var width$3 = 576;var height$3 = 512;
 
   // DownLeftAndUpRightToCenter
-  var svgPathData$1 = 'M439 7c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H296c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39L439 7zM72 272H216c13.3 0 24 10.7 24 24V440c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39L73 505c-9.4 9.4-24.6 9.4-33.9 0L7 473c-9.4-9.4-9.4-24.6 0-33.9l87-87L55 313c-6.9-6.9-8.9-17.2-5.2-26.2s12.5-14.8 22.2-14.8z';
-  var width$1 = 512;var height$1 = 512;
+  var svgPathData$2 = 'M439 7c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H296c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39L439 7zM72 272H216c13.3 0 24 10.7 24 24V440c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39L73 505c-9.4 9.4-24.6 9.4-33.9 0L7 473c-9.4-9.4-9.4-24.6 0-33.9l87-87L55 313c-6.9-6.9-8.9-17.2-5.2-26.2s12.5-14.8 22.2-14.8z';
+  var width$2 = 512;var height$2 = 512;
 
   // Heart
-  var svgPathData = 'M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z';
-  var width = 512;var height = 512;
+  var svgPathData$1 = 'M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z';
+  var width$1 = 512;var height$1 = 512;
+
+  // CaretDown
+  var svgPathData = 'M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z';
+  var width = 320;var height = 512;
 
   const toSvg = (svgPathData, width, height) => {
     return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 ${width} ${height}">` +
       `<path d="${svgPathData}" fill="currentColor" /></svg>`;
   };
   const icons = {
-    image: toSvg(svgPathData$g, width$g, height$g),
-    eye: toSvg(svgPathData$f, width$f, height$f),
-    expand: toSvg(svgPathData$e, width$e, height$e),
-    comment: toSvg(svgPathData$d, width$d, height$d),
-    refresh: toSvg(svgPathData$c, width$c, height$c),
-    wrench: toSvg(svgPathData$b, width$b, height$b),
-    bolt: toSvg(svgPathData$a, width$a, height$a),
-    link: toSvg(svgPathData$6, width$6, height$6),
-    pencil: toSvg(svgPathData$9, width$9, height$9),
-    clipboard: toSvg(svgPathData$8, width$8, height$8),
-    clock: toSvg(svgPathData$7, width$7, height$7),
-    shuffle: toSvg(svgPathData$5, width$5, height$5),
-    undo: toSvg(svgPathData$4, width$4, height$4),
-    download: toSvg(svgPathData$3, width$3, height$3),
-    bookOpen: toSvg(svgPathData$2, width$2, height$2),
-    shrink: toSvg(svgPathData$1, width$1, height$1),
-    heart: toSvg(svgPathData, width, height)
+    image: toSvg(svgPathData$h, width$h, height$h),
+    eye: toSvg(svgPathData$g, width$g, height$g),
+    expand: toSvg(svgPathData$f, width$f, height$f),
+    comment: toSvg(svgPathData$e, width$e, height$e),
+    refresh: toSvg(svgPathData$d, width$d, height$d),
+    wrench: toSvg(svgPathData$c, width$c, height$c),
+    bolt: toSvg(svgPathData$b, width$b, height$b),
+    link: toSvg(svgPathData$7, width$7, height$7),
+    pencil: toSvg(svgPathData$a, width$a, height$a),
+    clipboard: toSvg(svgPathData$9, width$9, height$9),
+    clock: toSvg(svgPathData$8, width$8, height$8),
+    shuffle: toSvg(svgPathData$6, width$6, height$6),
+    undo: toSvg(svgPathData$5, width$5, height$5),
+    download: toSvg(svgPathData$4, width$4, height$4),
+    bookOpen: toSvg(svgPathData$3, width$3, height$3),
+    shrink: toSvg(svgPathData$2, width$2, height$2),
+    heart: toSvg(svgPathData$1, width$1, height$1),
+    caretDown: toSvg(svgPathData, width, height)
   };
   var Icon = {
     /** Sets an icon in an HTML element */
@@ -6239,8 +6220,7 @@ svg.icon {
 </form>
 <datalist id="list-name"></datalist>
 <datalist id="list-email"></datalist>
-<datalist id="list-sub"></datalist>
-`;
+<datalist id="list-sub"></datalist>`;
 
   var ferongr_unreadDead = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAFVBMVEX///9zBQC/AADpDAP/gID/q6voCwJJTwpOAAAAAXRSTlMAQObYZgAAAGJJREFUeF5Fi7ENg0AQBCfa/AFdDh2gdwPIogMK2E2+/xLslwOvdqRJhv+GQQPUCtJM7svankLrq/I+TY5e6Ueh1jyBMX7AFJi9vwfyVO4CbbO6jNYpp9GyVPbdkFhVgAQ2H0NOE5jk9DT8AAAAAElFTkSuQmCC';
 
@@ -7121,7 +7101,7 @@ svg.icon {
     style.left   = left;
     style.right  = right;
     style.top    = top;
-    return style.bottom = bottom;
+    style.bottom = bottom;
   };
 
   var touchend = function (e) {
@@ -7141,7 +7121,17 @@ svg.icon {
       $.off(d, 'mousemove', this.move);
       $.off(d, 'mouseup',   this.up);
     }
-    return $.set(`${this.id}.position`, this.style.cssText);
+    if (this.style.length === 2) { // assume only left or right and top or bottom
+      $.set(`${this.id}.position`, this.style.cssText);
+    } else { // only include position data.
+      const { left, right, top, bottom } = this.style;
+      let position = '';
+      if (left) position += `left:${left};`;
+      if (right) position += `right:${right};`;
+      if (top) position += `top:${top};`;
+      if (bottom) position += `bottom:${bottom};`;
+      $.set(`${this.id}.position`, position);
+    }
   };
 
   const hoverstart = function ({ root, el, latestEvent, endEvents, height, width, cb, noRemove }) {
@@ -8422,7 +8412,7 @@ svg.icon {
       }
       );
 
-      $.extend(this.button, {textContent: "🞃"});
+      Icon.set(this.button, 'caretDown');
 
       this.menu = new UI.Menu('post');
       Callbacks.Post.push({
@@ -8990,13 +8980,12 @@ svg.icon {
   };
 
   var ThreadWatcherPage = `<div class="move">
-  Thread Watcher <a class="refresh" title="Check threads" href="javascript:;" title="refresh">🗘</a>
+  Thread Watcher <a class="refresh" title="Check threads" href="javascript:;" title="refresh"></a>
   <span id="watcher-status"></span>
-  <a class="menu-button" href="javascript:;">🞃</a>
+  <a class="menu-button" href="javascript:;"></a>
   <a class="close" href="javascript:;">×</a>
 </div>
-<div id="watched-threads"></div>
-`;
+<div id="watched-threads"></div>`;
 
   class Board {
     toString() { return this.ID; }
@@ -10052,13 +10041,16 @@ svg.icon {
       this.db     = new DataBoard('watchedThreads', this.refresh, true);
       this.dbLM   = new DataBoard('watcherLastModified', null, true);
       this.dialog = UI.dialog('thread-watcher', { innerHTML: ThreadWatcherPage });
-      Icon.set(this.dialog.firstElementChild.firstElementChild, 'refresh');
       this.status = $('#watcher-status', this.dialog);
       this.list   = this.dialog.lastElementChild;
       this.refreshButton = $('.refresh', this.dialog);
+      this.menuButton = $('.menu-button', this.dialog);
       this.closeButton = $('.move > .close', this.dialog);
       this.unreaddb = Unread.db || UnreadIndex.db || new DataBoard('lastReadPosts');
       this.unreadEnabled = Conf['Remember Last Read Post'];
+
+      Icon.set(this.refreshButton, 'refresh');
+      Icon.set(this.menuButton, 'caretDown');
 
       $.on(d, 'QRPostSuccessful',   this.cb.post);
       $.on(sc, 'click', this.toggleWatcher);
@@ -11726,8 +11718,7 @@ svg.icon {
     <option value="all pages">All threads</option>
     <option value="catalog">Catalog</option>
   </select>
-</span>
-`;
+</span>`;
 
   var PageList = `<div class="prev">
   <a>
@@ -11742,8 +11733,7 @@ svg.icon {
 </div>
 <div class="pages cataloglink">
   <a href="./catalog">Catalog</a>
-</div>
-`;
+</div>`;
 
   var Index = {
     showHiddenThreads: false,
@@ -13338,8 +13328,7 @@ svg.icon {
   </div>
   <div class="gal-next"></div>
 </div>
-<div class="gal-thumbnails"></div>
-`;
+<div class="gal-thumbnails"></div>`;
 
   var Sauce = {
     init() {
@@ -14005,8 +13994,7 @@ svg.icon {
   <a href="javascript:;" class="jump" title="Jump to post">→</a>
   <a href="javascript:;" class="close" title="Close">×</a>
 </div>
-<div id="media-embed"><div></div></div>
-`;
+<div id="media-embed"><div></div></div>`;
 
   var Linkify = {
     init() {
@@ -18824,8 +18812,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
   var ReportPage = `<legend><label><input id="archive-report-enabled" type="checkbox">Report illegal content to archives</label></legend>
 <label for="archive-report-reason">Details</label>
 <textarea id="archive-report-reason" disabled>Illegal content</textarea>
-<button id="archive-report-submit" hidden>Submit</button>
-`;
+<button id="archive-report-submit" hidden>Submit</button>`;
 
   var Report = {
     init() {
@@ -21459,9 +21446,10 @@ vp-replace
       }
     },
     node() {
-      if (this.isClone) {
+      if (this.isClone ||
+        // Happens when hovering over a dead link in the catalog.
+        (!this.isReply && !this.thread.nodes.root))
         return;
-      }
       const { hide, stub, hl, noti } = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
       if (hide) {
         if (this.isReply) {
