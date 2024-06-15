@@ -27,8 +27,11 @@
     "yotsuba"
   ],
   "ignoreWords": [
+    "deadlink",
     "endregion",
     "fappe",
+    "quotelink",
+    "quotelinks",
     "recursives",
     "Tyme",
     "userscript",

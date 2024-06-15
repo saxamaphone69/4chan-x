@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.10.1
+// @version      2.10.2
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -171,8 +171,8 @@
   'use strict';
 
   var version = {
-    "version": "2.10.1",
-    "date": "2024-06-01T14:17:03Z"
+    "version": "2.10.2",
+    "date": "2024-06-15T17:48:21Z"
   };
 
   var meta = {
@@ -8352,7 +8352,6 @@ svg.icon {
           $.rm($('.qmark-dead', quotelink));
           $.rmClass(quotelink, 'deadlink');
         }
-        quotelink.href = `#p${this.ID}`;
       }
     }
     collect() {
@@ -11558,6 +11557,94 @@ svg.icon {
     },
   };
 
+  const RestoreDeletedFromArchive = {
+    restore() {
+      const url = Redirect$1.to('threadJSON', { boardID: g.boardID, threadID: g.threadID });
+      if (!url) {
+        new Notice('warning', 'No archive found', 3);
+        return;
+      }
+      const encryptionOK = url.startsWith('https://');
+      if (encryptionOK || Conf['Exempt Archives from Encryption']) {
+        CrossOrigin$1.ajax(url, { onloadend() {
+            if (this.status < 200 || this.status >= 400) {
+              const domain = E(new URL(url).origin);
+              new Notice('error', $.el('div', {
+                innerHTML: 'There was an error while fetching from the archive. See the console for details.<br />' +
+                  'Some archive check the browser first before checking content, you might need to open the archive ' +
+                  `first to get past the browser check: <a href="${domain}" target="_blank">${domain}</a><br />` +
+                  'If that doesn\'t work, try a different archive under Settings > Advanced > Archives > Thread fetching.'
+              }));
+              console.error(this);
+              return;
+            }
+            let nrRestored = 0;
+            const archivePosts = this.response[g.threadID.toString()].posts;
+            for (const [postID, raw] of Object.entries(archivePosts)) {
+              if (RestoreDeletedFromArchive.insert(raw)[1]) {
+                ++nrRestored;
+              }
+            }
+            let msg;
+            if (nrRestored === 0) {
+              msg = 'No removed posts found';
+            } else if (nrRestored === 1) {
+              msg = '1 post restored';
+            } else {
+              msg = `${nrRestored} posts restored`;
+            }
+            new Notice('info', msg, 3);
+          } });
+      }
+    },
+    init() {
+      if (g.VIEW !== 'thread')
+        return;
+      const menuEntry = $.el('a', {
+        href: 'javascript:;',
+        textContent: 'Restore from archive',
+      });
+      $.on(menuEntry, 'click', () => {
+        RestoreDeletedFromArchive.restore();
+        Header.menu.close();
+      });
+      Header.menu.addEntry({
+        el: menuEntry,
+        order: 10,
+      });
+    },
+    /**
+    * Inserts a post from the archive in the thread. Will automatically skip posts from other threads and posts already
+    * in the thread.
+    * @param raw The raw data returned from the archive
+    * @returns A tuple with as first value the new post, and the second value a boolean whether is was inserted into the
+    * page.
+    */
+    insert(raw) {
+      const key = `${raw.board.shortname}.${raw.num}`;
+      if (g.posts.keys.includes(key))
+        return [undefined, false];
+      let inserted = false;
+      const post = parseArchivePost(raw);
+      post.resurrect();
+      post.markAsFromArchive();
+      if (post.threadID === g.threadID && g.VIEW === 'thread') {
+        const newPostIndex = g.posts.insert(key, post, key => +(key.split('.')[1]) < post.ID);
+        if (Conf['Thread Quotes']) {
+          post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
+        } else {
+          g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
+        }
+        QuoteThreading.insert(post);
+        inserted = true;
+        for (const quotelink of Get.allQuotelinksLinkingTo(post)) {
+          quotelink.href = `#p${post.ID}`;
+        }
+      }
+      return [post, inserted];
+    },
+  };
+
   class Fetcher {
     constructor(boardID, threadID, postID, root, quoter) {
       let post, thread;
@@ -11730,19 +11817,7 @@ svg.icon {
         this.root.textContent = data.error;
         return;
       }
-      this.threadID = +data.thread_num;
-      post = parseArchivePost(data);
-      if (post.threadID === g.threadID && g.VIEW === 'thread') {
-        const postIdNr = +post.ID;
-        const newPostIndex = g.posts.insert(`${g.boardID}.${post.ID}`, post, key => +(key.split('.')[1]) < postIdNr);
-        if (Conf['Thread Quotes']) {
-          post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
-        } else {
-          g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
-        }
-        QuoteThreading.insert(data);
-      }
-      return this.insert(post);
+      return this.insert(RestoreDeletedFromArchive.insert(data)[0]);
     }
   }
   Fetcher.archiveTags = {
@@ -14457,7 +14532,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         return;
       }
       const { tweet } = req.response;
-      console.log(tweet);
+      // console.log(tweet);
       async function getReplies(tweet) {
         if (!tweet?.replying_to_status) {
           return [];
@@ -19707,6 +19782,8 @@ $\
           isSticky: !!data.sticky,
           isClosed: !!data.closed,
           isArchived: !!data.archived,
+          threadReplies: data.replies,
+          threadImages: data.images,
           // file status
           fileDeleted: !!data.filedeleted,
           filesDeleted: data.filedeleted ? [0] : []
@@ -19833,15 +19910,15 @@ $\
         const fileBlock = generateFileHtml(file, ID, boardID, fileURL, shortFilename, fileThumb, o, staticPath, gifIcon);
         /* Whole Post */
         const postClass = o.isReply ? 'reply' : 'op';
+        const postContent = o.isReply ? [postInfo, fileBlock] : [fileBlock, postInfo];
+        postContent.push(h("blockquote", { class: "postMessage", id: `m${ID}` }, commentHTML));
+        // Check for g.theadID, otherwise this is appended in the catalog
+        if (!o.isReply && o.threadReplies != null && g.threadID) {
+          postContent.push(h("span", { class: "summary preview-summary" }, this.summaryText('', o.threadReplies, o.threadImages, true)));
+        }
         const wholePost = h(hFragment, null,
           (o.isReply ? h("div", { class: "sideArrows", id: `sa${ID}` }, ">>") : ''),
-          h("div", { id: `p${ID}`, class: `post ${postClass}${o.capcodeHighlight ? ' highlightPost' : ''}` },
-            (o.isReply ? h(hFragment, null,
-              postInfo,
-              fileBlock) : h(hFragment, null,
-              fileBlock,
-              postInfo)),
-            h("blockquote", { class: "postMessage", id: `m${ID}` }, commentHTML)));
+          h("div", { id: `p${ID}`, class: `post ${postClass}${o.capcodeHighlight ? ' highlightPost' : ''}` }, ...postContent));
         const container = $.el('div', {
           className: `postContainer ${postClass}Container`,
           id: `pc${ID}`
@@ -19863,16 +19940,14 @@ $\
         }
         return container;
       },
-      summaryText(status, posts, files) {
+      summaryText(status, posts, files, hoverPreview = false) {
         let text = '';
-        if (status) {
+        if (status)
           text += `${status} `;
-        }
-        text += `${posts} post${posts > 1 ? 's' : ''}`;
-        if (+files) {
+        text += `${posts} post${posts == 1 ? '' : 's'}`;
+        if (+files)
           text += ` and ${files} image repl${files > 1 ? 'ies' : 'y'}`;
-        }
-        return text += ` ${status === '-' ? 'shown' : 'omitted'}.`;
+        return hoverPreview ? text : `${text} ${status === '-' ? 'shown' : 'omitted'}.`;
       },
       summary(boardID, threadID, posts, files) {
         return $.el('a', {
@@ -25388,76 +25463,6 @@ vp-replace
         return cb(new Blob([ui8a], {type: type || 'image/png'}));
       };
     }
-  };
-
-  const RestoreDeletedFromArchive = {
-    restore() {
-      const url = Redirect$1.to('threadJSON', { boardID: g.boardID, threadID: g.threadID });
-      if (!url) {
-        new Notice('warning', 'No archive found', 3);
-        return;
-      }
-      const encryptionOK = url.startsWith('https://');
-      if (encryptionOK || Conf['Exempt Archives from Encryption']) {
-        CrossOrigin$1.ajax(url, { onloadend() {
-            if (this.status < 200 || this.status >= 400) {
-              const domain = E(new URL(url).origin);
-              new Notice('error', $.el('div', {
-                innerHTML: 'There was an error while fetching from the archive. See the console for details.<br />' +
-                  'Some archive check the browser first before checking content, you might need to open the archive ' +
-                  `first to get past the browser check: <a href="${domain}" target="_blank">${domain}</a><br />` +
-                  'If that doesn\'t work, try a different archive under Settings > Advanced > Archives > Thread fetching.'
-              }));
-              console.error(this);
-              return;
-            }
-            let nrRestored = 0;
-            const archivePosts = this.response[g.threadID.toString()].posts;
-            for (const [postID, raw] of Object.entries(archivePosts)) {
-              const key = `${g.boardID}.${postID}`;
-              if (!g.posts.keys.includes(key)) {
-                const postIdNr = +postID;
-                const newPost = parseArchivePost(raw);
-                const newPostIndex = g.posts.insert(key, newPost, key => +(key.split('.')[1]) < postIdNr);
-                newPost.resurrect();
-                newPost.markAsFromArchive();
-                if (Conf['Thread Quotes']) {
-                  newPost.thread.nodes.root.insertAdjacentElement('beforeend', newPost.root);
-                } else {
-                  g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', newPost.root);
-                }
-                QuoteThreading.insert(newPost);
-                ++nrRestored;
-              }
-            }
-            let msg;
-            if (nrRestored === 0) {
-              msg = 'No removed posts found';
-            } else if (nrRestored === 1) {
-              msg = '1 post restored';
-            } else {
-              msg = `${nrRestored} posts restored`;
-            }
-            new Notice('info', msg, 3);
-          } });
-      }
-    },
-    init() {
-      if (g.VIEW !== 'thread')
-        return;
-      const menuEntry = $.el('a', {
-        href: 'javascript:;',
-        textContent: 'Restore from archive',
-      });
-      $.on(menuEntry, 'click', () => {
-        RestoreDeletedFromArchive.restore();
-        Header.menu.close();
-      });
-      Header.menu.addEntry({
-        el: menuEntry,
-        order: 10,
-      });
-    },
   };
 
   var Main = {

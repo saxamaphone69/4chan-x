@@ -428,7 +428,6 @@ export default class Post {
         $.rm($('.qmark-dead', quotelink));
         $.rmClass(quotelink, 'deadlink');
       }
-      quotelink.href = `#p${this.ID}`;
     }
   }
 

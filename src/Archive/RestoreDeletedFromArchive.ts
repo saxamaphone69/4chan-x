@@ -6,6 +6,8 @@ import $ from '../platform/$';
 import Header from '../General/Header';
 import { type RawArchivePost, parseArchivePost } from './Parse';
 import QuoteThreading from '../Quotelinks/QuoteThreading';
+import type Post from '../classes/Post';
+import Get from '../General/Get';
 
 const RestoreDeletedFromArchive = {
   restore() {
@@ -31,22 +33,7 @@ const RestoreDeletedFromArchive = {
         let nrRestored = 0;
         const archivePosts = this.response[g.threadID.toString()].posts as Record<string, RawArchivePost>;
         for (const [postID, raw] of Object.entries(archivePosts)) {
-          const key = `${g.boardID}.${postID}`
-          if (!g.posts.keys.includes(key)) {
-            const postIdNr = +postID;
-            const newPost = parseArchivePost(raw);
-            const newPostIndex = g.posts.insert(key, newPost, key => +(key.split('.')[1]) < postIdNr);
-            newPost.resurrect();
-            newPost.markAsFromArchive();
-
-            if (Conf['Thread Quotes']) {
-              newPost.thread.nodes.root.insertAdjacentElement('beforeend', newPost.root);
-            } else {
-              g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', newPost.root);
-            }
-
-            QuoteThreading.insert(newPost);
-
+          if (RestoreDeletedFromArchive.insert(raw)[1]) {
             ++nrRestored;
           }
         }
@@ -80,6 +67,41 @@ const RestoreDeletedFromArchive = {
       el: menuEntry,
       order: 10,
     });
+  },
+
+  /**
+   * Inserts a post from the archive in the thread. Will automatically skip posts from other threads and posts already
+   * in the thread.
+   * @param raw The raw data returned from the archive
+   * @returns A tuple with as first value the new post, and the second value a boolean whether is was inserted into the
+   * page.
+   */
+  insert(raw: RawArchivePost): [(Post | undefined), boolean] {
+    const key = `${raw.board.shortname}.${raw.num}`;
+    if (g.posts.keys.includes(key)) return [undefined, false];
+
+    let inserted = false;
+
+    const post = parseArchivePost(raw);
+    post.resurrect();
+    post.markAsFromArchive();
+
+    if (post.threadID === g.threadID && g.VIEW === 'thread') {
+      const newPostIndex = g.posts.insert(key, post, key => +(key.split('.')[1]) < post.ID);
+
+      if (Conf['Thread Quotes']) {
+        post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
+      } else {
+        g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
+      }
+
+      QuoteThreading.insert(post);
+      inserted = true;
+      for (const quotelink of Get.allQuotelinksLinkingTo(post) as HTMLAnchorElement[]) {
+        quotelink.href = `#p${post.ID}`;
+      }
+    }
+    return [post, inserted];
   },
 }
 

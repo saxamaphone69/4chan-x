@@ -17,7 +17,7 @@ export default function EmbedFxTwitter(a: HTMLAnchorElement): HTMLElement {
 
     const { tweet } = req.response;
 
-    console.log(tweet);
+    // console.log(tweet);
 
     async function getReplies(tweet) {
       if (!tweet?.replying_to_status) {

@@ -8,8 +8,7 @@ import Index from "../General/Index";
 import { E, g, Conf, d } from "../globals/globals";
 import CrossOrigin from "../platform/CrossOrigin";
 import Get from "../General/Get";
-import parseArchivePost from "../Archive/Parse";
-import QuoteThreading from "../Quotelinks/QuoteThreading";
+import RestoreDeletedFromArchive from "../Archive/RestoreDeletedFromArchive";
 
 /*
  * decaffeinate suggestions:
@@ -226,20 +225,6 @@ export default class Fetcher {
       return;
     }
 
-    this.threadID = +data.thread_num;
-    post = parseArchivePost(data);
-    if (post.threadID === g.threadID && g.VIEW === 'thread') {
-      const postIdNr = +post.ID;
-      const newPostIndex = g.posts.insert(`${g.boardID}.${post.ID}`, post, key => +(key.split('.')[1]) < postIdNr);
-
-      if (Conf['Thread Quotes']) {
-        post.thread.nodes.root.insertAdjacentElement('beforeend', post.root);
-      } else {
-        g.posts.get(g.posts.keys[newPostIndex - 1]).root.insertAdjacentElement('afterend', post.root);
-      }
-
-      QuoteThreading.insert(data);
-    }
-    return this.insert(post);
+    return this.insert(RestoreDeletedFromArchive.insert(data)[0]);
   }
 }

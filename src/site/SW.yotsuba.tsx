@@ -6,14 +6,14 @@ import $$ from "../platform/$$";
 import Captcha from "../Posting/Captcha";
 import PostSuccessful from "../Posting/PostSuccessful";
 import ImageHost from "../Images/ImageHost";
-import { g, Conf, E, d, doc } from "../globals/globals";
+import { g, Conf, d, doc } from "../globals/globals";
 import BoardConfig from "../General/BoardConfig";
 import CSS from "../css/CSS";
 
 import generatePostInfoHtml from './SW.yotsuba.Build/PostInfoHtml';
 import generateFileHtml from "./SW.yotsuba.Build/FileHtml";
 import generateCatalogThreadHtml from "./SW.yotsuba.Build/CatalogThreadHtml";
-import h, { hFragment, isEscaped } from "../globals/jsx";
+import h, { type EscapedHtml, hFragment, isEscaped } from "../globals/jsx";
 import { dict, MINUTE } from "../platform/helpers";
 
 /*
@@ -421,6 +421,8 @@ $\
         isSticky: !!data.sticky,
         isClosed: !!data.closed,
         isArchived: !!data.archived,
+        threadReplies: data.replies,
+        threadImages: data.images,
         // file status
         fileDeleted: !!data.filedeleted,
         filesDeleted: data.filedeleted ? [0] : []
@@ -563,11 +565,19 @@ $\
 
       const postClass = o.isReply ? 'reply' : 'op';
 
+      const postContent: EscapedHtml[] = o.isReply ? [postInfo, fileBlock] : [fileBlock, postInfo];
+      postContent.push(<blockquote class="postMessage" id={`m${ID}`}>{commentHTML}</blockquote>);
+      // Check for g.theadID, otherwise this is appended in the catalog
+      if (!o.isReply && o.threadReplies != null && g.threadID) {
+        postContent.push(<span class="summary preview-summary">
+          {this.summaryText('', o.threadReplies, o.threadImages, true)}
+        </span>);
+      }
+
       const wholePost = <>
         {(o.isReply ? <div class="sideArrows" id={`sa${ID}`}>&gt;&gt;</div> : '')}
         <div id={`p${ID}`} class={`post ${postClass}${o.capcodeHighlight ? ' highlightPost' : ''}`}>
-          {(o.isReply ? <>{postInfo}{fileBlock}</> : <>{fileBlock}{postInfo}</>)}
-          <blockquote class="postMessage" id={`m${ID}`}>{commentHTML}</blockquote>
+          {...postContent}
         </div>
       </>;
 
@@ -595,12 +605,12 @@ $\
       return container;
     },
 
-    summaryText(status, posts, files) {
+    summaryText(status: string, posts: number, files: number, hoverPreview = false) {
       let text = '';
-      if (status) { text += `${status} `; }
-      text += `${posts} post${posts > 1 ? 's' : ''}`;
-      if (+files) { text += ` and ${files} image repl${files > 1 ? 'ies' : 'y'}`; }
-      return text += ` ${status === '-' ? 'shown' : 'omitted'}.`;
+      if (status) text += `${status} `;
+      text += `${posts} post${posts == 1 ? '' : 's'}`;
+      if (+files) text += ` and ${files} image repl${files > 1 ? 'ies' : 'y'}`;
+      return hoverPreview ? text : `${text} ${status === '-' ? 'shown' : 'omitted'}.`;
     },
 
     summary(boardID, threadID, posts, files) {

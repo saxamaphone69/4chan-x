@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.10.2 (2024-06-15)
+
+- Fixed wrong link on dead links to other threads. [#70](https://github.com/TuxedoTako/4chan-xt/issues/70)
+- Fixed quoted OPs not showing reply and image count. [#71](https://github.com/TuxedoTako/4chan-xt/issues/71) Might be a new feature, since it seems it was never supported, but I'm counting it as a bug fix because native 4chan has it.
+
 ### 2.10.1 (2024-06-01)
 
 - Address wobbly spin animation. [#65](https://github.com/TuxedoTako/4chan-xt/pull/65)
