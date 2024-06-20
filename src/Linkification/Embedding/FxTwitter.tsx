@@ -187,7 +187,7 @@ export default function EmbedFxTwitter(a: HTMLAnchorElement): HTMLElement {
         <div class="fxt-stats_meta">
           <span class="fxt-likes">
             {Icon.raw("comment")}
-            {tweet.likes.toLocaleString()}
+            {tweet.replies.toLocaleString()}
           </span>
           <span class="fxt-reposts">
             {Icon.raw("shuffle")}
@@ -195,7 +195,7 @@ export default function EmbedFxTwitter(a: HTMLAnchorElement): HTMLElement {
           </span>
           <span class="fxt-replies">
             {Icon.raw("heart")}
-            {tweet.replies.toLocaleString()}
+            {tweet.likes.toLocaleString()}
           </span>
         </div>
       </div>

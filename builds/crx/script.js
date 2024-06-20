@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.10.2",
-    "date": "2024-06-15T17:48:21Z"
+    "version": "2.10.3",
+    "date": "2024-06-20T16:54:42Z"
   };
 
   var meta = {
@@ -14496,13 +14496,13 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           h("div", { class: "fxt-stats_meta" },
             h("span", { class: "fxt-likes" },
               Icon.raw("comment"),
-              tweet.likes.toLocaleString()),
+              tweet.replies.toLocaleString()),
             h("span", { class: "fxt-reposts" },
               Icon.raw("shuffle"),
               tweet.retweets.toLocaleString()),
             h("span", { class: "fxt-replies" },
               Icon.raw("heart"),
-              tweet.replies.toLocaleString()))));
+              tweet.likes.toLocaleString()))));
       el.innerHTML = innerHTML.innerHTML;
       for (const textEl of el.getElementsByClassName('fxt-text')) {
         Linkify.process(textEl);

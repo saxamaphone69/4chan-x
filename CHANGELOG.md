@@ -3,10 +3,16 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.10.3 (2024-06-20)
+
+- Fixed reply and like count being switched in fxTwitter embeds.
+  [#60 \(comment\)](https://github.com/TuxedoTako/4chan-xt/issues/60#issuecomment-2180536991)
+
 ### 2.10.2 (2024-06-15)
 
 - Fixed wrong link on dead links to other threads. [#70](https://github.com/TuxedoTako/4chan-xt/issues/70)
-- Fixed quoted OPs not showing reply and image count. [#71](https://github.com/TuxedoTako/4chan-xt/issues/71) Might be a new feature, since it seems it was never supported, but I'm counting it as a bug fix because native 4chan has it.
+- Fixed quoted OPs not showing reply and image count. [#71](https://github.com/TuxedoTako/4chan-xt/issues/71) Might be a
+  new feature, since it seems it was never supported, but I'm counting it as a bug fix because native 4chan has it.
 
 ### 2.10.1 (2024-06-01)
 
