@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.10.4 (2024-06-29)
+
+- Handle the case of a Youtube URL formatted using /watch/ without any ?v= parameter.
+  [#73](https://github.com/TuxedoTako/4chan-xt/pull/73)
+
 ### 2.10.3 (2024-06-20)
 
 - Fixed reply and like count being switched in fxTwitter embeds.

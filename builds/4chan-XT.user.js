@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.10.3
+// @version      2.10.4
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -171,8 +171,8 @@
   'use strict';
 
   var version = {
-    "version": "2.10.3",
-    "date": "2024-06-20T16:54:42Z"
+    "version": "2.10.4",
+    "date": "2024-06-29T17:57:19Z"
   };
 
   var meta = {
@@ -15334,7 +15334,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       },
       {
         key: 'YouTube',
-        regExp: /^\w+:\/\/(?:youtu.be\/|[\w.]*youtube[\w.]*\/.*(?:v=|\bembed\/|\bv\/|shorts\/|live\/))([\w\-]{11})(.*)/,
+        regExp: /^\w+:\/\/(?:youtu.be\/|[\w.]*youtube[\w.]*\/.*(?:v=|\bembed\/|\bv\/|shorts\/|live\/|watch\/))([\w\-]{11})(.*)/,
         el(a) {
           let start = a.dataset.options.match(/\b(?:star)?t\=(\w+)/);
           if (start) {
