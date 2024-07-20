@@ -17,6 +17,17 @@ import Get from '../General/Get';
 import { DAY, dict, SECOND } from '../platform/helpers';
 import Icon from '../Icons/icon';
 
+interface ConvertOptions {
+  /** Max file size, optional, but passing it will prevent re-calculation */
+  maxSize?: number;
+  /** Image bitmap, optional, but passing it will prevent re-calculation */
+  img?: ImageBitmap | undefined;
+  /** Target width, defaults to the current width of the image */
+  width?: number;
+  /** Target height, defaults to the current width of the image */
+  height?: number;
+};
+
 var QR = {
   postingIsEnabled: false,
 
@@ -63,6 +74,8 @@ var QR = {
     spoiler: HTMLInputElement,
     oekakiButton: HTMLAnchorElement,
     randomizeButton: HTMLAnchorElement,
+    compress: HTMLAnchorElement,
+    view: HTMLAnchorElement,
     restoreNameButton: HTMLAnchorElement,
     fileRM: HTMLAnchorElement,
     urlButton: HTMLAnchorElement,
@@ -73,6 +86,7 @@ var QR = {
     flashTag: HTMLSelectElement,
     fileInput: HTMLInputElement,
     flag?: HTMLSelectElement,
+    preview?: HTMLDivElement;
   },
   shortcut: undefined as HTMLAnchorElement,
   hasFocus: false,
@@ -618,21 +632,21 @@ var QR = {
   handleUrl(urlDefault) {
     QR.open();
     QR.selected.preventAutoPost();
-    return CrossOrigin.permission(function() {
+    CrossOrigin.permission(function() {
       const url = prompt('Enter a URL:', urlDefault);
       if (url === null) { return; }
       QR.nodes.fileButton.focus();
-      return CrossOrigin.file(url, function(blob) {
+      CrossOrigin.file(url, function(blob) {
         if (blob && !/^text\//.test(blob.type)) {
-          return QR.handleFiles([blob]);
+          QR.handleFiles([blob]);
         } else {
-          return QR.error("Can't load file.");
+          QR.error("Can't load file.");
         }
       });
     });
   },
 
-  handleFiles(files) {
+  handleFiles(files: File[]) {
     if (this !== QR) { // file input
       files  = [...this.files];
       this.value = null;
@@ -648,7 +662,7 @@ var QR = {
     }
   },
 
-  handleFile(file, nfiles) {
+  handleFile(file: File, nfiles: number) {
     let post;
     const isText = /^text\//.test(file.type);
     if (nfiles === 1) {
@@ -721,6 +735,8 @@ var QR = {
     setNode('oekaki',         '.oekaki');
     setNode('drawButton',     '#qr-draw-button');
     setNode('randomizeButton','#qr-randomize');
+    setNode('compress',       '#qr-jpg');
+    setNode('view',           '#qr-view');
     setNode('restoreNameButton','#qr-restore-name');
     setNode('fileSubmit',     '#file-n-submit');
     setNode('fileButton',     '#qr-file-button');
@@ -768,6 +784,8 @@ var QR = {
     $.on(nodes.fileButton,     'click',     QR.openFileInput);
     $.on(nodes.noFile,         'click',     QR.openFileInput);
     $.on(nodes.randomizeButton,'click',     () => { QR.selected.randomizeName(); });
+    $.on(nodes.compress,       'click',     async () => { QR.handleFiles([await QR.convert(QR.selected.file)]); });
+    $.on(nodes.view,           'click',     QR.preview);
     $.on(nodes.restoreNameButton,'click',   () => { QR.selected.restoreName(); });
     $.on(nodes.filename,       'focus',     function() { return $.addClass(this.parentNode, 'focus'); });
     $.on(nodes.filename,       'blur',      function() { return $.rmClass(this.parentNode, 'focus'); });
@@ -830,6 +848,8 @@ var QR = {
     Icon.set(nodes.pasteArea, 'clipboard');
     Icon.set(nodes.customCooldown, 'clock');
     Icon.set(nodes.randomizeButton, 'shuffle');
+    Icon.set(nodes.compress, 'shrink');
+    Icon.set(nodes.view, 'eye');
     Icon.set(nodes.restoreNameButton, 'undo');
   },
 
@@ -1198,6 +1218,59 @@ var QR = {
       QR.notifications.push(new Notice('info', 'QR upload aborted.', 5));
     }
     QR.status();
+  },
+
+  getMaxSize(file: File) {
+    let max = QR.max_size;
+    if (file.type.startsWith('video/')) max = Math.min(max, QR.max_size_video);
+    return max;
+  },
+
+  async convert(file: File, type: 'jpeg' | 'png' = 'jpeg', options?: ConvertOptions): Promise<File> {
+    const maxSize = options?.maxSize || this.getMaxSize(file);
+    const img = options?.img || await createImageBitmap(file);
+    const width = options?.width || img.width;
+    const height = options?.height || img.height;
+
+    const canvas = new OffscreenCanvas(width, height);
+    const context = canvas.getContext("2d");
+    const newName = file.name.replace(/\.[a-z]+$/i, '.'+type);
+    const mime = 'image/' + type;
+    let newFile: File;
+    let quality = .9;
+    do {
+      context.drawImage(img, 0, 0, width, height);
+      newFile = new File([await canvas.convertToBlob({ type: mime, quality })], newName, { type: mime });
+
+      quality -= .1;
+    } while (type === 'jpeg' && newFile.size > maxSize && quality >= .1);
+
+    return newFile;
+  },
+
+  previewUrl: undefined as string | undefined,
+
+  preview() {
+    if (!QR.selected.file) return;
+
+    QR.nodes.preview = $.el('div', { id: 'overlay', className: 'media-preview' }) as HTMLDivElement;
+    $.add(doc, QR.nodes.preview);
+    QR.previewUrl = URL.createObjectURL(QR.selected.file);
+    if (QR.selected.file.type.startsWith('video/')) {
+      const video = $.el('video', { controls: true, src: QR.previewUrl });
+      $.add(QR.nodes.preview, video);
+      video.focus();
+    } else {
+      $.add(QR.nodes.preview, $.el('img', { src: QR.previewUrl }));
+    }
+    QR.nodes.preview.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).tagName !== 'VIDEO') QR.closePreview();
+    });
+  },
+
+  closePreview() {
+    QR.nodes.preview.remove();
+    URL.revokeObjectURL(QR.previewUrl);
   },
 
   cooldown: {
@@ -2008,32 +2081,93 @@ class post {
     }
   }
 
-  setFile(file: File) {
-    this.file = file;
-    this.originalName = file.name;
-    if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f')) {
-      this.randomizeName(false);
-    } else {
-      this.filename = this.file.name;
+  /**
+   * Checks if the mime type and file size are valid. For images, it will convert unsupported files to png, shrinks
+   * files with a resolution that is too big, and converts to jpeg if the file size is too big.
+   * It will not attempt to convert files that aren't images.
+   * @param file The old file.
+   * @returns A promise with the old file if it was valid, or a new file if it wasn't.
+   */
+  async validateFile(file: File): Promise<File> {
+    if (!QR.mimeTypes.includes(file.type)) {
+      if (file.type.startsWith('image/')) {
+        file = await QR.convert(file, 'png');
+        new Notice('info', 'Webp converted to png.', 3);
+      } else {
+        throw new Error('Unsupported file type.');
+      }
     }
-    this.filesize = $.bytesToString(this.file.size);
-    this.checkSize();
-    $.addClass(this.nodes.el, 'has-file');
-    QR.captcha.moreNeeded();
-    URL.revokeObjectURL(this.URL);
-    this.saveFilename();
-    if (this === QR.selected) {
-      this.showFileData();
-    } else {
-      this.updateFilename();
+
+    const maxSize = QR.getMaxSize(file)
+    if (file.type.startsWith('image/')) {
+      let img = await createImageBitmap(file);
+      const { width: originalW, height: originalH } = img;
+      let width = originalW, height = originalH;
+
+      if (width > QR.max_width) {
+        height = Math.round(height * (QR.max_width / width));
+        width = QR.max_width;
+      }
+      if (height > QR.max_height) {
+        width = Math.round(width * (QR.max_height / height));
+        height = QR.max_height;
+      }
+      if (width !== originalW || height !== originalH) {
+        file = await QR.convert(file, file.type === 'image/jpeg' ? 'jpeg' : 'png', { width, height, img });
+        img = undefined // just in case the file size shrinkage also needs to run using the new file
+        new Notice('warning',
+          `Image was too large got shrunk from ${originalW} * ${originalH} to ${width} * ${height}.` +
+          'It might have lost animation');
+      }
+
+      if (file.size > maxSize) {
+          const originalSize = file.size;
+          file = await QR.convert(file, 'jpeg', { maxSize, img });
+          new Notice('warning',
+            `Image was too large (${$.bytesToString(originalSize)}) and got converted to jpg (` +
+            `${$.bytesToString(file.size)}). It might have lost transparency or animation`
+          );
+        }
+    } else if (file.size > maxSize) {
+      throw new Error(`File too large (file: ${$.bytesToString(file.size)}, max: ${$.bytesToString(maxSize)}).`);
     }
-    this.rmMetadata();
-    this.nodes.el.dataset.type = this.file.type;
-    this.nodes.el.style.backgroundImage = '';
-    if (!QR.mimeTypes.includes(this.file.type)) {
-      this.fileError('Unsupported file type.');
-    } else if (/^(image|video)\//.test(this.file.type)) {
-      this.readFile();
+
+    return file;
+  }
+
+  async setFile(file: File) {
+    try {
+      // Needs to be set before the validation for some error messages.
+      this.file = file;
+      this.filename = file.name;
+      this.originalName = file.name;
+
+      this.file = await this.validateFile(file);
+      this.originalName = file.name;
+      if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f')) {
+        this.randomizeName(false);
+      } else {
+        this.filename = this.file.name;
+      }
+      this.filesize = $.bytesToString(this.file.size);
+      $.addClass(this.nodes.el, 'has-file', 'has-' + this.file.type.split('/')[0] );
+      QR.captcha.moreNeeded();
+      URL.revokeObjectURL(this.URL);
+      this.saveFilename();
+      if (this === QR.selected) {
+        this.showFileData();
+      } else {
+        this.updateFilename();
+      }
+      this.rmMetadata();
+      this.nodes.el.dataset.type = this.file.type;
+      this.nodes.el.style.backgroundImage = '';
+      if (/^(image|video)\//.test(this.file.type)) {
+        this.readFile();
+      }
+    } catch (error) {
+      console.error(error);
+      this.fileError(error?.message || error || 'unknown error when setting a file');
     }
     this.preventAutoPost();
   }
@@ -2047,14 +2181,6 @@ class post {
 
   restoreName() {
     QR.nodes.filename.value = this.filename = this.originalName;
-  }
-
-  checkSize() {
-    let max = QR.max_size;
-    if (/^video\//.test(this.file.type)) { max = Math.min(max, QR.max_size_video); }
-    if (this.file.size > max) {
-      this.fileError(`File too large (file: ${this.filesize}, max: ${$.bytesToString(max)}).`);
-    }
   }
 
   readFile() {
@@ -2171,7 +2297,7 @@ class post {
     QR.nodes.filename.removeAttribute('title');
     this.rmMetadata();
     this.nodes.el.style.backgroundImage = '';
-    $.rmClass(this.nodes.el, 'has-file');
+    $.rmClass(this.nodes.el, 'has-file', 'has-image', 'has-video');
     this.showFileData();
     URL.revokeObjectURL(this.URL);
     this.dismissErrors(error => $.hasClass(error, 'file-error'));
@@ -2205,10 +2331,10 @@ class post {
       this.updateFilename();
       QR.nodes.filename.value = this.filename;
       $.addClass(QR.nodes.oekaki, 'has-file');
-      $.addClass(QR.nodes.fileSubmit, 'has-file');
+      $.addClass(QR.nodes.fileSubmit, 'has-file', 'has-' + this.file.type.split('/')[0]);
     } else {
       $.rmClass(QR.nodes.oekaki, 'has-file');
-      $.rmClass(QR.nodes.fileSubmit, 'has-file');
+      $.rmClass(QR.nodes.fileSubmit, 'has-file', 'has-image', 'has-video');
     }
     if (this.file?.source != null) {
       QR.nodes.fileSubmit.dataset.source = this.file.source;

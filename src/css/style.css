@@ -1691,6 +1691,19 @@ input.field.tripped:not(:hover):not(:focus) {
 .goog-bubble-content iframe {
   position: static !important;
 }
+#overlay.media-preview {
+  display: flex;
+  overflow: auto;
+  align-items: center;
+}
+#overlay.media-preview video, #overlay.media-preview img {
+  margin: auto;
+}
+#overlay.media-preview video {
+  max-height: 100%;
+  max-width: 100%;
+}
+
 
 /* File Input, Submit Button, Oekaki */
 #file-n-submit, #qr .oekaki {
@@ -1801,6 +1814,8 @@ input#qr-filename {
 #qr:not(.has-spoiler) #qr-spoiler-label,
 #file-n-submit:not(.has-file) #qr-spoiler-label,
 #file-n-submit:not(.has-file) #qr-randomize,
+#file-n-submit:not(.has-image) #qr-jpg,
+#file-n-submit:not(.has-image):not(.has-video) #qr-view,
 #file-n-submit:not(.has-file) #qr-restore-name,
 .has-file #paste-area,
 .has-file #url-button,

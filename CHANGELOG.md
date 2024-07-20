@@ -3,6 +3,19 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### Unreleased
+
+- Automatic conversion of invalid image files in the quick reply.
+  - When encountering an invalid image format, like webp, it will convert to png, depending on browser support.
+  - When the resolution of an image is too large, it will be shrunk.
+  - When an image file is too big, it will be converted to jpg with increasingly lower quality until it fits.
+    [#72](https://github.com/TuxedoTako/4chan-xt/issues/72)
+    - There is a button to convert to jpg manually in the quick reply.
+  - A warning will be shown is an image was changed automatically.
+  - There is a new preview button on the quick reply modal to check the result before posting.
+  - The uses build-in functionality of the browser, so only image formats that the browser supports can be converted,
+    and no videos can be converted.
+
 ### 2.10.4 (2024-06-29)
 
 - Handle the case of a Youtube URL formatted using /watch/ without any ?v= parameter.

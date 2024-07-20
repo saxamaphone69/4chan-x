@@ -92,6 +92,8 @@ var Keybinds = {
           for (var notification of notifications) {
             $('.close', notification).click();
           }
+        } else if (QR.nodes?.preview) {
+          QR.closePreview();
         } else if (QR.nodes && !(QR.nodes.el.hidden || (window.getComputedStyle(QR.nodes.form).display === 'none'))) {
           if (Conf['Persistent QR']) {
             QR.hide();
