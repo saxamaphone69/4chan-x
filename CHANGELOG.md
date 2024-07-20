@@ -3,7 +3,7 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
-### Unreleased
+### 2.11.0 (2024-07-20)
 
 - Automatic conversion of invalid image files in the quick reply.
   - When encountering an invalid image format, like webp, it will convert to png, depending on browser support.
@@ -13,8 +13,12 @@ and import them in XT.
     - There is a button to convert to jpg manually in the quick reply.
   - A warning will be shown is an image was changed automatically.
   - There is a new preview button on the quick reply modal to check the result before posting.
-  - The uses build-in functionality of the browser, so only image formats that the browser supports can be converted,
+  - This uses build-in functionality of the browser, so only image formats that the browser supports can be converted,
     and no videos can be converted.
+- File thumbnails are now always opened when a file is added in the quick reply.
+  [#75](https://github.com/TuxedoTako/4chan-xt/issues/75)
+- Post filtering and highlighting aren't mutually exclusive anymore. Stubs are affected by the highlight class.
+  [4chan-x#3359](https://github.com/ccd0/4chan-x/issues/3359)
 
 ### 2.10.4 (2024-06-29)
 

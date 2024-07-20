@@ -259,11 +259,7 @@ var Filter = {
         }
       }
     }
-    if (hide) {
-      return {hide, stub};
-    } else {
-      return {hl, top, noti};
-    }
+    return {hide, stub, hl, top, noti};
   },
 
   node(this: Post) {
@@ -280,11 +276,10 @@ var Filter = {
       } else {
         ThreadHiding.hide(this.thread, stub);
       }
-    } else {
-      if (hl) {
-        this.highlights = hl;
-        $.addClass(this.nodes.root, ...hl);
-      }
+    }
+    if (hl) {
+      this.highlights = hl;
+      $.addClass(this.nodes.root, ...hl);
     }
     if (noti && Unread.posts && (this.ID > Unread.lastReadPost) && !QuoteYou.isYou(this)) {
       Unread.openNotification(this, ' triggered a notification filter');
@@ -333,16 +328,15 @@ var Filter = {
     if (QuoteYou.db?.get({siteID: g.SITE.ID, boardID: this.boardID, threadID: this.ID, postID: this.ID})) { return; }
     const {hide, hl, top} = Filter.test(g.SITE.Build.parseJSON(Filter.catalogData[this.ID], this));
     if (hide) {
-      return this.nodes.root.hidden = true;
-    } else {
-      if (hl) {
-        this.highlights = hl;
-        $.addClass(this.nodes.root, ...hl);
-      }
-      if (top) {
-        $.prepend(this.nodes.root.parentNode, this.nodes.root);
-        return g.SITE.catalogPin?.(this.nodes.root);
-      }
+      this.nodes.root.hidden = true;
+    }
+    if (hl) {
+      this.highlights = hl;
+      $.addClass(this.nodes.root, ...hl);
+    }
+    if (top) {
+      $.prepend(this.nodes.root.parentNode, this.nodes.root);
+      g.SITE.catalogPin?.(this.nodes.root);
     }
   },
 

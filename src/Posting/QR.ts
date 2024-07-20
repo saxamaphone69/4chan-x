@@ -602,7 +602,6 @@ var QR = {
       blob.name = `${Conf['pastedname']}.${$.getOwn(QR.extensionFromType, type) || 'jpg'}`;
       QR.open();
       QR.handleFiles([blob]);
-      $.addClass(QR.nodes.el, 'dump');
     }
   },
 
@@ -634,7 +633,7 @@ var QR = {
     QR.selected.preventAutoPost();
     CrossOrigin.permission(function() {
       const url = prompt('Enter a URL:', urlDefault);
-      if (url === null) { return; }
+      if (!url) return;
       QR.nodes.fileButton.focus();
       CrossOrigin.file(url, function(blob) {
         if (blob && !/^text\//.test(blob.type)) {
@@ -656,7 +655,7 @@ var QR = {
     for (var file of files) {
       QR.handleFile(file, files.length);
     }
-    if (files.length !== 1) { $.addClass(QR.nodes.el, 'dump'); }
+    $.addClass(QR.nodes.el, 'dump');
     if ((d.activeElement === QR.nodes.fileButton) && $.hasClass(QR.nodes.fileSubmit, 'has-file')) {
       return QR.nodes.filename.focus();
     }
@@ -1231,19 +1230,36 @@ var QR = {
     const img = options?.img || await createImageBitmap(file);
     const width = options?.width || img.width;
     const height = options?.height || img.height;
-
-    const canvas = new OffscreenCanvas(width, height);
-    const context = canvas.getContext("2d");
-    const newName = file.name.replace(/\.[a-z]+$/i, '.'+type);
+    const newName = file.name.replace(/\.[a-z]+$/i, '.' + type);
     const mime = 'image/' + type;
+
+    // Fallback to HTMLCanvasElement is for old firefox versions. Once the minimum firefox >= 105, this can be
+    // simplified to just the OffscreenCanvas implementation.
+    let canvas: HTMLCanvasElement | OffscreenCanvas;
+    let toBlob: (mime: string, quality: number) => Promise<Blob>;
+    if (window.OffscreenCanvas) {
+      canvas = new OffscreenCanvas(width, height);
+      toBlob = (mime, quality) => (canvas as OffscreenCanvas).convertToBlob({ type: mime, quality });
+    } else {
+      canvas = $.el('canvas', { width, height }) as HTMLCanvasElement;
+      toBlob = (mime, quality) => new Promise(resolve => {
+        (canvas as HTMLCanvasElement).toBlob(resolve, mime, quality);
+      });
+    }
+
     let newFile: File;
     let quality = .9;
-    do {
-      context.drawImage(img, 0, 0, width, height);
-      newFile = new File([await canvas.convertToBlob({ type: mime, quality })], newName, { type: mime });
 
+    canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+    do {
+      newFile = new File([await toBlob(mime, quality)], newName, { type: mime });
       quality -= .1;
     } while (type === 'jpeg' && newFile.size > maxSize && quality >= .1);
+
+    if (newFile.size >= file.size && newFile.type === file.type) {
+      new Notice('warning', "New jpeg file isn't smaller than the old one, so it won't be used.", 3);
+      return file;
+    }
 
     return newFile;
   },
@@ -2091,8 +2107,9 @@ class post {
   async validateFile(file: File): Promise<File> {
     if (!QR.mimeTypes.includes(file.type)) {
       if (file.type.startsWith('image/')) {
+        const msg = `The ${file.type.slice(6)} image was converted to png.`;
         file = await QR.convert(file, 'png');
-        new Notice('info', 'Webp converted to png.', 3);
+        new Notice('info', msg, 3);
       } else {
         throw new Error('Unsupported file type.');
       }
@@ -2117,7 +2134,8 @@ class post {
         img = undefined // just in case the file size shrinkage also needs to run using the new file
         new Notice('warning',
           `Image was too large got shrunk from ${originalW} * ${originalH} to ${width} * ${height}.` +
-          'It might have lost animation');
+          'It might have lost animation.'
+        );
       }
 
       if (file.size > maxSize) {
@@ -2125,9 +2143,9 @@ class post {
           file = await QR.convert(file, 'jpeg', { maxSize, img });
           new Notice('warning',
             `Image was too large (${$.bytesToString(originalSize)}) and got converted to jpg (` +
-            `${$.bytesToString(file.size)}). It might have lost transparency or animation`
+            `${$.bytesToString(file.size)}). It might have lost transparency or animation.`
           );
-        }
+      }
     } else if (file.size > maxSize) {
       throw new Error(`File too large (file: ${$.bytesToString(file.size)}, max: ${$.bytesToString(maxSize)}).`);
     }

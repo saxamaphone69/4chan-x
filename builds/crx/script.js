@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.10.4",
-    "date": "2024-06-29T17:57:19Z"
+    "version": "2.11.0",
+    "date": "2024-07-20T19:57:47Z"
   };
 
   var meta = {
@@ -4952,6 +4952,19 @@ input.field.tripped:not(:hover):not(:focus) {
 .goog-bubble-content iframe {
   position: static !important;
 }
+#overlay.media-preview {
+  display: flex;
+  overflow: auto;
+  align-items: center;
+}
+#overlay.media-preview video, #overlay.media-preview img {
+  margin: auto;
+}
+#overlay.media-preview video {
+  max-height: 100%;
+  max-width: 100%;
+}
+
 
 /* File Input, Submit Button, Oekaki */
 #file-n-submit, #qr .oekaki {
@@ -5062,6 +5075,8 @@ input#qr-filename {
 #qr:not(.has-spoiler) #qr-spoiler-label,
 #file-n-submit:not(.has-file) #qr-spoiler-label,
 #file-n-submit:not(.has-file) #qr-randomize,
+#file-n-submit:not(.has-image) #qr-jpg,
+#file-n-submit:not(.has-image):not(.has-video) #qr-view,
 #file-n-submit:not(.has-file) #qr-restore-name,
 .has-file #paste-area,
 .has-file #url-button,
@@ -6196,6 +6211,8 @@ svg.icon {
     <span class="row space">
       <span class="row">
         <a href="javascript:;" id="qr-oekaki-button" title="Edit in Tegaki">✎︎</a>
+        <a href="javascript:;" id="qr-jpg" title="Compress to jpg">C</a>
+        <a href="javascript:;" id="qr-view" title="Preview">V</a>
         <a href="javascript:;" id="qr-randomize" title="Randomize filename">R</a>
         <a href="javascript:;" id="qr-restore-name" title="Reset filename">U</a>
         <a href="javascript:;" id="qr-filerm" title="Remove file">✕</a>
@@ -15680,6 +15697,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
             for (var notification of notifications) {
               $('.close', notification).click();
             }
+          } else if (QR.nodes?.preview) {
+            QR.closePreview();
           } else if (QR.nodes && !(QR.nodes.el.hidden || (window.getComputedStyle(QR.nodes.form).display === 'none'))) {
             if (Conf['Persistent QR']) {
               QR.hide();
@@ -16975,7 +16994,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         blob.name = `${Conf['pastedname']}.${$.getOwn(QR.extensionFromType, type) || 'jpg'}`;
         QR.open();
         QR.handleFiles([blob]);
-        $.addClass(QR.nodes.el, 'dump');
       }
     },
     pasteFF() {
@@ -17005,17 +17023,16 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     handleUrl(urlDefault) {
       QR.open();
       QR.selected.preventAutoPost();
-      return CrossOrigin$1.permission(function () {
+      CrossOrigin$1.permission(function () {
         const url = prompt('Enter a URL:', urlDefault);
-        if (url === null) {
+        if (!url)
           return;
-        }
         QR.nodes.fileButton.focus();
-        return CrossOrigin$1.file(url, function (blob) {
+        CrossOrigin$1.file(url, function (blob) {
           if (blob && !/^text\//.test(blob.type)) {
-            return QR.handleFiles([blob]);
+            QR.handleFiles([blob]);
           } else {
-            return QR.error("Can't load file.");
+            QR.error("Can't load file.");
           }
         });
       });
@@ -17032,9 +17049,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       for (var file of files) {
         QR.handleFile(file, files.length);
       }
-      if (files.length !== 1) {
-        $.addClass(QR.nodes.el, 'dump');
-      }
+      $.addClass(QR.nodes.el, 'dump');
       if ((d.activeElement === QR.nodes.fileButton) && $.hasClass(QR.nodes.fileSubmit, 'has-file')) {
         return QR.nodes.filename.focus();
       }
@@ -17110,6 +17125,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       setNode('oekaki', '.oekaki');
       setNode('drawButton', '#qr-draw-button');
       setNode('randomizeButton', '#qr-randomize');
+      setNode('compress', '#qr-jpg');
+      setNode('view', '#qr-view');
       setNode('restoreNameButton', '#qr-restore-name');
       setNode('fileSubmit', '#file-n-submit');
       setNode('fileButton', '#qr-file-button');
@@ -17153,6 +17170,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       $.on(nodes.fileButton, 'click', QR.openFileInput);
       $.on(nodes.noFile, 'click', QR.openFileInput);
       $.on(nodes.randomizeButton, 'click', () => { QR.selected.randomizeName(); });
+      $.on(nodes.compress, 'click', async () => { QR.handleFiles([await QR.convert(QR.selected.file)]); });
+      $.on(nodes.view, 'click', QR.preview);
       $.on(nodes.restoreNameButton, 'click', () => { QR.selected.restoreName(); });
       $.on(nodes.filename, 'focus', function () { return $.addClass(this.parentNode, 'focus'); });
       $.on(nodes.filename, 'blur', function () { return $.rmClass(this.parentNode, 'focus'); });
@@ -17211,6 +17230,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       Icon.set(nodes.pasteArea, 'clipboard');
       Icon.set(nodes.customCooldown, 'clock');
       Icon.set(nodes.randomizeButton, 'shuffle');
+      Icon.set(nodes.compress, 'shrink');
+      Icon.set(nodes.view, 'eye');
       Icon.set(nodes.restoreNameButton, 'undo');
     },
     flags() {
@@ -17558,6 +17579,68 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         QR.notifications.push(new Notice('info', 'QR upload aborted.', 5));
       }
       QR.status();
+    },
+    getMaxSize(file) {
+      let max = QR.max_size;
+      if (file.type.startsWith('video/'))
+        max = Math.min(max, QR.max_size_video);
+      return max;
+    },
+    async convert(file, type = 'jpeg', options) {
+      const maxSize = options?.maxSize || this.getMaxSize(file);
+      const img = options?.img || await createImageBitmap(file);
+      const width = options?.width || img.width;
+      const height = options?.height || img.height;
+      const newName = file.name.replace(/\.[a-z]+$/i, '.' + type);
+      const mime = 'image/' + type;
+      // Fallback to HTMLCanvasElement is for old firefox versions. Once the minimum firefox >= 105, this can be
+      // simplified to just the OffscreenCanvas implementation.
+      let canvas;
+      let toBlob;
+      if (window.OffscreenCanvas) {
+        canvas = new OffscreenCanvas(width, height);
+        toBlob = (mime, quality) => canvas.convertToBlob({ type: mime, quality });
+      } else {
+        canvas = $.el('canvas', { width, height });
+        toBlob = (mime, quality) => new Promise(resolve => {
+          canvas.toBlob(resolve, mime, quality);
+        });
+      }
+      let newFile;
+      let quality = .9;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      do {
+        newFile = new File([await toBlob(mime, quality)], newName, { type: mime });
+        quality -= .1;
+      } while (type === 'jpeg' && newFile.size > maxSize && quality >= .1);
+      if (newFile.size >= file.size && newFile.type === file.type) {
+        new Notice('warning', "New jpeg file isn't smaller than the old one, so it won't be used.", 3);
+        return file;
+      }
+      return newFile;
+    },
+    previewUrl: undefined,
+    preview() {
+      if (!QR.selected.file)
+        return;
+      QR.nodes.preview = $.el('div', { id: 'overlay', className: 'media-preview' });
+      $.add(doc, QR.nodes.preview);
+      QR.previewUrl = URL.createObjectURL(QR.selected.file);
+      if (QR.selected.file.type.startsWith('video/')) {
+        const video = $.el('video', { controls: true, src: QR.previewUrl });
+        $.add(QR.nodes.preview, video);
+        video.focus();
+      } else {
+        $.add(QR.nodes.preview, $.el('img', { src: QR.previewUrl }));
+      }
+      QR.nodes.preview.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'VIDEO')
+          QR.closePreview();
+      });
+    },
+    closePreview() {
+      QR.nodes.preview.remove();
+      URL.revokeObjectURL(QR.previewUrl);
     },
     cooldown: {
       seconds: 0,
@@ -18325,32 +18408,85 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         }
       }
     }
-    setFile(file) {
-      this.file = file;
-      this.originalName = file.name;
-      if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f')) {
-        this.randomizeName(false);
-      } else {
-        this.filename = this.file.name;
+    /**
+    * Checks if the mime type and file size are valid. For images, it will convert unsupported files to png, shrinks
+    * files with a resolution that is too big, and converts to jpeg if the file size is too big.
+    * It will not attempt to convert files that aren't images.
+    * @param file The old file.
+    * @returns A promise with the old file if it was valid, or a new file if it wasn't.
+    */
+    async validateFile(file) {
+      if (!QR.mimeTypes.includes(file.type)) {
+        if (file.type.startsWith('image/')) {
+          const msg = `The ${file.type.slice(6)} image was converted to png.`;
+          file = await QR.convert(file, 'png');
+          new Notice('info', msg, 3);
+        } else {
+          throw new Error('Unsupported file type.');
+        }
       }
-      this.filesize = $.bytesToString(this.file.size);
-      this.checkSize();
-      $.addClass(this.nodes.el, 'has-file');
-      QR.captcha.moreNeeded();
-      URL.revokeObjectURL(this.URL);
-      this.saveFilename();
-      if (this === QR.selected) {
-        this.showFileData();
-      } else {
-        this.updateFilename();
+      const maxSize = QR.getMaxSize(file);
+      if (file.type.startsWith('image/')) {
+        let img = await createImageBitmap(file);
+        const { width: originalW, height: originalH } = img;
+        let width = originalW, height = originalH;
+        if (width > QR.max_width) {
+          height = Math.round(height * (QR.max_width / width));
+          width = QR.max_width;
+        }
+        if (height > QR.max_height) {
+          width = Math.round(width * (QR.max_height / height));
+          height = QR.max_height;
+        }
+        if (width !== originalW || height !== originalH) {
+          file = await QR.convert(file, file.type === 'image/jpeg' ? 'jpeg' : 'png', { width, height, img });
+          img = undefined; // just in case the file size shrinkage also needs to run using the new file
+          new Notice('warning', `Image was too large got shrunk from ${originalW} * ${originalH} to ${width} * ${height}.` +
+            'It might have lost animation.');
+        }
+        if (file.size > maxSize) {
+          const originalSize = file.size;
+          file = await QR.convert(file, 'jpeg', { maxSize, img });
+          new Notice('warning', `Image was too large (${$.bytesToString(originalSize)}) and got converted to jpg (` +
+            `${$.bytesToString(file.size)}). It might have lost transparency or animation.`);
+        }
+      } else if (file.size > maxSize) {
+        throw new Error(`File too large (file: ${$.bytesToString(file.size)}, max: ${$.bytesToString(maxSize)}).`);
       }
-      this.rmMetadata();
-      this.nodes.el.dataset.type = this.file.type;
-      this.nodes.el.style.backgroundImage = '';
-      if (!QR.mimeTypes.includes(this.file.type)) {
-        this.fileError('Unsupported file type.');
-      } else if (/^(image|video)\//.test(this.file.type)) {
-        this.readFile();
+      return file;
+    }
+    async setFile(file) {
+      try {
+        // Needs to be set before the validation for some error messages.
+        this.file = file;
+        this.filename = file.name;
+        this.originalName = file.name;
+        this.file = await this.validateFile(file);
+        this.originalName = file.name;
+        if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f')) {
+          this.randomizeName(false);
+        } else {
+          this.filename = this.file.name;
+        }
+        this.filesize = $.bytesToString(this.file.size);
+        $.addClass(this.nodes.el, 'has-file', 'has-' + this.file.type.split('/')[0]);
+        QR.captcha.moreNeeded();
+        URL.revokeObjectURL(this.URL);
+        this.saveFilename();
+        if (this === QR.selected) {
+          this.showFileData();
+        } else {
+          this.updateFilename();
+        }
+        this.rmMetadata();
+        this.nodes.el.dataset.type = this.file.type;
+        this.nodes.el.style.backgroundImage = '';
+        if (/^(image|video)\//.test(this.file.type)) {
+          this.readFile();
+        }
+      } catch (error) {
+        console.error(error);
+        this.fileError(error?.message || error || 'unknown error when setting a file');
       }
       this.preventAutoPost();
     }
@@ -18364,15 +18500,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     }
     restoreName() {
       QR.nodes.filename.value = this.filename = this.originalName;
-    }
-    checkSize() {
-      let max = QR.max_size;
-      if (/^video\//.test(this.file.type)) {
-        max = Math.min(max, QR.max_size_video);
-      }
-      if (this.file.size > max) {
-        this.fileError(`File too large (file: ${this.filesize}, max: ${$.bytesToString(max)}).`);
-      }
     }
     readFile() {
       const isVideo = /^video\//.test(this.file.type);
@@ -18488,7 +18615,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       QR.nodes.filename.removeAttribute('title');
       this.rmMetadata();
       this.nodes.el.style.backgroundImage = '';
-      $.rmClass(this.nodes.el, 'has-file');
+      $.rmClass(this.nodes.el, 'has-file', 'has-image', 'has-video');
       this.showFileData();
       URL.revokeObjectURL(this.URL);
       this.dismissErrors(error => $.hasClass(error, 'file-error'));
@@ -18520,10 +18647,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         this.updateFilename();
         QR.nodes.filename.value = this.filename;
         $.addClass(QR.nodes.oekaki, 'has-file');
-        $.addClass(QR.nodes.fileSubmit, 'has-file');
+        $.addClass(QR.nodes.fileSubmit, 'has-file', 'has-' + this.file.type.split('/')[0]);
       } else {
         $.rmClass(QR.nodes.oekaki, 'has-file');
-        $.rmClass(QR.nodes.fileSubmit, 'has-file');
+        $.rmClass(QR.nodes.fileSubmit, 'has-file', 'has-image', 'has-video');
       }
       if (this.file?.source != null) {
         QR.nodes.fileSubmit.dataset.source = this.file.source;
@@ -21514,11 +21641,7 @@ vp-replace
           }
         }
       }
-      if (hide) {
-        return { hide, stub };
-      } else {
-        return { hl, top, noti };
-      }
+      return { hide, stub, hl, top, noti };
     },
     node() {
       if (this.isClone ||
@@ -21532,11 +21655,10 @@ vp-replace
         } else {
           ThreadHiding.hide(this.thread, stub);
         }
-      } else {
-        if (hl) {
-          this.highlights = hl;
-          $.addClass(this.nodes.root, ...hl);
-        }
+      }
+      if (hl) {
+        this.highlights = hl;
+        $.addClass(this.nodes.root, ...hl);
       }
       if (noti && Unread.posts && (this.ID > Unread.lastReadPost) && !QuoteYou.isYou(this)) {
         Unread.openNotification(this, ' triggered a notification filter');
@@ -21588,16 +21710,15 @@ vp-replace
       }
       const { hide, hl, top } = Filter.test(g.SITE.Build.parseJSON(Filter.catalogData[this.ID], this));
       if (hide) {
-        return this.nodes.root.hidden = true;
-      } else {
-        if (hl) {
-          this.highlights = hl;
-          $.addClass(this.nodes.root, ...hl);
-        }
-        if (top) {
-          $.prepend(this.nodes.root.parentNode, this.nodes.root);
-          return g.SITE.catalogPin?.(this.nodes.root);
-        }
+        this.nodes.root.hidden = true;
+      }
+      if (hl) {
+        this.highlights = hl;
+        $.addClass(this.nodes.root, ...hl);
+      }
+      if (top) {
+        $.prepend(this.nodes.root.parentNode, this.nodes.root);
+        g.SITE.catalogPin?.(this.nodes.root);
       }
     },
     isHidden(post) {
