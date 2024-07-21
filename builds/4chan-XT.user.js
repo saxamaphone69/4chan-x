@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.11.0
+// @version      2.11.1
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -171,8 +171,8 @@
   'use strict';
 
   var version = {
-    "version": "2.11.0",
-    "date": "2024-07-20T19:57:47Z"
+    "version": "2.11.1",
+    "date": "2024-07-21T17:28:36Z"
   };
 
   var meta = {
@@ -4333,6 +4333,7 @@ div[data-checked="false"] > .suboption-list {
 :root:not(.catalog-hover-expand) .catalog-container .extra-linebreak,
 :root:not(.catalog-hover-expand) .catalog-container .abbr,
 .catalog-thread > .catalog-container > :not(.catalog-post),
+.catalog-thread .preview-summary,
 .catalog-post > .file > :not(.fileText),
 .catalog-post > * > .fileText > :not(:first-child),
 .catalog-post > .postInfo > :not(.subject):not(.nameBlock):not(.dateTime),
@@ -5333,6 +5334,7 @@ input[type="checkbox"]:checked ~ .checkbox-letter {
   overflow: hidden;
   position: relative;
   text-shadow: 0 0 2px #000;
+  text-align: center;
   transition: opacity .25s ease-in-out, transform .25s ease-in-out;
   vertical-align: top;
   background-size: cover;
@@ -16250,7 +16252,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
   };
 
   const Captcha = {
-    Cache: {
+    cache: {
       init() {
         $.on(d, 'SaveCaptcha', e => {
           return this.saveAPI(e.detail);
@@ -16399,7 +16401,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       updateCount() {
         return $.event('CaptchaCount', this.captchas.length);
       }
-    }, Replace: CaptchaReplace, t: CaptchaT, v2: {
+    },
+    replace: CaptchaReplace,
+    t: CaptchaT,
+    v2: {
       lifetime: 2 * MINUTE,
 
       init() {
@@ -16525,11 +16530,12 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
 
       setupJS() {
         return $.global(function () {
+          const { recaptchaKey } = this;
           const render = function () {
             const { classList } = document.documentElement;
             const container = document.querySelector('#qr .captcha-container');
             return container.dataset.widgetID = window.grecaptcha.render(container, {
-              sitekey: meta.recaptchaKey,
+              sitekey: recaptchaKey,
               theme: classList.contains('tomorrow') || classList.contains('spooky') || classList.contains('dark-captcha') ? 'dark' : 'light',
               callback(response) {
                 return window.dispatchEvent(new CustomEvent('captcha:success', { detail: response }));
@@ -16551,7 +16557,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
               return document.head.appendChild(script);
             }
           }
-        });
+        }, { recaptchaKey: meta.recaptchaKey });
       },
 
       afterSetup(mutations) {
@@ -17792,10 +17798,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       if (!QR.selected.file)
         return;
       QR.nodes.preview = $.el('div', { id: 'overlay', className: 'media-preview' });
-      $.add(doc, QR.nodes.preview);
+      $.add(d.body, QR.nodes.preview);
       QR.previewUrl = URL.createObjectURL(QR.selected.file);
       if (QR.selected.file.type.startsWith('video/')) {
-        const video = $.el('video', { controls: true, src: QR.previewUrl });
+        const video = $.el('video', { controls: true, src: QR.previewUrl, autoplay: true });
         $.add(QR.nodes.preview, video);
         video.focus();
       } else {
@@ -18584,7 +18590,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     * @returns A promise with the old file if it was valid, or a new file if it wasn't.
     */
     async validateFile(file) {
-      if (!QR.mimeTypes.includes(file.type)) {
+      // Do not check on altchans, those might support types 4chan doesn't
+      if (location.hostname.endsWith('4chan.org') && !QR.mimeTypes.includes(file.type)) {
         if (file.type.startsWith('image/')) {
           const msg = `The ${file.type.slice(6)} image was converted to png.`;
           file = await QR.convert(file, 'png');
@@ -18650,7 +18657,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         this.nodes.el.dataset.type = this.file.type;
         this.nodes.el.style.backgroundImage = '';
         if (/^(image|video)\//.test(this.file.type)) {
+          this.nodes.el.textContent = '';
           this.readFile();
+        } else {
+          this.nodes.el.textContent = this.file.name.match(/\.([^\.]+)$/)[1];
         }
       } catch (error) {
         console.error(error);
@@ -18765,12 +18775,20 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       const cv = $.el('canvas');
       cv.height = height;
       cv.width = width;
-      cv.getContext('2d').drawImage(el, 0, 0, width, height);
-      URL.revokeObjectURL(el.src);
-      cv.toBlob(blob => {
-        this.URL = URL.createObjectURL(blob);
-        this.nodes.el.style.backgroundImage = `url(${this.URL})`;
-      });
+      const drawThumbNail = () => {
+        cv.getContext('2d').drawImage(el, 0, 0, width, height);
+        URL.revokeObjectURL(el.src);
+        cv.toBlob(blob => {
+          this.URL = URL.createObjectURL(blob);
+          this.nodes.el.style.backgroundImage = `url(${this.URL})`;
+        });
+      };
+      if (isVideo) {
+        el.currentTime = 0;
+        el.addEventListener("seeked", drawThumbNail);
+      } else {
+        drawThumbNail();
+      }
     }
     rmFile() {
       if (this.isLocked) {
@@ -20039,8 +20057,9 @@ $\
         const postClass = o.isReply ? 'reply' : 'op';
         const postContent = o.isReply ? [postInfo, fileBlock] : [fileBlock, postInfo];
         postContent.push(h("blockquote", { class: "postMessage", id: `m${ID}` }, commentHTML));
-        // Check for g.theadID, otherwise this is appended in the catalog
-        if (!o.isReply && o.threadReplies != null && g.threadID) {
+        // I wonder if there's a better way to skip this in the catalog without breaking hovers.
+        // Currently, this is just hidden by css.
+        if (!o.isReply && o.threadReplies != null) {
           postContent.push(h("span", { class: "summary preview-summary" }, this.summaryText('', o.threadReplies, o.threadImages, true)));
         }
         const wholePost = h(hFragment, null,
@@ -21898,7 +21917,7 @@ vp-replace
       if (noti && Unread.posts && (this.ID > Unread.lastReadPost) && !QuoteYou.isYou(this)) {
         Unread.openNotification(this, ' triggered a notification filter');
       }
-      if (this.file) {
+      if (this.file?.thumbLink) {
         $.on(this.file.thumbLink, 'click', (e) => {
           if (!e.shiftKey || !Conf['MD5 Quick Filter in Threads'])
             return;

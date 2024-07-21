@@ -1270,10 +1270,10 @@ var QR = {
     if (!QR.selected.file) return;
 
     QR.nodes.preview = $.el('div', { id: 'overlay', className: 'media-preview' }) as HTMLDivElement;
-    $.add(doc, QR.nodes.preview);
+    $.add(d.body, QR.nodes.preview);
     QR.previewUrl = URL.createObjectURL(QR.selected.file);
     if (QR.selected.file.type.startsWith('video/')) {
-      const video = $.el('video', { controls: true, src: QR.previewUrl });
+      const video = $.el('video', { controls: true, src: QR.previewUrl, autoplay: true });
       $.add(QR.nodes.preview, video);
       video.focus();
     } else {
@@ -2105,7 +2105,8 @@ class post {
    * @returns A promise with the old file if it was valid, or a new file if it wasn't.
    */
   async validateFile(file: File): Promise<File> {
-    if (!QR.mimeTypes.includes(file.type)) {
+    // Do not check on altchans, those might support types 4chan doesn't
+    if (location.hostname.endsWith('4chan.org') && !QR.mimeTypes.includes(file.type)) {
       if (file.type.startsWith('image/')) {
         const msg = `The ${file.type.slice(6)} image was converted to png.`;
         file = await QR.convert(file, 'png');
@@ -2181,7 +2182,10 @@ class post {
       this.nodes.el.dataset.type = this.file.type;
       this.nodes.el.style.backgroundImage = '';
       if (/^(image|video)\//.test(this.file.type)) {
+        this.nodes.el.textContent = '';
         this.readFile();
+      } else {
+        this.nodes.el.textContent = this.file.name.match(/\.([^\.]+)$/)[1];
       }
     } catch (error) {
       console.error(error);
@@ -2298,12 +2302,21 @@ class post {
     const cv = $.el('canvas') as HTMLCanvasElement;
     cv.height = height;
     cv.width = width;
-    cv.getContext('2d').drawImage(el, 0, 0, width, height);
-    URL.revokeObjectURL(el.src);
-    cv.toBlob(blob => {
-      this.URL = URL.createObjectURL(blob);
-      this.nodes.el.style.backgroundImage = `url(${this.URL})`;
-    });
+
+    const drawThumbNail = () => {
+      cv.getContext('2d').drawImage(el, 0, 0, width, height);
+      URL.revokeObjectURL(el.src);
+      cv.toBlob(blob => {
+        this.URL = URL.createObjectURL(blob);
+        this.nodes.el.style.backgroundImage = `url(${this.URL})`;
+      });
+    };
+    if (isVideo) {
+      el.currentTime = 0;
+      el.addEventListener("seeked", drawThumbNail);
+    } else {
+      drawThumbNail();
+    }
   }
 
   rmFile() {

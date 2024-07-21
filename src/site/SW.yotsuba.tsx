@@ -567,8 +567,9 @@ $\
 
       const postContent: EscapedHtml[] = o.isReply ? [postInfo, fileBlock] : [fileBlock, postInfo];
       postContent.push(<blockquote class="postMessage" id={`m${ID}`}>{commentHTML}</blockquote>);
-      // Check for g.theadID, otherwise this is appended in the catalog
-      if (!o.isReply && o.threadReplies != null && g.threadID) {
+      // I wonder if there's a better way to skip this in the catalog without breaking hovers.
+      // Currently, this is just hidden by css.
+      if (!o.isReply && o.threadReplies != null) {
         postContent.push(<span class="summary preview-summary">
           {this.summaryText('', o.threadReplies, o.threadImages, true)}
         </span>);

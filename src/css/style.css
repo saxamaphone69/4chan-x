@@ -904,6 +904,7 @@ div[data-checked="false"] > .suboption-list {
 :root:not(.catalog-hover-expand) .catalog-container .extra-linebreak,
 :root:not(.catalog-hover-expand) .catalog-container .abbr,
 .catalog-thread > .catalog-container > :not(.catalog-post),
+.catalog-thread .preview-summary,
 .catalog-post > .file > :not(.fileText),
 .catalog-post > * > .fileText > :not(:first-child),
 .catalog-post > .postInfo > :not(.subject):not(.nameBlock):not(.dateTime),
@@ -1904,6 +1905,7 @@ input[type="checkbox"]:checked ~ .checkbox-letter {
   overflow: hidden;
   position: relative;
   text-shadow: 0 0 2px #000;
+  text-align: center;
   transition: opacity .25s ease-in-out, transform .25s ease-in-out;
   vertical-align: top;
   background-size: cover;

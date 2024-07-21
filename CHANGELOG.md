@@ -3,6 +3,15 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.11.1 (2024-07-21)
+
+- From [#76](https://github.com/TuxedoTako/4chan-xt/issues/76):
+  - Fixed errors on /f/. The captcha should load again.
+  - Fixed video thumbnails not being generated in the quick reply.
+  - Video preview now auto plays.
+- Hovering over an OP in the index now also shows the number of replies and images in the thread.
+  [#71 \(comment)](https://github.com/TuxedoTako/4chan-xt/issues/71#issuecomment-2241358550)
+
 ### 2.11.0 (2024-07-20)
 
 - Automatic conversion of invalid image files in the quick reply.

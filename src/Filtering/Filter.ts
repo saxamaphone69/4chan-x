@@ -284,7 +284,7 @@ var Filter = {
     if (noti && Unread.posts && (this.ID > Unread.lastReadPost) && !QuoteYou.isYou(this)) {
       Unread.openNotification(this, ' triggered a notification filter');
     }
-    if (this.file) {
+    if (this.file?.thumbLink) {
       $.on(this.file.thumbLink, 'click', (e: MouseEvent) => {
         if (!e.shiftKey || !Conf['MD5 Quick Filter in Threads']) return;
         Filter.quickFilterMD5.call(this);
