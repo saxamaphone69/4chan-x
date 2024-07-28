@@ -191,6 +191,10 @@ var Redirect = {
     } else {
       if (/[sm]\.jpg$/.test(filename)) { return ''; }
     }
+    if (archive.name === 'arch.b4k.co') {
+      // remove last 3 digits
+      filename = filename.replace(/[0-9]{3}\./, '.');
+    }
     return `${Redirect.protocol(archive)}${archive.domain}/${boardID}/full_image/${filename}`;
   },
 

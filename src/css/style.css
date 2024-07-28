@@ -904,7 +904,7 @@ div[data-checked="false"] > .suboption-list {
 :root:not(.catalog-hover-expand) .catalog-container .extra-linebreak,
 :root:not(.catalog-hover-expand) .catalog-container .abbr,
 .catalog-thread > .catalog-container > :not(.catalog-post),
-.catalog-thread .preview-summary,
+.preview-summary,
 .catalog-post > .file > :not(.fileText),
 .catalog-post > * > .fileText > :not(:first-child),
 .catalog-post > .postInfo > :not(.subject):not(.nameBlock):not(.dateTime),
@@ -1284,6 +1284,9 @@ textarea.copy-text-element {
 #qp img {
   max-height: 80vh;
   max-width: 50vw;
+}
+#qp .preview-summary {
+  display: block;
 }
 
 /* Quote Threading */

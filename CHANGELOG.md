@@ -3,6 +3,13 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### Unreleased
+
+- Fixed duplicated thread stats in the index.
+  [#71 \(comment)](https://github.com/TuxedoTako/4chan-xt/issues/71#issuecomment-2242285191)
+- Added handling for b4k image redirects. [#77](https://github.com/TuxedoTako/4chan-xt/issues/77)
+- Updated archives list, removing TokyoChronos.
+
 ### 2.11.1 (2024-07-21)
 
 - From [#76](https://github.com/TuxedoTako/4chan-xt/issues/76):
