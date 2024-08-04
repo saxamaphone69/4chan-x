@@ -207,9 +207,24 @@ var Header = {
     $.rmAll(list);
     if (!boardnav) { return; }
     boardnav = boardnav.replace(/(\r\n|\n|\r)/g, ' ');
-    const re = /[\w@]+(-(all|title|replace|full|index|catalog|archive|expired|nt|(mode|sort|text):"[^"]+"(,"[^"]+")?))*|[^\w@]+/g;
-    const nodes = (boardnav.match(re).map((t) => Header.mapCustomNavigation(t)));
-    $.add(list, nodes);
+    const segments = boardnav.split(/(\{\{|\}\})/);
+    const spanStack = [];
+    let currentContainer = list;
+    segments.forEach(segment => {
+      if (segment === '{{') {
+        const span = $.el('span');
+        $.add(currentContainer, span);
+        spanStack.push(span);
+        currentContainer = span;
+      } else if (segment === '}}') {
+        spanStack.pop();
+        currentContainer = spanStack.length > 0 ? spanStack[spanStack.length - 1] : list;
+      } else {
+        const re = /[\w@]+(-(all|title|replace|full|index|catalog|archive|expired|nt|(mode|sort|text):"[^"]+"(,"[^"]+")?))*|[^\w@]+/g;
+        const segmentNodes = (segment.match(re) || []).map((t) => Header.mapCustomNavigation(t));
+        segmentNodes.forEach(node => currentContainer.appendChild(node));
+      }
+    });
     return CatalogLinks.setLinks(list);
   },
 
@@ -291,6 +306,7 @@ var Header = {
         return $.el('a', {
           href: 'https://twitter.com/4chan',
           title: '4chan Twitter',
+          className: 'navSmall',
           textContent: '@'
         }
         );
@@ -355,7 +371,6 @@ var Header = {
       a.rel = 'noopener';
     }
 
-    if (boardID === '@') { $.addClass(a, 'navSmall'); }
     return a;
   },
 
