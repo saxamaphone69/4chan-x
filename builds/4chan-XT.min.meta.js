@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.11.1
+// @version      2.12.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -54,7 +54,6 @@
 // @connect      archived.moe
 // @connect      thebarchive.com
 // @connect      archiveofsins.com
-// @connect      www.tokyochronos.net
 // @connect      archive.palanq.win
 // @connect      eientei.xyz
 // @connect      api.clyp.it

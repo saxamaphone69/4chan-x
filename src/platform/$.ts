@@ -230,11 +230,11 @@ $.X = function(path, root) {
 };
 
 $.addClass = function(el, ...classNames) {
-  for (var className of classNames) { el.classList.add(className); }
+  el.classList.add(...classNames);
 };
 
 $.rmClass = function(el, ...classNames) {
-  for (var className of classNames) { el.classList.remove(className); }
+  el.classList.remove(...classNames);
 };
 
 $.toggleClass = (el, className) => el.classList.toggle(className);

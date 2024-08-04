@@ -3,12 +3,16 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
-### Unreleased
+### 2.12.0 (2024-08-04)
 
+- Ignore "Randomize Filename" if it's a soundpost. [#78](https://github.com/TuxedoTako/4chan-xt/pull/78)
+- Allow custom header positioning. [#84](https://github.com/TuxedoTako/4chan-xt/pull/84)
 - Fixed duplicated thread stats in the index.
   [#71 \(comment)](https://github.com/TuxedoTako/4chan-xt/issues/71#issuecomment-2242285191)
 - Added handling for b4k image redirects. [#77](https://github.com/TuxedoTako/4chan-xt/issues/77)
 - Updated archives list, removing TokyoChronos.
+- Added `from-archive` CSS class for posts restored from archives, and `from-archive-link` for quote links linking to
+  them. For use in custom styles. [#74](https://github.com/TuxedoTako/4chan-xt/issues/74)
 
 ### 2.11.1 (2024-07-21)
 

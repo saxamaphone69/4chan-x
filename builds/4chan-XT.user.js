@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.11.1
+// @version      2.12.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -54,7 +54,6 @@
 // @connect      archived.moe
 // @connect      thebarchive.com
 // @connect      archiveofsins.com
-// @connect      www.tokyochronos.net
 // @connect      archive.palanq.win
 // @connect      eientei.xyz
 // @connect      api.clyp.it
@@ -171,8 +170,8 @@
   'use strict';
 
   var version = {
-    "version": "2.11.1",
-    "date": "2024-07-21T17:28:36Z"
+    "version": "2.12.0",
+    "date": "2024-08-04T15:37:00Z"
   };
 
   var meta = {
@@ -1786,14 +1785,10 @@ https://*.hcaptcha.com
     return d.evaluate(path, root, null, 7, null);
   };
   $.addClass = function (el, ...classNames) {
-    for (var className of classNames) {
-      el.classList.add(className);
-    }
+    el.classList.add(...classNames);
   };
   $.rmClass = function (el, ...classNames) {
-    for (var className of classNames) {
-      el.classList.remove(className);
-    }
+    el.classList.remove(...classNames);
   };
   $.toggleClass = (el, className) => el.classList.toggle(className);
   $.hasClass = (el, className) => el.classList.contains(className);
@@ -2572,6 +2567,14 @@ https://*.hcaptcha.com
     will give you<br>
     <code>[ + ] [Technology] [Technology / Anime & Manga / Otaku Culture] [x / wsg / h] [Piracy]</code><br>
     if you are on /g/.
+  </div>
+  <div class="note">
+    For custom styling, you can wrap groups or individual links in <code>{{</code> and <code>}}</code>, to wrap them in
+    a span. You can also add classes in double quotes right after the {{. For example: <br />
+    <code>[g-title] {{"favorites"[a-title / jp-title]}}</code><br />
+    Results in:<br />
+    <code>[&lt;a [...] &gt;Technology&lt;/a&gt;] &lt;span class="favorites"&gt;[&lt;a [...] &gt;Anime &amp;amp;
+      Manga&lt;/a&gt; / &lt;a [...] &gt;Otaku Culture&lt;/a&gt;]&lt;/span&gt;</code>
   </div>
 </fieldset>
 
@@ -4333,7 +4336,7 @@ div[data-checked="false"] > .suboption-list {
 :root:not(.catalog-hover-expand) .catalog-container .extra-linebreak,
 :root:not(.catalog-hover-expand) .catalog-container .abbr,
 .catalog-thread > .catalog-container > :not(.catalog-post),
-.catalog-thread .preview-summary,
+.preview-summary,
 .catalog-post > .file > :not(.fileText),
 .catalog-post > * > .fileText > :not(:first-child),
 .catalog-post > .postInfo > :not(.subject):not(.nameBlock):not(.dateTime),
@@ -4713,6 +4716,9 @@ textarea.copy-text-element {
 #qp img {
   max-height: 80vh;
   max-width: 50vw;
+}
+#qp .preview-summary {
+  display: block;
 }
 
 /* Quote Threading */
@@ -8340,18 +8346,22 @@ svg.icon {
         $.after($('input', this.nodes.info), strong);
       }
       strong.textContent = '[Deleted, restored from external archive]';
+      $.addClass(this.nodes.root, 'from-archive');
       if (this.isClone) {
         return;
       }
       for (var clone of this.clones) {
         clone.markAsFromArchive();
       }
+      for (var quotelink of Get.allQuotelinksLinkingTo(this)) {
+        $.addClass(quotelink, 'from-archive-link');
+      }
     }
     // XXX Workaround for 4chan's racing condition
     // giving us false-positive dead posts.
     resurrect() {
       this.isDead = false;
-      $.rmClass(this.nodes.root, 'deleted-post');
+      $.rmClass(this.nodes.root, 'deleted-post', 'from-archive');
       const strong = $('strong.warning', this.nodes.info);
       // no false-positive files
       if (this.files.some(file => file.isDead)) {
@@ -8369,8 +8379,8 @@ svg.icon {
       for (var quotelink of Get.allQuotelinksLinkingTo(this)) {
         if ($.hasClass(quotelink, 'deadlink')) {
           $.rm($('.qmark-dead', quotelink));
-          $.rmClass(quotelink, 'deadlink');
         }
+        $.rmClass(quotelink, 'deadlink', 'from-archive-link');
       }
     }
     collect() {
@@ -18638,7 +18648,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         this.originalName = file.name;
         this.file = await this.validateFile(file);
         this.originalName = file.name;
-        if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f')) {
+        if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f') && (!this.file.name.includes('[sound='))) {
           this.randomizeName(false);
         } else {
           this.filename = this.file.name;
@@ -22562,13 +22572,29 @@ vp-replace
     generateBoardList(boardnav) {
       const list = $('#custom-board-list', Header.boardList);
       $.rmAll(list);
-      if (!boardnav) {
+      if (!boardnav)
         return;
-      }
       boardnav = boardnav.replace(/(\r\n|\n|\r)/g, ' ');
-      const re = /[\w@]+(-(all|title|replace|full|index|catalog|archive|expired|nt|(mode|sort|text):"[^"]+"(,"[^"]+")?))*|[^\w@]+/g;
-      const nodes = (boardnav.match(re).map((t) => Header.mapCustomNavigation(t)));
-      $.add(list, nodes);
+      const segments = boardnav.split(/(\{\{(?:"[^"]+")?|\}\})/);
+      const spanStack = [];
+      let currentContainer = list;
+      segments.forEach(segment => {
+        if (segment.startsWith('{{')) {
+          const span = $.el('span');
+          $.add(currentContainer, span);
+          spanStack.push(span);
+          currentContainer = span;
+          if (segment.length > 2)
+            span.className = segment.slice(3, -1);
+        } else if (segment === '}}') {
+          spanStack.pop();
+          currentContainer = spanStack.length > 0 ? spanStack[spanStack.length - 1] : list;
+        } else {
+          const re = /[\w@]+(-(all|title|replace|full|index|catalog|archive|expired|nt|(mode|sort|text):"[^"]+"(,"[^"]+")?))*|[^\w@]+/g;
+          const segmentNodes = (segment.match(re) || []).map((t) => Header.mapCustomNavigation(t));
+          segmentNodes.forEach(node => currentContainer.appendChild(node));
+        }
+      });
       return CatalogLinks.setLinks(list);
     },
     mapCustomNavigation(t) {
@@ -22640,6 +22666,7 @@ vp-replace
           return $.el('a', {
             href: 'https://twitter.com/4chan',
             title: '4chan Twitter',
+            className: 'navSmall',
             textContent: '@'
           });
         }
@@ -22697,9 +22724,6 @@ vp-replace
       if (/-nt/.test(t)) {
         a.target = '_blank';
         a.rel = 'noopener';
-      }
-      if (boardID === '@') {
-        $.addClass(a, 'navSmall');
       }
       return a;
     },
@@ -23117,16 +23141,6 @@ vp-replace
     "files": ["h", "hc", "hm", "i", "lgbt", "r", "s", "soc", "t", "u"],
     "reports": true
   }, {
-    "uid": 34,
-    "name": "TokyoChronos",
-    "domain": "www.tokyochronos.net",
-    "http": false,
-    "https": true,
-    "software": "foolfuuka",
-    "boards": ["c", "g", "jp", "mu", "vp", "vrpg", "vt"],
-    "files": [],
-    "reports": true
-  }, {
     "uid": 36,
     "name": "palanq.win",
     "domain": "archive.palanq.win",
@@ -23329,6 +23343,10 @@ vp-replace
         if (/[sm]\.jpg$/.test(filename)) {
           return '';
         }
+      }
+      if (archive.name === 'arch.b4k.co') {
+        // remove last 3 digits
+        filename = filename.replace(/[0-9]{3}\./, '.');
       }
       return `${Redirect.protocol(archive)}${archive.domain}/${boardID}/full_image/${filename}`;
     },

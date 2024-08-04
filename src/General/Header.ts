@@ -202,20 +202,21 @@ var Header = {
     return CatalogLinks.setLinks(fullBoardList);
   },
 
-  generateBoardList(boardnav) {
+  generateBoardList(boardnav: string) {
     const list = $('#custom-board-list', Header.boardList);
     $.rmAll(list);
-    if (!boardnav) { return; }
+    if (!boardnav) return;
     boardnav = boardnav.replace(/(\r\n|\n|\r)/g, ' ');
-    const segments = boardnav.split(/(\{\{|\}\})/);
+    const segments = boardnav.split(/(\{\{(?:"[^"]+")?|\}\})/);
     const spanStack = [];
     let currentContainer = list;
     segments.forEach(segment => {
-      if (segment === '{{') {
+      if (segment.startsWith('{{')) {
         const span = $.el('span');
         $.add(currentContainer, span);
         spanStack.push(span);
         currentContainer = span;
+        if (segment.length > 2) span.className = segment.slice(3, -1);
       } else if (segment === '}}') {
         spanStack.pop();
         currentContainer = spanStack.length > 0 ? spanStack[spanStack.length - 1] : list;

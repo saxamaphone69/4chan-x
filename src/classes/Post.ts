@@ -397,10 +397,14 @@ export default class Post {
       $.after($('input', this.nodes.info), strong);
     }
     strong.textContent = '[Deleted, restored from external archive]';
+    $.addClass(this.nodes.root, 'from-archive');
 
     if (this.isClone) { return; }
     for (var clone of this.clones) {
       clone.markAsFromArchive();
+    }
+    for (var quotelink of Get.allQuotelinksLinkingTo(this) as HTMLAnchorElement[]) {
+      $.addClass(quotelink, 'from-archive-link');
     }
   }
 
@@ -408,7 +412,7 @@ export default class Post {
   // giving us false-positive dead posts.
   resurrect() {
     this.isDead = false;
-    $.rmClass(this.nodes.root, 'deleted-post');
+    $.rmClass(this.nodes.root, 'deleted-post', 'from-archive');
     const strong = $('strong.warning', this.nodes.info);
     // no false-positive files
     if (this.files.some(file => file.isDead)) {
@@ -426,8 +430,8 @@ export default class Post {
     for (var quotelink of Get.allQuotelinksLinkingTo(this) as HTMLAnchorElement[]) {
       if ($.hasClass(quotelink, 'deadlink')) {
         $.rm($('.qmark-dead', quotelink));
-        $.rmClass(quotelink, 'deadlink');
       }
+      $.rmClass(quotelink, 'deadlink', 'from-archive-link');
     }
   }
 
