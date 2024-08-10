@@ -1208,8 +1208,6 @@ https://*.hcaptcha.com
 
   passMessageClosed: false,
 
-  'Prerequest Captcha': false,
-
   'PSAseen': [[]],
 
   XEmbedder: 'fxt',

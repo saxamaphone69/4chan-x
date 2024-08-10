@@ -38,31 +38,6 @@ const Captcha = {
       return this.neededRaw() && $.event('LoadCaptcha');
     },
 
-    prerequest() {
-      if (!Conf['Prerequest Captcha']) { return; }
-      // Post count temporarily off by 1 when called from QR.post.rm, QR.close, or QR.submit
-      return $.queueTask(() => {
-        if (
-          !this.prerequested &&
-          this.neededRaw() &&
-          !$.event('LoadCaptcha') &&
-          !QR.captcha.occupied() &&
-          (QR.cooldown.seconds <= 60) &&
-          (QR.selected === QR.posts[QR.posts.length - 1]) &&
-          !QR.selected.isOnlyQuotes()
-        ) {
-          const isReply = (QR.selected.thread !== 'new');
-          if (!$.event('RequestCaptcha', { isReply })) {
-            this.prerequested = true;
-            this.submitCB = captcha => {
-              if (captcha) { return this.save(captcha); }
-            };
-            return this.updateCount();
-          }
-        }
-      });
-    },
-
     haveCookie() {
       return /\b_ct=/.test(d.cookie) && (QR.posts[0].thread !== 'new');
     },

@@ -1,12 +1,7 @@
-import { d, g } from "../globals/globals";
+import { Conf, d, g } from "../globals/globals";
 import $ from "../platform/$";
 import QR from "./QR";
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 const CaptchaT = {
   init() {
     if (d.cookie.indexOf('pass_enabled=1') >= 0) { return; }
@@ -16,21 +11,17 @@ const CaptchaT = {
     this.nodes = {root};
 
     $.addClass(QR.nodes.el, 'has-captcha', 'captcha-t');
-    return $.after(QR.nodes.com.parentNode, root);
+    $.after(QR.nodes.com.parentNode, root);
   },
 
   moreNeeded() {
   },
 
   getThread() {
-    let threadID;
-    const boardID = g.BOARD.ID;
-    if (QR.posts[0].thread === 'new') {
-      threadID = '0';
-    } else {
-      threadID = '' + QR.posts[0].thread;
-    }
-    return {boardID, threadID};
+    return {
+      boardID: g.BOARD.ID,
+      threadID: QR.posts[0].thread === 'new' ? '0' : ('' + QR.posts[0].thread),
+    };
   },
 
   setup(focus) {
@@ -40,28 +31,26 @@ const CaptchaT = {
       this.nodes.container = $.el('div', {className: 'captcha-container'});
       $.prepend(this.nodes.root, this.nodes.container);
       CaptchaT.currentThread = CaptchaT.getThread();
+      CaptchaT.currentThread.autoLoad = Conf['Auto-load captcha'] ? '1' : '0';
       $.global(function() {
-        const el = document.querySelector('#qr .captcha-container');
-        window.TCaptcha.init(el, this.boardID, +this.threadID);
-        return window.TCaptcha.setErrorCb(err => window.dispatchEvent(new CustomEvent('CreateNotification', {detail: {
+        const { TCaptcha } = window;
+        TCaptcha.init(document.querySelector('#qr .captcha-container'), this.boardID, +this.threadID);
+        TCaptcha.setErrorCb(err => window.dispatchEvent(new CustomEvent('CreateNotification', {detail: {
           type: 'warning',
           content: '' + err
-        }})
-        ));
-      }
-      , CaptchaT.currentThread);
+        }})));
+        if (this.autoLoad === '1') TCaptcha.load(this.boardID, this.threadID);
+      }, CaptchaT.currentThread);
     }
 
-    if (focus) {
-      return $('#t-resp').focus();
-    }
+    if (focus) $('#t-resp').focus();
   },
 
   destroy() {
     if (!this.isEnabled || !this.nodes.container) { return; }
     $.global(() => window.TCaptcha.destroy());
     $.rm(this.nodes.container);
-    return delete this.nodes.container;
+    delete this.nodes.container;
   },
 
   updateThread() {
@@ -70,7 +59,7 @@ const CaptchaT = {
     const newThread = CaptchaT.getThread();
     if ((newThread.boardID !== boardID) || (newThread.threadID !== threadID)) {
       CaptchaT.destroy();
-      return CaptchaT.setup();
+      CaptchaT.setup();
     }
   },
 
@@ -89,9 +78,8 @@ const CaptchaT = {
   },
 
   setUsed() {
-    if (!this.isEnabled) { return; }
-    if (this.nodes.container) {
-      return $.global(() => window.TCaptcha.clearChallenge());
+    if (this.isEnabled && this.nodes.container) {
+      $.global(() => window.TCaptcha.clearChallenge());
     }
   },
 

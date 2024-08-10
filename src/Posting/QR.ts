@@ -2039,9 +2039,6 @@ class post {
     }
     this.nodes.span.textContent = this.com;
     QR.captcha.moreNeeded();
-    if (QR.captcha === Captcha.v2) {
-      Captcha.cache.prerequest();
-    }
   }
 
   isOnlyQuotes() {
