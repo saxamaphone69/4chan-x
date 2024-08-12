@@ -224,7 +224,7 @@ var Gallery = {
       file.loop = true;
       Volume.setup(file);
       if (Conf['Autoplay']) { file.play(); }
-      if (Conf['Show Controls']) { ImageCommon.addControls(file); }
+      if (Conf['Show Controls']) file.controls = true;
     }
 
     doc.classList.toggle('gal-pdf', file.nodeName === 'IFRAME');

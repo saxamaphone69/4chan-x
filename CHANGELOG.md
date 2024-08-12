@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### Unreleased
+
+- Fix "Auto-load captcha". [#42](https://github.com/TuxedoTako/4chan-xt/issues/42)
+- Fixed double controls when expanding a video the second time. [#87](https://github.com/TuxedoTako/4chan-xt/issues/87)
+
 ### 2.12.0 (2024-08-04)
 
 - Ignore "Randomize Filename" if it's a soundpost. [#78](https://github.com/TuxedoTako/4chan-xt/pull/78)

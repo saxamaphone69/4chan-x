@@ -28,6 +28,7 @@ export interface File {
   fullImage?:  HTMLImageElement | HTMLVideoElement,
   audio?:      HTMLAudioElement,
   audioSlider?:HTMLSpanElement,
+  wasPlaying?: boolean,
   dimensions?: string,
   height?:     string,
   width?:      string,

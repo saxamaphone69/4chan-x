@@ -338,9 +338,8 @@ var Main = {
           }
           if (Conf['Loop in New Tab']) {
             video.loop = true;
-            video.controls = false;
+            video.controls = true;
             video.play();
-            return ImageCommon.addControls(video);
           }
         }
       });

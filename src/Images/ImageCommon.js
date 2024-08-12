@@ -114,17 +114,6 @@ var ImageCommon = {
     return $.ajax(threadJSON, {onloadend() { return parseJSON.call(this); }});
   },
 
-  // Add controls, but not until the mouse is moved over the video.
-  addControls(video) {
-    var handler = function() {
-      $.off(video, 'mouseover', handler);
-      // Hacky workaround for Firefox forever-loading bug for very short videos
-      const t = new Date().getTime();
-      return $.asap((() => ($.engine !== 'gecko') || ((video.readyState >= 3) && (video.currentTime <= Math.max(0.1, (video.duration - 0.5)))) || (new Date().getTime() >= (t + 1000))), () => video.controls = true);
-    };
-    return $.on(video, 'mouseover', handler);
-  },
-
   // XXX Estimate whether clicks are on the video controls and should be ignored.
   onControls(e) {
     return (Conf['Show Controls'] && Conf['Click Passthrough'] && (e.target.nodeName === 'VIDEO')) ||

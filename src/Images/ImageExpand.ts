@@ -328,7 +328,8 @@ var ImageExpand = {
   },
 
   setupVideo(post: Post, playing: boolean, controls: boolean) {
-    const {fullImage, audio} = post.file;
+    const {audio} = post.file;
+    const fullImage = post.file.fullImage as HTMLVideoElement
     if (!playing && !audio) {
       fullImage.controls = controls;
       return;
@@ -336,14 +337,12 @@ var ImageExpand = {
     fullImage.controls = false;
     $.asap((() => doc.contains(fullImage)), function() {
       if (!d.hidden && Header.isNodeVisible(fullImage)) {
-        return fullImage.play();
+        fullImage.play();
       } else {
-        return post.file.wasPlaying = true;
+        post.file.wasPlaying = true;
       }
     });
-    if (controls && !audio) {
-      return ImageCommon.addControls(fullImage);
-    }
+    fullImage.controls = controls && !audio;
   },
 
   videoCB: (function() {
