@@ -1,7 +1,7 @@
 {
   "name": "4chan XT",
   "version": "2.13.0",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "description": "4chan XT is a script that adds various features to anonymous imageboards.",
   "icons": {
     "16": "icon16.png",
@@ -54,10 +54,7 @@
     }
   ],
   "background": {
-    "scripts": [
-      "eventPage.js"
-    ],
-    "persistent": false
+    "service_worker": "eventPage.js"
   },
   "homepage_url": "https://github.com/TuxedoTako/4chan-xt",
   "minimum_chrome_version": "90",
@@ -67,6 +64,11 @@
     }
   },
   "permissions": [
+    "storage",
+    "scripting",
+    "webRequest"
+  ],
+  "host_permissions": [
     "https://*.4chan.org/*",
     "https://*.4cdn.org/*",
     "https://erischan.org/*",
@@ -94,10 +96,9 @@
     "https://www.sportschan.org/*",
     "https://sushigirl.us/*",
     "https://www.sushigirl.us/*",
-    "https://tvch.moe/*",
-    "storage"
+    "https://tvch.moe/*"
   ],
-  "optional_permissions": [
+  "optional_host_permissions": [
     "*://*/"
   ]
 }

@@ -32,15 +32,7 @@ const CaptchaT = {
       $.prepend(this.nodes.root, this.nodes.container);
       CaptchaT.currentThread = CaptchaT.getThread();
       CaptchaT.currentThread.autoLoad = Conf['Auto-load captcha'] ? '1' : '0';
-      $.global(function() {
-        const { TCaptcha } = window;
-        TCaptcha.init(document.querySelector('#qr .captcha-container'), this.boardID, +this.threadID);
-        TCaptcha.setErrorCb(err => window.dispatchEvent(new CustomEvent('CreateNotification', {detail: {
-          type: 'warning',
-          content: '' + err
-        }})));
-        if (this.autoLoad === '1') TCaptcha.load(this.boardID, this.threadID);
-      }, CaptchaT.currentThread);
+      $.global('setupTCaptcha', CaptchaT.currentThread);
     }
 
     if (focus) $('#t-resp').focus();
@@ -48,7 +40,7 @@ const CaptchaT = {
 
   destroy() {
     if (!this.isEnabled || !this.nodes.container) { return; }
-    $.global(() => window.TCaptcha.destroy());
+    $.global('destroyTCaptcha');
     $.rm(this.nodes.container);
     delete this.nodes.container;
   },
@@ -79,7 +71,7 @@ const CaptchaT = {
 
   setUsed() {
     if (this.isEnabled && this.nodes.container) {
-      $.global(() => window.TCaptcha.clearChallenge());
+      $.global('TCaptchaClearChallenge');
     }
   },
 

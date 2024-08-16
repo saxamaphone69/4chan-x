@@ -3,9 +3,13 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
-### Unreleased
+### 2.13.0 (2024-08-16)
 
-- Fix "Auto-load captcha". [#42](https://github.com/TuxedoTako/4chan-xt/issues/42)
+- Future proofing: a manifest V3 version is now available. [#83](https://github.com/TuxedoTako/4chan-xt/issues/83)
+  - This version only works on chromium.
+  - The V2 version is still the default: to use the V3 version, go to the crx directory, rename or delete
+    `manifest.json`, and then rename `manifestV3.json` to `manifest.json`.
+- Fixed "Auto-load captcha". [#42](https://github.com/TuxedoTako/4chan-xt/issues/42)
 - Fixed double controls when expanding a video the second time. [#87](https://github.com/TuxedoTako/4chan-xt/issues/87)
 
 ### 2.12.0 (2024-08-04)

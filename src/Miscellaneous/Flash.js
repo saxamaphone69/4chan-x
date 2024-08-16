@@ -15,12 +15,12 @@ var Flash = {
 
   initReady() {
     if ($.hasStorage) {
-      return $.global(function() { if (JSON.parse(localStorage['4chan-settings'] || '{}').disableAll) { return window.SWFEmbed.init(); } });
+      $.global('initFlash');
     } else {
       if (g.VIEW === 'thread') {
-        $.global(() => window.Main.tid = location.pathname.split(/\/+/)[3]);
+        $.global('setThreadId');
       }
-      return $.global(() => window.SWFEmbed.init());
+      $.global('initFlashNoStorage');
     }
   }
 };

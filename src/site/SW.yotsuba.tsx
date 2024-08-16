@@ -335,9 +335,7 @@ $\
   },
 
   testNativeExtension() {
-    return $.global(function() {
-      if (window.Parser?.postMenuIcon) { return this.enabled = 'true'; }
-    });
+    return $.global('testNativeExtension', {});
   },
 
   transformBoardList() {

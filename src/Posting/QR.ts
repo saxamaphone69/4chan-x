@@ -1599,20 +1599,7 @@ var QR = {
     },
 
     setup() {
-      $.global(function () {
-        const { FCX } = window;
-        FCX.oekakiCB = () => window.Tegaki.flatten().toBlob(function (file) {
-          const source = `oekaki-${Date.now()}`;
-          FCX.oekakiLatest = source;
-          document.dispatchEvent(new CustomEvent('QRSetFile', {
-            bubbles: true,
-            detail: { file, name: FCX.oekakiName, source }
-          }));
-        });
-        if (window.Tegaki) {
-          document.querySelector('#qr .oekaki').hidden = false;
-        }
-      });
+      $.global('setupQR');
     },
 
     load(cb) {
@@ -1637,22 +1624,7 @@ var QR = {
     },
 
     draw() {
-      return $.global(function () {
-        const { Tegaki, FCX } = window;
-        if (Tegaki.bg) { Tegaki.destroy(); }
-        FCX.oekakiName = 'tegaki.png';
-        return Tegaki.open({
-          onDone: FCX.oekakiCB,
-          onCancel() { Tegaki.bgColor = '#ffffff'; },
-          width: +document.querySelector('#qr [name=oekaki-width]').value,
-          height: +document.querySelector('#qr [name=oekaki-height]').value,
-          bgColor:
-            document.querySelector('#qr [name=oekaki-bg]').checked ?
-              document.querySelector('#qr [name=oekaki-bgcolor]').value
-              :
-              'transparent'
-        });
-      });
+      return $.global('qrTegakiDraw');
     },
 
     button() {
@@ -1664,52 +1636,7 @@ var QR = {
     },
 
     edit() {
-      QR.oekaki.load(() => $.global(function () {
-        const { Tegaki, FCX } = window;
-        const name = document.getElementById('qr-filename').value.replace(/\.\w+$/, '') + '.png';
-        const { source } = document.getElementById('file-n-submit').dataset;
-        const error = content => document.dispatchEvent(new CustomEvent('CreateNotification', {
-          bubbles: true,
-          detail: { type: 'warning', content, lifetime: 20 }
-        }));
-        var cb = function (e) {
-          if (e) { this.removeEventListener('QRMetadata', cb, false); }
-          const selected = document.getElementById('selected');
-          if (!selected?.dataset.type) { return error('No file to edit.'); }
-          if (!/^(image|video)\//.test(selected.dataset.type)) { return error('Not an image.'); }
-          if (!selected.dataset.height) { return error('Metadata not available.'); }
-          if (selected.dataset.height === 'loading') {
-            selected.addEventListener('QRMetadata', cb, false);
-            return;
-          }
-          if (Tegaki.bg) { Tegaki.destroy(); }
-          FCX.oekakiName = name;
-          Tegaki.open({
-            onDone: FCX.oekakiCB,
-            onCancel() { Tegaki.bgColor = '#ffffff'; },
-            width: +selected.dataset.width,
-            height: +selected.dataset.height,
-            bgColor: 'transparent'
-          });
-          const canvas = document.createElement('canvas');
-          canvas.width = (canvas.naturalWidth = +selected.dataset.width);
-          canvas.height = (canvas.naturalHeight = +selected.dataset.height);
-          canvas.hidden = true;
-          document.body.appendChild(canvas);
-          canvas.addEventListener('QRImageDrawn', function () {
-            this.remove();
-            return Tegaki.onOpenImageLoaded.call(this);
-          }
-            , false);
-          canvas.dispatchEvent(new CustomEvent('QRDrawFile', { bubbles: true }));
-        };
-        if (Tegaki.bg && (Tegaki.onDoneCb === FCX.oekakiCB) && (source === FCX.oekakiLatest)) {
-          FCX.oekakiName = name;
-          return Tegaki.resume();
-        } else {
-          return cb();
-        }
-      }));
+      QR.oekaki.load(() => $.global('qrTegakiLoad'));
     },
 
     toggle() {

@@ -422,8 +422,7 @@ var Embedding = {
           CrossOrigin.cache(`https://api.github.com/gists/${a.dataset.uid}`, function() {
             el.textContent = Object.values(this.response.files)[0].content;
             el.className = 'prettyprint';
-            $.global(() => window.prettyPrint?.((function() {}), document.getElementById(document.currentScript.dataset.id).parentNode)
-            , {id: el.id});
+            $.global('prettyPrint', {id: el.id});
             return el.hidden = false;
           });
           return el;

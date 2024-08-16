@@ -21,26 +21,16 @@ export interface CrossOriginAjaxOptions {
   headers?: Record<string, string>;
 }
 
-
-let eventPageRequest;
-if (platform === 'crx') {
-  eventPageRequest = (function () {
-    const callbacks = [];
-    chrome.runtime.onMessage.addListener(function(response) {
-      callbacks[response.id](response.data);
-      return delete callbacks[response.id];});
-    return (params, cb) => chrome.runtime.sendMessage(params, id => callbacks[id] = cb);
-  })();
-}
 var CrossOrigin = {
   binary(url, cb, headers = dict()) {
     // XXX https://forums.lanik.us/viewtopic.php?f=64&t=24173&p=78310
     url = url.replace(/^((?:https?:)?\/\/(?:\w+\.)?(?:4chan|4channel|4cdn)\.org)\/adv\//, '$1//adv/');
     if (platform === 'crx') {
-    eventPageRequest({type: 'ajax', url, headers, responseType: 'arraybuffer'}, function({response, responseHeaderString}) {
-      if (response) { response = new Uint8Array(response); }
-      return cb(response, responseHeaderString);
-    });
+    $.eventPageRequest({type: 'ajax', url, headers, responseType: 'arraybuffer'})
+      .then(({response, responseHeaderString}: any) => {
+        if (response) response = new Uint8Array(response);
+        cb(response, responseHeaderString);
+      });
     } else {
       const fallback = function() {
         return $.ajax(url, {
@@ -217,7 +207,7 @@ var CrossOrigin = {
         };
       }
     } else {
-      eventPageRequest({type: 'ajax', url, responseType, headers, timeout}, function(result) {
+      $.eventPageRequest({type: 'ajax', url, responseType, headers, timeout}).then((result: any) => {
         if (result.status) {
           $.extend(req, result);
         }
@@ -245,7 +235,7 @@ var CrossOrigin = {
 
   permission(cb, cbFail, origins) {
     if (platform === 'crx') {
-      return eventPageRequest({type: 'permission', origins}, function(result) {
+      return $.eventPageRequest({type: 'permission', origins}).then((result) => {
         if (result) {
           return cb();
         } else {

@@ -1,59 +1,61 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
-let requestID = 0;
+import PageContextFunctions from "../PageContext/pageContext";
 
+// This requestId workaround isn't needed in manifest V3, since returning true in the event listener works.
+// But we keep it for manifest V2.
+let requestID = 0;
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   const id = requestID;
   requestID++;
+  handlers[request.type](request, sender).then(data => {
+    chrome.tabs.sendMessage(sender.tab.id, { id, data });
+  });
   sendResponse(id);
-  return handlers[request.type](request, response => chrome.tabs.sendMessage(sender.tab.id, {id, data: response}));});
+});
 
 var handlers = {
-  permission(request, cb) {
-    const origins = request.origins || ['*://*/'];
-    return chrome.permissions.contains({origins}, function(result) {
-      if (result) {
-        return cb(result);
-      } else {
-        return chrome.permissions.request({origins}, function(result) {
-          if (chrome.runtime.lastError) {
-            return cb(false);
-          } else {
-            return cb(result);
-          }
-        });
-      }
-    });
+  permission(request) {
+    return new Promise(resolve => {
+      const origins = request.origins || ['*://*/'];
+      chrome.permissions.contains({origins}, function(result) {
+        if (result) {
+          resolve(result);
+        } else {
+          chrome.permissions.request({origins}, function(result) {
+            resolve(chrome.runtime.lastError ? false : result);
+          });
+        }
+      });
+    })
   },
 
-  ajax(request, cb) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', request.url, true);
-    xhr.responseType = request.responseType;
-    xhr.timeout = request.timeout;
-    const object = request.headers || {};
-    for (var key in object) {
-      var value = object[key];
-      xhr.setRequestHeader(key, value);
-    }
-    xhr.addEventListener('load', function() {
-      let {status, statusText, response} = this;
-      const responseHeaderString = this.getAllResponseHeaders();
-      if (response && (request.responseType === 'arraybuffer')) {
-        response = [...new Uint8Array(response)];
+  async ajax(request) {
+    try {
+      const res = await fetch(request.url, { headers: request.headers || {} });
+      if (!res.ok) {
+        return { error: true };
       }
-      return cb({status, statusText, response, responseHeaderString});
+      let response;
+      if (request.responseType === 'arraybuffer') {
+        response = await res.arrayBuffer();
+      } else if (request.responseType === 'json') {
+        response = await res.json();
+      } else {
+        response = await res.text();
+      }
+      const responseHeaderString = Array.from(res.headers, h => `${h[0]}: ${h[1]}\r\n`).join('');
+      return { status: res.status, statusText: res.statusText, response, responseHeaderString };
+    } catch (e) {
+      return { error: true };
     }
-    , false);
-    xhr.addEventListener('error', () => cb({error: true})
-    , false);
-    xhr.addEventListener('abort', () => cb({error: true})
-    , false);
-    xhr.addEventListener('timeout', () => cb({error: true})
-    , false);
-    return xhr.send();
+  },
+
+  async runInPageContext(request, sender) {
+    const results = await chrome.scripting.executeScript({
+      func: PageContextFunctions[request.fn],
+      args: request.data ? [request.data] : [],
+      target: { tabId: sender.tab.id },
+      world: 'MAIN',
+    });
+    return results[0].result
   }
 };

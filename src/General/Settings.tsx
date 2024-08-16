@@ -62,17 +62,9 @@ var Settings = {
       if ($.hasStorage) {
         // Run in page context to handle case where 4chan X has localStorage access but not the page.
         // (e.g. Pale Moon 26.2.2, GM 3.8, cookies disabled for 4chan only)
-        return $.global(function() {
-          try {
-            const settings = JSON.parse(localStorage.getItem('4chan-settings')) || {};
-            if (settings.disableAll) { return; }
-            settings.disableAll = true;
-            return localStorage.setItem('4chan-settings', JSON.stringify(settings));
-          } catch (error) {
-            return Object.defineProperty(window, 'Config', {value: {disableAll: true}});
-          }});
+        return $.global('disableNativeExtension');
       } else {
-        return $.global(() => Object.defineProperty(window, 'Config', {value: {disableAll: true}}));
+        return $.global('disableNativeExtensionNoStorage');
       }
     }
   },

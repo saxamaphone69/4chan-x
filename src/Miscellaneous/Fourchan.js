@@ -29,14 +29,7 @@ var Fourchan = {
           return $.addClass(pre, 'prettyprinted');
         }
       });
-      $.global(() => window.addEventListener('prettyprint', e => window.dispatchEvent(new CustomEvent('prettyprint:cb', {
-        detail: {
-          ID:   e.detail.ID,
-          i:    e.detail.i,
-          html: window.prettyPrintOne(e.detail.html)
-        }
-      }))
-      , false));
+      $.global('fourChanPrettyPrintListener');
       Callbacks.Post.push({
         name: 'Parse [code] tags',
         cb:   Fourchan.code
@@ -50,22 +43,7 @@ var Fourchan = {
     }
 
     if (g.BOARD.config.math_tags) {
-      $.global(() => window.addEventListener('mathjax', function(e) {
-        if (window.MathJax) {
-          return window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, e.target]);
-        } else {
-          if (!document.querySelector('script[src^="//cdn.mathjax.org/"]')) { // don't load MathJax if already loading
-            window.loadMathJax();
-            window.loadMathJax = function() {};
-          }
-          // 4chan only handles post comments on MathJax load; anything else (e.g. the QR preview) must be queued explicitly.
-          if (!e.target.classList.contains('postMessage')) {
-            return document.querySelector('script[src^="//cdn.mathjax.org/"]').addEventListener('load', () => window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, e.target])
-            , false);
-          }
-        }
-      }
-      , false));
+      $.global('fourChanMathjaxListener');
       Callbacks.Post.push({
         name: 'Parse [math] tags',
         cb:   Fourchan.math
@@ -81,12 +59,7 @@ var Fourchan = {
 
   // Disable 4chan's ID highlighting (replaced by IDHighlight) and reported post hiding.
   initReady() {
-    return $.global(function() {
-      window.clickable_ids = false;
-      for (var node of document.querySelectorAll('.posteruid, .capcode')) {
-        node.removeEventListener('click', window.idClick, false);
-      }
-    });
+    return $.global('disable4chanIdHl');
   },
 
   code() {

@@ -42,6 +42,15 @@ const buildForTest = process.argv.includes('-test');
 
   const inlineFile = setupFileInliner(packageJson);
 
+  const cleanupPlugin = noFormat ? undefined : cleanup({
+    extensions: minify ? ['html', 'css'] : ['js', 'ts', 'tsx', 'json', 'html', 'css'],
+    comments: 'all',
+    lineEndings: 'unix',
+    maxEmptyLines: 1,
+    sourcemap: minify,
+  });
+
+
   const bundle = await rollup({
     input: resolve(__dirname, '../src/main/Main.js'),
     plugins: [
@@ -135,13 +144,7 @@ const buildForTest = process.argv.includes('-test');
         }
       }),
       faFix,
-      noFormat ? undefined : cleanup({
-        extensions: minify ? ['html', 'css'] : ['js', 'ts', 'tsx', 'json', 'html', 'css'],
-        comments: 'all',
-        lineEndings: 'unix',
-        maxEmptyLines: 1,
-        sourcemap: minify,
-      }),
+      cleanupPlugin,
     ].filter(Boolean)
   });
 
@@ -184,12 +187,28 @@ const buildForTest = process.argv.includes('-test');
       file: resolve(crxDir, 'script.js'),
     });
 
-    await copyFile(resolve(__dirname, '../src/meta/eventPage.js'), resolve(crxDir, 'eventPage.js'));
+    const eventPage = await rollup({
+      input: resolve(__dirname, '../src/meta/eventPage.js'),
+      plugins: [
+        typescript(),
+        noFormat ? undefined : fixTsOutputFormat({ include: ["**/*.ts", "**/*.tsx"] }),
+        cleanupPlugin,
+      ].filter(Boolean),
+    });
+
+    await eventPage.write({
+      format: 'module',
+      file: resolve(crxDir, 'eventPage.js'),
+    });
 
     await writeFile(
       resolve(crxDir, 'manifest.json'),
-      // There's no auto update for the extension.
-      generateManifestJson(packageJson, version),
+      generateManifestJson(packageJson, version, 2),
+    );
+
+    await writeFile(
+      resolve(crxDir, 'manifestV3.json'),
+      generateManifestJson(packageJson, version, 3),
     );
 
     for (const file of ['icon16.png', 'icon48.png', 'icon128.png']) {

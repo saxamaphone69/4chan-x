@@ -12,6 +12,7 @@ import Notice from "../classes/Notice";
 import { c, Conf, d, doc, g } from "../globals/globals";
 import { debounce, dict, MINUTE, platform, SECOND } from "./helpers";
 import meta from '../../package.json';
+import PageContextFunctions from "../PageContext/pageContext";
 
 // not chainable
 const $ = (selector, root = document.body) => root.querySelector(selector);
@@ -383,26 +384,46 @@ $.queueTask = (function() {
   };
 })() as (fn: (fn: any) => any, ...args: any[]) => void;
 
+if (platform === 'crx') {
+  const callbacks = new Map<number, ((...args: any[]) => any)>();
+
+  chrome.runtime.onMessage.addListener(({ id, data }) => {
+    callbacks.get(id)(data);
+    callbacks.delete(id);
+  });
+
+  $.eventPageRequest = (params) => new Promise(resolve => {
+    chrome.runtime.sendMessage(params, id => { callbacks.set(id, resolve); });
+  });
+}
+
 /**
  * Runs a function on the page instead of the user script or extension context.
- * @param fn The function to run. Will be passed as a string, thus losing access to the closure it was defined in.
+ * @param fn The name of the function in pageContext.ts. It must be defined there to run in a manifest V3 context.
  * @param data Data to pass to the function. Will be passed as `this`.
- * @returns The data.
+ * @returns A promise with the data object, which might be mutated by the function. If you're not using that, you can
+ * still await it to make sure the function is done.
  */
-$.global = function<T extends (Record<string, string> | undefined)>(fn: (this: T) => void, data?: T) {
-  if (doc) {
-    const script = $.el('script',
-      {textContent: `(${fn}).call(document.currentScript.dataset);`});
-    if (data) { $.extend(script.dataset, data); }
-    $.add((d.head || doc), script);
-    $.rm(script);
-    return script.dataset;
+$.global = async function(fn: string, data?: Record<string, string>) {
+  if (platform === 'crx' && chrome.runtime.getManifest().manifest_version === 3) {
+    return $.eventPageRequest({ type: 'runInPageContext', fn, data });
   } else {
+    if (doc) {
+      const script = $.el('script',
+        {textContent: `(${PageContextFunctions[fn]})(document.currentScript.dataset);`});
+      if (data) { $.extend(script.dataset, data); }
+      $.add((d.head || doc), script);
+      $.rm(script);
+      return script.dataset;
+    } else {
     // XXX dwb
-    try {
-      fn.call(data);
-    } catch (error) {}
-    return data;
+      try {
+        PageContextFunctions[fn](data);
+      } catch (error) {
+        console.error(error);
+      }
+      return data;
+    }
   }
 };
 

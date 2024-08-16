@@ -89,7 +89,6 @@ import BoardConfig from "../General/BoardConfig";
 import CaptchaReplace from "../Posting/Captcha.replace";
 import Get from "../General/Get";
 import { dict, platform } from "../platform/helpers";
-import Polyfill from "../General/Polyfill";
 import RestoreDeletedFromArchive from "../Archive/RestoreDeletedFromArchive";
 // #region tests_enabled
 import Test from "../General/Test";
@@ -128,17 +127,7 @@ var Main = {
     });
     try {
       $.global(
-        function () {
-          const date = +this.buildDate;
-          Object.defineProperty(window, 'fourchanXT', {
-            value: Object.freeze({
-              version: this.version,
-              // Getter to prevent mutations.
-              get buildDate() { return new Date(date) },
-            }),
-            writable: false,
-          });
-        },
+        'exposeVersion',
         { version: g.VERSION, buildDate: g.VERSION_DATE.getTime().toString() },
       );
     } catch (e) {
@@ -180,17 +169,7 @@ var Main = {
 
     // XXX Remove document-breaking ad
     if (['boards.4chan.org', 'boards.4channel.org'].includes(location.hostname)) {
-      $.global(function() {
-        const fromCharCode0 = String.fromCharCode;
-        return String.fromCharCode = function() {
-          if (document.body) {
-            String.fromCharCode = fromCharCode0;
-          } else if (document.currentScript && !document.currentScript.src) {
-            throw Error();
-          }
-          return fromCharCode0.apply(this, arguments);
-        };
-      });
+      $.global('removeBreakingAd');
       $.asap(docSet, () => $.onExists(doc, 'iframe[srcdoc]', $.rm));
     }
 
@@ -310,9 +289,7 @@ var Main = {
   },
 
   initFeatures() {
-    $.global(function() {
-      document.documentElement.classList.add('js-enabled');
-      return window.FCX = {};});
+    $.global('initMain');
     Main.jsEnabled = $.hasClass(doc, 'js-enabled');
 
     $.extend(g, Main.parseURL());
@@ -767,16 +744,17 @@ var Main = {
 
     // Detect conflicts with native extension
     if (g.SITE.testNativeExtension && !$.hasClass(doc, 'tainted')) {
-      const {enabled} = g.SITE.testNativeExtension();
-      if (enabled) {
-        $.addClass(doc, 'tainted');
-        if (Conf['Disable Native Extension'] && !Main.isFirstRun) {
-          const msg = $.el('div',
-            { innerHTML: 'Failed to disable the native extension. You may need to <a href="' + E(meta.upstreamFaq) +
-              '#blocking-native-extension" target="_blank">block it</a>.' });
-          new Notice('error', msg);
+      g.SITE.testNativeExtension().then(({enabled}) => {
+        if (enabled) {
+          $.addClass(doc, 'tainted');
+          if (Conf['Disable Native Extension'] && !Main.isFirstRun) {
+            const msg = $.el('div',
+              { innerHTML: 'Failed to disable the native extension. You may need to <a href="' + E(meta.upstreamFaq) +
+                '#blocking-native-extension" target="_blank">block it</a>.' });
+            new Notice('error', msg);
+          }
         }
-      }
+      });
     }
 
     if (!(errors instanceof Array)) {
@@ -879,7 +857,6 @@ User agent: ${navigator.userAgent}\
   mountedCBs: [],
 
   features: [
-    ['Polyfill',                  Polyfill],
     ['Board Configuration',       BoardConfig],
     ['Normalize URL',             NormalizeURL],
     ['Delay Redirect on Post',    PostRedirect],

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.12.0
+// @version      2.13.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -170,8 +170,8 @@
   'use strict';
 
   var version = {
-    "version": "2.12.0",
-    "date": "2024-08-04T15:37:00Z"
+    "version": "2.13.0",
+    "date": "2024-08-16T15:26:28Z"
   };
 
   var meta = {
@@ -1510,8 +1510,6 @@ https://*.hcaptcha.com
 
     passMessageClosed: false,
 
-    'Prerequest Captcha': false,
-
     'PSAseen': [[]],
 
     XEmbedder: 'fxt',
@@ -1568,6 +1566,248 @@ https://*.hcaptcha.com
   const HOUR = MINUTE * 60;
   const DAY = HOUR * 24;
   const platform = window.GM_xmlhttpRequest ? 'userscript' : 'crx';
+
+  /**
+   * Because of increased security in manifest v3, scripts can no longer just inject a script tag into the main page.
+   * Functions to be called in the main context must be predefined. Those functions should be in this file, and they will
+   * be loaded in the worker context in the extension version.
+   *
+   * These are the functions for `$.global`. They will be called by name.
+   *
+   * They are stringified, so don't use the short `fnName() {` notation.
+   */
+  const PageContextFunctions = {
+    stubCloneTopNav: () => { window.cloneTopNav = function () { }; },
+    disableNativeExtension: () => {
+      try {
+        const settings = JSON.parse(localStorage.getItem('4chan-settings')) || {};
+        if (settings.disableAll)
+          return;
+        settings.disableAll = true;
+        localStorage.setItem('4chan-settings', JSON.stringify(settings));
+      } catch (error) {
+        Object.defineProperty(window, 'Config', { value: { disableAll: true } });
+      }
+    },
+    disableNativeExtensionNoStorage: () => { Object.defineProperty(window, 'Config', { value: { disableAll: true } }); },
+    prettyPrint: ({ id }) => {
+      // @ts-ignore
+      window.prettyPrint?.((function () { }), document.getElementById(id).parentNode);
+    },
+    exposeVersion: ({ buildDate, version }) => {
+      const date = +buildDate;
+      Object.defineProperty(window, 'fourchanXT', {
+        value: Object.freeze({
+          version,
+          // Getter to prevent mutations.
+          get buildDate() { return new Date(date); },
+        }),
+        writable: false,
+      });
+    },
+    removeBreakingAd: () => {
+      const fromCharCode0 = String.fromCharCode;
+      // @ts-ignore
+      String.fromCharCode = function () {
+        if (document.body) {
+          String.fromCharCode = fromCharCode0;
+        } else if (document.currentScript && !document.currentScript.src) {
+          throw Error();
+        }
+        fromCharCode0.apply(this, arguments);
+      };
+    },
+    initMain: () => {
+      document.documentElement.classList.add('js-enabled');
+      window.FCX = {};
+    },
+    initFlash: () => {
+      if (JSON.parse(localStorage['4chan-settings'] || '{}').disableAll)
+        window.SWFEmbed.init();
+    },
+    initFlashNoStorage: () => { window.SWFEmbed.init(); },
+    setThreadId: () => { window.Main.tid = location.pathname.split(/\/+/)[3]; },
+    fourChanPrettyPrintListener: () => {
+      window.addEventListener('prettyprint', (e) => window.dispatchEvent(new CustomEvent('prettyprint:cb', {
+        detail: { ID: e.detail.ID, i: e.detail.i, html: window.prettyPrintOne(e.detail.html) }
+      })), false);
+    },
+    fourChanMathjaxListener: () => {
+      window.addEventListener('mathjax', function (e) {
+        if (window.MathJax) {
+          window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, e.target]);
+        } else {
+          if (!document.querySelector('script[src^="//cdn.mathjax.org/"]')) { // don't load MathJax if already loading
+            window.loadMathJax();
+            window.loadMathJax = function () { };
+          }
+          // 4chan only handles post comments on MathJax load; anything else (e.g. the QR preview) must be queued explicitly.
+          if (!e.target.classList.contains('postMessage')) {
+            document.querySelector('script[src^="//cdn.mathjax.org/"]').addEventListener('load', () => window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, e.target]), false);
+          }
+        }
+      }, false);
+    },
+    disable4chanIdHl: () => {
+      window.clickable_ids = false;
+      for (var node of document.querySelectorAll('.posteruid, .capcode')) {
+        node.removeEventListener('click', window.idClick, false);
+      }
+    },
+    initTinyBoard: () => {
+      let { boardID, threadID } = undefined;
+      threadID = +threadID;
+      const form = document.querySelector('form[name="post"]');
+      window.$(document).ajaxComplete(function (event, request, settings) {
+        let postID;
+        if (settings.url !== form.action)
+          return;
+        if (!(postID = +request.responseJSON?.id))
+          return;
+        const detail = { boardID, threadID, postID };
+        try {
+          const { redirect, noko } = request.responseJSON;
+          if (redirect && (originalNoko != null) && !originalNoko && !noko) {
+            detail.redirect = redirect;
+          }
+        } catch (error) { }
+        event = new CustomEvent('QRPostSuccessful', { bubbles: true, detail });
+        document.dispatchEvent(event);
+      });
+      var originalNoko = window.tb_settings?.ajax?.always_noko_replies;
+      let base;
+      (((base = window.tb_settings || (window.tb_settings = {}))).ajax || (base.ajax = {})).always_noko_replies = true;
+    },
+    setupCaptcha: ({ recaptchaKey }) => {
+      const render = function () {
+        const { classList } = document.documentElement;
+        const container = document.querySelector('#qr .captcha-container');
+        container.dataset.widgetID = window.grecaptcha.render(container, {
+          sitekey: recaptchaKey,
+          theme: classList.contains('tomorrow') || classList.contains('spooky') || classList.contains('dark-captcha') ? 'dark' : 'light',
+          callback(response) {
+            window.dispatchEvent(new CustomEvent('captcha:success', { detail: response }));
+          }
+        });
+      };
+      if (window.grecaptcha) {
+        render();
+      } else {
+        const cbNative = window.onRecaptchaLoaded;
+        window.onRecaptchaLoaded = function () {
+          render();
+          cbNative();
+        };
+        if (!document.head.querySelector('script[src^="https://www.google.com/recaptcha/api.js"]')) {
+          const script = document.createElement('script');
+          script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoaded&render=explicit';
+          document.head.appendChild(script);
+        }
+      }
+    },
+    resetCaptcha: () => {
+      window.grecaptcha.reset(document.querySelector('#qr .captcha-container').dataset.widgetID);
+    },
+    setupTCaptcha: ({ boardID, threadID, autoLoad }) => {
+      const { TCaptcha } = window;
+      TCaptcha.init(document.querySelector('#qr .captcha-container'), boardID, +threadID);
+      TCaptcha.setErrorCb(err => window.dispatchEvent(new CustomEvent('CreateNotification', {
+        detail: { type: 'warning', content: '' + err }
+      })));
+      if (autoLoad === '1')
+        TCaptcha.load(boardID, threadID);
+    },
+    destroyTCaptcha: () => { window.TCaptcha.destroy(); },
+    TCaptchaClearChallenge: () => { window.TCaptcha.clearChallenge(); },
+    setupQR: () => {
+      const { FCX, Tegaki } = window;
+      FCX.oekakiCB = () => Tegaki.flatten().toBlob(function (file) {
+        const source = `oekaki-${Date.now()}`;
+        FCX.oekakiLatest = source;
+        document.dispatchEvent(new CustomEvent('QRSetFile', {
+          bubbles: true,
+          detail: { file, name: FCX.oekakiName, source }
+        }));
+      });
+      if (Tegaki) {
+        document.querySelector('#qr .oekaki').hidden = false;
+      }
+    },
+    qrTegakiDraw: () => {
+      const { Tegaki, FCX } = window;
+      if (Tegaki.bg) {
+        Tegaki.destroy();
+      }
+      FCX.oekakiName = 'tegaki.png';
+      Tegaki.open({
+        onDone: FCX.oekakiCB,
+        onCancel() { Tegaki.bgColor = '#ffffff'; },
+        width: +document.querySelector('#qr [name=oekaki-width]').value,
+        height: +document.querySelector('#qr [name=oekaki-height]').value,
+        bgColor: document.querySelector('#qr [name=oekaki-bg]').checked ?
+          document.querySelector('#qr [name=oekaki-bgcolor]').value :
+          'transparent'
+      });
+    },
+    qrTegakiLoad: () => {
+      const { Tegaki, FCX } = window;
+      const name = document.getElementById('qr-filename').value.replace(/\.\w+$/, '') + '.png';
+      const { source } = document.getElementById('file-n-submit').dataset;
+      const error = content => document.dispatchEvent(new CustomEvent('CreateNotification', {
+        bubbles: true,
+        detail: { type: 'warning', content, lifetime: 20 }
+      }));
+      var cb = function (e) {
+        if (e) {
+          this.removeEventListener('QRMetadata', cb, false);
+        }
+        const selected = document.getElementById('selected');
+        if (!selected?.dataset.type)
+          return error('No file to edit.');
+        if (!/^(image|video)\//.test(selected.dataset.type)) {
+          return error('Not an image.');
+        }
+        if (!selected.dataset.height)
+          return error('Metadata not available.');
+        if (selected.dataset.height === 'loading') {
+          selected.addEventListener('QRMetadata', cb, false);
+          return;
+        }
+        if (Tegaki.bg) {
+          Tegaki.destroy();
+        }
+        FCX.oekakiName = name;
+        Tegaki.open({
+          onDone: FCX.oekakiCB,
+          onCancel() { Tegaki.bgColor = '#ffffff'; },
+          width: +selected.dataset.width,
+          height: +selected.dataset.height,
+          bgColor: 'transparent'
+        });
+        const canvas = document.createElement('canvas');
+        canvas.width = (canvas.naturalWidth = +selected.dataset.width);
+        canvas.height = (canvas.naturalHeight = +selected.dataset.height);
+        canvas.hidden = true;
+        document.body.appendChild(canvas);
+        canvas.addEventListener('QRImageDrawn', function () {
+          this.remove();
+          Tegaki.onOpenImageLoaded.call(this);
+        }, false);
+        canvas.dispatchEvent(new CustomEvent('QRDrawFile', { bubbles: true }));
+      };
+      if (Tegaki.bg && (Tegaki.onDoneCb === FCX.oekakiCB) && (source === FCX.oekakiLatest)) {
+        FCX.oekakiName = name;
+        Tegaki.resume();
+      } else {
+        cb();
+      }
+    },
+    testNativeExtension: (output = {}) => {
+      if (window.Parser?.postMenuIcon)
+        output.enabled = 'true';
+      return output;
+    },
+  };
 
   // loosely follows the jquery api:
   // not chainable
@@ -1922,27 +2162,35 @@ https://*.hcaptcha.com
       Promise.resolve().then(execTask);
     };
   })();
+
   /**
    * Runs a function on the page instead of the user script or extension context.
-   * @param fn The function to run. Will be passed as a string, thus losing access to the closure it was defined in.
+   * @param fn The name of the function in pageContext.ts. It must be defined there to run in a manifest V3 context.
    * @param data Data to pass to the function. Will be passed as `this`.
-   * @returns The data.
+   * @returns A promise with the data object, which might be mutated by the function. If you're not using that, you can
+   * still await it to make sure the function is done.
    */
-  $.global = function (fn, data) {
-    if (doc) {
-      const script = $.el('script', { textContent: `(${fn}).call(document.currentScript.dataset);` });
-      if (data) {
-        $.extend(script.dataset, data);
-      }
-      $.add((d.head || doc), script);
-      $.rm(script);
-      return script.dataset;
+  $.global = async function (fn, data) {
+    if (platform === 'crx' && chrome.runtime.getManifest().manifest_version === 3) {
+      return $.eventPageRequest({ type: 'runInPageContext', fn, data });
     } else {
-      // XXX dwb
-      try {
-        fn.call(data);
-      } catch (error) { }
-      return data;
+      if (doc) {
+        const script = $.el('script', { textContent: `(${PageContextFunctions[fn]})(document.currentScript.dataset);` });
+        if (data) {
+          $.extend(script.dataset, data);
+        }
+        $.add((d.head || doc), script);
+        $.rm(script);
+        return script.dataset;
+      } else {
+        // XXX dwb
+        try {
+          PageContextFunctions[fn](data);
+        } catch (error) {
+          console.error(error);
+        }
+        return data;
+      }
     }
   };
   $.bytesToString = function (size) {
@@ -6653,21 +6901,17 @@ svg.icon {
       this.nodes = {root};
 
       $.addClass(QR.nodes.el, 'has-captcha', 'captcha-t');
-      return $.after(QR.nodes.com.parentNode, root);
+      $.after(QR.nodes.com.parentNode, root);
     },
 
     moreNeeded() {
     },
 
     getThread() {
-      let threadID;
-      const boardID = g.BOARD.ID;
-      if (QR.posts[0].thread === 'new') {
-        threadID = '0';
-      } else {
-        threadID = '' + QR.posts[0].thread;
-      }
-      return {boardID, threadID};
+      return {
+        boardID: g.BOARD.ID,
+        threadID: QR.posts[0].thread === 'new' ? '0' : ('' + QR.posts[0].thread),
+      };
     },
 
     setup(focus) {
@@ -6677,28 +6921,18 @@ svg.icon {
         this.nodes.container = $.el('div', {className: 'captcha-container'});
         $.prepend(this.nodes.root, this.nodes.container);
         CaptchaT.currentThread = CaptchaT.getThread();
-        $.global(function() {
-          const el = document.querySelector('#qr .captcha-container');
-          window.TCaptcha.init(el, this.boardID, +this.threadID);
-          return window.TCaptcha.setErrorCb(err => window.dispatchEvent(new CustomEvent('CreateNotification', {detail: {
-            type: 'warning',
-            content: '' + err
-          }})
-          ));
-        }
-        , CaptchaT.currentThread);
+        CaptchaT.currentThread.autoLoad = Conf['Auto-load captcha'] ? '1' : '0';
+        $.global('setupTCaptcha', CaptchaT.currentThread);
       }
 
-      if (focus) {
-        return $('#t-resp').focus();
-      }
+      if (focus) $('#t-resp').focus();
     },
 
     destroy() {
       if (!this.isEnabled || !this.nodes.container) { return; }
-      $.global(() => window.TCaptcha.destroy());
+      $.global('destroyTCaptcha');
       $.rm(this.nodes.container);
-      return delete this.nodes.container;
+      delete this.nodes.container;
     },
 
     updateThread() {
@@ -6707,7 +6941,7 @@ svg.icon {
       const newThread = CaptchaT.getThread();
       if ((newThread.boardID !== boardID) || (newThread.threadID !== threadID)) {
         CaptchaT.destroy();
-        return CaptchaT.setup();
+        CaptchaT.setup();
       }
     },
 
@@ -6726,9 +6960,8 @@ svg.icon {
     },
 
     setUsed() {
-      if (!this.isEnabled) { return; }
-      if (this.nodes.container) {
-        return $.global(() => window.TCaptcha.clearChallenge());
+      if (this.isEnabled && this.nodes.container) {
+        $.global('TCaptchaClearChallenge');
       }
     },
 
@@ -7958,7 +8191,8 @@ svg.icon {
       }
     },
     setupVideo(post, playing, controls) {
-      const { fullImage, audio } = post.file;
+      const { audio } = post.file;
+      const fullImage = post.file.fullImage;
       if (!playing && !audio) {
         fullImage.controls = controls;
         return;
@@ -7966,14 +8200,12 @@ svg.icon {
       fullImage.controls = false;
       $.asap((() => doc.contains(fullImage)), function () {
         if (!d.hidden && Header.isNodeVisible(fullImage)) {
-          return fullImage.play();
+          fullImage.play();
         } else {
-          return post.file.wasPlaying = true;
+          post.file.wasPlaying = true;
         }
       });
-      if (controls && !audio) {
-        return ImageCommon.addControls(fullImage);
-      }
+      fullImage.controls = controls && !audio;
     },
     videoCB: (function () {
       // dragging to the left contracts the video
@@ -13968,7 +14200,7 @@ svg.icon {
         file.loop = true;
         Volume.setup(file);
         if (Conf['Autoplay']) { file.play(); }
-        if (Conf['Show Controls']) { ImageCommon.addControls(file); }
+        if (Conf['Show Controls']) file.controls = true;
       }
 
       doc.classList.toggle('gal-pdf', file.nodeName === 'IFRAME');
@@ -15118,7 +15350,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
             CrossOrigin$1.cache(`https://api.github.com/gists/${a.dataset.uid}`, function () {
               el.textContent = Object.values(this.response.files)[0].content;
               el.className = 'prettyprint';
-              $.global(() => window.prettyPrint?.((function () { }), document.getElementById(document.currentScript.dataset.id).parentNode), { id: el.id });
+              $.global('prettyPrint', { id: el.id });
               return el.hidden = false;
             });
             return el;
@@ -16290,31 +16522,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         return this.neededRaw() && $.event('LoadCaptcha');
       },
 
-      prerequest() {
-        if (!Conf['Prerequest Captcha']) { return; }
-        // Post count temporarily off by 1 when called from QR.post.rm, QR.close, or QR.submit
-        return $.queueTask(() => {
-          if (
-            !this.prerequested &&
-            this.neededRaw() &&
-            !$.event('LoadCaptcha') &&
-            !QR.captcha.occupied() &&
-            (QR.cooldown.seconds <= 60) &&
-            (QR.selected === QR.posts[QR.posts.length - 1]) &&
-            !QR.selected.isOnlyQuotes()
-          ) {
-            const isReply = (QR.selected.thread !== 'new');
-            if (!$.event('RequestCaptcha', { isReply })) {
-              this.prerequested = true;
-              this.submitCB = captcha => {
-                if (captcha) { return this.save(captcha); }
-              };
-              return this.updateCount();
-            }
-          }
-        });
-      },
-
       haveCookie() {
         return /\b_ct=/.test(d.cookie) && (QR.posts[0].thread !== 'new');
       },
@@ -16539,35 +16746,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       },
 
       setupJS() {
-        return $.global(function () {
-          const { recaptchaKey } = this;
-          const render = function () {
-            const { classList } = document.documentElement;
-            const container = document.querySelector('#qr .captcha-container');
-            return container.dataset.widgetID = window.grecaptcha.render(container, {
-              sitekey: recaptchaKey,
-              theme: classList.contains('tomorrow') || classList.contains('spooky') || classList.contains('dark-captcha') ? 'dark' : 'light',
-              callback(response) {
-                return window.dispatchEvent(new CustomEvent('captcha:success', { detail: response }));
-              }
-            }
-            );
-          };
-          if (window.grecaptcha) {
-            return render();
-          } else {
-            const cbNative = window.onRecaptchaLoaded;
-            window.onRecaptchaLoaded = function () {
-              render();
-              return cbNative();
-            };
-            if (!document.head.querySelector('script[src^="https://www.google.com/recaptcha/api.js"]')) {
-              const script = document.createElement('script');
-              script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoaded&render=explicit';
-              return document.head.appendChild(script);
-            }
-          }
-        }, { recaptchaKey: meta.recaptchaKey });
+        $.global('setupCaptcha', { recaptchaKey: meta.recaptchaKey });
       },
 
       afterSetup(mutations) {
@@ -16610,10 +16789,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         delete this.timeouts.destroy;
         $.rmClass(QR.nodes.el, 'captcha-open');
         if (this.nodes.container) {
-          $.global(function () {
-            const container = document.querySelector('#qr .captcha-container');
-            return window.grecaptcha.reset(container.dataset.widgetID);
-          });
+          $.global('resetCaptcha');
           $.rm(this.nodes.container);
           return delete this.nodes.container;
         }
@@ -16663,10 +16839,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           this.destroy();
           return this.setup(false, true);
         } else {
-          return $.global(function () {
-            const container = document.querySelector('#qr .captcha-container');
-            return window.grecaptcha.reset(container.dataset.widgetID);
-          });
+          $.global('resetCaptcha');
         }
       },
 
@@ -18125,20 +18298,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         }
       },
       setup() {
-        $.global(function () {
-          const { FCX } = window;
-          FCX.oekakiCB = () => window.Tegaki.flatten().toBlob(function (file) {
-            const source = `oekaki-${Date.now()}`;
-            FCX.oekakiLatest = source;
-            document.dispatchEvent(new CustomEvent('QRSetFile', {
-              bubbles: true,
-              detail: { file, name: FCX.oekakiName, source }
-            }));
-          });
-          if (window.Tegaki) {
-            document.querySelector('#qr .oekaki').hidden = false;
-          }
-        });
+        $.global('setupQR');
       },
       load(cb) {
         if ($('script[src^="//s.4cdn.org/js/tegaki"]', d.head)) {
@@ -18160,23 +18320,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         }
       },
       draw() {
-        return $.global(function () {
-          const { Tegaki, FCX } = window;
-          if (Tegaki.bg) {
-            Tegaki.destroy();
-          }
-          FCX.oekakiName = 'tegaki.png';
-          return Tegaki.open({
-            onDone: FCX.oekakiCB,
-            onCancel() { Tegaki.bgColor = '#ffffff'; },
-            width: +document.querySelector('#qr [name=oekaki-width]').value,
-            height: +document.querySelector('#qr [name=oekaki-height]').value,
-            bgColor: document.querySelector('#qr [name=oekaki-bg]').checked ?
-              document.querySelector('#qr [name=oekaki-bgcolor]').value
-              :
-                'transparent'
-          });
-        });
+        return $.global('qrTegakiDraw');
       },
       button() {
         if (QR.selected.file) {
@@ -18186,61 +18330,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         }
       },
       edit() {
-        QR.oekaki.load(() => $.global(function () {
-          const { Tegaki, FCX } = window;
-          const name = document.getElementById('qr-filename').value.replace(/\.\w+$/, '') + '.png';
-          const { source } = document.getElementById('file-n-submit').dataset;
-          const error = content => document.dispatchEvent(new CustomEvent('CreateNotification', {
-            bubbles: true,
-            detail: { type: 'warning', content, lifetime: 20 }
-          }));
-          var cb = function (e) {
-            if (e) {
-              this.removeEventListener('QRMetadata', cb, false);
-            }
-            const selected = document.getElementById('selected');
-            if (!selected?.dataset.type) {
-              return error('No file to edit.');
-            }
-            if (!/^(image|video)\//.test(selected.dataset.type)) {
-              return error('Not an image.');
-            }
-            if (!selected.dataset.height) {
-              return error('Metadata not available.');
-            }
-            if (selected.dataset.height === 'loading') {
-              selected.addEventListener('QRMetadata', cb, false);
-              return;
-            }
-            if (Tegaki.bg) {
-              Tegaki.destroy();
-            }
-            FCX.oekakiName = name;
-            Tegaki.open({
-              onDone: FCX.oekakiCB,
-              onCancel() { Tegaki.bgColor = '#ffffff'; },
-              width: +selected.dataset.width,
-              height: +selected.dataset.height,
-              bgColor: 'transparent'
-            });
-            const canvas = document.createElement('canvas');
-            canvas.width = (canvas.naturalWidth = +selected.dataset.width);
-            canvas.height = (canvas.naturalHeight = +selected.dataset.height);
-            canvas.hidden = true;
-            document.body.appendChild(canvas);
-            canvas.addEventListener('QRImageDrawn', function () {
-              this.remove();
-              return Tegaki.onOpenImageLoaded.call(this);
-            }, false);
-            canvas.dispatchEvent(new CustomEvent('QRDrawFile', { bubbles: true }));
-          };
-          if (Tegaki.bg && (Tegaki.onDoneCb === FCX.oekakiCB) && (source === FCX.oekakiLatest)) {
-            FCX.oekakiName = name;
-            return Tegaki.resume();
-          } else {
-            return cb();
-          }
-        }));
+        QR.oekaki.load(() => $.global('qrTegakiLoad'));
       },
       toggle() {
         QR.oekaki.load(() => QR.nodes.oekaki.hidden = !QR.nodes.oekaki.hidden);
@@ -18538,9 +18628,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       }
       this.nodes.span.textContent = this.com;
       QR.captcha.moreNeeded();
-      if (QR.captcha === Captcha.v2) {
-        Captcha.cache.prerequest();
-      }
     }
     isOnlyQuotes() {
       return (this.com || '').trim() === (this.quotedText || '').trim();
@@ -19201,17 +19288,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       return $.ajax(threadJSON, {onloadend() { return parseJSON.call(this); }});
     },
 
-    // Add controls, but not until the mouse is moved over the video.
-    addControls(video) {
-      var handler = function() {
-        $.off(video, 'mouseover', handler);
-        // Hacky workaround for Firefox forever-loading bug for very short videos
-        const t = new Date().getTime();
-        return $.asap((() => ($.engine !== 'gecko') || ((video.readyState >= 3) && (video.currentTime <= Math.max(0.1, (video.duration - 0.5)))) || (new Date().getTime() >= (t + 1000))), () => video.controls = true);
-      };
-      return $.on(video, 'mouseover', handler);
-    },
-
     // XXX Estimate whether clicks are on the video controls and should be ignored.
     onControls(e) {
       return (Conf['Show Controls'] && Conf['Click Passthrough'] && (e.target.nodeName === 'VIDEO')) ||
@@ -19851,11 +19927,7 @@ $\
       return ImageHost.test(link.hostname);
     },
     testNativeExtension() {
-      return $.global(function () {
-        if (window.Parser?.postMenuIcon) {
-          return this.enabled = 'true';
-        }
-      });
+      return $.global('testNativeExtension', {});
     },
     transformBoardList() {
       let node;
@@ -20618,20 +20690,9 @@ $\
         if ($.hasStorage) {
           // Run in page context to handle case where 4chan X has localStorage access but not the page.
           // (e.g. Pale Moon 26.2.2, GM 3.8, cookies disabled for 4chan only)
-          return $.global(function () {
-            try {
-              const settings = JSON.parse(localStorage.getItem('4chan-settings')) || {};
-              if (settings.disableAll) {
-                return;
-              }
-              settings.disableAll = true;
-              return localStorage.setItem('4chan-settings', JSON.stringify(settings));
-            } catch (error) {
-              return Object.defineProperty(window, 'Config', { value: { disableAll: true } });
-            }
-          });
+          return $.global('disableNativeExtension');
         } else {
-          return $.global(() => Object.defineProperty(window, 'Config', { value: { disableAll: true } }));
+          return $.global('disableNativeExtensionNoStorage');
         }
       }
     },
@@ -22510,7 +22571,7 @@ vp-replace
           $('#navtopright', footer).id = 'navbotright';
           $('#settingsWindowLink', footer).id = 'settingsWindowLinkBot';
           $.before(absbot, footer);
-          $.global(() => window.cloneTopNav = function () { });
+          $.global('stubCloneTopNav');
         }
         if (Header.bottomBoardList = $(g.SITE.selectors.boardListBottom)) {
           for (var a of $$('a', Header.bottomBoardList)) {
@@ -24289,12 +24350,12 @@ vp-replace
 
     initReady() {
       if ($.hasStorage) {
-        return $.global(function() { if (JSON.parse(localStorage['4chan-settings'] || '{}').disableAll) { return window.SWFEmbed.init(); } });
+        $.global('initFlash');
       } else {
         if (g.VIEW === 'thread') {
-          $.global(() => window.Main.tid = location.pathname.split(/\/+/)[3]);
+          $.global('setThreadId');
         }
-        return $.global(() => window.SWFEmbed.init());
+        $.global('initFlashNoStorage');
       }
     }
   };
@@ -24317,14 +24378,7 @@ vp-replace
             return $.addClass(pre, 'prettyprinted');
           }
         });
-        $.global(() => window.addEventListener('prettyprint', e => window.dispatchEvent(new CustomEvent('prettyprint:cb', {
-          detail: {
-            ID:   e.detail.ID,
-            i:    e.detail.i,
-            html: window.prettyPrintOne(e.detail.html)
-          }
-        }))
-        , false));
+        $.global('fourChanPrettyPrintListener');
         Callbacks.Post.push({
           name: 'Parse [code] tags',
           cb:   Fourchan.code
@@ -24338,22 +24392,7 @@ vp-replace
       }
 
       if (g.BOARD.config.math_tags) {
-        $.global(() => window.addEventListener('mathjax', function(e) {
-          if (window.MathJax) {
-            return window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, e.target]);
-          } else {
-            if (!document.querySelector('script[src^="//cdn.mathjax.org/"]')) { // don't load MathJax if already loading
-              window.loadMathJax();
-              window.loadMathJax = function() {};
-            }
-            // 4chan only handles post comments on MathJax load; anything else (e.g. the QR preview) must be queued explicitly.
-            if (!e.target.classList.contains('postMessage')) {
-              return document.querySelector('script[src^="//cdn.mathjax.org/"]').addEventListener('load', () => window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, e.target])
-              , false);
-            }
-          }
-        }
-        , false));
+        $.global('fourChanMathjaxListener');
         Callbacks.Post.push({
           name: 'Parse [math] tags',
           cb:   Fourchan.math
@@ -24369,12 +24408,7 @@ vp-replace
 
     // Disable 4chan's ID highlighting (replaced by IDHighlight) and reported post hiding.
     initReady() {
-      return $.global(function() {
-        window.clickable_ids = false;
-        for (var node of document.querySelectorAll('.posteruid, .capcode')) {
-          node.removeEventListener('click', window.idClick, false);
-        }
-      });
+      return $.global('disable4chanIdHl');
     },
 
     code() {
@@ -24827,29 +24861,7 @@ vp-replace
     init() {
       if (g.SITE.software !== 'tinyboard') { return; }
       if (g.VIEW === 'thread') {
-        return Main$1.ready(() => $.global(function() {
-          let base;
-          let {boardID, threadID} = document.currentScript.dataset;
-          threadID = +threadID;
-          const form = document.querySelector('form[name="post"]');
-          window.$(document).ajaxComplete(function(event, request, settings) {
-            let postID;
-            if (settings.url !== form.action) { return; }
-            if (!(postID = +request.responseJSON?.id)) { return; }
-            const detail = {boardID, threadID, postID};
-            try {
-              const {redirect, noko} = request.responseJSON;
-              if (redirect && (originalNoko != null) && !originalNoko && !noko) {
-                detail.redirect = redirect;
-              }
-            } catch (error) {}
-            event = new CustomEvent('QRPostSuccessful', {bubbles: true, detail});
-            return document.dispatchEvent(event);
-          });
-          var originalNoko = window.tb_settings?.ajax?.always_noko_replies;
-          return (((base = window.tb_settings || (window.tb_settings = {}))).ajax || (base.ajax = {})).always_noko_replies = true;
-        }
-        , {boardID: g.BOARD.ID, threadID: g.THREADID}));
+        return Main$1.ready(() => $.global("initTinyBoard", { boardID: g.BOARD.ID, threadID: g.THREADID.toString() }));
       }
     }
   };
@@ -25599,30 +25611,6 @@ vp-replace
     }
   };
 
-  const Polyfill = {
-    init() {
-      this.toBlob();
-      $.global(this.toBlob);
-      if (!Element.prototype.matches) { Element.prototype.matches = Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector; }
-    },
-    // This function is converted to a string and then put in a script tag.
-    // Do NOT shorten to `toBlob() {`.
-    toBlob: function() {
-      if (HTMLCanvasElement.prototype.toBlob) { return; }
-      HTMLCanvasElement.prototype.toBlob = function(cb, type, encoderOptions) {
-        const url = this.toDataURL(type, encoderOptions);
-        const data = atob(url.slice(url.indexOf(',')+1));
-        // DataUrl to Binary code from Aeosynth's 4chan X repo
-        const l = data.length;
-        const ui8a = new Uint8Array(l);
-        for (let i = 0, end = l; i < end; i++) {
-          ui8a[i] = data.charCodeAt(i);
-        }
-        return cb(new Blob([ui8a], {type: type || 'image/png'}));
-      };
-    }
-  };
-
   var Main = {
     init() {
       // XXX dwb userscripts extension reloads scripts run at document-start when replaceState/pushState is called.
@@ -25648,17 +25636,7 @@ vp-replace
       });
       try {
         $.global(
-          function () {
-            const date = +this.buildDate;
-            Object.defineProperty(window, 'fourchanXT', {
-              value: Object.freeze({
-                version: this.version,
-                // Getter to prevent mutations.
-                get buildDate() { return new Date(date) },
-              }),
-              writable: false,
-            });
-          },
+          'exposeVersion',
           { version: g.VERSION, buildDate: g.VERSION_DATE.getTime().toString() },
         );
       } catch (e) {
@@ -25700,17 +25678,7 @@ vp-replace
 
       // XXX Remove document-breaking ad
       if (['boards.4chan.org', 'boards.4channel.org'].includes(location.hostname)) {
-        $.global(function() {
-          const fromCharCode0 = String.fromCharCode;
-          return String.fromCharCode = function() {
-            if (document.body) {
-              String.fromCharCode = fromCharCode0;
-            } else if (document.currentScript && !document.currentScript.src) {
-              throw Error();
-            }
-            return fromCharCode0.apply(this, arguments);
-          };
-        });
+        $.global('removeBreakingAd');
         $.asap(docSet, () => $.onExists(doc, 'iframe[srcdoc]', $.rm));
       }
 
@@ -25824,9 +25792,7 @@ vp-replace
     },
 
     initFeatures() {
-      $.global(function() {
-        document.documentElement.classList.add('js-enabled');
-        return window.FCX = {};});
+      $.global('initMain');
       Main.jsEnabled = $.hasClass(doc, 'js-enabled');
 
       $.extend(g, Main.parseURL());
@@ -25852,9 +25818,8 @@ vp-replace
             }
             if (Conf['Loop in New Tab']) {
               video.loop = true;
-              video.controls = false;
+              video.controls = true;
               video.play();
-              return ImageCommon.addControls(video);
             }
           }
         });
@@ -26282,16 +26247,17 @@ vp-replace
 
       // Detect conflicts with native extension
       if (g.SITE.testNativeExtension && !$.hasClass(doc, 'tainted')) {
-        const {enabled} = g.SITE.testNativeExtension();
-        if (enabled) {
-          $.addClass(doc, 'tainted');
-          if (Conf['Disable Native Extension'] && !Main.isFirstRun) {
-            const msg = $.el('div',
-              { innerHTML: 'Failed to disable the native extension. You may need to <a href="' + E(meta.upstreamFaq) +
-                '#blocking-native-extension" target="_blank">block it</a>.' });
-            new Notice('error', msg);
+        g.SITE.testNativeExtension().then(({enabled}) => {
+          if (enabled) {
+            $.addClass(doc, 'tainted');
+            if (Conf['Disable Native Extension'] && !Main.isFirstRun) {
+              const msg = $.el('div',
+                { innerHTML: 'Failed to disable the native extension. You may need to <a href="' + E(meta.upstreamFaq) +
+                  '#blocking-native-extension" target="_blank">block it</a>.' });
+              new Notice('error', msg);
+            }
           }
-        }
+        });
       }
 
       if (!(errors instanceof Array)) {
@@ -26394,7 +26360,6 @@ User agent: ${navigator.userAgent}\
     mountedCBs: [],
 
     features: [
-      ['Polyfill',                  Polyfill],
       ['Board Configuration',       BoardConfig],
       ['Normalize URL',             NormalizeURL],
       ['Delay Redirect on Post',    PostRedirect],

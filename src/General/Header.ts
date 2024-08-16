@@ -127,7 +127,7 @@ var Header = {
         $('#navtopright',        footer).id = 'navbotright';
         $('#settingsWindowLink', footer).id = 'settingsWindowLinkBot';
         $.before(absbot, footer);
-        $.global(() => window.cloneTopNav = function() {});
+        $.global('stubCloneTopNav');
       }
       if (Header.bottomBoardList = $(g.SITE.selectors.boardListBottom)) {
         for (var a of $$('a', Header.bottomBoardList)) {

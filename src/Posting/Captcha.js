@@ -262,35 +262,7 @@ const Captcha = {
     },
 
     setupJS() {
-      return $.global(function () {
-        const { recaptchaKey } = this;
-        const render = function () {
-          const { classList } = document.documentElement;
-          const container = document.querySelector('#qr .captcha-container');
-          return container.dataset.widgetID = window.grecaptcha.render(container, {
-            sitekey: recaptchaKey,
-            theme: classList.contains('tomorrow') || classList.contains('spooky') || classList.contains('dark-captcha') ? 'dark' : 'light',
-            callback(response) {
-              return window.dispatchEvent(new CustomEvent('captcha:success', { detail: response }));
-            }
-          }
-          );
-        };
-        if (window.grecaptcha) {
-          return render();
-        } else {
-          const cbNative = window.onRecaptchaLoaded;
-          window.onRecaptchaLoaded = function () {
-            render();
-            return cbNative();
-          };
-          if (!document.head.querySelector('script[src^="https://www.google.com/recaptcha/api.js"]')) {
-            const script = document.createElement('script');
-            script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoaded&render=explicit';
-            return document.head.appendChild(script);
-          }
-        }
-      }, { recaptchaKey: meta.recaptchaKey });
+      $.global('setupCaptcha', { recaptchaKey: meta.recaptchaKey });
     },
 
     afterSetup(mutations) {
@@ -333,10 +305,7 @@ const Captcha = {
       delete this.timeouts.destroy;
       $.rmClass(QR.nodes.el, 'captcha-open');
       if (this.nodes.container) {
-        $.global(function () {
-          const container = document.querySelector('#qr .captcha-container');
-          return window.grecaptcha.reset(container.dataset.widgetID);
-        });
+        $.global('resetCaptcha');
         $.rm(this.nodes.container);
         return delete this.nodes.container;
       }
@@ -386,10 +355,7 @@ const Captcha = {
         this.destroy();
         return this.setup(false, true);
       } else {
-        return $.global(function () {
-          const container = document.querySelector('#qr .captcha-container');
-          return window.grecaptcha.reset(container.dataset.widgetID);
-        });
+        $.global('resetCaptcha');
       }
     },
 
