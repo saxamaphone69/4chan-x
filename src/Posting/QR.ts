@@ -1738,6 +1738,7 @@ class post {
     rm: HTMLElement,
     spoiler: HTMLInputElement,
     span: HTMLElement,
+    spanFileName: HTMLElement,
   };
   declare spoiler: boolean;
   declare thread: number | 'new';
@@ -1760,15 +1761,21 @@ class post {
       className: 'qr-preview',
       draggable: true,
       href: 'javascript:;'
-    }
-    );
-    $.extend(el, { innerHTML: '<a class="remove" title="Remove">✕</a><label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label><span></span>' });
+    }) as HTMLAnchorElement;
+    $.extend(el, {
+      innerHTML: '<a class="remove" title="Remove">✕</a>' +
+      '<label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label>' +
+      '<span id="qr-preview-comment"></span><br /><span id="qr-preview-name"></span>'
+    });
+
+    const [rm, spoiler, span, /*br*/, spanFileName] = el.childNodes as NodeListOf<HTMLElement>;
 
     this.nodes = {
       el,
-      rm: el.firstChild as HTMLElement,
-      spoiler: $('.qr-preview-spoiler input', el),
-      span: el.lastChild as HTMLElement,
+      rm,
+      spoiler: spoiler.firstChild as HTMLInputElement,
+      span,
+      spanFileName,
     };
 
     $.on(el, 'click', this.select);
@@ -2106,10 +2113,10 @@ class post {
       this.nodes.el.dataset.type = this.file.type;
       this.nodes.el.style.backgroundImage = '';
       if (/^(image|video)\//.test(this.file.type)) {
-        this.nodes.el.textContent = '';
+        this.nodes.spanFileName.textContent = '';
         this.readFile();
       } else {
-        this.nodes.el.textContent = this.file.name.match(/\.([^\.]+)$/)[1];
+        this.nodes.spanFileName.textContent = this.file.name.match(/\.([^\.]+)$/)[1];
       }
     } catch (error) {
       console.error(error);

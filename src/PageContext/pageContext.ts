@@ -165,16 +165,15 @@ const PageContextFunctions = {
   TCaptchaClearChallenge: () => { (window as any).TCaptcha.clearChallenge() },
 
   setupQR: () => {
-    const { FCX, Tegaki } = (window as any);
-    FCX.oekakiCB = () => Tegaki.flatten().toBlob(function (file) {
+    (window as any).FCX.oekakiCB = () => (window as any).Tegaki.flatten().toBlob(function (file) {
       const source = `oekaki-${Date.now()}`;
-      FCX.oekakiLatest = source;
+      (window as any).FCX.oekakiLatest = source;
       document.dispatchEvent(new CustomEvent('QRSetFile', {
         bubbles: true,
-        detail: { file, name: FCX.oekakiName, source }
+        detail: { file, name: (window as any).FCX.oekakiName, source }
       }));
     });
-    if (Tegaki) {
+    if ((window as any).Tegaki) {
       document.querySelector<HTMLElement>('#qr .oekaki').hidden = false;
     }
   },
