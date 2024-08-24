@@ -3,7 +3,7 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
-### Unreleased
+### 2.13.1 (2024-08-24)
 
 - Restored the button to remove an entry from the dump list and the spoiler checkbox on the thumbnail.
   [#90](https://github.com/TuxedoTako/4chan-xt/issues/90)

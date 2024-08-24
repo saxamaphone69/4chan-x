@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.13.0",
-    "date": "2024-08-16T15:26:28Z"
+    "version": "2.13.1",
+    "date": "2024-08-24T16:27:41Z"
   };
 
   var meta = {
@@ -1635,16 +1635,15 @@ https://*.hcaptcha.com
     destroyTCaptcha: () => { window.TCaptcha.destroy(); },
     TCaptchaClearChallenge: () => { window.TCaptcha.clearChallenge(); },
     setupQR: () => {
-      const { FCX, Tegaki } = window;
-      FCX.oekakiCB = () => Tegaki.flatten().toBlob(function (file) {
+      window.FCX.oekakiCB = () => window.Tegaki.flatten().toBlob(function (file) {
         const source = `oekaki-${Date.now()}`;
-        FCX.oekakiLatest = source;
+        window.FCX.oekakiLatest = source;
         document.dispatchEvent(new CustomEvent('QRSetFile', {
           bubbles: true,
-          detail: { file, name: FCX.oekakiName, source }
+          detail: { file, name: window.FCX.oekakiName, source }
         }));
       });
-      if (Tegaki) {
+      if (window.Tegaki) {
         document.querySelector('#qr .oekaki').hidden = false;
       }
     },
@@ -5430,7 +5429,6 @@ input[type="checkbox"]:checked ~ .checkbox-letter {
   overflow: hidden;
   position: relative;
   text-shadow: 0 0 2px #000;
-  text-align: center;
   transition: opacity .25s ease-in-out, transform .25s ease-in-out;
   vertical-align: top;
   background-size: cover;
@@ -18268,12 +18266,18 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         draggable: true,
         href: 'javascript:;'
       });
-      $.extend(el, { innerHTML: '<a class="remove" title="Remove">✕</a><label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label><span></span>' });
+      $.extend(el, {
+        innerHTML: '<a class="remove" title="Remove">✕</a>' +
+          '<label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label>' +
+          '<span id="qr-preview-comment"></span><br /><span id="qr-preview-name"></span>'
+      });
+      const [rm, spoiler, span, /*br*/ , spanFileName] = el.childNodes;
       this.nodes = {
         el,
-        rm: el.firstChild,
-        spoiler: $('.qr-preview-spoiler input', el),
-        span: el.lastChild,
+        rm,
+        spoiler: spoiler.firstChild,
+        span,
+        spanFileName,
       };
       $.on(el, 'click', this.select);
       $.on(this.nodes.rm, 'click', e => { e.stopPropagation(); this.rm(); });
@@ -18596,10 +18600,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         this.nodes.el.dataset.type = this.file.type;
         this.nodes.el.style.backgroundImage = '';
         if (/^(image|video)\//.test(this.file.type)) {
-          this.nodes.el.textContent = '';
+          this.nodes.spanFileName.textContent = '';
           this.readFile();
         } else {
-          this.nodes.el.textContent = this.file.name.match(/\.([^\.]+)$/)[1];
+          this.nodes.spanFileName.textContent = this.file.name.match(/\.([^\.]+)$/)[1];
         }
       } catch (error) {
         console.error(error);

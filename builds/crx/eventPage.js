@@ -151,16 +151,15 @@ const PageContextFunctions = {
   destroyTCaptcha: () => { window.TCaptcha.destroy(); },
   TCaptchaClearChallenge: () => { window.TCaptcha.clearChallenge(); },
   setupQR: () => {
-    const { FCX, Tegaki } = window;
-    FCX.oekakiCB = () => Tegaki.flatten().toBlob(function (file) {
+    window.FCX.oekakiCB = () => window.Tegaki.flatten().toBlob(function (file) {
       const source = `oekaki-${Date.now()}`;
-      FCX.oekakiLatest = source;
+      window.FCX.oekakiLatest = source;
       document.dispatchEvent(new CustomEvent('QRSetFile', {
         bubbles: true,
-        detail: { file, name: FCX.oekakiName, source }
+        detail: { file, name: window.FCX.oekakiName, source }
       }));
     });
-    if (Tegaki) {
+    if (window.Tegaki) {
       document.querySelector('#qr .oekaki').hidden = false;
     }
   },
