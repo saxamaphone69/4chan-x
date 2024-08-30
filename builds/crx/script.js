@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.13.1",
-    "date": "2024-08-24T16:27:41Z"
+    "version": "2.13.2",
+    "date": "2024-08-30T18:37:00Z"
   };
 
   var meta = {
@@ -7993,8 +7993,8 @@ svg.icon {
           if (isVideo) {
             Audio.setupSync(el, audioEl);
             el.controls = false;
-            audioEl.loop = true;
           }
+          audioEl.loop = true;
           audioEl.controls = Conf['Show Controls'];
           audioEl.autoplay = Conf['Autoplay'];
           $.after(el, audioEl);
@@ -10006,21 +10006,22 @@ svg.icon {
     init() {
       if (!((g.VIEW === 'index') && Conf['Thread Expansion'])) { return; }
       if (Conf['JSON Index']) {
-        return $.on(d, 'IndexRefreshInternal', this.onIndexRefresh);
+        $.on(d, 'IndexRefreshInternal', this.onIndexRefresh);
       } else {
-        return Callbacks.Thread.push({
+        Callbacks.Thread.push({
           name: 'Expand Thread',
-          cb() { return ExpandThread.setButton(this); }
+          cb() { ExpandThread.setButton(this); }
         });
       }
     },
 
     setButton(thread) {
-      let a;
-      if (!(thread.nodes.root && (a = $('.summary', thread.nodes.root)))) { return; }
+      if (!thread.nodes.root) return;
+      const a = $('.summary:not(.preview-summary)', thread.nodes.root);
+      if (!a) return;
       a.textContent = g.SITE.Build.summaryText('+', ...a.textContent.match(/\d+/g));
       a.style.cursor = 'pointer';
-      return $.on(a, 'click', ExpandThread.cbToggle);
+      $.on(a, 'click', ExpandThread.cbToggle);
     },
 
     disconnect(refresh) {
@@ -10035,18 +10036,18 @@ svg.icon {
         delete ExpandThread.statuses[threadID];
       }
 
-      if (!refresh) { return $.off(d, 'IndexRefreshInternal', this.onIndexRefresh); }
+      if (!refresh) $.off(d, 'IndexRefreshInternal', this.onIndexRefresh);
     },
 
     onIndexRefresh() {
       ExpandThread.disconnect(true);
-      return g.BOARD.threads.forEach(thread => ExpandThread.setButton(thread));
+      g.BOARD.threads.forEach(thread => ExpandThread.setButton(thread));
     },
 
     cbToggle(e) {
       if ($.modifiedClick(e)) { return; }
       e.preventDefault();
-      return ExpandThread.toggle(Get.threadFromNode(this));
+      ExpandThread.toggle(Get.threadFromNode(this));
     },
 
     cbToggleBottom(e) {
@@ -10063,9 +10064,9 @@ svg.icon {
       let a;
       if (!(thread.nodes.root && (a = $('.summary', thread.nodes.root)))) { return; }
       if (thread.ID in ExpandThread.statuses) {
-        return ExpandThread.contract(thread, a, thread.nodes.root);
+        ExpandThread.contract(thread, a, thread.nodes.root);
       } else {
-        return ExpandThread.expand(thread, a);
+        ExpandThread.expand(thread, a);
       }
     },
 
@@ -10076,9 +10077,9 @@ svg.icon {
       status.req = $.cache(g.SITE.urls.threadJSON({boardID: thread.board.ID, threadID: thread.ID}), function() {
         if (this !== status.req) { return; } // aborted
         delete status.req;
-        return ExpandThread.parse(this, thread, a);
+        ExpandThread.parse(this, thread, a);
       });
-      return status.numReplies = $$(g.SITE.selectors.replyOriginal, thread.nodes.root).length;
+      status.numReplies = $$(g.SITE.selectors.replyOriginal, thread.nodes.root).length;
     },
 
     contract(thread, a, threadRoot) {
@@ -10108,7 +10109,7 @@ svg.icon {
         $.event('PostsRemoved', null, a.parentNode);
       }
       a.textContent = g.SITE.Build.summaryText('+', postsCount, filesCount);
-      return $.rm($('.summary-bottom', threadRoot));
+      $.rm($('.summary-bottom', threadRoot));
     },
 
     parse(req, thread, a) {
@@ -10149,7 +10150,7 @@ svg.icon {
         const a2 = a.cloneNode(true);
         a2.classList.add('summary-bottom');
         $.on(a2, 'click', ExpandThread.cbToggleBottom);
-        return $.after(root, a2);
+        $.after(root, a2);
       }
     }
   };
@@ -23175,8 +23176,11 @@ vp-replace
         }
       }
       if (archive.name === 'arch.b4k.co') {
-        // remove last 3 digits
-        filename = filename.replace(/[0-9]{3}\./, '.');
+        const [timeStamp, ext] = filename.split('.');
+        if (timeStamp.length > 13) {
+          // remove last 3 digits
+          filename = `${timeStamp.slice(0, -3)}.${ext}`;
+        }
       }
       return `${Redirect.protocol(archive)}${archive.domain}/${boardID}/full_image/${filename}`;
     },

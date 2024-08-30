@@ -284,8 +284,8 @@ var ImageExpand = {
         if (isVideo) {
           Audio.setupSync(el as HTMLVideoElement, audioEl);
           (el as HTMLVideoElement).controls = false;
-          audioEl.loop = true;
         }
+        audioEl.loop = true;
         audioEl.controls = Conf['Show Controls'];
         audioEl.autoplay = Conf['Autoplay'];
 
