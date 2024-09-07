@@ -357,7 +357,7 @@ var Keybinds = {
         if ((48 <= kc && kc <= 57) || (65 <= kc && kc <= 90)) { // 0-9, A-Z
           return String.fromCharCode(kc).toLowerCase();
         } else if (96 <= kc && kc <= 105) { // numpad 0-9
-          return String.fromCharCode(kc - 48).toLowerCase();
+          return String.fromCharCode(kc - 48);
         } else {
           return null;
         }

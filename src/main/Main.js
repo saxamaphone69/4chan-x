@@ -168,8 +168,7 @@ var Main = {
     };
 
     // XXX Remove document-breaking ad
-    if (['boards.4chan.org', 'boards.4channel.org'].includes(location.hostname)) {
-      $.global('removeBreakingAd');
+    if (location.hostname === 'boards.4chan.org') {
       $.asap(docSet, () => $.onExists(doc, 'iframe[srcdoc]', $.rm));
     }
 

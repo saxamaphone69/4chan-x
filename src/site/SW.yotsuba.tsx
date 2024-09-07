@@ -55,7 +55,7 @@ const SWYotsuba = {
     board:         '.board',
     thread:        '.thread',
     threadDivider: '.board > hr',
-    summary:       '.summary',
+    summary:       'a.summary',
     postContainer: '.postContainer',
     replyOriginal: '.replyContainer:not([data-clone])',
     sideArrows:    'div.sideArrows',

@@ -3,6 +3,12 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.13.3 (2024-09-07)
+
+- Fixed thread expansion in the index again.
+  [#97 \(comment\)](https://github.com/TuxedoTako/4chan-xt/issues/97#issuecomment-2322505527)
+- Fixed keybinds not working the first time. [#101](https://github.com/TuxedoTako/4chan-xt/issues/101)
+
 ### 2.13.2 (2024-08-30)
 
 - Fixed sound posts on images and gifs not looping. [#89](https://github.com/TuxedoTako/4chan-xt/issues/89)

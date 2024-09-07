@@ -40,19 +40,6 @@ const PageContextFunctions = {
       });
   },
 
-  removeBreakingAd: () => {
-    const fromCharCode0 = String.fromCharCode;
-    // @ts-ignore
-    String.fromCharCode = function () {
-      if (document.body) {
-        String.fromCharCode = fromCharCode0;
-      } else if (document.currentScript && !(document.currentScript as HTMLScriptElement).src) {
-        throw Error();
-      }
-      fromCharCode0.apply(this, arguments);
-    };
-  },
-
   initMain: () => {
     document.documentElement.classList.add('js-enabled');
     (window as any).FCX = {};

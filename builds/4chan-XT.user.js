@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.13.2
+// @version      2.13.3
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -170,8 +170,8 @@
   'use strict';
 
   var version = {
-    "version": "2.13.2",
-    "date": "2024-08-30T18:37:00Z"
+    "version": "2.13.3",
+    "date": "2024-09-07T16:00:00Z"
   };
 
   var meta = {
@@ -1604,18 +1604,6 @@ https://*.hcaptcha.com
         }),
         writable: false,
       });
-    },
-    removeBreakingAd: () => {
-      const fromCharCode0 = String.fromCharCode;
-      // @ts-ignore
-      String.fromCharCode = function () {
-        if (document.body) {
-          String.fromCharCode = fromCharCode0;
-        } else if (document.currentScript && !document.currentScript.src) {
-          throw Error();
-        }
-        fromCharCode0.apply(this, arguments);
-      };
     },
     initMain: () => {
       document.documentElement.classList.add('js-enabled');
@@ -10175,7 +10163,7 @@ svg.icon {
 
     setButton(thread) {
       if (!thread.nodes.root) return;
-      const a = $('.summary:not(.preview-summary)', thread.nodes.root);
+      const a = $('a.summary', thread.nodes.root);
       if (!a) return;
       a.textContent = g.SITE.Build.summaryText('+', ...a.textContent.match(/\d+/g));
       a.style.cursor = 'pointer';
@@ -10219,8 +10207,9 @@ svg.icon {
     },
 
     toggle(thread) {
-      let a;
-      if (!(thread.nodes.root && (a = $('.summary', thread.nodes.root)))) { return; }
+      if (!thread.nodes.root) return;
+      const a = $('a.summary', thread.nodes.root);
+      if (!a) return;
       if (thread.ID in ExpandThread.statuses) {
         ExpandThread.contract(thread, a, thread.nodes.root);
       } else {
@@ -16373,7 +16362,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           if ((48 <= kc && kc <= 57) || (65 <= kc && kc <= 90)) { // 0-9, A-Z
             return String.fromCharCode(kc).toLowerCase();
           } else if (96 <= kc && kc <= 105) { // numpad 0-9
-            return String.fromCharCode(kc - 48).toLowerCase();
+            return String.fromCharCode(kc - 48);
           } else {
             return null;
           }
@@ -19673,7 +19662,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       board: '.board',
       thread: '.thread',
       threadDivider: '.board > hr',
-      summary: '.summary',
+      summary: 'a.summary',
       postContainer: '.postContainer',
       replyOriginal: '.replyContainer:not([data-clone])',
       sideArrows: 'div.sideArrows',
@@ -25685,8 +25674,7 @@ vp-replace
       };
 
       // XXX Remove document-breaking ad
-      if (['boards.4chan.org', 'boards.4channel.org'].includes(location.hostname)) {
-        $.global('removeBreakingAd');
+      if (location.hostname === 'boards.4chan.org') {
         $.asap(docSet, () => $.onExists(doc, 'iframe[srcdoc]', $.rm));
       }
 

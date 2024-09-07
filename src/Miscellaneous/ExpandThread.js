@@ -24,7 +24,7 @@ var ExpandThread = {
 
   setButton(thread) {
     if (!thread.nodes.root) return;
-    const a = $('.summary:not(.preview-summary)', thread.nodes.root);
+    const a = $('a.summary', thread.nodes.root);
     if (!a) return;
     a.textContent = g.SITE.Build.summaryText('+', ...a.textContent.match(/\d+/g));
     a.style.cursor = 'pointer';
@@ -68,8 +68,9 @@ var ExpandThread = {
   },
 
   toggle(thread) {
-    let a;
-    if (!(thread.nodes.root && (a = $('.summary', thread.nodes.root)))) { return; }
+    if (!thread.nodes.root) return;
+    const a = $('a.summary', thread.nodes.root);
+    if (!a) return;
     if (thread.ID in ExpandThread.statuses) {
       ExpandThread.contract(thread, a, thread.nodes.root);
     } else {
