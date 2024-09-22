@@ -51,6 +51,7 @@ var CrossOrigin = {
       }
       const gmOptions = {
         method: "GET",
+        anonymous: true,
         url,
         headers,
         responseType: 'arraybuffer',
@@ -165,6 +166,7 @@ var CrossOrigin = {
 
       const gmOptions = {
         method: 'GET',
+        anonymous: true,
         url,
         headers,
         timeout,
