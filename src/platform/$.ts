@@ -158,13 +158,13 @@ $.whenModified = function(url, bucket, cb, options={}) {
 })();
 
 $.cb = {
-  checked() {
+  checked(this: HTMLInputElement) {
     if ($.hasOwn(Conf, this.name)) {
       $.set(this.name, this.checked);
       return Conf[this.name] = this.checked;
     }
   },
-  value() {
+  value(this: HTMLInputElement | HTMLTextAreaElement) {
     if ($.hasOwn(Conf, this.name)) {
       $.set(this.name, this.value.trim());
       return Conf[this.name] = this.value;

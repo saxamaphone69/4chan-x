@@ -12,8 +12,6 @@ import AdvancedPage from './Settings/Advanced.html';
 import KeybindsPage from './Settings/Keybinds.html';
 import FilterSelectPage from './Settings/Filter-select.html';
 import Redirect from '../Archive/Redirect';
-import DataBoard from '../classes/DataBoard';
-import Notice from '../classes/Notice';
 import Config from '../config/Config';
 import ImageHost from '../Images/ImageHost';
 import CustomCSS from '../Miscellaneous/CustomCSS';
@@ -360,140 +358,10 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     return reader.readAsText(file);
   },
 
-  convertFrom: {
-    loadletter(data) {
-      const convertSettings = function(data, map) {
-        for (var prevKey in map) {
-          var newKey = map[prevKey];
-          if (newKey) { data.Conf[newKey] = data.Conf[prevKey]; }
-          delete data.Conf[prevKey];
-        }
-        return data;
-      };
-      data = convertSettings(data, {
-        // General confs
-        'Disable 4chan\'s extension': 'Disable Native Extension',
-        'Comment Auto-Expansion': '',
-        'Remove Slug': '',
-        'Always HTTPS': 'Redirect to HTTPS',
-        'Check for Updates': '',
-        'Recursive Filtering': 'Recursive Hiding',
-        'Reply Hiding': 'Reply Hiding Buttons',
-        'Thread Hiding': 'Thread Hiding Buttons',
-        'Show Stubs': 'Stubs',
-        'Image Auto-Gif': 'Replace GIF',
-        'Expand All WebM': 'Expand videos',
-        'Reveal Spoilers': 'Reveal Spoiler Thumbnails',
-        'Expand From Current': 'Expand from here',
-        'Current Page': 'Page Count in Stats',
-        'Current Page Position': '',
-        'Alternative captcha': 'Use Recaptcha v1',
-        'Alt index captcha': 'Use Recaptcha v1 on Index',
-        'Auto Submit': 'Post on Captcha Completion',
-        'Open Reply in New Tab': 'Open Post in New Tab',
-        'Remember QR size': 'Remember QR Size',
-        'Remember Subject': '',
-        'Quote Inline': 'Quote Inlining',
-        'Quote Preview': 'Quote Previewing',
-        'Indicate OP quote': 'Mark OP Quotes',
-        'Indicate You quote': 'Mark Quotes of You',
-        'Indicate Cross-thread Quotes': 'Mark Cross-thread Quotes',
-        // filter
-        'uniqueid': 'uniqueID',
-        'mod': 'capcode',
-        'email': '',
-        'country': 'flag',
-        'md5': 'MD5',
-        // keybinds
-        'openEmptyQR': 'Open empty QR',
-        'openQR': 'Open QR',
-        'openOptions': 'Open settings',
-        'close': 'Close',
-        'spoiler': 'Spoiler tags',
-        'sageru': 'Toggle sage',
-        'code': 'Code tags',
-        'sjis': 'SJIS tags',
-        'submit': 'Submit QR',
-        'watch': 'Watch',
-        'update': 'Update',
-        'unreadCountTo0': '',
-        'expandAllImages': 'Expand images',
-        'expandImage': 'Expand image',
-        'zero': 'Front page',
-        'nextPage': 'Next page',
-        'previousPage': 'Previous page',
-        'nextThread': 'Next thread',
-        'previousThread': 'Previous thread',
-        'expandThread': 'Expand thread',
-        'openThreadTab': 'Open thread',
-        'openThread': 'Open thread tab',
-        'nextReply': 'Next reply',
-        'previousReply': 'Previous reply',
-        'hide': 'Hide',
-        // updater
-        'Scrolling': 'Auto Scroll',
-        'Verbose': ''
-      }
-      );
-      if ('Always CDN' in data.Conf) {
-        data.Conf['fourchanImageHost'] = data.Conf['Always CDN'] ? 'i.4cdn.org' : '';
-        delete data.Conf['Always CDN'];
-      }
-      data.Conf.sauces = data.Conf.sauces.replace(/\$\d/g, function(c) {
-        switch (c) {
-          case '$1':
-            return '%TURL';
-          case '$2':
-            return '%URL';
-          case '$3':
-            return '%MD5';
-          case '$4':
-            return '%board';
-          default:
-            return c;
-        }
-      });
-      for (var key in Config.hotkeys) {
-        var val = Config.hotkeys[key];
-        if (key in data.Conf) {
-          data.Conf[key] = data.Conf[key].replace(/ctrl|alt|meta/g, s => `${s[0].toUpperCase()}${s.slice(1)}`).replace(/(^|.+\+)[A-Z]$/g, s => `Shift+${s.slice(0, -1)}${s.slice(-1).toLowerCase()}`);
-        }
-      }
-      if (data.WatchedThreads) {
-        data.Conf['watchedThreads'] = dict.clone({ '4chan.org': { boards: {} } });
-        for (var boardID in data.WatchedThreads) {
-          var threads = data.WatchedThreads[boardID];
-          for (var threadID in threads) {
-            var threadData = threads[threadID];
-            (data.Conf['watchedThreads']['4chan.org'].boards[boardID] || (data.Conf['watchedThreads']['4chan.org'].boards[boardID] = dict()))[threadID] = { excerpt: threadData.textContent };
-          }
-        }
-      }
-      return data;
-    }
-  },
-
   upgrade(data, version) {
     let corrupted, key, val;
     const changes = dict();
     const set = (key, value) => data[key] = (changes[key] = value);
-    const setD = function(key, value) {
-      if (data[key] == null) { return set(key, value); }
-    };
-    const addSauces = function(sauces) {
-      if (data['sauces'] != null) {
-        sauces = sauces.filter(s => data['sauces'].indexOf(s.match(/[^#;\s]+|$/)[0]) < 0);
-        if (sauces.length) {
-          return set('sauces', data['sauces'] + '\n\n' + sauces.join('\n'));
-        }
-      }
-    };
-    const addCSS = function(css) {
-      if (data['usercss'] == null) { set('usercss', Config['usercss']); }
-      if (data['usercss'].indexOf(css) < 0) {
-        return set('usercss', css + '\n\n' + data['usercss']);
-      }
-    };
     // XXX https://github.com/greasemonkey/greasemonkey/issues/2600
     if (corrupted = (version[0] === '"')) {
       try {
@@ -501,15 +369,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       } catch (error) {}
     }
     const compareString = version.replace(/^XT /i, '').replace(/\d+/g, x => x.padStart(5, '0'));
-    if (compareString < '00001.00013.00014.00008') {
-      for (key in data) {
-        val = data[key];
-        if ((typeof val === 'string') && (typeof Conf[key] !== 'string') && !['Index Sort', 'Last Long Reply Thresholds 0', 'Last Long Reply Thresholds 1'].includes(key)) {
-          corrupted = true;
-          break;
-        }
-      }
-    }
     if (corrupted) {
       for (key in data) {
         val = data[key];
@@ -519,240 +378,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             set(key, val2);
           } catch (error1) {}
         }
-      }
-    }
-    if (compareString < '00001.00011.00008.00000') {
-      if (data['Fixed Thread Watcher'] == null) {
-        set('Fixed Thread Watcher', data['Toggleable Thread Watcher'] ?? true);
-      }
-      if (data['Exempt Archives from Encryption'] == null) {
-        set('Exempt Archives from Encryption', data['Except Archives from Encryption'] ?? false);
-      }
-    }
-    if (compareString < '00001.00011.00010.00001') {
-      if (data['selectedArchives'] != null) {
-        const uids = {"Moe":0,"4plebs Archive":3,"Nyafuu Archive":4,"Love is Over":5,"Rebecca Black Tech":8,"warosu":10,"fgts":15,"not4plebs":22,"DesuStorage":23,"fireden.net":24,"disabled":null};
-        for (var boardID in data['selectedArchives']) {
-          var record = data['selectedArchives'][boardID];
-          for (var type in record) {
-            var name = record[type];
-            if ($.hasOwn(uids, name)) {
-              record[type] = uids[name];
-            }
-          }
-        }
-        set('selectedArchives', data['selectedArchives']);
-      }
-    }
-    if (compareString < '00001.00011.00016.00000') {
-      let rice;
-      if (rice = Config['usercss'].match(/\/\* Board title rice \*\/(?:\n.+)*/)[0]) {
-        if ((data['usercss'] != null) && (data['usercss'].indexOf(rice) < 0)) {
-          set('usercss', rice + '\n\n' + data['usercss']);
-        }
-      }
-    }
-    if (compareString < '00001.00011.00017.00000') {
-      for (key of ['Persistent QR', 'Color User IDs', 'Fappe Tyme', 'Werk Tyme', 'Highlight Posts Quoting You', 'Highlight Own Posts']) {
-        if (data[key] == null) { set(key, (key === 'Persistent QR')); }
-      }
-    }
-    if (compareString < '00001.00011.00017.00006') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(/^(#?\s*)http:\/\/iqdb\.org\//mg, '$1//iqdb.org/'));
-      }
-    }
-    if ((compareString < '00001.00011.00019.00003') && !Settings.dialog) {
-      $.queueTask(() => Settings.warnings.ads(item => new Notice('warning', [...item.childNodes])));
-    }
-    if (compareString < '00001.00011.00020.00003') {
-      const object = {'Inline Cross-thread Quotes Only': false, 'Pass Link': true};
-      for (key in object) {
-        var value = object[key];
-        if (data[key] == null) { set(key, value); }
-      }
-    }
-    if (compareString < '00001.00011.00021.00003') {
-      if (data['Remember Your Posts'] == null) {
-        set('Remember Your Posts', data['Mark Quotes of You'] ?? true);
-      }
-    }
-    if (compareString < '00001.00011.00022.00000') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(/^(#?\s*https:\/\/www\.google\.com\/searchbyimage\?image_url=%(?:IMG|URL))%3Fs\.jpg/mg, '$1'));
-        set('sauces', data['sauces'].replace(/^#?\s*https:\/\/www\.google\.com\/searchbyimage\?image_url=%(?:IMG|T?URL)(?=$|;)/mg, '$&&safe=off'));
-      }
-    }
-    if (compareString < '00001.00011.00022.00002') {
-      if ((data['Use Recaptcha v1 in Reports'] == null) && data['Use Recaptcha v1'] && !data['Use Recaptcha v2 in Reports']) {
-        set('Use Recaptcha v1 in Reports', true);
-      }
-    }
-    if (compareString < '00001.00011.00024.00000') {
-      if ((data['JSON Navigation'] != null) && (data['JSON Index'] == null)) {
-        set('JSON Index', data['JSON Navigation']);
-      }
-    }
-    if (compareString < '00001.00011.00026.00000') {
-      if ((data['Oekaki Links'] != null) && (data['Edit Link'] == null)) {
-        set('Edit Link', data['Oekaki Links']);
-      }
-      if (data['Inline Cross-thread Quotes Only'] == null) { set('Inline Cross-thread Quotes Only', true); }
-    }
-    if (compareString < '00001.00011.00030.00000') {
-      if (data['Quote Threading'] && (data['Thread Quotes'] == null)) {
-        set('Thread Quotes', true);
-      }
-    }
-    if (compareString < '00001.00011.00032.00000') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(/^(#?\s*)http:\/\/3d\.iqdb\.org\//mg, '$1//3d.iqdb.org/'));
-      }
-      addSauces([
-        '#https://desustorage.org/_/search/image/%sMD5/',
-        '#https://boards.fireden.net/_/search/image/%sMD5/',
-        '#https://foolz.fireden.net/_/search/image/%sMD5/',
-        '#//www.gif-explode.com/%URL;types:gif'
-      ]);
-    }
-    if (compareString < '00001.00011.00035.00000') {
-      addSauces(['https://whatanime.ga/?auto&url=%IMG;text:wait']);
-    }
-    if (compareString < '00001.00012.00000.00000') {
-      if (data['Exempt Archives from Encryption'] == null) { set('Exempt Archives from Encryption', false); }
-      if (data['Show New Thread Option in Threads'] == null) { set('Show New Thread Option in Threads', false); }
-      if (data['Show Name and Subject']) { addCSS('#qr .persona .field {display: block !important;}'); }
-      if (data['QR Shortcut'] === false) { addCSS('#shortcut-qr {display: none;}'); }
-      if (data['Bottom QR Link'] === false) { addCSS('.qr-link-container-bottom {display: none;}'); }
-    }
-    if (compareString < '00001.00012.00000.00006') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(/^(#?\s*)https:\/\/(?:desustorage|cuckchan)\.org\//mg, '$1https://desuarchive.org/'));
-      }
-    }
-    if (compareString < '00001.00012.00001.00000') {
-      if ((data['Persistent Thread Watcher'] == null) && (data['Toggleable Thread Watcher'] != null)) {
-        set('Persistent Thread Watcher', !data['Toggleable Thread Watcher']);
-      }
-    }
-    if (compareString < '00001.00012.00003.00000') {
-      for (key of ['Image Hover in Catalog', 'Auto Watch', 'Auto Watch Reply']) {
-        setD(key, false);
-      }
-    }
-    if (compareString < '00001.00013.00001.00002') {
-      addSauces(['#//www.bing.com/images/search?q=imgurl:%IMG&view=detailv2&iss=sbi#enterInsights']);
-    }
-    if (compareString < '00001.00013.00005.00000') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(/^(#?\s*)http:\/\/regex\.info\/exif\.cgi/mg, '$1http://exif.regex.info/exif.cgi'));
-      }
-      addSauces(Config['sauces'].match(/# Known filename formats:(?:\n.+)*|$/)[0].split('\n'));
-    }
-    if (compareString < '00001.00013.00007.00002') {
-      setD('Require OP Quote Link', true);
-    }
-    if (compareString < '00001.00013.00008.00000') {
-      setD('Download Link', true);
-    }
-    if (compareString < '00001.00013.00009.00003') {
-      if (data['jsWhitelist'] != null) {
-        const list = data['jsWhitelist'].split('\n');
-        if (!list.includes('https://cdnjs.cloudflare.com') && list.includes('https://cdn.mathjax.org')) {
-          set('jsWhitelist', data['jsWhitelist'] + '\n\nhttps://cdnjs.cloudflare.com');
-        }
-      }
-    }
-    if (compareString < '00001.00014.00000.00006') {
-      if (data['siteSoftware'] != null) {
-        set('siteSoftware', data['siteSoftware'] + '\n4cdn.org yotsuba');
-      }
-    }
-    if (compareString < '00001.00014.00003.00002') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(/^(#?\s*)https:\/\/whatanime\.ga\//mg, '$1https://trace.moe/'));
-      }
-    }
-    if (compareString < '00001.00014.00004.00004') {
-      if ((data['siteSoftware'] != null) && !/^4channel\.org yotsuba$/m.test(data['siteSoftware'])) {
-        set('siteSoftware', data['siteSoftware'] + '\n4channel.org yotsuba');
-      }
-    }
-    if (compareString < '00001.00014.00005.00000') {
-      for (var db of DataBoard.keys) {
-        if (data[db]?.boards) {
-          var {boards, lastChecked} = data[db];
-          data[db]['4chan.org'] = {boards, lastChecked};
-          delete data[db].boards;
-          delete data[db].lastChecked;
-          set(db, data[db]);
-        }
-      }
-      if ((data['siteSoftware'] != null) && (data['siteProperties'] == null)) {
-        const siteProperties = dict();
-        for (var line of data['siteSoftware'].split('\n')) {
-          var [hostname, software] = line.split(' ');
-          siteProperties[hostname] = {software};
-        }
-        set('siteProperties', siteProperties);
-      }
-    }
-    if (compareString < '00001.00014.00006.00006') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(
-          /\/\/%\$1\.deviantart\.com\/gallery\/#\/d%\$2;regexp:\/\^\\w\+_by_\(\\w\+\)-d\(\[\\da-z\]\+\)\//g,
-          '//www.deviantart.com/gallery/#/d%$1%$2;regexp:/^\\w+_by_\\w+[_-]d([\\da-z]{6})\\b|^d([\\da-z]{6})-[\\da-z]{8}-/'
-        )
-        );
-      }
-    }
-    if (compareString < '00001.00014.00008.00000') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(
-          /https:\/\/www\.yandex\.com\/images\/search/g,
-          'https://yandex.com/images/search'
-        )
-        );
-      }
-    }
-    if (compareString < '00001.00014.00009.00000') {
-      if (data['sauces'] != null) {
-        set('sauces', data['sauces'].replace(/^(#?\s*)(?:http:)?\/\/(www\.pixiv\.net|www\.deviantart\.com|imgur\.com|flickr\.com)\//mg, '$1https://$2/'));
-        set('sauces', data['sauces'].replace(/https:\/\/yandex\.com\/images\/search\?rpt=imageview&img_url=%IMG/g, 'https://yandex.com/images/search?rpt=imageview&url=%IMG'));
-      }
-    }
-    if (compareString < '00001.00014.00009.00001') {
-      if ((data['Use Faster Image Host'] != null) && (data['fourchanImageHost'] == null)) {
-        set('fourchanImageHost', (data['Use Faster Image Host'] ? 'i.4cdn.org' : ''));
-      }
-    }
-    if (compareString < '00001.00014.00010.00001') {
-      if (data['Filter in Native Catalog'] == null) {
-        set('Filter in Native Catalog', false);
-      }
-    }
-    if (compareString < '00001.00014.00012.00008') {
-      if (data['boardnav'] == null) {
-        set('boardnav', `\
-[ toggle-all ]
-a-replace
-c-replace
-g-replace
-k-replace
-v-replace
-vg-replace
-vr-replace
-ck-replace
-co-replace
-fit-replace
-jp-replace
-mu-replace
-sp-replace
-tv-replace
-vp-replace
-[external-text:"FAQ","${meta.faq}"]\
-`
-        );
       }
     }
     if (compareString < '00001.00014.00016.00001') {
@@ -810,10 +435,7 @@ vp-replace
   },
 
   loadSettings(data, cb) {
-    // https://github.com/loadletter/4chan-x has differently named settings.
-    if (data.version.startsWith('2.') && "Disable 4chan's extension" in data.Conf) {
-      data = Settings.convertFrom.loadletter(data);
-    } else if (data.version !== g.VERSION) {
+    if (data.version !== g.VERSION) {
       Settings.upgrade(data.Conf, data.version);
     }
     return $.clear(function(err) {
@@ -873,9 +495,9 @@ vp-replace
     const ta = $('textarea', section);
     $.get('sauces', Conf['sauces'], function(item) {
       ta.value = item['sauces'];
-      return (ta.hidden = false);
+      ta.hidden = false;
     }); // XXX prevent Firefox from adding initialization to undo queue
-    return $.on(ta, 'change', $.cb.value);
+    $.on(ta, 'change', $.cb.value);
   },
 
   advanced(section) {
@@ -897,7 +519,7 @@ vp-replace
     const items = dict();
     for (name in inputs) {
       input = inputs[name];
-      if (!['Interval', 'Custom CSS'].includes(name)) {
+      if (!['Interval', 'Custom CSS', 'timeLocale'].includes(name)) {
         items[name] = Conf[name];
         var event = (
           (input.nodeName === 'SELECT') ||
@@ -926,18 +548,21 @@ vp-replace
       $.add(listImageHost, $.el('option', {textContent}));
     }
 
-    const interval  = inputs['Interval'];
-    const customCSS = inputs['Custom CSS'];
-    const applyCSS  = $('#apply-css', section);
+    const interval  : HTMLInputElement  = inputs['Interval'];
+    const customCSS : HTMLInputElement  = inputs['Custom CSS'];
+    const applyCSS  : HTMLButtonElement = $('#apply-css', section); //
+    const timeLocale: HTMLInputElement  = inputs.timeLocale;
 
     interval.value             =  Conf['Interval'];
     customCSS.checked          =  Conf['Custom CSS'];
     inputs['usercss'].disabled = !Conf['Custom CSS'];
     applyCSS.disabled          = !Conf['Custom CSS'];
+    timeLocale.value           =  Conf.timeLocale;
 
     $.on(interval,  'change', ThreadUpdater.cb.interval);
     $.on(customCSS, 'change', Settings.togglecss);
-    $.on(applyCSS,  'click',  () => CustomCSS.update());
+    $.on(applyCSS, 'click', () => CustomCSS.update());
+    $.on(timeLocale, 'change', Settings.setTimeLocale);
 
     const itemsArchive = dict();
     for (name of ['archives', 'selectedArchives', 'lastarchivecheck']) { itemsArchive[name] = Conf[name]; }
@@ -956,7 +581,7 @@ vp-replace
       return $(`tbody > .${this.value}`, table).hidden = false;
     });
 
-    return $.on(updateArchives, 'click', () => Redirect.update(() => Settings.addArchiveTable(section)));
+    $.on(updateArchives, 'click', () => Redirect.update(() => Settings.addArchiveTable(section)));
   },
 
   addArchiveTable(section) {
@@ -1137,6 +762,20 @@ vp-replace
       CustomCSS.addStyle();
     }
     return $.cb.checked.call(this);
+  },
+
+  setTimeLocale(e: InputEvent) {
+    const input = e.target as HTMLInputElement;
+    try {
+      if (input.value !== '') new Intl.DateTimeFormat(input.value);
+      input.setCustomValidity('');
+      Time.formatterCache.clear();
+      $.cb.value.call(input);
+      Settings.timeLocale.call(input);
+    } catch (e) {
+      input.setCustomValidity('Locale not recognized');
+      input.reportValidity();
+    }
   },
 
   keybinds(section) {
