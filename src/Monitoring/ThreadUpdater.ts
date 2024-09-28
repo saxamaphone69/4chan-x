@@ -33,6 +33,9 @@ var ThreadUpdater = {
     // Don't let it keep the loading icon on indefinitely.
     this.audio = $.el('audio');
     if ($.engine !== 'gecko') { this.audio.src = this.beep; }
+    $.on(this.audio, 'error', () => {
+      new Notice('error', this.audio.error.message || 'Error when trying to play thread updater beep.', 15);
+    })
 
     if (Conf['Updater and Stats in Header']) {
       this.dialog = (sc = $.el('span',
@@ -129,13 +132,15 @@ var ThreadUpdater = {
   */
   beep: `data:audio/wav;base64,${Beep}`,
 
-  playBeep() {
-    const {audio} = ThreadUpdater;
-    if (!audio.src) { audio.src = ThreadUpdater.beep; }
+  playBeep(repeatIfPlaying = true) {
+    const { audio } = ThreadUpdater as { audio: HTMLAudioElement };
+    const source = Conf.beepSource || ThreadUpdater.beep
+    if (audio.src !== source) audio.src = source;
+    audio.volume = Conf.beepVolume;
     if (audio.paused) {
-      return audio.play();
-    } else {
-      return $.one(audio, 'ended', ThreadUpdater.playBeep);
+      audio.play();
+    } else if (repeatIfPlaying) {
+      $.one(audio, 'ended', ThreadUpdater.playBeep);
     }
   },
 

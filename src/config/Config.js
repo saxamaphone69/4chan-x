@@ -1214,5 +1214,8 @@ https://*.hcaptcha.com
   fxtLang: '',
   fxtUrl: 'https://api.fxtwitter.com',
   fxtMaxReplies: 5,
+
+  beepSource: '',
+  beepVolume: 100,
 };
 export default Config;

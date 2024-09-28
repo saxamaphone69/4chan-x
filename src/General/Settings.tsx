@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 import SettingsPage from './Settings/SettingsHtml';
 import FilterGuidePage from './Settings/Filter-guide.html';
 import SaucePage from './Settings/Sauce.html';
@@ -60,9 +53,9 @@ var Settings = {
       if ($.hasStorage) {
         // Run in page context to handle case where 4chan X has localStorage access but not the page.
         // (e.g. Pale Moon 26.2.2, GM 3.8, cookies disabled for 4chan only)
-        return $.global('disableNativeExtension');
+        $.global('disableNativeExtension');
       } else {
-        return $.global('disableNativeExtensionNoStorage');
+        $.global('disableNativeExtensionNoStorage');
       }
     }
   },
@@ -108,7 +101,7 @@ var Settings = {
 
     $.add(d.body, dialog);
 
-    return $.event('OpenSettings', null, dialog);
+    $.event('OpenSettings', null, dialog);
   },
 
   close() {
@@ -116,7 +109,7 @@ var Settings = {
     // Unfocus current field to trigger change event.
     d.activeElement?.blur();
     $.rm(Settings.dialog);
-    return delete Settings.dialog;
+    delete Settings.dialog;
   },
 
   sections: [],
@@ -126,7 +119,7 @@ var Settings = {
       ({title, open} = title.detail);
     }
     const hyphenatedTitle = title.toLowerCase().replace(/\s+/g, '-');
-    return Settings.sections.push({title, hyphenatedTitle, open});
+    Settings.sections.push({title, hyphenatedTitle, open});
   },
 
   openSection() {
@@ -140,14 +133,14 @@ var Settings = {
     section.className = `section-${this.hyphenatedTitle}`;
     this.open(section, g);
     section.scrollTop = 0;
-    return $.event('OpenSettings', null, section);
+    $.event('OpenSettings', null, section);
   },
 
   warnings: {
     localStorage(cb) {
       if ($.cantSync) {
         const why = $.cantSet ? 'save your settings' : 'synchronize settings between tabs';
-        return cb($.el('li', {
+        cb($.el('li', {
           textContent: `\
 ${meta.name} needs local storage to ${why}.
 Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's privacy settings (may be listed as part of "local data" or "cookies").\
@@ -158,9 +151,9 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       }
     },
     ads(cb) {
-      return $.onExists(doc, '.adg-rects > .desktop', ad => $.onExists(ad, 'iframe', function() {
+      $.onExists(doc, '.adg-rects > .desktop', ad => $.onExists(ad, 'iframe', function() {
         const url = Redirect.to('thread', {boardID: 'qa', threadID: 362590});
-        return cb($.el('li',
+        cb($.el('li',
           <>
             To protect yourself from <a href={url} target="_blank">malicious ads</a>,
             you should <a href="https://github.com/gorhill/uBlock#ublock-origin" target="_blank">block ads</a> on 4chan.
@@ -179,7 +172,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       {innerHTML: '<legend>Warnings</legend><ul></ul>'});
     const addWarning = function(item) {
       $.add($('ul', warnings), item);
-      return warnings.hidden = false;
+      warnings.hidden = false;
     };
     for (key in Settings.warnings) {
       var warning = Settings.warnings[key];
@@ -191,33 +184,31 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     const inputs = dict();
     const addCheckboxes = function(root, obj) {
       const containers = [root];
-      return (() => {
-        const result = [];
-        for (key in obj) {
-          var arr = obj[key];
-          if (arr instanceof Array) {
-            var description = arr[1];
-            var div = $.el('div',
-              { innerHTML: `<label><input type="checkbox" name="${key}">${key}</label><span class="description">: ${description}</span>` });
-            div.dataset.name = key;
-            var input = $('input', div);
-            $.on(input, 'change', $.cb.checked);
-            $.on(input, 'change', function() { return this.parentNode.parentNode.dataset.checked = this.checked; });
-            items[key]  = Conf[key];
-            inputs[key] = input;
-            var level = arr[2] || 0;
-            if (containers.length <= level) {
-              var container = $.el('div', {className: 'suboption-list'});
-              $.add(containers[containers.length-1].lastElementChild, container);
-              containers[level] = container;
-            } else if (containers.length > (level+1)) {
-              containers.splice(level+1, containers.length - (level+1));
-            }
-            result.push($.add(containers[level], div));
+      const result = [];
+      for (key in obj) {
+        var arr = obj[key];
+        if (arr instanceof Array) {
+          var description = arr[1];
+          var div = $.el('div',
+            { innerHTML: `<label><input type="checkbox" name="${key}">${key}</label><span class="description">: ${description}</span>` });
+          div.dataset.name = key;
+          var input = $('input', div);
+          $.on(input, 'change', $.cb.checked);
+          $.on(input, 'change', function() { this.parentNode.parentNode.dataset.checked = this.checked; });
+          items[key] = Conf[key];
+          inputs[key] = input;
+          var level = arr[2] || 0;
+          if (containers.length <= level) {
+            var container = $.el('div', {className: 'suboption-list' });
+            $.add(containers[containers.length-1].lastElementChild, container);
+            containers[level] = container;
+          } else if (containers.length > (level+1)) {
+            containers.splice(level+1, containers.length - (level+1));
           }
+          result.push($.add(containers[level], div));
         }
-        return result;
-      })();
+      }
+      return result;
     };
 
     for (var keyFS in Config.main) {
@@ -280,11 +271,11 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           hiddenNum += Object.keys(thread).length;
         }
       }
-      return button.textContent = `Hidden: ${hiddenNum}`;
+      button.textContent = `Hidden: ${hiddenNum}`;
     });
     $.on(button, 'click', function() {
       this.textContent = 'Hidden: 0';
-      return $.get('hiddenThreads', dict(), function({hiddenThreads}) {
+      $.get('hiddenThreads', dict(), function({hiddenThreads}){
         if ($.hasStorage && (g.SITE.software === 'yotsuba')) {
           let boardID;
           for (boardID in hiddenThreads['4chan.org']?.boards) {
@@ -294,20 +285,20 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             localStorage.removeItem(`4chan-hide-t-${boardID}`);
           }
         }
-        return ($.delete(['hiddenThreads', 'hiddenPosts']));
+        $.delete(['hiddenThreads', 'hiddenPosts']);
       });
     });
-    return $.after($('input[name="Stubs"]', section).parentNode.parentNode, div);
+    $.after($('input[name="Stubs"]', section).parentNode.parentNode, div);
   },
 
   export() {
     // Make sure to export the most recent data, but don't overwrite existing `Conf` object.
     const Conf2 = dict();
     $.extend(Conf2, Conf);
-    return $.get(Conf2, function(Conf2) {
+    $.get(Conf2, function(Conf2) {
       // Don't export cached JSON data.
       delete Conf2['boardConfig'];
-      return (Settings.downloadExport({version: g.VERSION, date: Date.now(), Conf: Conf2}));
+      Settings.downloadExport({version: g.VERSION, date: Date.now(), Conf: Conf2});
     });
   },
 
@@ -322,11 +313,11 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     const p = $('.imp-exp-result', Settings.dialog);
     $.rmAll(p);
     $.add(p, a);
-    return a.click();
+    a.click();
   },
 
   import() {
-    return $('input[type=file]', this.parentNode).click();
+    $('input[type=file]', this.parentNode).click();
   },
 
   onImport() {
@@ -342,20 +333,20 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     const reader = new FileReader();
     reader.onload = function(e) {
       try {
-        return Settings.loadSettings(dict.json(e.target.result), function (err) {
+        Settings.loadSettings(dict.json(e.target.result), function (err) {
           if (err) {
-            return output.textContent = 'Import failed due to an error.';
+            output.textContent = 'Import failed due to an error.';
           } else if (confirm('Import successful. Reload now?')) {
-            return window.location.reload();
+            window.location.reload();
           }
         });
       } catch (error) {
         const err = error;
         output.textContent = 'Import failed due to an error.';
-        return c.error(err.stack);
+        c.error(err.stack);
       }
     };
-    return reader.readAsText(file);
+    reader.readAsText(file);
   },
 
   upgrade(data, version) {
@@ -438,19 +429,19 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     if (data.version !== g.VERSION) {
       Settings.upgrade(data.Conf, data.version);
     }
-    return $.clear(function(err) {
+    $.clear(function(err) {
       if (err) { return cb(err); }
-      return $.set(data.Conf, cb);
+      $.set(data.Conf, cb);
     });
   },
 
   reset() {
     if (confirm('Your current settings will be entirely wiped, are you sure?')) {
-      return $.clear(function(err) {
+      $.clear(function(err) {
         if (err) {
-          return $('.imp-exp-result').textContent = 'Import failed due to an error.';
+          $('.imp-exp-result').textContent = 'Import failed due to an error.';
         } else if (confirm('Reset successful. Reload now?')) {
-          return window.location.reload();
+          window.location.reload();
         }
       });
     }
@@ -460,7 +451,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     $.extend(section, { innerHTML: FilterSelectPage });
     const select = $('select', section);
     $.on(select, 'change', Settings.selectFilter);
-    return Settings.selectFilter.call(select);
+    Settings.selectFilter.call(select);
   },
 
   selectFilter(this: HTMLSelectElement) {
@@ -477,7 +468,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       $.on(ta, 'change', $.cb.value);
       $.get(name, Conf[name], function(item) {
         ta.value = item[name];
-        return $.add(div, ta);
+        $.add(div, ta);
       });
       return;
     }
@@ -513,7 +504,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     $.on(inputs['archiveLists'], 'change', function() {
       $.set('lastarchivecheck', 0);
       Conf['lastarchivecheck'] = 0;
-      return $.id('lastarchivecheck').textContent = 'never';
+      $.id('lastarchivecheck').textContent = 'never';
     });
 
     const items = dict();
@@ -550,7 +541,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
 
     const interval  : HTMLInputElement  = inputs['Interval'];
     const customCSS : HTMLInputElement  = inputs['Custom CSS'];
-    const applyCSS  : HTMLButtonElement = $('#apply-css', section); //
+    const applyCSS  : HTMLButtonElement = $('#apply-css', section);
     const timeLocale: HTMLInputElement  = inputs.timeLocale;
 
     interval.value             =  Conf['Interval'];
@@ -569,7 +560,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     $.get(itemsArchive, function(itemsArchive) {
       $.extend(Conf, itemsArchive);
       Redirect.selectArchives();
-      return Settings.addArchiveTable(section);
+      Settings.addArchiveTable(section);
     });
 
     const boardSelect    = $('#archive-board-select', section);
@@ -578,10 +569,13 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
 
     $.on(boardSelect, 'change', function() {
       $('tbody > :not([hidden])', table).hidden = true;
-      return $(`tbody > .${this.value}`, table).hidden = false;
+      $(`tbody > .${this.value}`, table).hidden = false;
     });
 
     $.on(updateArchives, 'click', () => Redirect.update(() => Settings.addArchiveTable(section)));
+
+    $.on(inputs.beepVolume, 'change', () => { ThreadUpdater.playBeep(false); });
+    $.on(inputs.beepSource, 'change', () => { ThreadUpdater.playBeep(false); });
   },
 
   addArchiveTable(section) {
@@ -700,28 +694,28 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
   },
 
   saveSelectedArchive() {
-    return $.get('selectedArchives', Conf['selectedArchives'], ({selectedArchives}) => {
+    $.get('selectedArchives', Conf['selectedArchives'], ({selectedArchives}) => {
       (selectedArchives[this.dataset.boardid] || (selectedArchives[this.dataset.boardid] = dict()))[this.dataset.type] = JSON.parse(this.value);
       $.set('selectedArchives', selectedArchives);
       Conf['selectedArchives'] = selectedArchives;
-      return Redirect.selectArchives();
+      Redirect.selectArchives();
     });
   },
 
   boardnav() {
-    return Header.generateBoardList(this.value);
+    Header.generateBoardList(this.value);
   },
 
   time() {
-    return this.nextElementSibling.textContent = Time.format(new Date(), this.value);
+    this.nextElementSibling.textContent = Time.format(new Date(), this.value);
   },
 
   timeLocale() {
-    return Settings.time.call($('[name=time]', Settings.dialog));
+    Settings.time.call($('[name=time]', Settings.dialog));
   },
 
   backlink() {
-    return this.nextElementSibling.textContent = this.value.replace(/%(?:id|%)/g, x => ({'%id': '123456789', '%%': '%'})[x]);
+    this.nextElementSibling.textContent = this.value.replace(/%(?:id|%)/g, x => ({'%id': '123456789', '%%': '%'})[x]);
   },
 
   fileInfo() {
@@ -739,7 +733,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         tag: 'Loop'
       }
     };
-    return FileInfo.format(this.value, data, this.nextElementSibling);
+    FileInfo.format(this.value, data, this.nextElementSibling);
   },
 
   favicon() {
@@ -761,7 +755,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     } else {
       CustomCSS.addStyle();
     }
-    return $.cb.checked.call(this);
+    $.cb.checked.call(this);
   },
 
   setTimeLocale(e: InputEvent) {
@@ -799,7 +793,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       $.add(tbody, tr);
     }
 
-    return $.get(items, function(items) {
+    $.get(items, function (items) {
       for (key in items) {
         var val = items[key];
         inputs[key].value = val;
@@ -812,9 +806,9 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     if (e.keyCode === 9) { return; } // tab
     e.preventDefault();
     e.stopPropagation();
-    if ((key = Keybinds.keyCode(e)) == null) { return; }
+    if (!(key = Keybinds.keyCode(e))) return;
     this.value = key;
-    return $.cb.value.call(this);
+    $.cb.value.call(this);
   }
 };
 export default Settings;

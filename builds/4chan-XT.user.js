@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.13.3
+// @version      2.14.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -170,8 +170,8 @@
   'use strict';
 
   var version = {
-    "version": "2.13.3",
-    "date": "2024-09-07T16:00:00Z"
+    "version": "2.14.0",
+    "date": "2024-09-28T18:15:00Z"
   };
 
   var meta = {
@@ -1516,6 +1516,9 @@ https://*.hcaptcha.com
     fxtLang: '',
     fxtUrl: 'https://api.fxtwitter.com',
     fxtMaxReplies: 5,
+
+    beepSource: '',
+    beepVolume: 100,
   };
 
   // This file was created because these functions on $ were sometimes not initialized yet because of circular
@@ -2827,7 +2830,7 @@ https://*.hcaptcha.com
   <div>Minute: <code>%M</code></div>
   <div>Second: <code>%S</code></div>
   <div>Literal <code>%</code>: <code>%%</code></div>
-  <div><a href="https://www.w3.org/International/articles/language-tags/" target="_blank">Language tag</a>: <input name="timeLocale" class="field" spellcheck="false"> (needs page reload)</div>
+  <div><a href="https://www.w3.org/International/articles/language-tags/" target="_blank">Language tag</a>: <input name="timeLocale" class="field" spellcheck="false"></div>
   <div>Relative time, like "3 minutes ago":
     <select name="RelativeTime">
       <option value="No">Disabled</option>
@@ -2943,11 +2946,23 @@ https://*.hcaptcha.com
   <label>
     Language to translate FxTwitter embeds to, as a two character ISO code, like <code>en</code>.
     Leave empty for no translation.
-    <input name="fxtLang" maxlength="2" />
+    <input name="fxtLang" maxlength="2" class="field" />
   </label><br />
-  <label>FxTwitter endpoint <input name="fxtUrl" type="url" /></label><br />
+  <label>FxTwitter endpoint <input name="fxtUrl" type="url" class="field" /></label><br />
   <label>FxTwitter maximum amount of replies include
-    <input name="fxtMaxReplies" type="number" min="0" step="1" max="100" />
+    <input name="fxtMaxReplies" type="number" min="0" step="1" max="100" class="field" />
+  </label>
+</fieldset>
+
+<fieldset>
+  <legend>Thread updater sound</legend>
+  <label>
+    Sound volume, between 0 and 1:
+    <input name="beepVolume" type="number" min=".01" max="1" step=".01" class="field" />
+  </label><br />
+  <label>
+    Sound url. Can be a base64 one starting with <code>data:</code>. Leave empty for the default beep.
+    <input type="string" name="beepSource" class="field wide" />
   </label>
 </fieldset>`;
 
@@ -2977,262 +2992,6 @@ https://*.hcaptcha.com
   <option value="MD5">Image MD5</option>
   </select>
 <div></div>`;
-
-  /**
-   * This class handles data related to specific threads or posts. This data is automatically cleaned up when the thread
-   * ages out.
-   * TODO At this moment, .get and .set aren't fully typed yet.
-   */
-  class DataBoard {
-    constructor(key, sync, dontClean = false) {
-      this.changes = [];
-      this.onSync = this.onSync.bind(this);
-      this.key = key;
-      this.initData(Conf[this.key]);
-      $.sync(this.key, this.onSync);
-      if (!dontClean)
-        this.clean();
-      if (!sync)
-        return;
-      // Chrome also fires the onChanged callback on the current tab,
-      // so we only start syncing when we're ready.
-      var init = () => {
-        $.off(d, '4chanXInitFinished', init);
-        this.sync = sync;
-      };
-      $.on(d, '4chanXInitFinished', init);
-    }
-    initData(data) {
-      let boards;
-      this.data = data;
-      if (this.data.boards) {
-        let lastChecked;
-        ({ boards, lastChecked } = this.data);
-        this.data['4chan.org'] = { boards, lastChecked };
-        delete this.data.boards;
-        delete this.data.lastChecked;
-      }
-      return this.data[g.SITE.ID] || (this.data[g.SITE.ID] = { boards: dict() });
-    }
-    save(change, cb) {
-      change();
-      this.changes.push(change);
-      return $.get(this.key, { boards: dict() }, (items) => {
-        if (!this.changes.length) {
-          return;
-        }
-        const needSync = ((items[this.key].version || 0) > (this.data.version || 0));
-        if (needSync) {
-          this.initData(items[this.key]);
-          for (change of this.changes) {
-            change();
-          }
-        }
-        this.changes = [];
-        this.data.version = (this.data.version || 0) + 1;
-        return $.set(this.key, this.data, () => {
-          if (needSync) {
-            this.sync?.();
-          }
-          return cb?.();
-        });
-      });
-    }
-    forceSync(cb) {
-      return $.get(this.key, { boards: dict() }, (items) => {
-        if ((items[this.key].version || 0) > (this.data.version || 0)) {
-          this.initData(items[this.key]);
-          for (var change of this.changes) {
-            change();
-          }
-          this.sync?.();
-        }
-        return cb?.();
-      });
-    }
-    delete({ siteID, boardID, threadID, postID }, cb) {
-      if (!siteID) {
-        siteID = g.SITE.ID;
-      }
-      if (!this.data[siteID]) {
-        return;
-      }
-      this.save(() => {
-        if (postID) {
-          if (!this.data[siteID].boards[boardID]?.[threadID]) {
-            return;
-          }
-          delete this.data[siteID].boards[boardID][threadID][postID];
-          this.deleteIfEmpty({ siteID, boardID, threadID });
-        } else if (threadID) {
-          if (!this.data[siteID].boards[boardID]) {
-            return;
-          }
-          delete this.data[siteID].boards[boardID][threadID];
-          this.deleteIfEmpty({ siteID, boardID });
-        } else {
-          delete this.data[siteID].boards[boardID];
-        }
-      }, cb);
-    }
-    deleteIfEmpty({ siteID, boardID, threadID }) {
-      if (!this.data[siteID]) {
-        return;
-      }
-      if (threadID) {
-        if (!Object.keys(this.data[siteID].boards[boardID][threadID]).length) {
-          delete this.data[siteID].boards[boardID][threadID];
-          this.deleteIfEmpty({ siteID, boardID });
-        }
-      } else if (!Object.keys(this.data[siteID].boards[boardID]).length) {
-        delete this.data[siteID].boards[boardID];
-      }
-    }
-    set(data, cb) {
-      this.save(() => {
-        this.setUnsafe(data);
-      }, cb);
-    }
-    setUnsafe({ siteID, boardID, threadID, postID, val }) {
-      if (!siteID) {
-        siteID = g.SITE.ID;
-      }
-      if (!this.data[siteID])
-        this.data[siteID] = { boards: dict() };
-      const boards = this.data[siteID].boards;
-      if (postID !== undefined) {
-        let base;
-        (((base = boards[boardID] || (boards[boardID] = dict())))[threadID] || (base[threadID] = dict()))[postID] = val;
-      } else if (threadID !== undefined) {
-        (boards[boardID] || (boards[boardID] = dict()))[threadID] = val;
-      } else {
-        boards[boardID] = val;
-      }
-    }
-    extend({ siteID, boardID, threadID, postID, val }, cb) {
-      this.save(() => {
-        const oldVal = this.get({ siteID, boardID, threadID, postID, defaultValue: dict() });
-        for (var key in val) {
-          var subVal = val[key];
-          if (typeof subVal === 'undefined') {
-            delete oldVal[key];
-          } else {
-            oldVal[key] = subVal;
-          }
-        }
-        this.setUnsafe({ siteID, boardID, threadID, postID, val: oldVal });
-      }, cb);
-    }
-    setLastChecked(key = 'lastChecked') {
-      this.save(() => {
-        this.data[key] = Date.now();
-      });
-    }
-    get({ siteID, boardID, threadID, postID, defaultValue }) {
-      let board, val;
-      if (!siteID) {
-        siteID = g.SITE.ID;
-      }
-      if (board = this.data[siteID]?.boards[boardID]) {
-        let thread;
-        if (threadID == null) {
-          if (postID != null) {
-            for (thread = 0; thread < board.length; thread++) {
-              if (postID in thread) {
-                val = thread[postID];
-                break;
-              }
-            }
-          } else {
-            val = board;
-          }
-        } else if (thread = board[threadID]) {
-          val = (postID != null) ? thread[postID] : thread;
-        }
-      }
-      return val || defaultValue;
-    }
-    clean() {
-      let boardID, middle;
-      const siteID = g.SITE.ID;
-      for (boardID in this.data[siteID].boards) {
-        this.deleteIfEmpty({ siteID, boardID });
-      }
-      const now = Date.now();
-      if (now - (2 * HOUR) >= ((middle = this.data[siteID].lastChecked || 0)) || middle > now) {
-        this.data[siteID].lastChecked = now;
-        for (boardID in this.data[siteID].boards) {
-          this.ajaxClean(boardID);
-        }
-      }
-    }
-    ajaxClean(boardID) {
-      const that = this;
-      const siteID = g.SITE.ID;
-      const threadsList = g.SITE.urls.threadsListJSON?.({ siteID, boardID });
-      if (!threadsList) {
-        return;
-      }
-      $.cache(threadsList, function () {
-        if (this.status !== 200) {
-          return;
-        }
-        const archiveList = g.SITE.urls.archiveListJSON?.({ siteID, boardID });
-        if (!archiveList)
-          return that.ajaxCleanParse(boardID, this.response);
-        const response1 = this.response;
-        $.cache(archiveList, function () {
-          if ((this.status !== 200) && (!!g.SITE.archivedBoardsKnown || (this.status !== 404))) {
-            return;
-          }
-          that.ajaxCleanParse(boardID, response1, this.response);
-        });
-      });
-    }
-    ajaxCleanParse(boardID, response1, response2) {
-      let board, ID;
-      const siteID = g.SITE.ID;
-      if (!(board = this.data[siteID].boards[boardID]))
-        return;
-      const threads = dict();
-      if (response1) {
-        for (var page of response1) {
-          for (var thread of page.threads) {
-            ID = thread.no;
-            if (ID in board) {
-              threads[ID] = board[ID];
-            }
-          }
-        }
-      }
-      if (response2) {
-        for (ID of response2) {
-          if (ID in board)
-            threads[ID] = board[ID];
-        }
-      }
-      this.data[siteID].boards[boardID] = threads;
-      this.deleteIfEmpty({ siteID, boardID });
-      $.set(this.key, this.data);
-    }
-    onSync(data) {
-      if ((data.version || 0) <= (this.data.version || 0)) {
-        return;
-      }
-      this.initData(data);
-      this.sync?.();
-    }
-  }
-  DataBoard.keys = [
-    'hiddenThreads',
-    'hiddenPosts',
-    'hiddenPosterIds',
-    'lastReadPosts',
-    'yourPosts',
-    'watchedThreads',
-    'watcherLastModified',
-    'customTitles',
-  ];
 
   const $$ = (selector, root = d.body) => Array.from(root.querySelectorAll(selector));
 
@@ -4320,7 +4079,7 @@ div[data-checked="false"] > .suboption-list {
 .section-sauce textarea {
   height: 430px;
 }
-.section-advanced .field[name="boardnav"] {
+.section-advanced .field.wide {
   width: 100%;
 }
 .section-advanced textarea {
@@ -6955,6 +6714,262 @@ svg.icon {
       return !!this.nodes.container;
     }
   };
+
+  /**
+   * This class handles data related to specific threads or posts. This data is automatically cleaned up when the thread
+   * ages out.
+   * TODO At this moment, .get and .set aren't fully typed yet.
+   */
+  class DataBoard {
+    constructor(key, sync, dontClean = false) {
+      this.changes = [];
+      this.onSync = this.onSync.bind(this);
+      this.key = key;
+      this.initData(Conf[this.key]);
+      $.sync(this.key, this.onSync);
+      if (!dontClean)
+        this.clean();
+      if (!sync)
+        return;
+      // Chrome also fires the onChanged callback on the current tab,
+      // so we only start syncing when we're ready.
+      var init = () => {
+        $.off(d, '4chanXInitFinished', init);
+        this.sync = sync;
+      };
+      $.on(d, '4chanXInitFinished', init);
+    }
+    initData(data) {
+      let boards;
+      this.data = data;
+      if (this.data.boards) {
+        let lastChecked;
+        ({ boards, lastChecked } = this.data);
+        this.data['4chan.org'] = { boards, lastChecked };
+        delete this.data.boards;
+        delete this.data.lastChecked;
+      }
+      return this.data[g.SITE.ID] || (this.data[g.SITE.ID] = { boards: dict() });
+    }
+    save(change, cb) {
+      change();
+      this.changes.push(change);
+      return $.get(this.key, { boards: dict() }, (items) => {
+        if (!this.changes.length) {
+          return;
+        }
+        const needSync = ((items[this.key].version || 0) > (this.data.version || 0));
+        if (needSync) {
+          this.initData(items[this.key]);
+          for (change of this.changes) {
+            change();
+          }
+        }
+        this.changes = [];
+        this.data.version = (this.data.version || 0) + 1;
+        return $.set(this.key, this.data, () => {
+          if (needSync) {
+            this.sync?.();
+          }
+          return cb?.();
+        });
+      });
+    }
+    forceSync(cb) {
+      return $.get(this.key, { boards: dict() }, (items) => {
+        if ((items[this.key].version || 0) > (this.data.version || 0)) {
+          this.initData(items[this.key]);
+          for (var change of this.changes) {
+            change();
+          }
+          this.sync?.();
+        }
+        return cb?.();
+      });
+    }
+    delete({ siteID, boardID, threadID, postID }, cb) {
+      if (!siteID) {
+        siteID = g.SITE.ID;
+      }
+      if (!this.data[siteID]) {
+        return;
+      }
+      this.save(() => {
+        if (postID) {
+          if (!this.data[siteID].boards[boardID]?.[threadID]) {
+            return;
+          }
+          delete this.data[siteID].boards[boardID][threadID][postID];
+          this.deleteIfEmpty({ siteID, boardID, threadID });
+        } else if (threadID) {
+          if (!this.data[siteID].boards[boardID]) {
+            return;
+          }
+          delete this.data[siteID].boards[boardID][threadID];
+          this.deleteIfEmpty({ siteID, boardID });
+        } else {
+          delete this.data[siteID].boards[boardID];
+        }
+      }, cb);
+    }
+    deleteIfEmpty({ siteID, boardID, threadID }) {
+      if (!this.data[siteID]) {
+        return;
+      }
+      if (threadID) {
+        if (!Object.keys(this.data[siteID].boards[boardID][threadID]).length) {
+          delete this.data[siteID].boards[boardID][threadID];
+          this.deleteIfEmpty({ siteID, boardID });
+        }
+      } else if (!Object.keys(this.data[siteID].boards[boardID]).length) {
+        delete this.data[siteID].boards[boardID];
+      }
+    }
+    set(data, cb) {
+      this.save(() => {
+        this.setUnsafe(data);
+      }, cb);
+    }
+    setUnsafe({ siteID, boardID, threadID, postID, val }) {
+      if (!siteID) {
+        siteID = g.SITE.ID;
+      }
+      if (!this.data[siteID])
+        this.data[siteID] = { boards: dict() };
+      const boards = this.data[siteID].boards;
+      if (postID !== undefined) {
+        let base;
+        (((base = boards[boardID] || (boards[boardID] = dict())))[threadID] || (base[threadID] = dict()))[postID] = val;
+      } else if (threadID !== undefined) {
+        (boards[boardID] || (boards[boardID] = dict()))[threadID] = val;
+      } else {
+        boards[boardID] = val;
+      }
+    }
+    extend({ siteID, boardID, threadID, postID, val }, cb) {
+      this.save(() => {
+        const oldVal = this.get({ siteID, boardID, threadID, postID, defaultValue: dict() });
+        for (var key in val) {
+          var subVal = val[key];
+          if (typeof subVal === 'undefined') {
+            delete oldVal[key];
+          } else {
+            oldVal[key] = subVal;
+          }
+        }
+        this.setUnsafe({ siteID, boardID, threadID, postID, val: oldVal });
+      }, cb);
+    }
+    setLastChecked(key = 'lastChecked') {
+      this.save(() => {
+        this.data[key] = Date.now();
+      });
+    }
+    get({ siteID, boardID, threadID, postID, defaultValue }) {
+      let board, val;
+      if (!siteID) {
+        siteID = g.SITE.ID;
+      }
+      if (board = this.data[siteID]?.boards[boardID]) {
+        let thread;
+        if (threadID == null) {
+          if (postID != null) {
+            for (thread = 0; thread < board.length; thread++) {
+              if (postID in thread) {
+                val = thread[postID];
+                break;
+              }
+            }
+          } else {
+            val = board;
+          }
+        } else if (thread = board[threadID]) {
+          val = (postID != null) ? thread[postID] : thread;
+        }
+      }
+      return val || defaultValue;
+    }
+    clean() {
+      let boardID, middle;
+      const siteID = g.SITE.ID;
+      for (boardID in this.data[siteID].boards) {
+        this.deleteIfEmpty({ siteID, boardID });
+      }
+      const now = Date.now();
+      if (now - (2 * HOUR) >= ((middle = this.data[siteID].lastChecked || 0)) || middle > now) {
+        this.data[siteID].lastChecked = now;
+        for (boardID in this.data[siteID].boards) {
+          this.ajaxClean(boardID);
+        }
+      }
+    }
+    ajaxClean(boardID) {
+      const that = this;
+      const siteID = g.SITE.ID;
+      const threadsList = g.SITE.urls.threadsListJSON?.({ siteID, boardID });
+      if (!threadsList) {
+        return;
+      }
+      $.cache(threadsList, function () {
+        if (this.status !== 200) {
+          return;
+        }
+        const archiveList = g.SITE.urls.archiveListJSON?.({ siteID, boardID });
+        if (!archiveList)
+          return that.ajaxCleanParse(boardID, this.response);
+        const response1 = this.response;
+        $.cache(archiveList, function () {
+          if ((this.status !== 200) && (!!g.SITE.archivedBoardsKnown || (this.status !== 404))) {
+            return;
+          }
+          that.ajaxCleanParse(boardID, response1, this.response);
+        });
+      });
+    }
+    ajaxCleanParse(boardID, response1, response2) {
+      let board, ID;
+      const siteID = g.SITE.ID;
+      if (!(board = this.data[siteID].boards[boardID]))
+        return;
+      const threads = dict();
+      if (response1) {
+        for (var page of response1) {
+          for (var thread of page.threads) {
+            ID = thread.no;
+            if (ID in board) {
+              threads[ID] = board[ID];
+            }
+          }
+        }
+      }
+      if (response2) {
+        for (ID of response2) {
+          if (ID in board)
+            threads[ID] = board[ID];
+        }
+      }
+      this.data[siteID].boards[boardID] = threads;
+      this.deleteIfEmpty({ siteID, boardID });
+      $.set(this.key, this.data);
+    }
+    onSync(data) {
+      if ((data.version || 0) <= (this.data.version || 0)) {
+        return;
+      }
+      this.initData(data);
+      this.sync?.();
+    }
+  }
+  DataBoard.keys = [
+    'hiddenThreads',
+    'hiddenPosts',
+    'hiddenPosterIds',
+    'lastReadPosts',
+    'yourPosts',
+    'watchedThreads',
+    'watcherLastModified',
+    'customTitles',
+  ];
 
   class SimpleDict {
     constructor() {
@@ -15640,6 +15655,9 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       if ($.engine !== 'gecko') {
         this.audio.src = this.beep;
       }
+      $.on(this.audio, 'error', () => {
+        new Notice('error', this.audio.error.message || 'Error when trying to play thread updater beep.', 15);
+      });
       if (Conf['Updater and Stats in Header']) {
         this.dialog = (sc = $.el('span', { id: 'updater' }));
         $.extend(sc, { innerHTML: '<span id="update-status" class="empty"></span><span id="update-timer" class="empty" title="Update now"></span>' });
@@ -15716,15 +15734,16 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     cc-by-nc-3.0
     */
     beep: `data:audio/wav;base64,${Beep}`,
-    playBeep() {
+    playBeep(repeatIfPlaying = true) {
       const { audio } = ThreadUpdater;
-      if (!audio.src) {
-        audio.src = ThreadUpdater.beep;
-      }
+      const source = Conf.beepSource || ThreadUpdater.beep;
+      if (audio.src !== source)
+        audio.src = source;
+      audio.volume = Conf.beepVolume;
       if (audio.paused) {
-        return audio.play();
-      } else {
-        return $.one(audio, 'ended', ThreadUpdater.playBeep);
+        audio.play();
+      } else if (repeatIfPlaying) {
+        $.one(audio, 'ended', ThreadUpdater.playBeep);
       }
     },
     cb: {
@@ -19010,6 +19029,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         }
         const gmOptions = {
           method: "GET",
+          anonymous: true,
           url,
           headers,
           responseType: 'arraybuffer',
@@ -19121,6 +19141,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         }
         const gmOptions = {
           method: 'GET',
+          anonymous: true,
           url,
           headers,
           timeout,
@@ -20684,9 +20705,9 @@ $\
         if ($.hasStorage) {
           // Run in page context to handle case where 4chan X has localStorage access but not the page.
           // (e.g. Pale Moon 26.2.2, GM 3.8, cookies disabled for 4chan only)
-          return $.global('disableNativeExtension');
+          $.global('disableNativeExtension');
         } else {
-          return $.global('disableNativeExtensionNoStorage');
+          $.global('disableNativeExtensionNoStorage');
         }
       }
     },
@@ -20729,7 +20750,7 @@ $\
       });
       $.on(dialog.firstElementChild, 'click', e => e.stopPropagation());
       $.add(d.body, dialog);
-      return $.event('OpenSettings', null, dialog);
+      $.event('OpenSettings', null, dialog);
     },
     close() {
       if (!Settings.dialog) {
@@ -20738,7 +20759,7 @@ $\
       // Unfocus current field to trigger change event.
       d.activeElement?.blur();
       $.rm(Settings.dialog);
-      return delete Settings.dialog;
+      delete Settings.dialog;
     },
     sections: [],
     addSection(title, open) {
@@ -20746,7 +20767,7 @@ $\
         ({ title, open } = title.detail);
       }
       const hyphenatedTitle = title.toLowerCase().replace(/\s+/g, '-');
-      return Settings.sections.push({ title, hyphenatedTitle, open });
+      Settings.sections.push({ title, hyphenatedTitle, open });
     },
     openSection() {
       let selected;
@@ -20759,13 +20780,13 @@ $\
       section.className = `section-${this.hyphenatedTitle}`;
       this.open(section, g);
       section.scrollTop = 0;
-      return $.event('OpenSettings', null, section);
+      $.event('OpenSettings', null, section);
     },
     warnings: {
       localStorage(cb) {
         if ($.cantSync) {
           const why = $.cantSet ? 'save your settings' : 'synchronize settings between tabs';
-          return cb($.el('li', {
+          cb($.el('li', {
             textContent: `\
 ${meta.name} needs local storage to ${why}.
 Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's privacy settings (may be listed as part of "local data" or "cookies").\
@@ -20774,9 +20795,9 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         }
       },
       ads(cb) {
-        return $.onExists(doc, '.adg-rects > .desktop', ad => $.onExists(ad, 'iframe', function () {
+        $.onExists(doc, '.adg-rects > .desktop', ad => $.onExists(ad, 'iframe', function () {
           const url = Redirect$1.to('thread', { boardID: 'qa', threadID: 362590 });
-          return cb($.el('li', h(hFragment, null,
+          cb($.el('li', h(hFragment, null,
             "To protect yourself from ",
             h("a", { href: url, target: "_blank" }, "malicious ads"),
             ", you should ",
@@ -20790,7 +20811,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       const warnings = $.el('fieldset', { hidden: true }, { innerHTML: '<legend>Warnings</legend><ul></ul>' });
       const addWarning = function (item) {
         $.add($('ul', warnings), item);
-        return warnings.hidden = false;
+        warnings.hidden = false;
       };
       for (key in Settings.warnings) {
         var warning = Settings.warnings[key];
@@ -20801,32 +20822,30 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       const inputs = dict();
       const addCheckboxes = function (root, obj) {
         const containers = [root];
-        return (() => {
-          const result = [];
-          for (key in obj) {
-            var arr = obj[key];
-            if (arr instanceof Array) {
-              var description = arr[1];
-              var div = $.el('div', { innerHTML: `<label><input type="checkbox" name="${key}">${key}</label><span class="description">: ${description}</span>` });
-              div.dataset.name = key;
-              var input = $('input', div);
-              $.on(input, 'change', $.cb.checked);
-              $.on(input, 'change', function () { return this.parentNode.parentNode.dataset.checked = this.checked; });
-              items[key] = Conf[key];
-              inputs[key] = input;
-              var level = arr[2] || 0;
-              if (containers.length <= level) {
-                var container = $.el('div', { className: 'suboption-list' });
-                $.add(containers[containers.length - 1].lastElementChild, container);
-                containers[level] = container;
-              } else if (containers.length > (level + 1)) {
-                containers.splice(level + 1, containers.length - (level + 1));
-              }
-              result.push($.add(containers[level], div));
+        const result = [];
+        for (key in obj) {
+          var arr = obj[key];
+          if (arr instanceof Array) {
+            var description = arr[1];
+            var div = $.el('div', { innerHTML: `<label><input type="checkbox" name="${key}">${key}</label><span class="description">: ${description}</span>` });
+            div.dataset.name = key;
+            var input = $('input', div);
+            $.on(input, 'change', $.cb.checked);
+            $.on(input, 'change', function () { this.parentNode.parentNode.dataset.checked = this.checked; });
+            items[key] = Conf[key];
+            inputs[key] = input;
+            var level = arr[2] || 0;
+            if (containers.length <= level) {
+              var container = $.el('div', { className: 'suboption-list' });
+              $.add(containers[containers.length - 1].lastElementChild, container);
+              containers[level] = container;
+            } else if (containers.length > (level + 1)) {
+              containers.splice(level + 1, containers.length - (level + 1));
             }
+            result.push($.add(containers[level], div));
           }
-          return result;
-        })();
+        }
+        return result;
       };
       for (var keyFS in Config.main) {
         var obj = Config.main[keyFS];
@@ -20882,11 +20901,11 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             hiddenNum += Object.keys(thread).length;
           }
         }
-        return button.textContent = `Hidden: ${hiddenNum}`;
+        button.textContent = `Hidden: ${hiddenNum}`;
       });
       $.on(button, 'click', function () {
         this.textContent = 'Hidden: 0';
-        return $.get('hiddenThreads', dict(), function ({ hiddenThreads }) {
+        $.get('hiddenThreads', dict(), function ({ hiddenThreads }) {
           if ($.hasStorage && (g.SITE.software === 'yotsuba')) {
             let boardID;
             for (boardID in hiddenThreads['4chan.org']?.boards) {
@@ -20896,19 +20915,19 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
               localStorage.removeItem(`4chan-hide-t-${boardID}`);
             }
           }
-          return ($.delete(['hiddenThreads', 'hiddenPosts']));
+          $.delete(['hiddenThreads', 'hiddenPosts']);
         });
       });
-      return $.after($('input[name="Stubs"]', section).parentNode.parentNode, div);
+      $.after($('input[name="Stubs"]', section).parentNode.parentNode, div);
     },
     export() {
       // Make sure to export the most recent data, but don't overwrite existing `Conf` object.
       const Conf2 = dict();
       $.extend(Conf2, Conf);
-      return $.get(Conf2, function (Conf2) {
+      $.get(Conf2, function (Conf2) {
         // Don't export cached JSON data.
         delete Conf2['boardConfig'];
-        return (Settings.downloadExport({ version: g.VERSION, date: Date.now(), Conf: Conf2 }));
+        Settings.downloadExport({ version: g.VERSION, date: Date.now(), Conf: Conf2 });
       });
     },
     downloadExport(data) {
@@ -20921,10 +20940,10 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       const p = $('.imp-exp-result', Settings.dialog);
       $.rmAll(p);
       $.add(p, a);
-      return a.click();
+      a.click();
     },
     import() {
-      return $('input[type=file]', this.parentNode).click();
+      $('input[type=file]', this.parentNode).click();
     },
     onImport() {
       let file;
@@ -20940,159 +20959,25 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       const reader = new FileReader();
       reader.onload = function (e) {
         try {
-          return Settings.loadSettings(dict.json(e.target.result), function (err) {
+          Settings.loadSettings(dict.json(e.target.result), function (err) {
             if (err) {
-              return output.textContent = 'Import failed due to an error.';
+              output.textContent = 'Import failed due to an error.';
             } else if (confirm('Import successful. Reload now?')) {
-              return window.location.reload();
+              window.location.reload();
             }
           });
         } catch (error) {
           const err = error;
           output.textContent = 'Import failed due to an error.';
-          return c.error(err.stack);
+          c.error(err.stack);
         }
       };
-      return reader.readAsText(file);
-    },
-    convertFrom: {
-      loadletter(data) {
-        const convertSettings = function (data, map) {
-          for (var prevKey in map) {
-            var newKey = map[prevKey];
-            if (newKey) {
-              data.Conf[newKey] = data.Conf[prevKey];
-            }
-            delete data.Conf[prevKey];
-          }
-          return data;
-        };
-        data = convertSettings(data, {
-          // General confs
-          'Disable 4chan\'s extension': 'Disable Native Extension',
-          'Comment Auto-Expansion': '',
-          'Remove Slug': '',
-          'Always HTTPS': 'Redirect to HTTPS',
-          'Check for Updates': '',
-          'Recursive Filtering': 'Recursive Hiding',
-          'Reply Hiding': 'Reply Hiding Buttons',
-          'Thread Hiding': 'Thread Hiding Buttons',
-          'Show Stubs': 'Stubs',
-          'Image Auto-Gif': 'Replace GIF',
-          'Expand All WebM': 'Expand videos',
-          'Reveal Spoilers': 'Reveal Spoiler Thumbnails',
-          'Expand From Current': 'Expand from here',
-          'Current Page': 'Page Count in Stats',
-          'Current Page Position': '',
-          'Alternative captcha': 'Use Recaptcha v1',
-          'Alt index captcha': 'Use Recaptcha v1 on Index',
-          'Auto Submit': 'Post on Captcha Completion',
-          'Open Reply in New Tab': 'Open Post in New Tab',
-          'Remember QR size': 'Remember QR Size',
-          'Remember Subject': '',
-          'Quote Inline': 'Quote Inlining',
-          'Quote Preview': 'Quote Previewing',
-          'Indicate OP quote': 'Mark OP Quotes',
-          'Indicate You quote': 'Mark Quotes of You',
-          'Indicate Cross-thread Quotes': 'Mark Cross-thread Quotes',
-          // filter
-          'uniqueid': 'uniqueID',
-          'mod': 'capcode',
-          'email': '',
-          'country': 'flag',
-          'md5': 'MD5',
-          // keybinds
-          'openEmptyQR': 'Open empty QR',
-          'openQR': 'Open QR',
-          'openOptions': 'Open settings',
-          'close': 'Close',
-          'spoiler': 'Spoiler tags',
-          'sageru': 'Toggle sage',
-          'code': 'Code tags',
-          'sjis': 'SJIS tags',
-          'submit': 'Submit QR',
-          'watch': 'Watch',
-          'update': 'Update',
-          'unreadCountTo0': '',
-          'expandAllImages': 'Expand images',
-          'expandImage': 'Expand image',
-          'zero': 'Front page',
-          'nextPage': 'Next page',
-          'previousPage': 'Previous page',
-          'nextThread': 'Next thread',
-          'previousThread': 'Previous thread',
-          'expandThread': 'Expand thread',
-          'openThreadTab': 'Open thread',
-          'openThread': 'Open thread tab',
-          'nextReply': 'Next reply',
-          'previousReply': 'Previous reply',
-          'hide': 'Hide',
-          // updater
-          'Scrolling': 'Auto Scroll',
-          'Verbose': ''
-        });
-        if ('Always CDN' in data.Conf) {
-          data.Conf['fourchanImageHost'] = data.Conf['Always CDN'] ? 'i.4cdn.org' : '';
-          delete data.Conf['Always CDN'];
-        }
-        data.Conf.sauces = data.Conf.sauces.replace(/\$\d/g, function (c) {
-          switch (c) {
-            case '$1':
-              return '%TURL';
-            case '$2':
-              return '%URL';
-            case '$3':
-              return '%MD5';
-            case '$4':
-              return '%board';
-            default:
-              return c;
-          }
-        });
-        for (var key in Config.hotkeys) {
-          Config.hotkeys[key];
-          if (key in data.Conf) {
-            data.Conf[key] = data.Conf[key].replace(/ctrl|alt|meta/g, s => `${s[0].toUpperCase()}${s.slice(1)}`).replace(/(^|.+\+)[A-Z]$/g, s => `Shift+${s.slice(0, -1)}${s.slice(-1).toLowerCase()}`);
-          }
-        }
-        if (data.WatchedThreads) {
-          data.Conf['watchedThreads'] = dict.clone({ '4chan.org': { boards: {} } });
-          for (var boardID in data.WatchedThreads) {
-            var threads = data.WatchedThreads[boardID];
-            for (var threadID in threads) {
-              var threadData = threads[threadID];
-              (data.Conf['watchedThreads']['4chan.org'].boards[boardID] || (data.Conf['watchedThreads']['4chan.org'].boards[boardID] = dict()))[threadID] = { excerpt: threadData.textContent };
-            }
-          }
-        }
-        return data;
-      }
+      reader.readAsText(file);
     },
     upgrade(data, version) {
       let corrupted, key, val;
       const changes = dict();
       const set = (key, value) => data[key] = (changes[key] = value);
-      const setD = function (key, value) {
-        if (data[key] == null) {
-          return set(key, value);
-        }
-      };
-      const addSauces = function (sauces) {
-        if (data['sauces'] != null) {
-          sauces = sauces.filter(s => data['sauces'].indexOf(s.match(/[^#;\s]+|$/)[0]) < 0);
-          if (sauces.length) {
-            return set('sauces', data['sauces'] + '\n\n' + sauces.join('\n'));
-          }
-        }
-      };
-      const addCSS = function (css) {
-        if (data['usercss'] == null) {
-          set('usercss', Config['usercss']);
-        }
-        if (data['usercss'].indexOf(css) < 0) {
-          return set('usercss', css + '\n\n' + data['usercss']);
-        }
-      };
       // XXX https://github.com/greasemonkey/greasemonkey/issues/2600
       if (corrupted = (version[0] === '"')) {
         try {
@@ -21100,15 +20985,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         } catch (error) { }
       }
       const compareString = version.replace(/^XT /i, '').replace(/\d+/g, x => x.padStart(5, '0'));
-      if (compareString < '00001.00013.00014.00008') {
-        for (key in data) {
-          val = data[key];
-          if ((typeof val === 'string') && (typeof Conf[key] !== 'string') && !['Index Sort', 'Last Long Reply Thresholds 0', 'Last Long Reply Thresholds 1'].includes(key)) {
-            corrupted = true;
-            break;
-          }
-        }
-      }
       if (corrupted) {
         for (key in data) {
           val = data[key];
@@ -21118,247 +20994,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
               set(key, val2);
             } catch (error1) { }
           }
-        }
-      }
-      if (compareString < '00001.00011.00008.00000') {
-        if (data['Fixed Thread Watcher'] == null) {
-          set('Fixed Thread Watcher', data['Toggleable Thread Watcher'] ?? true);
-        }
-        if (data['Exempt Archives from Encryption'] == null) {
-          set('Exempt Archives from Encryption', data['Except Archives from Encryption'] ?? false);
-        }
-      }
-      if (compareString < '00001.00011.00010.00001') {
-        if (data['selectedArchives'] != null) {
-          const uids = { "Moe": 0, "4plebs Archive": 3, "Nyafuu Archive": 4, "Love is Over": 5, "Rebecca Black Tech": 8, "warosu": 10, "fgts": 15, "not4plebs": 22, "DesuStorage": 23, "fireden.net": 24, "disabled": null };
-          for (var boardID in data['selectedArchives']) {
-            var record = data['selectedArchives'][boardID];
-            for (var type in record) {
-              var name = record[type];
-              if ($.hasOwn(uids, name)) {
-                record[type] = uids[name];
-              }
-            }
-          }
-          set('selectedArchives', data['selectedArchives']);
-        }
-      }
-      if (compareString < '00001.00011.00016.00000') {
-        let rice;
-        if (rice = Config['usercss'].match(/\/\* Board title rice \*\/(?:\n.+)*/)[0]) {
-          if ((data['usercss'] != null) && (data['usercss'].indexOf(rice) < 0)) {
-            set('usercss', rice + '\n\n' + data['usercss']);
-          }
-        }
-      }
-      if (compareString < '00001.00011.00017.00000') {
-        for (key of ['Persistent QR', 'Color User IDs', 'Fappe Tyme', 'Werk Tyme', 'Highlight Posts Quoting You', 'Highlight Own Posts']) {
-          if (data[key] == null) {
-            set(key, (key === 'Persistent QR'));
-          }
-        }
-      }
-      if (compareString < '00001.00011.00017.00006') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/^(#?\s*)http:\/\/iqdb\.org\//mg, '$1//iqdb.org/'));
-        }
-      }
-      if ((compareString < '00001.00011.00019.00003') && !Settings.dialog) {
-        $.queueTask(() => Settings.warnings.ads(item => new Notice('warning', [...item.childNodes])));
-      }
-      if (compareString < '00001.00011.00020.00003') {
-        const object = { 'Inline Cross-thread Quotes Only': false, 'Pass Link': true };
-        for (key in object) {
-          var value = object[key];
-          if (data[key] == null) {
-            set(key, value);
-          }
-        }
-      }
-      if (compareString < '00001.00011.00021.00003') {
-        if (data['Remember Your Posts'] == null) {
-          set('Remember Your Posts', data['Mark Quotes of You'] ?? true);
-        }
-      }
-      if (compareString < '00001.00011.00022.00000') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/^(#?\s*https:\/\/www\.google\.com\/searchbyimage\?image_url=%(?:IMG|URL))%3Fs\.jpg/mg, '$1'));
-          set('sauces', data['sauces'].replace(/^#?\s*https:\/\/www\.google\.com\/searchbyimage\?image_url=%(?:IMG|T?URL)(?=$|;)/mg, '$&&safe=off'));
-        }
-      }
-      if (compareString < '00001.00011.00022.00002') {
-        if ((data['Use Recaptcha v1 in Reports'] == null) && data['Use Recaptcha v1'] && !data['Use Recaptcha v2 in Reports']) {
-          set('Use Recaptcha v1 in Reports', true);
-        }
-      }
-      if (compareString < '00001.00011.00024.00000') {
-        if ((data['JSON Navigation'] != null) && (data['JSON Index'] == null)) {
-          set('JSON Index', data['JSON Navigation']);
-        }
-      }
-      if (compareString < '00001.00011.00026.00000') {
-        if ((data['Oekaki Links'] != null) && (data['Edit Link'] == null)) {
-          set('Edit Link', data['Oekaki Links']);
-        }
-        if (data['Inline Cross-thread Quotes Only'] == null) {
-          set('Inline Cross-thread Quotes Only', true);
-        }
-      }
-      if (compareString < '00001.00011.00030.00000') {
-        if (data['Quote Threading'] && (data['Thread Quotes'] == null)) {
-          set('Thread Quotes', true);
-        }
-      }
-      if (compareString < '00001.00011.00032.00000') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/^(#?\s*)http:\/\/3d\.iqdb\.org\//mg, '$1//3d.iqdb.org/'));
-        }
-        addSauces([
-          '#https://desustorage.org/_/search/image/%sMD5/',
-          '#https://boards.fireden.net/_/search/image/%sMD5/',
-          '#https://foolz.fireden.net/_/search/image/%sMD5/',
-          '#//www.gif-explode.com/%URL;types:gif'
-        ]);
-      }
-      if (compareString < '00001.00011.00035.00000') {
-        addSauces(['https://whatanime.ga/?auto&url=%IMG;text:wait']);
-      }
-      if (compareString < '00001.00012.00000.00000') {
-        if (data['Exempt Archives from Encryption'] == null) {
-          set('Exempt Archives from Encryption', false);
-        }
-        if (data['Show New Thread Option in Threads'] == null) {
-          set('Show New Thread Option in Threads', false);
-        }
-        if (data['Show Name and Subject']) {
-          addCSS('#qr .persona .field {display: block !important;}');
-        }
-        if (data['QR Shortcut'] === false) {
-          addCSS('#shortcut-qr {display: none;}');
-        }
-        if (data['Bottom QR Link'] === false) {
-          addCSS('.qr-link-container-bottom {display: none;}');
-        }
-      }
-      if (compareString < '00001.00012.00000.00006') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/^(#?\s*)https:\/\/(?:desustorage|cuckchan)\.org\//mg, '$1https://desuarchive.org/'));
-        }
-      }
-      if (compareString < '00001.00012.00001.00000') {
-        if ((data['Persistent Thread Watcher'] == null) && (data['Toggleable Thread Watcher'] != null)) {
-          set('Persistent Thread Watcher', !data['Toggleable Thread Watcher']);
-        }
-      }
-      if (compareString < '00001.00012.00003.00000') {
-        for (key of ['Image Hover in Catalog', 'Auto Watch', 'Auto Watch Reply']) {
-          setD(key, false);
-        }
-      }
-      if (compareString < '00001.00013.00001.00002') {
-        addSauces(['#//www.bing.com/images/search?q=imgurl:%IMG&view=detailv2&iss=sbi#enterInsights']);
-      }
-      if (compareString < '00001.00013.00005.00000') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/^(#?\s*)http:\/\/regex\.info\/exif\.cgi/mg, '$1http://exif.regex.info/exif.cgi'));
-        }
-        addSauces(Config['sauces'].match(/# Known filename formats:(?:\n.+)*|$/)[0].split('\n'));
-      }
-      if (compareString < '00001.00013.00007.00002') {
-        setD('Require OP Quote Link', true);
-      }
-      if (compareString < '00001.00013.00008.00000') {
-        setD('Download Link', true);
-      }
-      if (compareString < '00001.00013.00009.00003') {
-        if (data['jsWhitelist'] != null) {
-          const list = data['jsWhitelist'].split('\n');
-          if (!list.includes('https://cdnjs.cloudflare.com') && list.includes('https://cdn.mathjax.org')) {
-            set('jsWhitelist', data['jsWhitelist'] + '\n\nhttps://cdnjs.cloudflare.com');
-          }
-        }
-      }
-      if (compareString < '00001.00014.00000.00006') {
-        if (data['siteSoftware'] != null) {
-          set('siteSoftware', data['siteSoftware'] + '\n4cdn.org yotsuba');
-        }
-      }
-      if (compareString < '00001.00014.00003.00002') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/^(#?\s*)https:\/\/whatanime\.ga\//mg, '$1https://trace.moe/'));
-        }
-      }
-      if (compareString < '00001.00014.00004.00004') {
-        if ((data['siteSoftware'] != null) && !/^4channel\.org yotsuba$/m.test(data['siteSoftware'])) {
-          set('siteSoftware', data['siteSoftware'] + '\n4channel.org yotsuba');
-        }
-      }
-      if (compareString < '00001.00014.00005.00000') {
-        for (var db of DataBoard.keys) {
-          if (data[db]?.boards) {
-            var { boards, lastChecked } = data[db];
-            data[db]['4chan.org'] = { boards, lastChecked };
-            delete data[db].boards;
-            delete data[db].lastChecked;
-            set(db, data[db]);
-          }
-        }
-        if ((data['siteSoftware'] != null) && (data['siteProperties'] == null)) {
-          const siteProperties = dict();
-          for (var line of data['siteSoftware'].split('\n')) {
-            var [hostname, software] = line.split(' ');
-            siteProperties[hostname] = { software };
-          }
-          set('siteProperties', siteProperties);
-        }
-      }
-      if (compareString < '00001.00014.00006.00006') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/\/\/%\$1\.deviantart\.com\/gallery\/#\/d%\$2;regexp:\/\^\\w\+_by_\(\\w\+\)-d\(\[\\da-z\]\+\)\//g, '//www.deviantart.com/gallery/#/d%$1%$2;regexp:/^\\w+_by_\\w+[_-]d([\\da-z]{6})\\b|^d([\\da-z]{6})-[\\da-z]{8}-/'));
-        }
-      }
-      if (compareString < '00001.00014.00008.00000') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/https:\/\/www\.yandex\.com\/images\/search/g, 'https://yandex.com/images/search'));
-        }
-      }
-      if (compareString < '00001.00014.00009.00000') {
-        if (data['sauces'] != null) {
-          set('sauces', data['sauces'].replace(/^(#?\s*)(?:http:)?\/\/(www\.pixiv\.net|www\.deviantart\.com|imgur\.com|flickr\.com)\//mg, '$1https://$2/'));
-          set('sauces', data['sauces'].replace(/https:\/\/yandex\.com\/images\/search\?rpt=imageview&img_url=%IMG/g, 'https://yandex.com/images/search?rpt=imageview&url=%IMG'));
-        }
-      }
-      if (compareString < '00001.00014.00009.00001') {
-        if ((data['Use Faster Image Host'] != null) && (data['fourchanImageHost'] == null)) {
-          set('fourchanImageHost', (data['Use Faster Image Host'] ? 'i.4cdn.org' : ''));
-        }
-      }
-      if (compareString < '00001.00014.00010.00001') {
-        if (data['Filter in Native Catalog'] == null) {
-          set('Filter in Native Catalog', false);
-        }
-      }
-      if (compareString < '00001.00014.00012.00008') {
-        if (data['boardnav'] == null) {
-          set('boardnav', `\
-[ toggle-all ]
-a-replace
-c-replace
-g-replace
-k-replace
-v-replace
-vg-replace
-vr-replace
-ck-replace
-co-replace
-fit-replace
-jp-replace
-mu-replace
-sp-replace
-tv-replace
-vp-replace
-[external-text:"FAQ","${meta.faq}"]\
-`);
         }
       }
       if (compareString < '00001.00014.00016.00001') {
@@ -21405,26 +21040,23 @@ vp-replace
       return changes;
     },
     loadSettings(data, cb) {
-      // https://github.com/loadletter/4chan-x has differently named settings.
-      if (data.version.startsWith('2.') && "Disable 4chan's extension" in data.Conf) {
-        data = Settings.convertFrom.loadletter(data);
-      } else if (data.version !== g.VERSION) {
+      if (data.version !== g.VERSION) {
         Settings.upgrade(data.Conf, data.version);
       }
-      return $.clear(function (err) {
+      $.clear(function (err) {
         if (err) {
           return cb(err);
         }
-        return $.set(data.Conf, cb);
+        $.set(data.Conf, cb);
       });
     },
     reset() {
       if (confirm('Your current settings will be entirely wiped, are you sure?')) {
-        return $.clear(function (err) {
+        $.clear(function (err) {
           if (err) {
-            return $('.imp-exp-result').textContent = 'Import failed due to an error.';
+            $('.imp-exp-result').textContent = 'Import failed due to an error.';
           } else if (confirm('Reset successful. Reload now?')) {
-            return window.location.reload();
+            window.location.reload();
           }
         });
       }
@@ -21433,7 +21065,7 @@ vp-replace
       $.extend(section, { innerHTML: FilterSelectPage });
       const select = $('select', section);
       $.on(select, 'change', Settings.selectFilter);
-      return Settings.selectFilter.call(select);
+      Settings.selectFilter.call(select);
     },
     selectFilter() {
       let name;
@@ -21451,7 +21083,7 @@ vp-replace
         $.on(ta, 'change', $.cb.value);
         $.get(name, Conf[name], function (item) {
           ta.value = item[name];
-          return $.add(div, ta);
+          $.add(div, ta);
         });
         return;
       }
@@ -21468,9 +21100,9 @@ vp-replace
       const ta = $('textarea', section);
       $.get('sauces', Conf['sauces'], function (item) {
         ta.value = item['sauces'];
-        return (ta.hidden = false);
+        ta.hidden = false;
       }); // XXX prevent Firefox from adding initialization to undo queue
-      return $.on(ta, 'change', $.cb.value);
+      $.on(ta, 'change', $.cb.value);
     },
     advanced(section) {
       let input, name;
@@ -21485,12 +21117,12 @@ vp-replace
       $.on(inputs['archiveLists'], 'change', function () {
         $.set('lastarchivecheck', 0);
         Conf['lastarchivecheck'] = 0;
-        return $.id('lastarchivecheck').textContent = 'never';
+        $.id('lastarchivecheck').textContent = 'never';
       });
       const items = dict();
       for (name in inputs) {
         input = inputs[name];
-        if (!['Interval', 'Custom CSS'].includes(name)) {
+        if (!['Interval', 'Custom CSS', 'timeLocale'].includes(name)) {
           items[name] = Conf[name];
           var event = ((input.nodeName === 'SELECT') ||
             ['checkbox', 'radio'].includes(input.type) ||
@@ -21519,13 +21151,16 @@ vp-replace
       const interval = inputs['Interval'];
       const customCSS = inputs['Custom CSS'];
       const applyCSS = $('#apply-css', section);
+      const timeLocale = inputs.timeLocale;
       interval.value = Conf['Interval'];
       customCSS.checked = Conf['Custom CSS'];
       inputs['usercss'].disabled = !Conf['Custom CSS'];
       applyCSS.disabled = !Conf['Custom CSS'];
+      timeLocale.value = Conf.timeLocale;
       $.on(interval, 'change', ThreadUpdater.cb.interval);
       $.on(customCSS, 'change', Settings.togglecss);
       $.on(applyCSS, 'click', () => CustomCSS.update());
+      $.on(timeLocale, 'change', Settings.setTimeLocale);
       const itemsArchive = dict();
       for (name of ['archives', 'selectedArchives', 'lastarchivecheck']) {
         itemsArchive[name] = Conf[name];
@@ -21533,16 +21168,18 @@ vp-replace
       $.get(itemsArchive, function (itemsArchive) {
         $.extend(Conf, itemsArchive);
         Redirect$1.selectArchives();
-        return Settings.addArchiveTable(section);
+        Settings.addArchiveTable(section);
       });
       const boardSelect = $('#archive-board-select', section);
       const table = $('#archive-table', section);
       const updateArchives = $('#update-archives', section);
       $.on(boardSelect, 'change', function () {
         $('tbody > :not([hidden])', table).hidden = true;
-        return $(`tbody > .${this.value}`, table).hidden = false;
+        $(`tbody > .${this.value}`, table).hidden = false;
       });
-      return $.on(updateArchives, 'click', () => Redirect$1.update(() => Settings.addArchiveTable(section)));
+      $.on(updateArchives, 'click', () => Redirect$1.update(() => Settings.addArchiveTable(section)));
+      $.on(inputs.beepVolume, 'change', () => { ThreadUpdater.playBeep(false); });
+      $.on(inputs.beepSource, 'change', () => { ThreadUpdater.playBeep(false); });
     },
     addArchiveTable(section) {
       let boardID, o;
@@ -21648,24 +21285,24 @@ vp-replace
       return td;
     },
     saveSelectedArchive() {
-      return $.get('selectedArchives', Conf['selectedArchives'], ({ selectedArchives }) => {
+      $.get('selectedArchives', Conf['selectedArchives'], ({ selectedArchives }) => {
         (selectedArchives[this.dataset.boardid] || (selectedArchives[this.dataset.boardid] = dict()))[this.dataset.type] = JSON.parse(this.value);
         $.set('selectedArchives', selectedArchives);
         Conf['selectedArchives'] = selectedArchives;
-        return Redirect$1.selectArchives();
+        Redirect$1.selectArchives();
       });
     },
     boardnav() {
-      return Header.generateBoardList(this.value);
+      Header.generateBoardList(this.value);
     },
     time() {
-      return this.nextElementSibling.textContent = Time.format(new Date(), this.value);
+      this.nextElementSibling.textContent = Time.format(new Date(), this.value);
     },
     timeLocale() {
-      return Settings.time.call($('[name=time]', Settings.dialog));
+      Settings.time.call($('[name=time]', Settings.dialog));
     },
     backlink() {
-      return this.nextElementSibling.textContent = this.value.replace(/%(?:id|%)/g, x => ({ '%id': '123456789', '%%': '%' })[x]);
+      this.nextElementSibling.textContent = this.value.replace(/%(?:id|%)/g, x => ({ '%id': '123456789', '%%': '%' })[x]);
     },
     fileInfo() {
       const data = {
@@ -21682,7 +21319,7 @@ vp-replace
           tag: 'Loop'
         }
       };
-      return FileInfo.format(this.value, data, this.nextElementSibling);
+      FileInfo.format(this.value, data, this.nextElementSibling);
     },
     favicon() {
       Favicon.switch();
@@ -21706,7 +21343,21 @@ vp-replace
       } else {
         CustomCSS.addStyle();
       }
-      return $.cb.checked.call(this);
+      $.cb.checked.call(this);
+    },
+    setTimeLocale(e) {
+      const input = e.target;
+      try {
+        if (input.value !== '')
+          new Intl.DateTimeFormat(input.value);
+        input.setCustomValidity('');
+        Time.formatterCache.clear();
+        $.cb.value.call(input);
+        Settings.timeLocale.call(input);
+      } catch (e) {
+        input.setCustomValidity('Locale not recognized');
+        input.reportValidity();
+      }
     },
     keybinds(section) {
       let key;
@@ -21726,7 +21377,7 @@ vp-replace
         $.on(input, 'keydown', Settings.keybind);
         $.add(tbody, tr);
       }
-      return $.get(items, function (items) {
+      $.get(items, function (items) {
         for (key in items) {
           var val = items[key];
           inputs[key].value = val;
@@ -21740,11 +21391,10 @@ vp-replace
       } // tab
       e.preventDefault();
       e.stopPropagation();
-      if ((key = Keybinds.keyCode(e)) == null) {
+      if (!(key = Keybinds.keyCode(e)))
         return;
-      }
       this.value = key;
-      return $.cb.value.call(this);
+      $.cb.value.call(this);
     }
   };
 

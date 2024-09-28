@@ -3,10 +3,12 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
-### Not yet released
+### 2.14.0 (2024-09-28)
 
-- Add `anonymous: true` to cross-origin gmOptions to fix failing requests when first-party isolation is enabled on
+- Added `anonymous: true` to cross-origin gmOptions to fix failing requests when first-party isolation is enabled on
   Firefox. [#105](https://github.com/TuxedoTako/4chan-xt/issues/105)
+- Allow setting a custom thread update sound and volume in the advanced settings.
+  [#103](https://github.com/TuxedoTako/4chan-xt/issues/103)
 - Cleaned up code related importing settings from older versions, in this case from versions before 1.14.15 (released at
   the end of 2019), and the loadLetter fork. If you want to import setting from there, use an older version as an
   intermediate.

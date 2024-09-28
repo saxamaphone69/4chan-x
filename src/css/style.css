@@ -653,7 +653,7 @@ div[data-checked="false"] > .suboption-list {
 .section-sauce textarea {
   height: 430px;
 }
-.section-advanced .field[name="boardnav"] {
+.section-advanced .field.wide {
   width: 100%;
 }
 .section-advanced textarea {
