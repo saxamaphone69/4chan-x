@@ -18,15 +18,12 @@ import type Thread from '../classes/Thread';
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * DS201: Simplify complex destructure assignments
- * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
  */
 
 var ThreadUpdater = {
   init(this: typeof ThreadUpdater) {
     let sc;
-    if ((g.VIEW !== 'thread') || !Conf['Thread Updater']) { return; }
-    this.enabled = true;
 
     // Chromium won't play audio created in an inactive tab until the tab has been focused, so set it up now.
     // XXX Sometimes the loading stalls in Firefox, esp. when opening in private browsing window followed by normal window.
@@ -35,7 +32,11 @@ var ThreadUpdater = {
     if ($.engine !== 'gecko') { this.audio.src = this.beep; }
     $.on(this.audio, 'error', () => {
       new Notice('error', this.audio.error.message || 'Error when trying to play thread updater beep.', 15);
-    })
+    });
+
+    // Return after the audio player is initiated, so it works in the settings preview.
+    if ((g.VIEW !== 'thread') || !Conf['Thread Updater']) return;
+    this.enabled = true;
 
     if (Conf['Updater and Stats in Header']) {
       this.dialog = (sc = $.el('span',
@@ -136,7 +137,7 @@ var ThreadUpdater = {
     const { audio } = ThreadUpdater as { audio: HTMLAudioElement };
     const source = Conf.beepSource || ThreadUpdater.beep
     if (audio.src !== source) audio.src = source;
-    audio.volume = Conf.beepVolume;
+    audio.volume = Math.max(.01, Math.min(+Conf.beepVolume, 1));
     if (audio.paused) {
       audio.play();
     } else if (repeatIfPlaying) {
@@ -357,7 +358,7 @@ var ThreadUpdater = {
     ThreadUpdater.updateThreadStatus('Closed', !!OP.closed);
     thread.postLimit = !!OP.bumplimit;
     thread.fileLimit = !!OP.imagelimit;
-    if (OP.unique_ips != null) { thread.ipCount   = OP.unique_ips; }
+    if (OP.unique_ips) thread.ipCount = OP.unique_ips;
 
     const posts    = []; // new post objects
     const index    = []; // existing posts
@@ -448,7 +449,7 @@ var ThreadUpdater = {
     }
 
     // Update IP count in original post form.
-    if ((OP.unique_ips != null) && (ipCountEl = $.id('unique-ips'))) {
+    if (OP.unique_ips && (ipCountEl = $.id('unique-ips'))) {
       ipCountEl.textContent = OP.unique_ips;
       ipCountEl.previousSibling.textContent = ipCountEl.previousSibling.textContent.replace(/\b(?:is|are)\b/, OP.unique_ips === 1 ? 'is' : 'are');
       ipCountEl.nextSibling.textContent = ipCountEl.nextSibling.textContent.replace(/\bposters?\b/, OP.unique_ips === 1 ? 'poster' : 'posters');

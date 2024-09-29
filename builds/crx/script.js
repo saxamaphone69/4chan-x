@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.14.0",
-    "date": "2024-09-28T18:15:00Z"
+    "version": "2.14.1",
+    "date": "2024-09-29T09:22:00Z"
   };
 
   var meta = {
@@ -1433,7 +1433,7 @@ https://*.hcaptcha.com
     fxtMaxReplies: 5,
 
     beepSource: '',
-    beepVolume: 100,
+    beepVolume: 1,
   };
 
   // This file was created because these functions on $ were sometimes not initialized yet because of circular
@@ -15486,10 +15486,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
   var ThreadUpdater = {
     init() {
       let sc;
-      if ((g.VIEW !== 'thread') || !Conf['Thread Updater']) {
-        return;
-      }
-      this.enabled = true;
       // Chromium won't play audio created in an inactive tab until the tab has been focused, so set it up now.
       // XXX Sometimes the loading stalls in Firefox, esp. when opening in private browsing window followed by normal window.
       // Don't let it keep the loading icon on indefinitely.
@@ -15500,6 +15496,10 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       $.on(this.audio, 'error', () => {
         new Notice('error', this.audio.error.message || 'Error when trying to play thread updater beep.', 15);
       });
+      // Return after the audio player is initiated, so it works in the settings preview.
+      if ((g.VIEW !== 'thread') || !Conf['Thread Updater'])
+        return;
+      this.enabled = true;
       if (Conf['Updater and Stats in Header']) {
         this.dialog = (sc = $.el('span', { id: 'updater' }));
         $.extend(sc, { innerHTML: '<span id="update-status" class="empty"></span><span id="update-timer" class="empty" title="Update now"></span>' });
@@ -15581,7 +15581,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       const source = Conf.beepSource || ThreadUpdater.beep;
       if (audio.src !== source)
         audio.src = source;
-      audio.volume = Conf.beepVolume;
+      audio.volume = Math.max(.01, Math.min(+Conf.beepVolume, 1));
       if (audio.paused) {
         audio.play();
       } else if (repeatIfPlaying) {
@@ -15789,9 +15789,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       ThreadUpdater.updateThreadStatus('Closed', !!OP.closed);
       thread.postLimit = !!OP.bumplimit;
       thread.fileLimit = !!OP.imagelimit;
-      if (OP.unique_ips != null) {
+      if (OP.unique_ips)
         thread.ipCount = OP.unique_ips;
-      }
       const posts = []; // new post objects
       const index = []; // existing posts
       const files = []; // existing files
@@ -15879,7 +15878,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         }
       }
       // Update IP count in original post form.
-      if ((OP.unique_ips != null) && (ipCountEl = $.id('unique-ips'))) {
+      if (OP.unique_ips && (ipCountEl = $.id('unique-ips'))) {
         ipCountEl.textContent = OP.unique_ips;
         ipCountEl.previousSibling.textContent = ipCountEl.previousSibling.textContent.replace(/\b(?:is|are)\b/, OP.unique_ips === 1 ? 'is' : 'are');
         ipCountEl.nextSibling.textContent = ipCountEl.nextSibling.textContent.replace(/\bposters?\b/, OP.unique_ips === 1 ? 'poster' : 'posters');

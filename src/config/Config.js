@@ -1216,6 +1216,6 @@ https://*.hcaptcha.com
   fxtMaxReplies: 5,
 
   beepSource: '',
-  beepVolume: 100,
+  beepVolume: 1,
 };
 export default Config;

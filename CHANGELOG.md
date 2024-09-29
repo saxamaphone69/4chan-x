@@ -3,6 +3,13 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.14.1 (2024-09-29)
+
+- Notification sound fixes:
+  - Fixed wrong default value for the volume.
+  - The volume is now corrected when set to the audio in case a wrong value is given.
+  - Preview in the settings now works on pages that aren't a thread, like the catalog.
+
 ### 2.14.0 (2024-09-28)
 
 - Added `anonymous: true` to cross-origin gmOptions to fix failing requests when first-party isolation is enabled on
