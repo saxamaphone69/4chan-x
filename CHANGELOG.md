@@ -3,6 +3,12 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### Not released yet
+
+- Stubs will now show the reason a post was hidden. [#108](https://github.com/TuxedoTako/4chan-xt/issues/108),
+  [ccd0#126](https://github.com/ccd0/4chan-x/issues/126)
+- You can now apply a hide and highlight on the same filter. The highlight class will apply to the stub.
+
 ### 2.14.1 (2024-09-29)
 
 - Notification sound fixes:

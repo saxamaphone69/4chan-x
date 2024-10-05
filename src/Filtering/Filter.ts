@@ -35,6 +35,15 @@ interface FilterObj {
   noti: boolean;
 }
 
+export interface FilterResults {
+  hide: boolean;
+  stub?: boolean;
+  hl?: string[] | null;
+  top?: boolean;
+  noti?: boolean;
+  reasons?: string;
+};
+
 type FilterType = "postID" | "name" | "uniqueID" | "tripcode" | "capcode" | "pass" | "email" | "subject" | "comment"
   | "flag" | "filename" | "dimensions" | "filesize" | "MD5";
 
@@ -60,6 +69,7 @@ var Filter = {
         let regexp:   RegExp | string;
         let top:      boolean;
         let types:    string[];
+        let hide:     boolean;
 
         if (line[0] === '#') { continue; }
 
@@ -120,12 +130,13 @@ var Filter = {
 
         // Highlight the post.
         // If not specified, the highlight class will be filter-highlight.
-        if (hl = /(?:^|;)\s*highlight/.test(filter)) {
-          hl = filter.match(/(?:^|;)\s*highlight:([\w-]+)/)?.[1] || 'filter-highlight';
+        const highlightRes = filter.match(/(?:^|;)\s*highlight(?::([\w-]+))?/)
+        if (highlightRes) {
+          hl = highlightRes[1] || 'filter-highlight';
           // Put highlighted OP's thread on top of the board page or not.
           // Defaults to on top.
-          top = filter.match(/(?:^|;)\s*top:(yes|no)/)?.[1] || 'yes';
-          top = top === 'yes'; // Turn it into a boolean
+          top = (filter.match(/(?:^|;)\s*top:(yes|no)/)?.[1] || 'yes') === 'yes';
+          hide = /(?:^|;)\s*hide(?::yes)?(?:;|$)/.test(filter);
         }
 
         // Fields that this filter applies to (for 'general' filters)
@@ -138,9 +149,11 @@ var Filter = {
         }
 
         // Hide the post (default case).
-        var hide = !(hl || noti);
+        hide = hide || !(hl || noti);
 
-        const filterObj = { isstring, regexp, boards, excludes, mask, hide, stub, hl, top, noti };
+        const reason = filter.match(/(?:^|;)\s*reason:([^;$]+)/)?.[1];
+
+        const filterObj = { isstring, regexp, boards, excludes, mask, hide, stub, hl, top, noti, reason };
         if (key === 'general') {
           for (var type of types) {
             this.filters.get(type)?.push(filterObj) ?? this.filters.set(type, [filterObj]);
@@ -207,16 +220,14 @@ var Filter = {
 
   parseBoardsMemo: dict(),
 
-  test(
-    post: Post,
-    hideable = true,
-  ): { hide: boolean, stub: boolean } | { hl: string[] | null, top: boolean, noti: boolean } {
-    if (post.filterResults) { return post.filterResults; }
+  test(post: Post, hideable = true): FilterResults {
+    if (post.filterResults) return post.filterResults;
     let hide           = false;
     let stub           = true;
     let hl  : string[] = undefined;
     let top            = false;
     let noti           = false;
+    let reasons: string[];
     if (QuoteYou.isYou(post)) {
       hideable = false;
     }
@@ -237,29 +248,27 @@ var Filter = {
             (filter.excludes &&  (filter.excludes[board] || filter.excludes[site])) ||
             (filter.mask & mask) ||
             (filter.isstring ? (filter.regexp !== value) : !filter.regexp.test(value))
-          ) { continue; }
+          ) continue;
           if (filter.hide) {
             if (hideable) {
               hide = true;
-              if (stub) { ({
-                stub
-              } = filter); }
+              if (stub) {
+                ({ stub } = filter);
+                (reasons || (reasons = [])).push(filter.reason || `Filtered ${key} ${filter.regexp}`);
+              }
             }
-          } else {
-            if (!hl || !hl.includes(filter.hl)) {
-              (hl || (hl = [])).push(filter.hl);
-            }
-            if (!top) { ({
-              top
-            } = filter); }
-            if (filter.noti) {
-              noti = true;
-            }
+          }
+          if (!hl?.includes(filter.hl)) {
+            (hl || (hl = [])).push(filter.hl);
+          }
+          if (!top) { ({ top } = filter); }
+          if (filter.noti) {
+            noti = true;
           }
         }
       }
     }
-    return {hide, stub, hl, top, noti};
+    return {hide, stub, hl, top, noti, reasons: reasons?.join(' & ')};
   },
 
   node(this: Post) {
@@ -269,10 +278,13 @@ var Filter = {
       (!this.isReply && !this.thread.nodes.root)
     ) return;
 
-    const {hide, stub, hl, noti} = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
+    const {hide, stub, hl, noti, reasons}: FilterResults = Filter.test(
+      this,
+      (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index')))
+    );
     if (hide) {
       if (this.isReply) {
-        PostHiding.hide(this, stub);
+        PostHiding.hide(this, stub, undefined, reasons);
       } else {
         ThreadHiding.hide(this.thread, stub);
       }
@@ -427,7 +439,7 @@ var Filter = {
     Filter.addFilter('MD5', filter);
     const origin = post.origin || post;
     if (origin.isReply) {
-      PostHiding.hide(origin);
+      PostHiding.hide(origin, undefined, undefined, files.map(f => `Filtered MD5 ${f.MD5}`).join(' & '));
     } else if (g.VIEW === 'index') {
       ThreadHiding.hide(origin.thread);
     }

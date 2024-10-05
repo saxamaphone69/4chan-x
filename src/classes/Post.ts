@@ -1,3 +1,4 @@
+import type { FilterResults } from "../Filtering/Filter";
 import Get from "../General/Get";
 // #region tests_enabled
 import Test from "../General/Test";
@@ -62,6 +63,8 @@ export default class Post {
   declare files:          ReturnType<Post['parseFile']>[];
   declare forBuildTest?:  boolean;
   declare normalizedOriginal?: any;
+  declare highlights?:    string[];
+  declare filterResults:  FilterResults;
 
   declare info: {
     subject:       string | undefined,

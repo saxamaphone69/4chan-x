@@ -288,7 +288,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         $.delete(['hiddenThreads', 'hiddenPosts']);
       });
     });
-    $.after($('input[name="Stubs"]', section).parentNode.parentNode, div);
+    $('input[name="Stubs"]', section).closest('fieldset').insertAdjacentElement('beforeend', div);
   },
 
   export() {

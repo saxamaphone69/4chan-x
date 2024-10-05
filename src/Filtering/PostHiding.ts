@@ -59,10 +59,9 @@ var PostHiding = {
 
     if (data) {
       if (data.thisPost) {
-        PostHiding.hide(this, data.makeStub, data.hideRecursively);
+        PostHiding.hide(this, data.makeStub, data.hideRecursively, 'Hidden manually');
       } else {
-        Recursive.apply(PostHiding.hide, this, data.makeStub, true);
-        Recursive.add(PostHiding.hide, this, data.makeStub, true);
+        PostHiding.hideRecursive(this, data.makeStub);
       }
     }
 
@@ -195,10 +194,9 @@ var PostHiding = {
       if (!thisPost && !replies && !byId) return;
 
       if (thisPost) {
-        PostHiding.hide(post, makeStub, replies);
+        PostHiding.hide(post, makeStub, replies, 'Hidden manually');
       } else if (replies) {
-        Recursive.apply(PostHiding.hide, post, makeStub, true);
-        Recursive.add(PostHiding.hide, post, makeStub, true);
+        PostHiding.hideRecursive(post, makeStub);
       }
       if (byId) {
         g.posts.forEach((p) => {
@@ -288,10 +286,10 @@ var PostHiding = {
   saveHiddenState(
     post: Post,
     isHiding: boolean,
-    thisPost: boolean,
-    makeStub: boolean,
-    hideRecursively: boolean,
-    byId: boolean
+    thisPost?: boolean,
+    makeStub?: boolean,
+    hideRecursively?: boolean,
+    byId?: boolean
   ) {
     const data = {
       boardID:  post.board.ID,
@@ -312,18 +310,22 @@ var PostHiding = {
   },
 
   toggle() {
-    const post = Get.postFromNode(this);
-    PostHiding[(post.isHidden ? 'show' : 'hide')](post);
+    const post: Post = Get.postFromNode(this);
+    post.isHidden ? PostHiding.show(post) : PostHiding.hide(post, undefined, undefined, 'Hidden manually');
     PostHiding.saveHiddenState(post, post.isHidden);
   },
 
-  hide(post: Post, makeStub: boolean = Conf['Stubs'], hideRecursively: boolean = Conf['Recursive Hiding']) {
-    if (post.isHidden) { return; }
+  hide(
+    post: Post,
+    makeStub: boolean = Conf['Stubs'],
+    hideRecursively: boolean = Conf['Recursive Hiding'],
+    reason?: string
+  ) {
+    if (post.isHidden) return;
     post.isHidden = true;
 
     if (hideRecursively) {
-      Recursive.apply(PostHiding.hide, post, makeStub, true);
-      Recursive.add(PostHiding.hide, post, makeStub, true);
+      PostHiding.hideRecursive(post, makeStub);
     }
 
     for (var quotelink of Get.allQuotelinksLinkingTo(post)) {
@@ -336,14 +338,26 @@ var PostHiding = {
     }
 
     const a = PostHiding.makeButton(post, 'show');
-    $.add(a, $.tn(` ${post.info.nameBlock}`));
+    let text = ` ${post.info.nameBlock}`;
+    let r = post.filterResults?.reasons || '';
+    if (reason) r = r ? `${r} & ${reason}` : reason;
+    if (Conf['Filter Reason'] && r) text += ` (${r})`;
+    $.add(a, $.tn(text));
     post.nodes.stub = $.el('div',
       {className: 'stub'});
+    if (!Conf['Filter Reason'] && r) post.nodes.stub.title = r;
     $.add(post.nodes.stub, a);
     if (Conf['Menu']) {
       $.add(post.nodes.stub, Menu.makeButton(post));
     }
     $.prepend(post.nodes.root, post.nodes.stub);
+  },
+
+  hideRecursive(post: Post, makeStub: boolean) {
+    const recursiveArgs: [typeof PostHiding.hide, ...Parameters<typeof PostHiding.hide>] =
+      [PostHiding.hide, post, makeStub, true, `Hidden recursively from ${post.ID}`]
+    Recursive.apply(...recursiveArgs);
+    Recursive.add(...recursiveArgs);
   },
 
   show(post: Post, showRecursively: boolean = Conf['Recursive Hiding']) {

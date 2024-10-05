@@ -221,7 +221,11 @@ const Config = {
       'Stubs': [
         true,
         'Show stubs of hidden threads / replies.'
-      ]
+      ],
+      'Filter Reason': [
+        true,
+        'Show the reason the post was hidden in the stub. If disabled, you can hover over the stub to see the reason.'
+      ],
     },
 
     'Images and Videos': {
