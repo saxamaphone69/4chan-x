@@ -13,6 +13,7 @@ import QuoteYou from "../Quotelinks/QuoteYou";
 import PostHiding from "./PostHiding";
 import ThreadHiding from "./ThreadHiding";
 import Post from "../classes/Post";
+import Recursive from "./Recursive";
 
 /*
  * decaffeinate suggestions:
@@ -33,6 +34,9 @@ interface FilterObj {
   hl: string;
   top: boolean;
   noti: boolean;
+  poster?: boolean;
+  replies?: boolean;
+  reason?: string;
 }
 
 export interface FilterResults {
@@ -41,6 +45,8 @@ export interface FilterResults {
   hl?: string[] | null;
   top?: boolean;
   noti?: boolean;
+  poster?: boolean;
+  replies?: boolean;
   reasons?: string;
 };
 
@@ -55,8 +61,8 @@ var Filter = {
   filters: new Map<FilterType, FilterObj[] | Map<string, FilterObj[]>>(),
 
   init(this: typeof Filter) {
-    if (!['index', 'thread', 'catalog'].includes(g.VIEW) || !Conf['Filter']) { return; }
-    if ((g.VIEW === 'catalog') && !Conf['Filter in Native Catalog']) { return; }
+    if (!['index', 'thread', 'catalog'].includes(g.VIEW) || !Conf['Filter']) return;
+    if ((g.VIEW === 'catalog') && !Conf['Filter in Native Catalog']) return;
 
     if (!Conf['Filtered Backlinks']) {
       $.addClass(doc, 'hide-backlinks');
@@ -71,7 +77,7 @@ var Filter = {
         let types:    string[];
         let hide:     boolean;
 
-        if (line[0] === '#') { continue; }
+        if (line[0] === '#') continue;
 
         if (!(regexp = line.match(/\/(.*)\/(\w*)/))) {
           continue;
@@ -136,7 +142,7 @@ var Filter = {
           // Put highlighted OP's thread on top of the board page or not.
           // Defaults to on top.
           top = (filter.match(/(?:^|;)\s*top:(yes|no)/)?.[1] || 'yes') === 'yes';
-          hide = /(?:^|;)\s*hide(?::yes)?(?:;|$)/.test(filter);
+          hide = /(?:^|;)\s*hide(?:[;:]|$)/.test(filter);
         }
 
         // Fields that this filter applies to (for 'general' filters)
@@ -153,7 +159,12 @@ var Filter = {
 
         const reason = filter.match(/(?:^|;)\s*reason:([^;$]+)/)?.[1];
 
-        const filterObj = { isstring, regexp, boards, excludes, mask, hide, stub, hl, top, noti, reason };
+        const poster = /(?:^|;)\s*poster(?:[;:]|$)/.test(filter);
+
+        const replies = /(?:^|;)\s*replies(?:[;:]|$)/.test(filter);
+
+        const filterObj: FilterObj
+          = { isstring, regexp, boards, excludes, mask, hide, stub, hl, top, noti, reason, poster, replies };
         if (key === 'general') {
           for (var type of types) {
             this.filters.get(type)?.push(filterObj) ?? this.filters.set(type, [filterObj]);
@@ -227,6 +238,8 @@ var Filter = {
     let hl  : string[] = undefined;
     let top            = false;
     let noti           = false;
+    let poster         = false;
+    let replies        = false;
     let reasons: string[];
     if (QuoteYou.isYou(post)) {
       hideable = false;
@@ -235,11 +248,11 @@ var Filter = {
     mask = (mask | (post.file ? 4 : 8));
     const board = `${post.siteID}/${post.boardID}`;
     const site = `${post.siteID}/*`;
-    for (const key of Filter.filters.keys()) {
-      for (const value of Filter.values(key, post)) {
-        const filtersOrMap = Filter.filters.get(key);
+    for (const type of Filter.filters.keys()) {
+      for (const value of Filter.values(type, post)) {
+        const filtersOrMap = Filter.filters.get(type);
 
-        const filtersForType = Array.isArray(filtersOrMap) ? filtersOrMap : filtersOrMap.get(value);
+        const filtersForType: FilterObj[] = Array.isArray(filtersOrMap) ? filtersOrMap : filtersOrMap.get(value);
         if (!filtersForType) continue;
 
         for (const filter of filtersForType) {
@@ -254,7 +267,7 @@ var Filter = {
               hide = true;
               if (stub) {
                 ({ stub } = filter);
-                (reasons || (reasons = [])).push(filter.reason || `Filtered ${key} ${filter.regexp}`);
+                (reasons || (reasons = [])).push(filter.reason || `Filtered ${type} ${filter.regexp}`);
               }
             }
           }
@@ -262,13 +275,14 @@ var Filter = {
             (hl || (hl = [])).push(filter.hl);
           }
           if (!top) { ({ top } = filter); }
-          if (filter.noti) {
-            noti = true;
-          }
+          if (filter.noti) noti = true;
+          if (filter.poster) poster = true;
+          if (filter.replies) replies = true;
         }
       }
     }
-    return {hide, stub, hl, top, noti, reasons: reasons?.join(' & ')};
+    post.filterResults = {hide, stub, hl, top, noti, poster, replies, reasons: reasons?.join(' & ')};
+    return post.filterResults;
   },
 
   node(this: Post) {
@@ -278,13 +292,27 @@ var Filter = {
       (!this.isReply && !this.thread.nodes.root)
     ) return;
 
-    const {hide, stub, hl, noti, reasons}: FilterResults = Filter.test(
+    const {hide, stub, hl, noti, poster, replies }: FilterResults = Filter.test(
       this,
       (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index')))
     );
     if (hide) {
       if (this.isReply) {
-        PostHiding.hide(this, stub, undefined, reasons);
+        PostHiding.hide(this, stub);
+        if (replies) {
+          Recursive.applyAndAdd(PostHiding.hide, this, stub, undefined, `Hidden recursively from ${this.ID}`);
+        }
+        if (poster && this.info.uniqueID) {
+          const reason = `Hidden because it's the same poster as ${this.ID} (${this.filterResults.reasons})`;
+          g.posts.forEach((p) => {
+            if (p.info.uniqueID === this.info.uniqueID && p !== this) {
+              PostHiding.hide(p, stub, replies, reason);
+              if (replies) {
+                Recursive.applyAndAdd(PostHiding.hide, p, stub, undefined, `Hidden recursively from ${p.ID}`);
+              }
+            }
+          });
+        }
       } else {
         ThreadHiding.hide(this.thread, stub);
       }
@@ -292,6 +320,20 @@ var Filter = {
     if (hl) {
       this.highlights = hl;
       $.addClass(this.nodes.root, ...hl);
+      if (this.isReply) {
+        const hlFn = (post: Post, ...hl: string[]) => { $.addClass(post.nodes.root, ...hl); };
+
+        if (replies) Recursive.applyAndAdd(hlFn, this, ...hl);
+
+        if (poster && this.info.uniqueID) {
+          g.posts.forEach((p) => {
+            if (p.info.uniqueID === this.info.uniqueID && p !== this) {
+              $.addClass(p.nodes.root, ...hl);
+              if (replies) Recursive.applyAndAdd(hlFn, p, ...hl);
+            }
+          });
+        }
+      }
     }
     if (noti && Unread.posts && (this.ID > Unread.lastReadPost) && !QuoteYou.isYou(this)) {
       Unread.openNotification(this, ' triggered a notification filter');
@@ -335,7 +377,7 @@ var Filter = {
     });
   },
 
-  catalogNode() {
+  catalogNode(this: Post) {
     if ((this.boardID !== g.BOARD.ID) || !Filter.catalogData[this.ID]) { return; }
     if (QuoteYou.db?.get({siteID: g.SITE.ID, boardID: this.boardID, threadID: this.ID, postID: this.ID})) { return; }
     const {hide, hl, top} = Filter.test(g.SITE.Build.parseJSON(Filter.catalogData[this.ID], this));

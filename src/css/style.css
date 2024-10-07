@@ -216,7 +216,8 @@ audio.controls-added {
 #navlinks, .fixed #header-bar,
 :root.float #updater,
 :root.float #thread-stats,
-#qr {
+#qr,
+#export-dialog {
   position: fixed;
 }
 #overlay {
@@ -245,6 +246,9 @@ audio.controls-added {
 }
 #embedding {
   z-index: 11;
+}
+#export-dialog {
+  z-index: 1001;
 }
 :root.fixed-watcher #thread-watcher {
   z-index: 10;

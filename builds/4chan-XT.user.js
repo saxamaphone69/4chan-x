@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.14.1
+// @version      2.15.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -170,8 +170,8 @@
   'use strict';
 
   var version = {
-    "version": "2.14.1",
-    "date": "2024-09-29T09:22:00Z"
+    "version": "2.15.0",
+    "date": "2024-10-07T19:19:19Z"
   };
 
   var meta = {
@@ -433,7 +433,15 @@ div.boardTitle {
         'Enable Native Flash Embedding': [
           true,
           'Activate the native extension\'s Flash embedding if the native extension is disabled.'
-        ]
+        ],
+        'Export History': [
+          true,
+          'Export last read, your posts, etc. when exporting the setting'
+        ],
+        'Ask to Export History': [
+          true,
+          'Ask if history should be exported when settings are exported.'
+        ],
       },
 
       'Linkification': {
@@ -523,7 +531,11 @@ div.boardTitle {
         'Stubs': [
           true,
           'Show stubs of hidden threads / replies.'
-        ]
+        ],
+        'Filter Reason': [
+          true,
+          'Show the reason the post was hidden in the stub. If disabled, you can hover over the stub to see the reason.'
+        ],
       },
 
       'Images and Videos': {
@@ -2672,6 +2684,10 @@ https://*.hcaptcha.com
     For example: <code>boards:4:*;</code>.<br>
   </li>
   <li>
+    Show a custom reason in the stub. If not given, the type and regex will be shown.<br>
+    For example: <code>reason:This is bait;</code>
+  </li>
+  <li>
     Select boards to be excluded from the filter. The syntax is the same as for the <code>boards:</code> option above.<br>
     For example: <code>exclude:vg,v;</code>.
   </li>
@@ -2695,10 +2711,10 @@ https://*.hcaptcha.com
     Highlighted OPs will have their threads put on top of the board index by default.<br>
     For example: <code>top:yes;</code> or <code>top:no;</code>.
   </li>
-  <li>
-    Show a desktop notification instead of hiding.<br>
-    For example: <code>notify;</code>.
-  </li>
+  <li>Show a desktop notification instead of hiding: <code>notify;</code>.</li>
+  <li>Hide all posts from this poster: <code>poster;</code>.</li>
+  <li>Recursively hide replies: <code>replies;</code>.</li>
+  <li>Hide anyway even if highlighting. The highlight class will be applied to the stub: <code>hide;</code>.</li>
   <li>
     Filters in the "General" section apply to multiple fields, by default <code>subject,name,filename,comment</code>.<br>
     The fields can be specified with the <code>type</code> option, separated by commas.<br>
@@ -2992,6 +3008,14 @@ https://*.hcaptcha.com
   <option value="MD5">Image MD5</option>
   </select>
 <div></div>`;
+
+  var ExportDialog = `<form id="export-form">
+  <div class="move">Export settings</div>
+  <label><input name="history" type="checkbox" />Export history (last read, your posts, etc)</label><br />
+  <label><input name="ask" type="checkbox" checked />Ask every time.</label><br />
+  <button type="submit">Export</button>
+  <button type="button" id="cancel-export">Cancel</button>
+</form>`;
 
   const $$ = (selector, root = d.body) => Array.from(root.querySelectorAll(selector));
 
@@ -3642,7 +3666,8 @@ audio.controls-added {
 #navlinks, .fixed #header-bar,
 :root.float #updater,
 :root.float #thread-stats,
-#qr {
+#qr,
+#export-dialog {
   position: fixed;
 }
 #overlay {
@@ -3671,6 +3696,9 @@ audio.controls-added {
 }
 #embedding {
   z-index: 11;
+}
+#export-dialog {
+  z-index: 1001;
 }
 :root.fixed-watcher #thread-watcher {
   z-index: 10;
@@ -8928,7 +8956,11 @@ svg.icon {
           recursive(post, ...args);
         }
       });
-    }
+    },
+    applyAndAdd(recursive, post, ...args) {
+      Recursive.apply(recursive, post, ...args);
+      this.add(recursive, post, ...args);
+    },
   };
 
   var PostHiding = {
@@ -8966,10 +8998,9 @@ svg.icon {
       }
       if (data) {
         if (data.thisPost) {
-          PostHiding.hide(this, data.makeStub, data.hideRecursively);
+          PostHiding.hide(this, data.makeStub, data.hideRecursively, 'Hidden manually');
         } else {
-          Recursive.apply(PostHiding.hide, this, data.makeStub, true);
-          Recursive.add(PostHiding.hide, this, data.makeStub, true);
+          PostHiding.hideRecursive(this, data.makeStub);
         }
       }
       if (!Conf['Reply Hiding Buttons']) {
@@ -9090,15 +9121,15 @@ svg.icon {
         if (!thisPost && !replies && !byId)
           return;
         if (thisPost) {
-          PostHiding.hide(post, makeStub, replies);
+          PostHiding.hide(post, makeStub, replies, 'Hidden manually');
         } else if (replies) {
-          Recursive.apply(PostHiding.hide, post, makeStub, true);
-          Recursive.add(PostHiding.hide, post, makeStub, true);
+          PostHiding.hideRecursive(post, makeStub);
         }
         if (byId) {
+          const msg = `Hidden because of poster ID ${post.info.uniqueID}`;
           g.posts.forEach((p) => {
             if (p.info.uniqueID === post.info.uniqueID && p !== post) {
-              PostHiding.hide(p, makeStub, replies);
+              PostHiding.hide(p, makeStub, replies, msg);
               PostHiding.saveHiddenState(p, true, thisPost, makeStub, replies, byId);
             }
           });
@@ -9191,17 +9222,15 @@ svg.icon {
     },
     toggle() {
       const post = Get.postFromNode(this);
-      PostHiding[(post.isHidden ? 'show' : 'hide')](post);
+      post.isHidden ? PostHiding.show(post) : PostHiding.hide(post, undefined, undefined, 'Hidden manually');
       PostHiding.saveHiddenState(post, post.isHidden);
     },
-    hide(post, makeStub = Conf['Stubs'], hideRecursively = Conf['Recursive Hiding']) {
-      if (post.isHidden) {
+    hide(post, makeStub = Conf['Stubs'], hideRecursively = Conf['Recursive Hiding'], reason) {
+      if (post.isHidden)
         return;
-      }
       post.isHidden = true;
       if (hideRecursively) {
-        Recursive.apply(PostHiding.hide, post, makeStub, true);
-        Recursive.add(PostHiding.hide, post, makeStub, true);
+        PostHiding.hideRecursive(post, makeStub);
       }
       for (var quotelink of Get.allQuotelinksLinkingTo(post)) {
         $.addClass(quotelink, 'filtered');
@@ -9211,13 +9240,24 @@ svg.icon {
         return;
       }
       const a = PostHiding.makeButton(post, 'show');
-      $.add(a, $.tn(` ${post.info.nameBlock}`));
+      let text = ` ${post.info.nameBlock}`;
+      let r = post.filterResults?.reasons || '';
+      if (reason)
+        r = r ? `${r} & ${reason}` : reason;
+      if (Conf['Filter Reason'] && r)
+        text += ` (${r})`;
+      $.add(a, $.tn(text));
       post.nodes.stub = $.el('div', { className: 'stub' });
+      if (!Conf['Filter Reason'] && r)
+        post.nodes.stub.title = r;
       $.add(post.nodes.stub, a);
       if (Conf['Menu']) {
         $.add(post.nodes.stub, Menu.makeButton(post));
       }
       $.prepend(post.nodes.root, post.nodes.stub);
+    },
+    hideRecursive(post, makeStub) {
+      Recursive.applyAndAdd(PostHiding.hide, post, makeStub, true, `Hidden recursively from ${post.ID}`);
     },
     show(post, showRecursively = Conf['Recursive Hiding']) {
       if (post.nodes.stub) {
@@ -13062,7 +13102,7 @@ svg.icon {
         Index.liveThreadDict[data.no] = data;
         Index.threadPosition[data.no] = i;
         Index.parsedThreads[data.no] = (obj = g.SITE.Build.parseJSON(data, g.BOARD));
-        obj.filterResults = (results = Filter.test(obj));
+        results = Filter.test(obj);
         obj.isOnTop  = results.top;
         obj.isHidden = results.hide || ThreadHiding.isHidden(obj.boardID, obj.threadID);
         if (data.last_replies) {
@@ -20917,12 +20957,58 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           $.delete(['hiddenThreads', 'hiddenPosts']);
         });
       });
-      $.after($('input[name="Stubs"]', section).parentNode.parentNode, div);
+      $('input[name="Stubs"]', section).closest('fieldset').insertAdjacentElement('beforeend', div);
     },
-    export() {
+    isExportModalOpen: false,
+    async export() {
+      let exportHistory = Conf['Export History'];
+      let cancelled = false;
+      if (Conf['Ask to Export History']) {
+        if (Settings.isExportModalOpen)
+          return;
+        const dialog = UI.dialog('export-dialog', { innerHTML: ExportDialog });
+        const form = $('form', dialog);
+        const { history, ask } = form.elements;
+        history.checked = Conf['Export History'];
+        $.add(d.body, dialog);
+        const exportBtnRect = $('.export', Settings.dialog).getBoundingClientRect();
+        dialog.style.top = `${exportBtnRect.y + exportBtnRect.height}px`;
+        dialog.style.left = `${exportBtnRect.x}px`;
+        Settings.isExportModalOpen = true;
+        await new Promise(resolve => {
+          const close = () => {
+            dialog.remove();
+            resolve();
+            Settings.isExportModalOpen = false;
+          };
+          $.on(form, 'submit', (e) => {
+            e.preventDefault();
+            exportHistory = history.checked;
+            $.set('Export History', exportHistory);
+            $.set('Ask to Export History', ask.checked);
+            close();
+          });
+          $.on($('#cancel-export', dialog), 'click', () => {
+            cancelled = true;
+            close();
+          });
+        });
+        if (cancelled)
+          return;
+      }
       // Make sure to export the most recent data, but don't overwrite existing `Conf` object.
       const Conf2 = dict();
       $.extend(Conf2, Conf);
+      if (!exportHistory) {
+        delete Conf2.hiddenThreads;
+        delete Conf2.hiddenPosts;
+        delete Conf2.hiddenPosterIds;
+        delete Conf2.lastReadPosts;
+        delete Conf2.yourPosts;
+        delete Conf2.watchedThreads;
+        delete Conf2.cooldowns;
+        delete Conf2['Index Sort'];
+      }
       $.get(Conf2, function (Conf2) {
         // Don't export cached JSON data.
         delete Conf2['boardConfig'];
@@ -21404,12 +21490,10 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     */
     filters: new Map(),
     init() {
-      if (!['index', 'thread', 'catalog'].includes(g.VIEW) || !Conf['Filter']) {
+      if (!['index', 'thread', 'catalog'].includes(g.VIEW) || !Conf['Filter'])
         return;
-      }
-      if ((g.VIEW === 'catalog') && !Conf['Filter in Native Catalog']) {
+      if ((g.VIEW === 'catalog') && !Conf['Filter in Native Catalog'])
         return;
-      }
       if (!Conf['Filtered Backlinks']) {
         $.addClass(doc, 'hide-backlinks');
       }
@@ -21420,9 +21504,9 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           let regexp;
           let top;
           let types;
-          if (line[0] === '#') {
+          let hide;
+          if (line[0] === '#')
             continue;
-          }
           if (!(regexp = line.match(/\/(.*)\/(\w*)/))) {
             continue;
           }
@@ -21473,12 +21557,13 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           var noti = /(?:^|;)\s*notify/.test(filter);
           // Highlight the post.
           // If not specified, the highlight class will be filter-highlight.
-          if (hl = /(?:^|;)\s*highlight/.test(filter)) {
-            hl = filter.match(/(?:^|;)\s*highlight:([\w-]+)/)?.[1] || 'filter-highlight';
+          const highlightRes = filter.match(/(?:^|;)\s*highlight(?::([\w-]+))?/);
+          if (highlightRes) {
+            hl = highlightRes[1] || 'filter-highlight';
             // Put highlighted OP's thread on top of the board page or not.
             // Defaults to on top.
-            top = filter.match(/(?:^|;)\s*top:(yes|no)/)?.[1] || 'yes';
-            top = top === 'yes'; // Turn it into a boolean
+            top = (filter.match(/(?:^|;)\s*top:(yes|no)/)?.[1] || 'yes') === 'yes';
+            hide = /(?:^|;)\s*hide(?:[;:]|$)/.test(filter);
           }
           // Fields that this filter applies to (for 'general' filters)
           if (key === 'general') {
@@ -21489,8 +21574,11 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             }
           }
           // Hide the post (default case).
-          var hide = !(hl || noti);
-          const filterObj = { isstring, regexp, boards, excludes, mask, hide, stub, hl, top, noti };
+          hide = hide || !(hl || noti);
+          const reason = filter.match(/(?:^|;)\s*reason:([^;$]+)/)?.[1];
+          const poster = /(?:^|;)\s*poster(?:[;:]|$)/.test(filter);
+          const replies = /(?:^|;)\s*replies(?:[;:]|$)/.test(filter);
+          const filterObj = { isstring, regexp, boards, excludes, mask, hide, stub, hl, top, noti, reason, poster, replies };
           if (key === 'general') {
             for (var type of types) {
               this.filters.get(type)?.push(filterObj) ?? this.filters.set(type, [filterObj]);
@@ -21556,14 +21644,16 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     },
     parseBoardsMemo: dict(),
     test(post, hideable = true) {
-      if (post.filterResults) {
+      if (post.filterResults)
         return post.filterResults;
-      }
       let hide = false;
       let stub = true;
       let hl = undefined;
       let top = false;
       let noti = false;
+      let poster = false;
+      let replies = false;
+      let reasons;
       if (QuoteYou.isYou(post)) {
         hideable = false;
       }
@@ -21571,9 +21661,9 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       mask = (mask | (post.file ? 4 : 8));
       const board = `${post.siteID}/${post.boardID}`;
       const site = `${post.siteID}/*`;
-      for (const key of Filter.filters.keys()) {
-        for (const value of Filter.values(key, post)) {
-          const filtersOrMap = Filter.filters.get(key);
+      for (const type of Filter.filters.keys()) {
+        for (const value of Filter.values(type, post)) {
+          const filtersOrMap = Filter.filters.get(type);
           const filtersForType = Array.isArray(filtersOrMap) ? filtersOrMap : filtersOrMap.get(value);
           if (!filtersForType)
             continue;
@@ -21581,45 +21671,58 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             if ((filter.boards && !(filter.boards[board] || filter.boards[site])) ||
               (filter.excludes && (filter.excludes[board] || filter.excludes[site])) ||
               (filter.mask & mask) ||
-              (filter.isstring ? (filter.regexp !== value) : !filter.regexp.test(value))) {
+              (filter.isstring ? (filter.regexp !== value) : !filter.regexp.test(value)))
               continue;
-            }
             if (filter.hide) {
               if (hideable) {
                 hide = true;
                 if (stub) {
-                  ({
-                    stub
-                  } = filter);
+                  ({ stub } = filter);
+                  (reasons || (reasons = [])).push(filter.reason || `Filtered ${type} ${filter.regexp}`);
                 }
               }
-            } else {
-              if (!hl || !hl.includes(filter.hl)) {
-                (hl || (hl = [])).push(filter.hl);
-              }
-              if (!top) {
-                ({
-                  top
-                } = filter);
-              }
-              if (filter.noti) {
-                noti = true;
-              }
             }
+            if (!hl?.includes(filter.hl)) {
+              (hl || (hl = [])).push(filter.hl);
+            }
+            if (!top) {
+              ({ top } = filter);
+            }
+            if (filter.noti)
+              noti = true;
+            if (filter.poster)
+              poster = true;
+            if (filter.replies)
+              replies = true;
           }
         }
       }
-      return { hide, stub, hl, top, noti };
+      post.filterResults = { hide, stub, hl, top, noti, poster, replies, reasons: reasons?.join(' & ') };
+      return post.filterResults;
     },
     node() {
       if (this.isClone ||
         // Happens when hovering over a dead link in the catalog.
         (!this.isReply && !this.thread.nodes.root))
         return;
-      const { hide, stub, hl, noti } = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
+      const { hide, stub, hl, noti, poster, replies } = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
       if (hide) {
         if (this.isReply) {
           PostHiding.hide(this, stub);
+          if (replies) {
+            Recursive.applyAndAdd(PostHiding.hide, this, stub, undefined, `Hidden recursively from ${this.ID}`);
+          }
+          if (poster && this.info.uniqueID) {
+            const reason = `Hidden because it's the same poster as ${this.ID} (${this.filterResults.reasons})`;
+            g.posts.forEach((p) => {
+              if (p.info.uniqueID === this.info.uniqueID && p !== this) {
+                PostHiding.hide(p, stub, replies, reason);
+                if (replies) {
+                  Recursive.applyAndAdd(PostHiding.hide, p, stub, undefined, `Hidden recursively from ${p.ID}`);
+                }
+              }
+            });
+          }
         } else {
           ThreadHiding.hide(this.thread, stub);
         }
@@ -21627,6 +21730,20 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       if (hl) {
         this.highlights = hl;
         $.addClass(this.nodes.root, ...hl);
+        if (this.isReply) {
+          const hlFn = (post, ...hl) => { $.addClass(post.nodes.root, ...hl); };
+          if (replies)
+            Recursive.applyAndAdd(hlFn, this, ...hl);
+          if (poster && this.info.uniqueID) {
+            g.posts.forEach((p) => {
+              if (p.info.uniqueID === this.info.uniqueID && p !== this) {
+                $.addClass(p.nodes.root, ...hl);
+                if (replies)
+                  Recursive.applyAndAdd(hlFn, p, ...hl);
+              }
+            });
+          }
+        }
       }
       if (noti && Unread.posts && (this.ID > Unread.lastReadPost) && !QuoteYou.isYou(this)) {
         Unread.openNotification(this, ' triggered a notification filter');
@@ -21774,7 +21891,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       Filter.addFilter('MD5', filter);
       const origin = post.origin || post;
       if (origin.isReply) {
-        PostHiding.hide(origin);
+        PostHiding.hide(origin, undefined, undefined, files.map(f => `Filtered MD5 ${f.MD5}`).join(' & '));
       } else if (g.VIEW === 'index') {
         ThreadHiding.hide(origin.thread);
       }

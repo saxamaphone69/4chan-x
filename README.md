@@ -3,6 +3,18 @@
 Originally forked from [4chan X](https://github.com/ccd0/4chan-x) for [this PR](https://github.com/ccd0/4chan-x/pull/3341),
 this fork started getting some features on its own. See the releases.
 
+New features include:
+
+- Fetching the thread from an external archive and inserting deleted posts
+- Basic audio posts support
+- Automatically converting unsupported image files to png
+- Automatically JPG'ing image files above the size limit
+- Having both relative time and a timestamp on a post at the same time
+- Counting poster ID's as a replacement of the deleted IP counter
+- Hiding all posts from a poster ID in a thread
+- A manifest v3 version for chromium browsers dropping support for v2
+- A button to un-randomize a filename in the quick reply
+
 The 4chan XT project is a migration of 4chan X from coffeescript to TypeScript/JavaScript. It is named XT both as a
 continuation of eXTended, and a T for TypeScript. The goals of this project is to first get a working bundle from js/ts
 files, and then gradually convert js files to ts and add types as needed.
@@ -54,7 +66,7 @@ The simplest build is as easy as `npm install` `npm run build`, but there are so
     - I moved these to a new file called helpers.ts, which shouldn't have dependencies itself
 - tsconfig.json has `"checkJs": true,`, and a lot of js files report type errors when opened because of unknown
   properties on objects and reassigning variables with different types. These errors don't block the bundle at this moment.
-- the es 2020 target was choses for optional chaining
+- the es 2020 target was chosen for optional chaining
 - @violentmonkey/types was chosen over @types/greasemonkey because @types/greasemonkey only declares the GM object,
   and not GM\_ functions
 

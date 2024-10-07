@@ -199,9 +199,10 @@ var PostHiding = {
         PostHiding.hideRecursive(post, makeStub);
       }
       if (byId) {
+        const msg = `Hidden because of poster ID ${post.info.uniqueID}`;
         g.posts.forEach((p) => {
           if (p.info.uniqueID === post.info.uniqueID && p !== post) {
-            PostHiding.hide(p, makeStub, replies);
+            PostHiding.hide(p, makeStub, replies, msg);
             PostHiding.saveHiddenState(p, true, thisPost, makeStub, replies, byId);
           }
         });
@@ -354,10 +355,7 @@ var PostHiding = {
   },
 
   hideRecursive(post: Post, makeStub: boolean) {
-    const recursiveArgs: [typeof PostHiding.hide, ...Parameters<typeof PostHiding.hide>] =
-      [PostHiding.hide, post, makeStub, true, `Hidden recursively from ${post.ID}`]
-    Recursive.apply(...recursiveArgs);
-    Recursive.add(...recursiveArgs);
+    Recursive.applyAndAdd(PostHiding.hide, post, makeStub, true, `Hidden recursively from ${post.ID}`);
   },
 
   show(post: Post, showRecursively: boolean = Conf['Recursive Hiding']) {

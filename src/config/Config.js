@@ -131,7 +131,15 @@ const Config = {
       'Enable Native Flash Embedding': [
         true,
         'Activate the native extension\'s Flash embedding if the native extension is disabled.'
-      ]
+      ],
+      'Export History': [
+        true,
+        'Export last read, your posts, etc. when exporting the setting'
+      ],
+      'Ask to Export History': [
+        true,
+        'Ask if history should be exported when settings are exported.'
+      ],
     },
 
     'Linkification': {

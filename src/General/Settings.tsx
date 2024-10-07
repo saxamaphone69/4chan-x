@@ -4,6 +4,7 @@ import SaucePage from './Settings/Sauce.html';
 import AdvancedPage from './Settings/Advanced.html';
 import KeybindsPage from './Settings/Keybinds.html';
 import FilterSelectPage from './Settings/Filter-select.html';
+import ExportDialog from './Settings/Export.html';
 import Redirect from '../Archive/Redirect';
 import Config from '../config/Config';
 import ImageHost from '../Images/ImageHost';
@@ -22,6 +23,7 @@ import Header from './Header';
 import h, { hFragment } from '../globals/jsx';
 import { dict } from '../platform/helpers';
 import Icon from '../Icons/icon';
+import UI from './UI';
 
 var Settings = {
   dialog: undefined as HTMLDivElement | undefined,
@@ -291,10 +293,64 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     $('input[name="Stubs"]', section).closest('fieldset').insertAdjacentElement('beforeend', div);
   },
 
-  export() {
+  isExportModalOpen: false,
+
+  async export() {
+    let exportHistory = Conf['Export History'];
+    let cancelled = false;
+
+    if (Conf['Ask to Export History']) {
+      if (Settings.isExportModalOpen) return;
+
+      const dialog = UI.dialog('export-dialog', { innerHTML: ExportDialog });
+      const form = $('form', dialog) as HTMLFormElement;
+      const { history, ask } = form.elements as any as { history: HTMLInputElement, ask: HTMLInputElement };
+      history.checked = Conf['Export History'];
+      $.add(d.body, dialog);
+
+      const exportBtnRect = ($('.export', Settings.dialog) as HTMLElement).getBoundingClientRect();
+      dialog.style.top = `${exportBtnRect.y + exportBtnRect.height}px`;
+      dialog.style.left = `${exportBtnRect.x}px`;
+
+      Settings.isExportModalOpen = true;
+
+      await new Promise<void>(resolve => {
+        const close = () => {
+          dialog.remove();
+          resolve();
+          Settings.isExportModalOpen = false;
+        };
+
+        $.on(form, 'submit', (e) => {
+          e.preventDefault();
+          exportHistory = history.checked
+          $.set('Export History', exportHistory);
+          $.set('Ask to Export History', ask.checked);
+          close();
+        });
+
+        $.on($('#cancel-export', dialog), 'click', () => {
+          cancelled = true;
+          close();
+        });
+      });
+
+      if (cancelled) return;
+    }
+
     // Make sure to export the most recent data, but don't overwrite existing `Conf` object.
     const Conf2 = dict();
     $.extend(Conf2, Conf);
+    if (!exportHistory) {
+      delete Conf2.hiddenThreads;
+      delete Conf2.hiddenPosts;
+      delete Conf2.hiddenPosterIds;
+      delete Conf2.lastReadPosts;
+      delete Conf2.yourPosts;
+      delete Conf2.watchedThreads;
+      delete Conf2.cooldowns;
+      delete Conf2['Index Sort'];
+    }
     $.get(Conf2, function(Conf2) {
       // Don't export cached JSON data.
       delete Conf2['boardConfig'];

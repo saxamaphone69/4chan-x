@@ -48,13 +48,26 @@ var Recursive = {
     }
   },
 
-  apply<Fn extends (post: Post, ...args: any[]) => void>(recursive: Fn, post, ...args: DropFirst<Parameters<Fn>>) {
+  apply<Fn extends (post: Post, ...args: any[]) => void>(
+    recursive: Fn,
+    post: Post,
+    ...args: DropFirst<Parameters<Fn>>
+  ) {
     const {fullID} = post;
     g.posts.forEach(function(post) {
       if (post.quotes.includes(fullID)) {
         recursive(post, ...args);
       }
     });
-  }
+  },
+
+  applyAndAdd<Fn extends (post: Post, ...args: any[]) => void>(
+    recursive: Fn,
+    post: Post,
+    ...args: DropFirst<Parameters<Fn>>
+  ) {
+    Recursive.apply(recursive, post, ...args);
+    this.add(recursive, post, ...args);
+  },
 };
 export default Recursive;

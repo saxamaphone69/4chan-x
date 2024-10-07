@@ -853,7 +853,7 @@ var Index = {
       Index.liveThreadDict[data.no] = data;
       Index.threadPosition[data.no] = i;
       Index.parsedThreads[data.no] = (obj = g.SITE.Build.parseJSON(data, g.BOARD));
-      obj.filterResults = (results = Filter.test(obj));
+      results = Filter.test(obj);
       obj.isOnTop  = results.top;
       obj.isHidden = results.hide || ThreadHiding.isHidden(obj.boardID, obj.threadID);
       if (data.last_replies) {
