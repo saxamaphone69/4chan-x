@@ -199,7 +199,7 @@ var ThreadHiding = {
       className: `${type}-thread-button`,
       href:      'javascript:;'
     });
-    $.add(a, $.el('span', { textContent: type === 'hide' ? '➖︎' : '➕︎' }));
+    $.add(a, $.el('span', { className: 'stub-icon', textContent: type === 'hide' ? '➖︎' : '➕︎' }));
     a.dataset.fullID = thread.fullID;
     $.on(a, 'click', ThreadHiding.toggle);
     return a;
@@ -212,9 +212,7 @@ var ThreadHiding = {
 
     const a = ThreadHiding.makeButton(thread, 'show');
     const { nameBlock, subject } = thread.OP.info;
-    $.add(a, $.tn(
-      ` ${subject ? subject + ' - ' : ''}${nameBlock} (${numReplies} repl${numReplies === 1 ? 'y' : 'ies'})`
-    ));
+    a.innerHTML = `${subject ? `<span class="stub-subject">${subject}</span>` : ''}<span class="stub-name">${nameBlock}</span><span class="stub-replies">(${numReplies} repl${numReplies === 1 ? 'y' : 'ies'})</span>`;
 
     let reasons = thread.OP.filterResults?.reasons || [];
     if (reason) reasons = [...reasons, reason];
