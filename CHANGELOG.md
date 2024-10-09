@@ -3,6 +3,14 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.15.1 (2024-10-09)
+
+- Fixed filter for poster ID not hiding new posts of that poster.
+- [#108 \(comment\)](https://github.com/TuxedoTako/4chan-xt/issues/108#issuecomment-2398058231)
+  - Put filter reasons in spans for easier customization with user styles.
+  - Fixed thread stubs in the index not showing the reason.
+  - Added subject to thread stubs. [ccd0#3371](https://github.com/ccd0/4chan-x/pull/3371)
+
 ### 2.15.0 (2024-10-07)
 
 - Filter updates

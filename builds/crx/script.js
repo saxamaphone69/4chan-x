@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.15.0",
-    "date": "2024-10-07T19:19:19Z"
+    "version": "2.15.1",
+    "date": "2024-10-09T11:25:00Z"
   };
 
   var meta = {
@@ -4779,6 +4779,9 @@ $site$infoRoot a.hide-reply-button {
 .stub input {
   display: inline-block;
 }
+.stub-reasons::before { content: ' ('; }
+.stub-reasons::after { content: ')'; }
+.stub-reason:not(:last-of-type)::after { content: ' & '; }
 $site$thread[hidden] + hr {
   display: none;
 }
@@ -7144,8 +7147,6 @@ svg.icon {
       setPosition() {
         const mRect   = this.menu.getBoundingClientRect();
         const bRect   = lastToggledButton.getBoundingClientRect();
-        window.scrollY + bRect.top;
-        window.scrollX + bRect.left;
         const cHeight = doc.clientHeight;
         const cWidth  = doc.clientWidth;
         const [top, bottom] = (bRect.top + bRect.height + mRect.height) < cHeight ?
@@ -9081,18 +9082,20 @@ svg.icon {
         post.nodes.root.hidden = true;
         return;
       }
-      const a = PostHiding.makeButton(post, 'show');
-      let text = ` ${post.info.nameBlock}`;
-      let r = post.filterResults?.reasons || '';
-      if (reason)
-        r = r ? `${r} & ${reason}` : reason;
-      if (Conf['Filter Reason'] && r)
-        text += ` (${r})`;
-      $.add(a, $.tn(text));
       post.nodes.stub = $.el('div', { className: 'stub' });
-      if (!Conf['Filter Reason'] && r)
-        post.nodes.stub.title = r;
+      const a = PostHiding.makeButton(post, 'show');
+      $.add(a, $.tn(` ${post.info.nameBlock}`));
+      let reasons = post.filterResults?.reasons || [];
+      if (reason)
+        reasons = [...reasons, reason];
+      if (Conf['Filter Reason'] && reasons.length) {
+        const reasonsSpan = $.el('span', { className: 'stub-reasons' });
+        $.add(reasonsSpan, reasons.map(re => $.el('span', { className: 'stub-reason', textContent: re })));
+        a.appendChild(reasonsSpan);
+      }
       $.add(post.nodes.stub, a);
+      if (!Conf['Filter Reason'] && reasons)
+        post.nodes.stub.title = reasons.join(' & ');
       if (Conf['Menu']) {
         $.add(post.nodes.stub, Menu.makeButton(post));
       }
@@ -13398,7 +13401,7 @@ svg.icon {
       }
 
       if (data = ThreadHiding.db.get({boardID: this.board.ID, threadID: this.ID})) {
-        return ThreadHiding.hide(this.thread, data.makeStub);
+        ThreadHiding.hide(this.thread, data.makeStub, 'Hidden manually');
       }
     },
 
@@ -13406,7 +13409,7 @@ svg.icon {
       return g.BOARD.threads.forEach(function(thread) {
         const {root} = thread.nodes;
         if (thread.isHidden && thread.stub && !root.contains(thread.stub)) {
-          return ThreadHiding.makeStub(thread, root);
+          ThreadHiding.makeStub(thread, root);
         }
       });
     },
@@ -13484,7 +13487,7 @@ svg.icon {
       hide() {
         const makeStub = $('input', this.parentNode).checked;
         const {thread} = ThreadHiding.menu;
-        ThreadHiding.hide(thread, makeStub);
+        ThreadHiding.hide(thread, makeStub, 'Hidden manually');
         ThreadHiding.saveHiddenState(thread, makeStub);
         return $.event('CloseMenu');
       },
@@ -13516,20 +13519,34 @@ svg.icon {
       return a;
     },
 
-    makeStub(thread, root) {
+    makeStub(thread, root, reason) {
       let summary, threadDivider;
       let numReplies  = $$(g.SITE.selectors.replyOriginal, root).length;
       if (summary = $(g.SITE.selectors.summary, root)) { numReplies += +summary.textContent.match(/\d+/); }
 
       const a = ThreadHiding.makeButton(thread, 'show');
-      $.add(a, $.tn(` ${thread.OP.info.nameBlock} (${numReplies === 1 ? '1 reply' : `${numReplies} replies`})`));
-      thread.stub = $.el('div',
-        {className: 'stub'});
+      const { nameBlock, subject } = thread.OP.info;
+      $.add(a, $.tn(
+        ` ${subject ? subject + ' - ' : ''}${nameBlock} (${numReplies} repl${numReplies === 1 ? 'y' : 'ies'})`
+      ));
+
+      let reasons = thread.OP.filterResults?.reasons || [];
+      if (reason) reasons = [...reasons, reason];
+
+      if (Conf['Filter Reason'] && reasons.length) {
+        const reasonsSpan = $.el('span', { className: 'stub-reasons' });
+        $.add(reasonsSpan, reasons.map(re => $.el('span', { className: 'stub-reason', textContent: re })));
+        a.appendChild(reasonsSpan);
+      }
+
+      thread.stub = $.el('div', {className: 'stub'});
+
       if (Conf['Menu']) {
         $.add(thread.stub, [a, Menu.makeButton(thread.OP)]);
       } else {
         $.add(thread.stub, a);
       }
+      if (!Conf['Filter Reason'] && reasons) thread.stub.title = reasons.join(' & ');
       $.prepend(root, thread.stub);
 
       // Prevent hiding of thread divider on sites that put it inside the thread
@@ -13560,12 +13577,12 @@ svg.icon {
       if (thread.isHidden) {
         ThreadHiding.show(thread);
       } else {
-        ThreadHiding.hide(thread);
+        ThreadHiding.hide(thread, undefined, 'Hidden manually');
       }
       return ThreadHiding.saveHiddenState(thread);
     },
 
-    hide(thread, makeStub=Conf['Stubs']) {
+    hide(thread, makeStub=Conf['Stubs'], reason) {
       if (thread.isHidden) { return; }
       const threadRoot = thread.nodes.root;
       thread.isHidden = true;
@@ -13577,7 +13594,7 @@ svg.icon {
 
       if (!makeStub) { return threadRoot.hidden = true; }
 
-      return ThreadHiding.makeStub(thread, threadRoot);
+      ThreadHiding.makeStub(thread, threadRoot, reason);
     },
 
     show(thread) {
@@ -21262,29 +21279,30 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       for (var key in Config.filter) {
         for (var line of Conf[key].split('\n')) {
           let hl;
-          let isstring;
           let regexp;
           let top;
-          let types;
-          let hide;
+          let hide = true;
+          let mask = 0;
+          let boards = false;
+          let excludes = false;
+          let reason;
+          let poster = false;
+          let replies = false;
+          let noti = false;
+          let stub = Conf.Stubs;
           if (line[0] === '#')
             continue;
-          if (!(regexp = line.match(/\/(.*)\/(\w*)/))) {
+          const regexpMatch = line.match(/\/(.*)\/(\w*)/);
+          if (!regexpMatch) {
             continue;
           }
-          // Don't mix up filter flags with the regular expression.
-          var filter = line.replace(regexp[0], '');
-          // List of the boards this filter applies to.
-          var boards = this.parseBoards(filter.match(/(?:^|;)\s*boards:([^;]+)/)?.[1]);
-          // Boards to exclude from an otherwise global rule.
-          var excludes = this.parseBoards(filter.match(/(?:^|;)\s*exclude:([^;]+)/)?.[1]);
-          if (isstring = (['uniqueID', 'MD5'].includes(key))) {
+          if (key === 'uniqueID' || key === 'MD5') {
             // MD5 filter will use strings instead of regular expressions.
-            regexp = regexp[1];
+            regexp = regexpMatch[1];
           } else {
             try {
               // Please, don't write silly regular expressions.
-              regexp = RegExp(regexp[1], regexp[2]);
+              regexp = RegExp(regexpMatch[1], regexpMatch[2]);
             } catch (err) {
               // I warned you, bro.
               new Notice('warning', [
@@ -21297,51 +21315,54 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
               continue;
             }
           }
-          // Filter OPs along with their threads or replies only.
-          var op = filter.match(/(?:^|;)\s*op:(no|only)/)?.[1] || '';
-          var mask = $.getOwn({ 'no': 1, 'only': 2 }, op) || 0;
-          // Filter only posts with/without files.
-          var file = filter.match(/(?:^|;)\s*file:(no|only)/)?.[1] || '';
-          mask = mask | ($.getOwn({ 'no': 4, 'only': 8 }, file) || 0);
-          // Overrule the `Show Stubs` setting.
-          // Defaults to stub showing.
-          var stub = (() => {
-            switch (filter.match(/(?:^|;)\s*stub:(yes|no)/)?.[1]) {
-              case 'yes':
-                return true;
-              case 'no':
-                return false;
-              default:
-                return Conf['Stubs'];
+          // Don't mix up filter flags with the regular expression.
+          const options = line.slice(regexpMatch[0].length);
+          if (options.length) {
+            // List of the boards this filter applies to.
+            boards = this.parseBoards(options.match(/(?:^|;)\s*boards:([^;]+)/)?.[1]);
+            // Boards to exclude from an otherwise global rule.
+            excludes = this.parseBoards(options.match(/(?:^|;)\s*exclude:([^;]+)/)?.[1]);
+            // Filter OPs along with their threads or replies only.
+            const op = options.match(/(?:^|;)\s*op:(no|only)/)?.[1] || '';
+            mask = $.getOwn({ 'no': 1, 'only': 2 }, op) || 0;
+            // Filter only posts with/without files.
+            const file = options.match(/(?:^|;)\s*file:(no|only)/)?.[1] || '';
+            mask = mask | ($.getOwn({ 'no': 4, 'only': 8 }, file) || 0);
+            // Overrule the `Show Stubs` setting.
+            // Defaults to stub showing.
+            stub = (() => {
+              switch (options.match(/(?:^|;)\s*stub:(yes|no)/)?.[1]) {
+                case 'yes':
+                  return true;
+                case 'no':
+                  return false;
+                default:
+                  return Conf['Stubs'];
+              }
+            })();
+            // Desktop notification
+            noti = /(?:^|;)\s*notify/.test(options);
+            // Highlight the post.
+            // If not specified, the highlight class will be filter-highlight.
+            const highlightRes = options.match(/(?:^|;)\s*highlight(?::([\w-]+))?/);
+            if (highlightRes) {
+              hl = highlightRes[1] || 'filter-highlight';
+              // Put highlighted OP's thread on top of the board page or not.
+              // Defaults to on top.
+              top = (options.match(/(?:^|;)\s*top:(yes|no)/)?.[1] || 'yes') === 'yes';
+              hide = /(?:^|;)\s*hide(?:[;:]|$)/.test(options);
             }
-          })();
-          // Desktop notification
-          var noti = /(?:^|;)\s*notify/.test(filter);
-          // Highlight the post.
-          // If not specified, the highlight class will be filter-highlight.
-          const highlightRes = filter.match(/(?:^|;)\s*highlight(?::([\w-]+))?/);
-          if (highlightRes) {
-            hl = highlightRes[1] || 'filter-highlight';
-            // Put highlighted OP's thread on top of the board page or not.
-            // Defaults to on top.
-            top = (filter.match(/(?:^|;)\s*top:(yes|no)/)?.[1] || 'yes') === 'yes';
-            hide = /(?:^|;)\s*hide(?:[;:]|$)/.test(filter);
+            // Hide the post (default case).
+            hide = hide || !(hl || noti);
+            reason = options.match(/(?:^|;)\s*reason:([^;$]+)/)?.[1];
+            poster = /(?:^|;)\s*poster(?:[;:]|$)/.test(options);
+            replies = /(?:^|;)\s*replies(?:[;:]|$)/.test(options);
           }
+          const filterObj = { regexp, boards, excludes, mask, hide, stub, hl, top, noti, reason, poster, replies };
           // Fields that this filter applies to (for 'general' filters)
           if (key === 'general') {
-            if (types = filter.match(/(?:^|;)\s*type:([^;]*)/)) {
-              types = types[1].split(',');
-            } else {
-              types = ['subject', 'name', 'filename', 'comment'];
-            }
-          }
-          // Hide the post (default case).
-          hide = hide || !(hl || noti);
-          const reason = filter.match(/(?:^|;)\s*reason:([^;$]+)/)?.[1];
-          const poster = /(?:^|;)\s*poster(?:[;:]|$)/.test(filter);
-          const replies = /(?:^|;)\s*replies(?:[;:]|$)/.test(filter);
-          const filterObj = { isstring, regexp, boards, excludes, mask, hide, stub, hl, top, noti, reason, poster, replies };
-          if (key === 'general') {
+            const types = options.match(/(?:^|;)\s*type:([^;]*)/)?.[1].split(',')
+              || ['subject', 'name', 'filename', 'comment'];
             for (var type of types) {
               this.filters.get(type)?.push(filterObj) ?? this.filters.set(type, [filterObj]);
             }
@@ -21429,11 +21450,12 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           const filtersForType = Array.isArray(filtersOrMap) ? filtersOrMap : filtersOrMap.get(value);
           if (!filtersForType)
             continue;
+          const isString = type === 'uniqueID' || type === 'MD5';
           for (const filter of filtersForType) {
             if ((filter.boards && !(filter.boards[board] || filter.boards[site])) ||
               (filter.excludes && (filter.excludes[board] || filter.excludes[site])) ||
               (filter.mask & mask) ||
-              (filter.isstring ? (filter.regexp !== value) : !filter.regexp.test(value)))
+              (isString ? (filter.regexp !== value) : !filter.regexp.test(value)))
               continue;
             if (filter.hide) {
               if (hideable) {
@@ -21444,7 +21466,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
                 }
               }
             }
-            if (!hl?.includes(filter.hl)) {
+            if (filter.hl && !hl?.includes(filter.hl)) {
               (hl || (hl = [])).push(filter.hl);
             }
             if (!top) {
@@ -21459,7 +21481,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           }
         }
       }
-      post.filterResults = { hide, stub, hl, top, noti, poster, replies, reasons: reasons?.join(' & ') };
+      post.filterResults = { hide, stub, hl, top, noti, poster, replies, reasons };
       return post.filterResults;
     },
     node() {
@@ -21468,6 +21490,30 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         (!this.isReply && !this.thread.nodes.root))
         return;
       const { hide, stub, hl, noti, poster, replies } = Filter.test(this, (!this.isFetchedQuote && (this.isReply || (g.VIEW === 'index'))));
+      // Add temporary filter for the poster ID for future posts.
+      let reason;
+      if (poster && this.info.uniqueID) {
+        reason = `Hidden because it's the same poster as ${this.ID} (${this.filterResults.reasons})`;
+        const { uniqueID } = this.info;
+        const newFilter = {
+          regexp: uniqueID,
+          boards: false,
+          excludes: false,
+          mask: 0,
+          hide,
+          stub,
+          replies,
+          // A filter can only have one hl class.
+          hl: hl?.[0],
+          reason,
+        };
+        const map = Filter.filters.get('uniqueID');
+        if (map) {
+          map.get(uniqueID)?.push(newFilter) ?? map.set(uniqueID, [newFilter]);
+        } else {
+          Filter.filters.set('uniqueID', (new Map()).set(uniqueID, [newFilter]));
+        }
+      }
       if (hide) {
         if (this.isReply) {
           PostHiding.hide(this, stub);
@@ -21475,7 +21521,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             Recursive.applyAndAdd(PostHiding.hide, this, stub, undefined, `Hidden recursively from ${this.ID}`);
           }
           if (poster && this.info.uniqueID) {
-            const reason = `Hidden because it's the same poster as ${this.ID} (${this.filterResults.reasons})`;
             g.posts.forEach((p) => {
               if (p.info.uniqueID === this.info.uniqueID && p !== this) {
                 PostHiding.hide(p, stub, replies, reason);

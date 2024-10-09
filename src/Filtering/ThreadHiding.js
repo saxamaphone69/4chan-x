@@ -87,7 +87,7 @@ var ThreadHiding = {
     }
 
     if (data = ThreadHiding.db.get({boardID: this.board.ID, threadID: this.ID})) {
-      return ThreadHiding.hide(this.thread, data.makeStub);
+      ThreadHiding.hide(this.thread, data.makeStub, 'Hidden manually');
     }
   },
 
@@ -95,7 +95,7 @@ var ThreadHiding = {
     return g.BOARD.threads.forEach(function(thread) {
       const {root} = thread.nodes;
       if (thread.isHidden && thread.stub && !root.contains(thread.stub)) {
-        return ThreadHiding.makeStub(thread, root);
+        ThreadHiding.makeStub(thread, root);
       }
     });
   },
@@ -173,7 +173,7 @@ var ThreadHiding = {
     hide() {
       const makeStub = $('input', this.parentNode).checked;
       const {thread} = ThreadHiding.menu;
-      ThreadHiding.hide(thread, makeStub);
+      ThreadHiding.hide(thread, makeStub, 'Hidden manually');
       ThreadHiding.saveHiddenState(thread, makeStub);
       return $.event('CloseMenu');
     },
@@ -205,20 +205,34 @@ var ThreadHiding = {
     return a;
   },
 
-  makeStub(thread, root) {
+  makeStub(thread, root, reason) {
     let summary, threadDivider;
     let numReplies  = $$(g.SITE.selectors.replyOriginal, root).length;
     if (summary = $(g.SITE.selectors.summary, root)) { numReplies += +summary.textContent.match(/\d+/); }
 
     const a = ThreadHiding.makeButton(thread, 'show');
-    $.add(a, $.tn(` ${thread.OP.info.nameBlock} (${numReplies === 1 ? '1 reply' : `${numReplies} replies`})`));
-    thread.stub = $.el('div',
-      {className: 'stub'});
+    const { nameBlock, subject } = thread.OP.info;
+    $.add(a, $.tn(
+      ` ${subject ? subject + ' - ' : ''}${nameBlock} (${numReplies} repl${numReplies === 1 ? 'y' : 'ies'})`
+    ));
+
+    let reasons = thread.OP.filterResults?.reasons || [];
+    if (reason) reasons = [...reasons, reason];
+
+    if (Conf['Filter Reason'] && reasons.length) {
+      const reasonsSpan = $.el('span', { className: 'stub-reasons' });
+      $.add(reasonsSpan, reasons.map(re => $.el('span', { className: 'stub-reason', textContent: re })));
+      a.appendChild(reasonsSpan);
+    }
+
+    thread.stub = $.el('div', {className: 'stub'});
+
     if (Conf['Menu']) {
       $.add(thread.stub, [a, Menu.makeButton(thread.OP)]);
     } else {
       $.add(thread.stub, a);
     }
+    if (!Conf['Filter Reason'] && reasons) thread.stub.title = reasons.join(' & ');
     $.prepend(root, thread.stub);
 
     // Prevent hiding of thread divider on sites that put it inside the thread
@@ -249,12 +263,12 @@ var ThreadHiding = {
     if (thread.isHidden) {
       ThreadHiding.show(thread);
     } else {
-      ThreadHiding.hide(thread);
+      ThreadHiding.hide(thread, undefined, 'Hidden manually');
     }
     return ThreadHiding.saveHiddenState(thread);
   },
 
-  hide(thread, makeStub=Conf['Stubs']) {
+  hide(thread, makeStub=Conf['Stubs'], reason) {
     if (thread.isHidden) { return; }
     const threadRoot = thread.nodes.root;
     thread.isHidden = true;
@@ -266,7 +280,7 @@ var ThreadHiding = {
 
     if (!makeStub) { return threadRoot.hidden = true; }
 
-    return ThreadHiding.makeStub(thread, threadRoot);
+    ThreadHiding.makeStub(thread, threadRoot, reason);
   },
 
   show(thread) {

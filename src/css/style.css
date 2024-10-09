@@ -1487,6 +1487,9 @@ $site$infoRoot a.hide-reply-button {
 .stub input {
   display: inline-block;
 }
+.stub-reasons::before { content: ' ('; }
+.stub-reasons::after { content: ')'; }
+.stub-reason:not(:last-of-type)::after { content: ' & '; }
 $site$thread[hidden] + hr {
   display: none;
 }

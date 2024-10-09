@@ -117,8 +117,6 @@ var Menu = (function() {
     setPosition() {
       const mRect   = this.menu.getBoundingClientRect();
       const bRect   = lastToggledButton.getBoundingClientRect();
-      const bTop    = window.scrollY + bRect.top;
-      const bLeft   = window.scrollX + bRect.left;
       const cHeight = doc.clientHeight;
       const cWidth  = doc.clientWidth;
       const [top, bottom] = (bRect.top + bRect.height + mRect.height) < cHeight ?

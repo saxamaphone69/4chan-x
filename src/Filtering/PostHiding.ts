@@ -338,16 +338,21 @@ var PostHiding = {
       return;
     }
 
+    post.nodes.stub = $.el('div', { className: 'stub' });
     const a = PostHiding.makeButton(post, 'show');
-    let text = ` ${post.info.nameBlock}`;
-    let r = post.filterResults?.reasons || '';
-    if (reason) r = r ? `${r} & ${reason}` : reason;
-    if (Conf['Filter Reason'] && r) text += ` (${r})`;
-    $.add(a, $.tn(text));
-    post.nodes.stub = $.el('div',
-      {className: 'stub'});
-    if (!Conf['Filter Reason'] && r) post.nodes.stub.title = r;
+    $.add(a, $.tn(` ${post.info.nameBlock}`));
+
+    let reasons = post.filterResults?.reasons || [];
+    if (reason) reasons = [...reasons, reason];
+    if (Conf['Filter Reason'] && reasons.length) {
+      const reasonsSpan = $.el('span', { className: 'stub-reasons' });
+      $.add(reasonsSpan, reasons.map(re => $.el('span', { className: 'stub-reason', textContent: re })));
+      a.appendChild(reasonsSpan);
+    }
+
     $.add(post.nodes.stub, a);
+
+    if (!Conf['Filter Reason'] && reasons) post.nodes.stub.title = reasons.join(' & ');
     if (Conf['Menu']) {
       $.add(post.nodes.stub, Menu.makeButton(post));
     }
