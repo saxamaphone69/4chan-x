@@ -272,6 +272,7 @@ var PostHiding = {
 
   makeButton(post, type) {
     const span = $.el('span', {
+      className: 'stub-icon',
       textContent: type === 'hide' ? '➖︎' : '➕︎',
     });
     const a = $.el('a', {
@@ -340,7 +341,7 @@ var PostHiding = {
 
     post.nodes.stub = $.el('div', { className: 'stub' });
     const a = PostHiding.makeButton(post, 'show');
-    $.add(a, $.tn(` ${post.info.nameBlock}`));
+    $.add(a, $.el('span', { className: 'stub-name', textContent: post.info.nameBlock}));
 
     let reasons = post.filterResults?.reasons || [];
     if (reason) reasons = [...reasons, reason];
