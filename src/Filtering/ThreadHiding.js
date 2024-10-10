@@ -212,8 +212,22 @@ var ThreadHiding = {
 
     const a = ThreadHiding.makeButton(thread, 'show');
     const { nameBlock, subject } = thread.OP.info;
-    a.innerHTML = `${subject ? `<span class="stub-subject">${subject}</span>` : ''}<span class="stub-name">${nameBlock}</span><span class="stub-replies">(${numReplies} repl${numReplies === 1 ? 'y' : 'ies'})</span>`;
-
+    
+    if (subject) {
+      $.add(a, $.el('span', {
+        className: 'stub-subject',
+        textContent: subject
+      }))
+    }
+    $.add(a, $.el('span', {
+      className: 'stub-name',
+      textContent: nameBlock
+    }))
+    $.add(a, $.el('span', {
+      className: 'stub-replies',
+      textContent: `(${numReplies} repl${numReplies === 1 ? 'y' : 'ies'})`
+    }))
+    
     let reasons = thread.OP.filterResults?.reasons || [];
     if (reason) reasons = [...reasons, reason];
 
