@@ -1487,6 +1487,13 @@ $site$infoRoot a.hide-reply-button {
 .stub input {
   display: inline-block;
 }
+.stub-icon,
+.stub-subject {
+  margin-right: 1ch;
+}
+.stub-replies {
+  margin-left: 1ch;
+}
 .stub-reasons::before { content: ' ('; }
 .stub-reasons::after { content: ')'; }
 .stub-reason:not(:last-of-type)::after { content: ' & '; }
