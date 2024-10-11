@@ -86,8 +86,7 @@ const PageContextFunctions = {
     }
   },
 
-  initTinyBoard: () => {
-    let { boardID, threadID } = this;
+  initTinyBoard: ({ boardID, threadID }) => {
     threadID = +threadID;
     const form = document.querySelector<HTMLFormElement>('form[name="post"]');
     (window as any).$(document).ajaxComplete(function (event, request, settings) {

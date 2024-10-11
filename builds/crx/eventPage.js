@@ -73,8 +73,7 @@ const PageContextFunctions = {
       node.removeEventListener('click', window.idClick, false);
     }
   },
-  initTinyBoard: () => {
-    let { boardID, threadID } = undefined;
+  initTinyBoard: ({ boardID, threadID }) => {
     threadID = +threadID;
     const form = document.querySelector('form[name="post"]');
     window.$(document).ajaxComplete(function (event, request, settings) {

@@ -178,12 +178,7 @@ var Embedding = {
     const cb = function() {
       for (data of queue) { Embedding.cb.title(this, data); }
     };
-    return CrossOrigin.cache(service.api((() => {
-      const result = [];
-      for (data of queue) {         result.push(data.uid);
-      }
-      return result;
-    })()), cb);
+    return CrossOrigin.cache(service.api(queue.map(data => data.uid)), cb);
   },
 
   preview(data) {

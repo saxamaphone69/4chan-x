@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.15.1
+// @version      2.15.2
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -15,13 +15,11 @@
 // @include      https://erischan.org/*
 // @include      https://www.erischan.org/*
 // @include      https://fufufu.moe/*
-// @include      https://gnfos.com/*
-// @include      https://himasugi.blog/*
-// @include      https://www.himasugi.blog/*
 // @include      https://kakashinenpo.com/*
 // @include      https://www.kakashinenpo.com/*
 // @include      https://kissu.moe/*
 // @include      https://www.kissu.moe/*
+// @include      https://original.kissu.moe/*
 // @include      https://lainchan.org/*
 // @include      https://www.lainchan.org/*
 // @include      https://merorin.com/*

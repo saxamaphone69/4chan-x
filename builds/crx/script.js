@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.15.1",
-    "date": "2024-10-09T11:25:00Z"
+    "version": "2.15.2",
+    "date": "2024-10-11T15:05:00Z"
   };
 
   var meta = {
@@ -1572,8 +1572,7 @@ https://*.hcaptcha.com
         node.removeEventListener('click', window.idClick, false);
       }
     },
-    initTinyBoard: () => {
-      let { boardID, threadID } = undefined;
+    initTinyBoard: ({ boardID, threadID }) => {
       threadID = +threadID;
       const form = document.querySelector('form[name="post"]');
       window.$(document).ajaxComplete(function (event, request, settings) {
@@ -4778,6 +4777,13 @@ $site$infoRoot a.hide-reply-button {
 }
 .stub input {
   display: inline-block;
+}
+.stub-icon,
+.stub-subject {
+  margin-right: 1ch;
+}
+.stub-replies {
+  margin-left: 1ch;
 }
 .stub-reasons::before { content: ' ('; }
 .stub-reasons::after { content: ')'; }
@@ -9035,6 +9041,7 @@ svg.icon {
     },
     makeButton(post, type) {
       const span = $.el('span', {
+        className: 'stub-icon',
         textContent: type === 'hide' ? '➖︎' : '➕︎',
       });
       const a = $.el('a', {
@@ -9084,7 +9091,7 @@ svg.icon {
       }
       post.nodes.stub = $.el('div', { className: 'stub' });
       const a = PostHiding.makeButton(post, 'show');
-      $.add(a, $.tn(` ${post.info.nameBlock}`));
+      $.add(a, $.el('span', { className: 'stub-name', textContent: post.info.nameBlock }));
       let reasons = post.filterResults?.reasons || [];
       if (reason)
         reasons = [...reasons, reason];
@@ -13513,7 +13520,7 @@ svg.icon {
         className: `${type}-thread-button`,
         href:      'javascript:;'
       });
-      $.add(a, $.el('span', { textContent: type === 'hide' ? '➖︎' : '➕︎' }));
+      $.add(a, $.el('span', { className: 'stub-icon', textContent: type === 'hide' ? '➖︎' : '➕︎' }));
       a.dataset.fullID = thread.fullID;
       $.on(a, 'click', ThreadHiding.toggle);
       return a;
@@ -13526,9 +13533,21 @@ svg.icon {
 
       const a = ThreadHiding.makeButton(thread, 'show');
       const { nameBlock, subject } = thread.OP.info;
-      $.add(a, $.tn(
-        ` ${subject ? subject + ' - ' : ''}${nameBlock} (${numReplies} repl${numReplies === 1 ? 'y' : 'ies'})`
-      ));
+
+      if (subject) {
+        $.add(a, $.el('span', {
+          className: 'stub-subject',
+          textContent: subject
+        }));
+      }
+      $.add(a, $.el('span', {
+        className: 'stub-name',
+        textContent: nameBlock
+      }));
+      $.add(a, $.el('span', {
+        className: 'stub-replies',
+        textContent: `(${numReplies} repl${numReplies === 1 ? 'y' : 'ies'})`
+      }));
 
       let reasons = thread.OP.filterResults?.reasons || [];
       if (reason) reasons = [...reasons, reason];
@@ -15017,13 +15036,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           Embedding.cb.title(this, data);
         }
       };
-      return CrossOrigin$1.cache(service.api((() => {
-        const result = [];
-        for (data of queue) {
-          result.push(data.uid);
-        }
-        return result;
-      })()), cb);
+      return CrossOrigin$1.cache(service.api(queue.map(data => data.uid)), cb);
     },
     preview(data) {
       let service;

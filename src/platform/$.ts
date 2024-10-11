@@ -691,16 +691,11 @@ if (platform === 'crx') {
       if (!(keys instanceof Array)) {
         keys = [keys];
       }
-      return Promise.all((() => {
-        const result = [];
-        for (key of keys) {         result.push(GM.deleteValue(g.NAMESPACE + key));
-        }
-        return result;
-      })()).then(function() {
+      Promise.all(keys.map(key => GM.deleteValue(g.NAMESPACE + key))).then(function() {
         const items = dict();
-        for (key of keys) { items[key] = undefined; }
+        for (key of keys) items[key] = undefined;
         $.syncChannel.postMessage(items);
-        return cb?.();
+        cb?.();
       });
     };
 
