@@ -110,9 +110,9 @@ var Filter = {
         }
 
         // Don't mix up filter flags with the regular expression.
-        const options = line.slice(regexpMatch[0].length);
+        const options = line.length > regexpMatch[0].length ? line.replace(regexpMatch[0], '') : '';
 
-        if (options.length) {
+        if (options) {
 
           // List of the boards this filter applies to.
           boards = this.parseBoards(options.match(/(?:^|;)\s*boards:([^;]+)/)?.[1]);

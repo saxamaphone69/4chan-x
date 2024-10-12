@@ -3,9 +3,14 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.15.3 (2024-10-12)
+
+- Fixed parsing of filter entries where options are used before the regex.
+  [#112](https://github.com/TuxedoTako/4chan-xt/issues/112)
+
 ### 2.15.2 (2024-10-11)
 
-- Added discernible classes and names to stubs [#111](https://github.com/TuxedoTako/4chan-xt/pull/111)
+- Added discernible classes and names to stubs. [#111](https://github.com/TuxedoTako/4chan-xt/pull/111)
 - Removed alt-chans that no longer exist from the `@include` list.
 
 ### 2.15.1 (2024-10-09)

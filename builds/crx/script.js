@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.15.2",
-    "date": "2024-10-11T15:05:00Z"
+    "version": "2.15.3",
+    "date": "2024-10-12T14:55:00Z"
   };
 
   var meta = {
@@ -21329,8 +21329,8 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             }
           }
           // Don't mix up filter flags with the regular expression.
-          const options = line.slice(regexpMatch[0].length);
-          if (options.length) {
+          const options = line.length > regexpMatch[0].length ? line.replace(regexpMatch[0], '') : '';
+          if (options) {
             // List of the boards this filter applies to.
             boards = this.parseBoards(options.match(/(?:^|;)\s*boards:([^;]+)/)?.[1]);
             // Boards to exclude from an otherwise global rule.

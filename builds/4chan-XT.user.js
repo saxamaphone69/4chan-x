@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.15.2
+// @version      2.15.3
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -168,8 +168,8 @@
   'use strict';
 
   var version = {
-    "version": "2.15.2",
-    "date": "2024-10-11T15:05:00Z"
+    "version": "2.15.3",
+    "date": "2024-10-12T14:55:00Z"
   };
 
   var meta = {
@@ -19213,6 +19213,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
                   response = JSON.parse(xhr.responseText);
                 } catch (error) {
                   console.error(error);
+                  console.error(xhr);
                 }
               }
               $.extend(req, {
@@ -21558,8 +21559,8 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             }
           }
           // Don't mix up filter flags with the regular expression.
-          const options = line.slice(regexpMatch[0].length);
-          if (options.length) {
+          const options = line.length > regexpMatch[0].length ? line.replace(regexpMatch[0], '') : '';
+          if (options) {
             // List of the boards this filter applies to.
             boards = this.parseBoards(options.match(/(?:^|;)\s*boards:([^;]+)/)?.[1]);
             // Boards to exclude from an otherwise global rule.

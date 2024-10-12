@@ -178,6 +178,7 @@ var CrossOrigin = {
                 response = JSON.parse(xhr.responseText);
               } catch (error) {
                 console.error(error);
+                console.error(xhr);
               }
             }
             $.extend(req, {
