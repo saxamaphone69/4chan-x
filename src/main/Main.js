@@ -104,6 +104,8 @@ import Test from "../General/Test";
  */
 var Main = {
   init() {
+    // Return if the url is exactly https://www.4chan.org, this is only the home page which has a cloudflare checking system which breaks this script
+    if (window.location.hostname == 'www.4chan.org') { return; }
     // XXX dwb userscripts extension reloads scripts run at document-start when replaceState/pushState is called.
     // XXX Firefox reinjects WebExtension content scripts when extension is updated / reloaded.
     let key;
