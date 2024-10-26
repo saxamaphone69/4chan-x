@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.16.0 (2024-10-26)
+
+- Split post functionality in the quick reply, thanks to [@paradox460](https://github.com/paradox460).
+  [#116](https://github.com/TuxedoTako/4chan-xt/pull/116)
+
 ### 2.15.4 (2024-10-19)
 
 - Do not run on the home page, to fix the cloudflare error. [#113](https://github.com/TuxedoTako/4chan-xt/pull/113)
