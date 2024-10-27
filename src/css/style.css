@@ -1487,7 +1487,7 @@ $site$infoRoot a.hide-reply-button {
 .stub input {
   display: inline-block;
 }
-.stub-icon,
+.stub .stub-icon,
 .stub-subject {
   margin-right: 1ch;
 }
