@@ -3,6 +3,14 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.17.0 (2024-11-10)
+
+- Tweak stub-icon CSS to undo increased padding. [#117](https://github.com/TuxedoTako/4chan-xt/pull/117)
+- Update x.com embed regex to include FxTwitter, VxTwitter, and nitter links.
+  [#123](https://github.com/TuxedoTako/4chan-xt/pull/123)
+- Thread Watcher: Prune Read Dead Threads and Open Unread Dead Threads.
+  [#122](https://github.com/TuxedoTako/4chan-xt/issues/122)
+
 ### 2.16.0 (2024-10-26)
 
 - Split post functionality in the quick reply, thanks to [@paradox460](https://github.com/paradox460).

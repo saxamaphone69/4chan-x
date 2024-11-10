@@ -186,35 +186,45 @@ var ThreadWatcher = {
 
   cb: {
     openAll() {
-      if ($.hasClass(this, 'disabled')) { return; }
+      if ($.hasClass(this, 'disabled')) return;
       for (var a of $$('a.watcher-link', ThreadWatcher.list)) {
         $.open(a.href);
       }
-      return $.event('CloseMenu');
+      $.event('CloseMenu');
     },
     openUnread() {
-      if ($.hasClass(this, 'disabled')) { return; }
+      if ($.hasClass(this, 'disabled')) return;
       for (var a of $$('.replies-unread > a.watcher-link', ThreadWatcher.list)) {
         $.open(a.href);
       }
-      return $.event('CloseMenu');
+      $.event('CloseMenu');
     },
     openDeads() {
-      if ($.hasClass(this, 'disabled')) { return; }
-      for (var a of $$('.dead-thread > a.watcher-link', ThreadWatcher.list)) {
+      if ($.hasClass(this, 'disabled')) return;
+      for (var a of $$('.dead-thread.replies-unread > a.watcher-link', ThreadWatcher.list)) {
         $.open(a.href);
       }
-      return $.event('CloseMenu');
+      $.event('CloseMenu');
     },
     pruneDeads() {
-      if ($.hasClass(this, 'disabled')) { return; }
+      if ($.hasClass(this, 'disabled')) return;
       for (var {siteID, boardID, threadID, data} of ThreadWatcher.getAll()) {
         if (data.isDead) {
           ThreadWatcher.db.delete({siteID, boardID, threadID});
         }
       }
       ThreadWatcher.refresh();
-      return $.event('CloseMenu');
+      $.event('CloseMenu');
+    },
+    pruneReadDeads() {
+      if ($.hasClass(this, 'disabled')) return;
+      for (var { siteID, boardID, threadID, data } of ThreadWatcher.getAll()) {
+        if (data.isDead && !data.unread) {
+          ThreadWatcher.db.delete({ siteID, boardID, threadID });
+        }
+      }
+      ThreadWatcher.refresh();
+      $.event('CloseMenu');
     },
     dismiss() {
       for (var {siteID, boardID, threadID, data} of ThreadWatcher.getAll()) {
@@ -222,26 +232,26 @@ var ThreadWatcher = {
           ThreadWatcher.update(siteID, boardID, threadID, {dismiss: data.quotingYou || 0});
         }
       }
-      return $.event('CloseMenu');
+      $.event('CloseMenu');
     },
     toggle() {
       const {thread} = Get.postFromNode(this);
-      return ThreadWatcher.toggle(thread);
+      ThreadWatcher.toggle(thread);
     },
     rm() {
       const {siteID} = this.parentNode.dataset;
       const [boardID, threadID] = this.parentNode.dataset.fullID.split('.');
-      return ThreadWatcher.rm(siteID, boardID, +threadID);
+      ThreadWatcher.rm(siteID, boardID, +threadID);
     },
     post(e) {
       const {boardID, threadID, postID} = e.detail;
       const cb = PostRedirect.delay();
       if (postID === threadID) {
         if (Conf['Auto Watch']) {
-          return ThreadWatcher.addRaw(boardID, threadID, {}, cb);
+          ThreadWatcher.addRaw(boardID, threadID, {}, cb);
         }
       } else if (Conf['Auto Watch Reply']) {
-        return ThreadWatcher.add((g.threads.get(boardID + '.' + threadID) || new Thread(threadID, g.boards[boardID] || new Board(boardID))), cb);
+        ThreadWatcher.add((g.threads.get(boardID + '.' + threadID) || new Thread(threadID, g.boards[boardID] || new Board(boardID))), cb);
       }
     },
     onIndexUpdate(e) {
@@ -576,8 +586,7 @@ var ThreadWatcher = {
     const x = $.el('a', {
       textContent: '✕',
       href: 'javascript:;'
-    }
-    );
+    });
     $.on(x, 'click', ThreadWatcher.cb.rm);
 
     let {excerpt, isArchived} = data;
@@ -588,15 +597,13 @@ var ThreadWatcher = {
       href: g.sites[siteID]?.urls.thread({siteID, boardID, threadID}, isArchived) || '',
       title: excerpt,
       className: 'watcher-link'
-    }
-    );
+    });
 
     if (Conf['Show Page'] && (data.page != null)) {
       page = $.el('span', {
         textContent: `[${data.page}]`,
         className: 'watcher-page'
-      }
-      );
+      });
       $.add(link, page);
     }
 
@@ -604,16 +611,14 @@ var ThreadWatcher = {
       const count = $.el('span', {
         textContent: `(${data.unread})`,
         className: 'watcher-unread'
-      }
-      );
+      });
       $.add(link, count);
     }
 
     const title = $.el('span', {
       textContent: excerpt,
       className: 'watcher-title'
-    }
-    );
+    });
     $.add(link, title);
 
     const div = $.el('div');
@@ -848,24 +853,30 @@ var ThreadWatcher = {
         }
       });
 
-      // `Open dead threads` entry
+      const toggleDisabledDead = function () {
+        this.el.classList.toggle('disabled', !$('.dead-thread', ThreadWatcher.list));
+        return true;
+      };
+
+      // `Open unread dead threads` entry
       entries.push({
-        text: 'Open dead threads',
+        text: 'Open unread dead threads',
         cb: ThreadWatcher.cb.openDeads,
-        open() {
-          this.el.classList.toggle('disabled', !$('.dead-thread', ThreadWatcher.list));
-          return true;
-        }
+        open: toggleDisabledDead,
       });
 
-      // `Prune dead threads` entry
+      // `Prune all dead threads` entry
       entries.push({
-        text: 'Prune dead threads',
+        text: 'Prune all dead threads',
         cb: ThreadWatcher.cb.pruneDeads,
-        open() {
-          this.el.classList.toggle('disabled', !$('.dead-thread', ThreadWatcher.list));
-          return true;
-        }
+        open: toggleDisabledDead,
+      });
+
+      // `Prune read dead threads` entry
+      entries.push({
+        text: 'Prune read dead threads',
+        cb: ThreadWatcher.cb.pruneReadDeads,
+        open: toggleDisabledDead,
       });
 
       // `Dismiss posts quoting you` entry
@@ -884,8 +895,7 @@ var ThreadWatcher = {
           el: $.el('a', {
             textContent: text,
             href: 'javascript:;'
-          }
-          )
+          })
         };
         if (title) { entry.el.title = title; }
         $.on(entry.el, 'click', cb);

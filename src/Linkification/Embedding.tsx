@@ -588,7 +588,8 @@ var Embedding = {
     }
     , {
       key: 'Twitter',
-      regExp: /^\w+:\/\/(?:www\.|mobile\.)?(?:(?:fx|vx)?twitter|(?:fixup|fixv)?x|twittpr)\.com\/(\w+\/status\/\d+)/,
+      regExp:
+        /^\w+:\/\/(?:www\.|mobile\.)?(?:(?:(?:fx|vx)?twitter|(?:fixup|fixv)?x|twittpr|xcancel)\.com|nitter\.\w+.\w+)\/(\w+\/status\/\d+)/,
       style: 'border: none; width: 550px; height: 250px; overflow: hidden; resize: both;',
       el(a) {
         if (Conf.XEmbedder === 'tf') {
