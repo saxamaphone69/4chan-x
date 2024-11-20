@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.17.0
+// @version      2.18.0
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -169,8 +169,8 @@
   'use strict';
 
   var version = {
-    "version": "2.17.0",
-    "date": "2024-11-10T18:28:00Z"
+    "version": "2.18.0",
+    "date": "2024-11-20T18:50:00Z"
   };
 
   var meta = {
@@ -275,7 +275,7 @@
         }
       }
 
-      if (errors) { return Main$1.handleErrors(errors); }
+      if (errors) { return Main.handleErrors(errors); }
     }
   }
   Callbacks.initClass();
@@ -1810,6 +1810,7 @@ https://*.hcaptcha.com
   };
 
   // loosely follows the jquery api:
+  // http://api.jquery.com/
   // not chainable
   const $ = (selector, root = document.body) => root.querySelector(selector);
   $.id = id => d.getElementById(id);
@@ -6628,7 +6629,7 @@ svg.icon {
     init() {
       if ((g.SITE.software !== 'yotsuba') || (d.cookie.indexOf('pass_enabled=1') >= 0)) { return; }
 
-      if (Conf['Force Noscript Captcha'] && Main$1.jsEnabled) {
+      if (Conf['Force Noscript Captcha'] && Main.jsEnabled) {
         $.ready(this.noscript);
         return;
       }
@@ -7329,7 +7330,7 @@ svg.icon {
           try {
             if (!entry.open(data)) { return; }
           } catch (err) {
-            Main$1.handleErrors({
+            Main.handleErrors({
               message: `Error in building the ${this.type} menu.`,
               error: err
             });
@@ -9216,7 +9217,7 @@ svg.icon {
       };
       if (isHiding) {
         data.val = {
-          thisPost: thisPost !== false,
+          thisPost: thisPost !== false, // undefined -> true
           makeStub,
           hideRecursively,
           byId
@@ -9290,7 +9291,7 @@ svg.icon {
     init() {
       if ((['index', 'thread', 'archive'].includes(g.VIEW) &&
         ['Show', 'Both', 'BothRelativeFirst'].includes(Conf.RelativeTime)) ||
-        Index$1.enabled) {
+        Index.enabled) {
         this.flush();
         $.on(d, 'visibilitychange PostsInserted', this.flush);
       }
@@ -10198,7 +10199,7 @@ svg.icon {
             }
           }
         }
-        return ThreadWatcher$1.update(g.SITE.ID, Unread.thread.board.ID, Unread.thread.ID, {
+        return ThreadWatcher.update(g.SITE.ID, Unread.thread.board.ID, Unread.thread.ID, {
           last: Unread.thread.lastPost,
           isDead: Unread.thread.isDead,
           isArchived: Unread.thread.isArchived,
@@ -10315,7 +10316,7 @@ svg.icon {
         if ('file' in Get.postFromRoot(reply)) { filesCount++; }
         $.rm(reply);
       }
-      if (Index$1.enabled) { // otherwise handled by Main.addPosts
+      if (Index.enabled) { // otherwise handled by Main.addPosts
         $.event('PostsRemoved', null, a.parentNode);
       }
       a.textContent = g.SITE.Build.summaryText('+', postsCount, filesCount);
@@ -10349,7 +10350,7 @@ svg.icon {
         posts.push(post);
         postsRoot.push(root);
       }
-      Main$1.callbackNodes('Post', posts);
+      Main.callbackNodes('Post', posts);
       $.after(a, postsRoot);
       $.event('PostsInserted', null, a.parentNode);
 
@@ -10390,7 +10391,7 @@ svg.icon {
         boardID: this.board.ID,
         threadID: this.ID
       }) || 0;
-      if (!Index$1.enabled) { // let onIndexRefresh handle JSON Index
+      if (!Index.enabled) { // let onIndexRefresh handle JSON Index
         return UnreadIndex.update(this);
       }
     },
@@ -10408,7 +10409,7 @@ svg.icon {
     },
 
     onPostsInserted(e) {
-      if (e.target === Index$1.root) { return; } // onIndexRefresh handles this case
+      if (e.target === Index.root) { return; } // onIndexRefresh handles this case
       const thread = Get.threadFromNode(e.target);
       if (!thread || (thread.nodes.root !== e.target)) { return; }
       const wasVisible = !!UnreadIndex.hr[thread.fullID]?.parentNode;
@@ -10463,7 +10464,7 @@ svg.icon {
 
       const hasUnread = repliesShown ?
         firstUnread || !repliesRead
-      : Index$1.enabled ?
+      : Index.enabled ?
         thread.lastPost > lastReadPost
       :
         thread.OP.ID > lastReadPost;
@@ -10496,7 +10497,7 @@ svg.icon {
       });
       $.rm(UnreadIndex.hr[thread.fullID]);
       thread.nodes.root.classList.remove('unread-thread');
-      return ThreadWatcher$1.update(g.SITE.ID, thread.board.ID, thread.ID, {
+      return ThreadWatcher.update(g.SITE.ID, thread.board.ID, thread.ID, {
         last: thread.lastPost,
         unread: 0,
         quotingYou: 0
@@ -10562,7 +10563,7 @@ svg.icon {
       ThreadWatcher.fetchAuto();
       $.on(window, 'visibilitychange focus', () => $.queueTask(ThreadWatcher.fetchAuto));
 
-      if (Conf['Menu'] && Index$1.enabled) {
+      if (Conf['Menu'] && Index.enabled) {
         Menu.menu.addEntry({
           el: $.el('a', {
             href:      'javascript:;',
@@ -10649,7 +10650,7 @@ svg.icon {
     }, // Also on mousedown to prevent highlighting thumbnail in Firefox.
 
     addDialog() {
-      if (!Main$1.isThisPageLegit()) { return; }
+      if (!Main.isThisPageLegit()) { return; }
       ThreadWatcher.build();
       return $.prepend(d.body, ThreadWatcher.dialog);
     },
@@ -10776,7 +10777,7 @@ svg.icon {
         }
         return cb.apply(this, args);
       };
-      const ajax = siteID === g.SITE.ID ? $.ajax : CrossOrigin$1.ajax;
+      const ajax = siteID === g.SITE.ID ? $.ajax : CrossOrigin.ajax;
       if (force) {
         delete $.lastModified.ThreadWatcher?.[url];
       }
@@ -11405,7 +11406,6 @@ svg.icon {
       }
     }
   };
-  var ThreadWatcher$1 = ThreadWatcher;
 
   const parseArchivePost = (data) => {
     // https://github.com/eksopl/asagi/blob/v0.4.0b74/src/main/java/net/easymodo/asagi/YotsubaAbstract.java#L82-L129
@@ -11471,11 +11471,11 @@ svg.icon {
       if (thumb_link?.[0] === '/') {
         thumb_link = url.split('/', 3).join('/') + thumb_link;
       }
-      if (!Redirect$1.securityCheck(thumb_link)) {
+      if (!Redirect.securityCheck(thumb_link)) {
         thumb_link = '';
       }
-      let media_link = Redirect$1.to('file', { boardID: o.boardID, filename: data.media.media_orig });
-      if (!Redirect$1.securityCheck(media_link)) {
+      let media_link = Redirect.to('file', { boardID: o.boardID, filename: data.media.media_orig });
+      if (!Redirect.securityCheck(media_link)) {
         media_link = '';
       }
       o.file = {
@@ -11512,7 +11512,7 @@ svg.icon {
     if (post.file) {
       post.file.thumbURL = o.file.thumbURL;
     }
-    Main$1.callbackNodes('Post', [post]);
+    Main.callbackNodes('Post', [post]);
     return post;
   };
 
@@ -11881,14 +11881,14 @@ svg.icon {
 
   const RestoreDeletedFromArchive = {
     restore() {
-      const url = Redirect$1.to('threadJSON', { boardID: g.boardID, threadID: g.threadID });
+      const url = Redirect.to('threadJSON', { boardID: g.boardID, threadID: g.threadID });
       if (!url) {
         new Notice('warning', 'No archive found', 3);
         return;
       }
       const encryptionOK = url.startsWith('https://');
       if (encryptionOK || Conf['Exempt Archives from Encryption']) {
-        CrossOrigin$1.ajax(url, { onloadend() {
+        CrossOrigin.ajax(url, { onloadend() {
             if (this.status < 200 || this.status >= 400) {
               const domain = E(new URL(url).origin);
               new Notice('error', $.el('div', {
@@ -11980,10 +11980,10 @@ svg.icon {
         return;
       }
       // 4chan X catalog data
-      if ((post = Index$1.replyData?.[`${this.boardID}.${this.postID}`]) && (thread = g.threads.get(`${this.boardID}.${this.threadID}`))) {
+      if ((post = Index.replyData?.[`${this.boardID}.${this.postID}`]) && (thread = g.threads.get(`${this.boardID}.${this.threadID}`))) {
         const board = g.boards[this.boardID];
         post = new Post(g.SITE.Build.postFromObject(post, this.boardID), thread, board, { isFetchedQuote: true });
-        Main$1.callbackNodes('Post', [post]);
+        Main.callbackNodes('Post', [post]);
         this.insert(post);
         return;
       }
@@ -12006,7 +12006,7 @@ svg.icon {
         this.quoter = post;
       }
       const clone = post.addClone(this.quoter.context, ($.hasClass(this.root, 'dialog')));
-      Main$1.callbackNodes('Post', [clone]);
+      Main.callbackNodes('Post', [clone]);
       // Get rid of the side arrows/stubs.
       const { nodes } = clone;
       $.rmAll(nodes.root);
@@ -12087,7 +12087,7 @@ svg.icon {
       const thread = g.threads.get(`${this.boardID}.${this.threadID}`) ||
         new Thread(this.threadID, board);
       post = new Post(g.SITE.Build.postFromObject(post, this.boardID), thread, board, { isFetchedQuote: true });
-      Main$1.callbackNodes('Post', [post]);
+      Main.callbackNodes('Post', [post]);
       return this.insert(post);
     }
     archivedPost() {
@@ -12095,14 +12095,14 @@ svg.icon {
       if (!Conf['Resurrect Quotes']) {
         return false;
       }
-      if (!(url = Redirect$1.to('post', { boardID: this.boardID, postID: this.postID }))) {
+      if (!(url = Redirect.to('post', { boardID: this.boardID, postID: this.postID }))) {
         return false;
       }
-      const archive = Redirect$1.data.post[this.boardID];
+      const archive = Redirect.data.post[this.boardID];
       const encryptionOK = /^https:\/\//.test(url) || (location.protocol === 'http:');
       if (encryptionOK || Conf['Exempt Archives from Encryption']) {
         const that = this;
-        CrossOrigin$1.cache(url, function () {
+        CrossOrigin.cache(url, function () {
           if (!encryptionOK && this.response?.media) {
             const { media } = this.response;
             for (var key in media) {
@@ -12495,7 +12495,7 @@ svg.icon {
         if (timeEl.dataset.utc) { return RelativeDates.update(timeEl); }
       });
 
-      return Main$1.ready(function() {
+      return Main.ready(function() {
         let pagelist;
         if (pagelist = $('.pagelist')) {
           $.replace(pagelist, Index.pagelist);
@@ -13208,14 +13208,14 @@ svg.icon {
           });
         }
       }
-      if (errors) { Main$1.handleErrors(errors); }
+      if (errors) { Main.handleErrors(errors); }
 
       if (withReplies) {
         newPosts = newPosts.concat(Index.buildReplies(threads));
       }
 
-      Main$1.callbackNodes('Thread', newThreads);
-      Main$1.callbackNodes('Post',   newPosts);
+      Main.callbackNodes('Thread', newThreads);
+      Main.callbackNodes('Post',   newPosts);
       Index.updateHideLabel();
       $.event('IndexRefreshInternal', {threadIDs: (threads.map((t) => t.fullID)), isCatalog});
 
@@ -13251,7 +13251,7 @@ svg.icon {
         $.add(thread.nodes.root, nodes);
       }
 
-      if (errors) { Main$1.handleErrors(errors); }
+      if (errors) { Main.handleErrors(errors); }
       return posts;
     },
 
@@ -13265,7 +13265,7 @@ svg.icon {
           catalogThreads.push(new CatalogThread(root, thread));
         }
       }
-      Main$1.callbackNodes('CatalogThread', catalogThreads);
+      Main.callbackNodes('CatalogThread', catalogThreads);
     },
 
     sizeCatalogViews(threads) {
@@ -13348,7 +13348,7 @@ svg.icon {
       // Sticky threads
       Index.sortOnTop(obj => obj.isSticky);
       // Highlighted threads
-      Index.sortOnTop(obj => obj.isOnTop || (Conf['Pin Watched Threads'] && ThreadWatcher$1.isWatchedRaw(obj.boardID, obj.threadID)));
+      Index.sortOnTop(obj => obj.isOnTop || (Conf['Pin Watched Threads'] && ThreadWatcher.isWatchedRaw(obj.boardID, obj.threadID)));
       // Non-hidden threads
       if (Conf['Anchor Hidden Threads']) { return Index.sortOnTop(obj => !Index.isHidden(obj.threadID)); }
     },
@@ -13500,7 +13500,6 @@ svg.icon {
       return true;
     }
   };
-  var Index$1 = Index;
 
   var ThreadHiding = {
     init() {
@@ -13531,7 +13530,7 @@ svg.icon {
     catalogWatch() {
       if (!$.hasStorage || (g.SITE.software !== 'yotsuba')) { return; }
       this.hiddenThreads = JSON.parse(localStorage.getItem(`4chan-hide-t-${g.BOARD}`)) || {};
-      return Main$1.ready(() => // 4chan's catalog sets the style to "display: none;" when hiding or unhiding a thread.
+      return Main.ready(() => // 4chan's catalog sets the style to "display: none;" when hiding or unhiding a thread.
       new MutationObserver(ThreadHiding.catalogSave).observe($.id('threads'), {
         attributes: true,
         subtree: true,
@@ -13771,10 +13770,10 @@ svg.icon {
       if (thread.isHidden) { return; }
       const threadRoot = thread.nodes.root;
       thread.isHidden = true;
-      Index$1.updateHideLabel();
-      if (thread.catalogView && !Index$1.showHiddenThreads) {
+      Index.updateHideLabel();
+      if (thread.catalogView && !Index.showHiddenThreads) {
         $.rm(thread.catalogView.nodes.root);
-        $.event('PostsRemoved', null, Index$1.root);
+        $.event('PostsRemoved', null, Index.root);
       }
 
       if (!makeStub) { return threadRoot.hidden = true; }
@@ -13789,22 +13788,22 @@ svg.icon {
       }
       const threadRoot = thread.nodes.root;
       threadRoot.hidden = (thread.isHidden = false);
-      Index$1.updateHideLabel();
+      Index.updateHideLabel();
       if (thread.catalogView) {
         const { root } = thread.catalogView.nodes;
 
-        if (Index$1.showHiddenThreads) {
+        if (Index.showHiddenThreads) {
           $.rm(root);
-          $.event('PostsRemoved', null, Index$1.root);
+          $.event('PostsRemoved', null, Index.root);
         } else {
-          let i = Index$1.sortedThreadIDs.indexOf(thread.ID) - 1;
+          let i = Index.sortedThreadIDs.indexOf(thread.ID) - 1;
 
           while (true) {
             if (i < 0) {
               $('.board').insertAdjacentElement('afterbegin', root);
               break;
             }
-            const rootPrevious = d.getElementById(`t${Index$1.sortedThreadIDs[i]}`);
+            const rootPrevious = d.getElementById(`t${Index.sortedThreadIDs[i]}`);
             if (rootPrevious) {
               rootPrevious.insertAdjacentElement('afterend', root);
               break;
@@ -13812,7 +13811,7 @@ svg.icon {
             --i;
           }
 
-          $.event('PostsInserted', null, Index$1.root);
+          $.event('PostsInserted', null, Index.root);
         }
       }
     }
@@ -14120,7 +14119,7 @@ svg.icon {
               Gallery.nodes.total.textContent = Gallery.images.length;
             }
 
-            if (!Conf['Image Expansion'] && ((g.SITE.software !== 'tinyboard') || !Main$1.jsEnabled)) {
+            if (!Conf['Image Expansion'] && ((g.SITE.software !== 'tinyboard') || !Main.jsEnabled)) {
               result.push($.on(file.thumbLink, 'click', Gallery.cb.image));
             } else {
               result.push(undefined);
@@ -14878,7 +14877,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
   function EmbedFxTwitter(a) {
     const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
     const shouldTranslate = Conf.fxtLang ? `/${Conf.fxtLang}` : '';
-    CrossOrigin$1.cachePromise(`${Conf.fxtUrl}/${a.dataset.uid}${shouldTranslate}`).then(async (req) => {
+    CrossOrigin.cachePromise(`${Conf.fxtUrl}/${a.dataset.uid}${shouldTranslate}`).then(async (req) => {
       if (req.status === 404) {
         el.textContent = '404: tweet not found';
         return;
@@ -14893,7 +14892,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         let replies = [];
         replies.push(tweet);
         for (let i = 0; i < max_replies; i++) {
-          const replyReq = await CrossOrigin$1.cachePromise(`https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${shouldTranslate}`);
+          const replyReq = await CrossOrigin.cachePromise(`https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${shouldTranslate}`);
           const replyRes = replyReq.response;
           replies.push(replyRes.tweet);
           if (!replyRes.tweet?.replying_to_status) {
@@ -15147,7 +15146,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       }
     },
     ready() {
-      if (!Main$1.isThisPageLegit()) {
+      if (!Main.isThisPageLegit()) {
         return;
       }
       $.addClass(Embedding.dialog, 'empty');
@@ -15191,7 +15190,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           return Embedding.flushTitles(service);
         }
       } else {
-        return CrossOrigin$1.cache(service.api(uid), (function () { return Embedding.cb.title(this, data); }));
+        return CrossOrigin.cache(service.api(uid), (function () { return Embedding.cb.title(this, data); }));
       }
     },
     flushTitles(service) {
@@ -15206,7 +15205,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           Embedding.cb.title(this, data);
         }
       };
-      return CrossOrigin$1.cache(service.api(queue.map(data => data.uid)), cb);
+      return CrossOrigin.cache(service.api(queue.map(data => data.uid)), cb);
     },
     preview(data) {
       let service;
@@ -15432,7 +15431,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
               hidden: true,
               id: `gist-embed-${counter++}`
             });
-            CrossOrigin$1.cache(`https://api.github.com/gists/${a.dataset.uid}`, function () {
+            CrossOrigin.cache(`https://api.github.com/gists/${a.dataset.uid}`, function () {
               el.textContent = Object.values(this.response.files)[0].content;
               el.className = 'prettyprint';
               $.global('prettyPrint', { id: el.id });
@@ -15756,7 +15755,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       $.on(this.status, 'click', this.update);
       const updateLink = $.el('span', { className: 'brackets-wrap updatelink' });
       $.extend(updateLink, { innerHTML: '<a href="javascript:;">Update</a>' });
-      Main$1.ready(function () {
+      Main.ready(function () {
         let navLinksBot;
         if (navLinksBot = $('.navLinksBot')) {
           return $.add(navLinksBot, [$.tn(' '), updateLink]);
@@ -16084,7 +16083,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         ThreadUpdater.outdateCount = 0;
         const unreadCount = Unread.posts?.size;
         const unreadQYCount = Unread.postsQuotingYou?.size;
-        Main$1.callbackNodes('Post', posts);
+        Main.callbackNodes('Post', posts);
         if (d.hidden || !d.hasFocus()) {
           if (Conf['Beep Quoting You'] && (Unread.postsQuotingYou?.size > unreadQYCount)) {
             ThreadUpdater.playBeep();
@@ -16259,24 +16258,24 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
               ThreadUpdater.update();
               break;
             case 'index':
-              if (!Index$1.enabled) { return; }
-              Index$1.update();
+              if (!Index.enabled) { return; }
+              Index.update();
               break;
             default:
               return;
           }
           break;
         case Conf['Watch']:
-          if (!ThreadWatcher$1.enabled || !thread) { return; }
-          ThreadWatcher$1.toggle(thread);
+          if (!ThreadWatcher.enabled || !thread) { return; }
+          ThreadWatcher.toggle(thread);
           break;
         case Conf['Update thread watcher']:
-          if (!ThreadWatcher$1.enabled) { return; }
-          ThreadWatcher$1.buttonFetchAll();
+          if (!ThreadWatcher.enabled) { return; }
+          ThreadWatcher.buttonFetchAll();
           break;
         case Conf['Toggle thread watcher']:
-          if (!ThreadWatcher$1.enabled) { return; }
-          ThreadWatcher$1.toggleWatcher();
+          if (!ThreadWatcher.enabled) { return; }
+          ThreadWatcher.toggleWatcher();
           break;
         case Conf['Toggle threading']:
           if (!QuoteThreading.ready) { return; }
@@ -16310,8 +16309,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           break;
         // Board Navigation
         case Conf['Front page']:
-          if (Index$1.enabled) {
-            Index$1.userPageNav(1);
+          if (Index.enabled) {
+            Index.userPageNav(1);
           } else {
             location.href = `/${g.BOARD}/`;
           }
@@ -16321,26 +16320,26 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           break;
         case Conf['Next page']:
           if ((g.VIEW !== 'index') || !!g.SITE.isOnePage?.(g.BOARD)) { return; }
-          if (Index$1.enabled) {
+          if (Index.enabled) {
             if (!['paged', 'infinite'].includes(Conf['Index Mode'])) { return; }
-            $('.next button', Index$1.pagelist).click();
+            $('.next button', Index.pagelist).click();
           } else {
             $(g.SITE.selectors.nav.next)?.click();
           }
           break;
         case Conf['Previous page']:
           if ((g.VIEW !== 'index') || !!g.SITE.isOnePage?.(g.BOARD)) { return; }
-          if (Index$1.enabled) {
+          if (Index.enabled) {
             if (!['paged', 'infinite'].includes(Conf['Index Mode'])) { return; }
-            $('.prev button', Index$1.pagelist).click();
+            $('.prev button', Index.pagelist).click();
           } else {
             $(g.SITE.selectors.nav.prev)?.click();
           }
           break;
         case Conf['Search form']:
           if (g.VIEW !== 'index') { return; }
-          var searchInput = Index$1.enabled ?
-            Index$1.searchInput
+          var searchInput = Index.enabled ?
+            Index.searchInput
           : g.SITE.selectors.searchBox ?
             $(g.SITE.selectors.searchBox)
           :
@@ -16350,15 +16349,15 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           searchInput.focus();
           break;
         case Conf['Paged mode']:
-          if (!Index$1.enabledOn(g.BOARD)) { return; }
+          if (!Index.enabledOn(g.BOARD)) { return; }
           location.href = g.VIEW === 'index' ? '#paged' : `/${g.BOARD}/#paged`;
           break;
         case Conf['Infinite scrolling mode']:
-          if (!Index$1.enabledOn(g.BOARD)) { return; }
+          if (!Index.enabledOn(g.BOARD)) { return; }
           location.href = g.VIEW === 'index' ? '#infinite' : `/${g.BOARD}/#infinite`;
           break;
         case Conf['All pages mode']:
-          if (!Index$1.enabledOn(g.BOARD)) { return; }
+          if (!Index.enabledOn(g.BOARD)) { return; }
           location.href = g.VIEW === 'index' ? '#all-pages' : `/${g.BOARD}/#all-pages`;
           break;
         case Conf['Open catalog']:
@@ -16366,8 +16365,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           location.href = catalog;
           break;
         case Conf['Cycle sort type']:
-          if (!Index$1.enabled) { return; }
-          Index$1.cycleSortType();
+          if (!Index.enabled) { return; }
+          Index.cycleSortType();
           break;
         // Thread Navigation
         case Conf['Next thread']:
@@ -16716,7 +16715,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         if (d.cookie.indexOf('pass_enabled=1') >= 0) { return; }
         if (!(this.isEnabled = !!$('#g-recaptcha, #captcha-forced-noscript') || !$.id('postForm'))) { return; }
 
-        if (this.noscript = Conf['Force Noscript Captcha'] || !Main$1.jsEnabled) {
+        if (this.noscript = Conf['Force Noscript Captcha'] || !Main.jsEnabled) {
           $.addClass(QR.nodes.el, 'noscript-captcha');
         }
 
@@ -16961,8 +16960,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     hasFocus: false,
     req: undefined,
     selected: undefined,
-    mimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/vnd.adobe.flash.movie', 'application/x-shockwave-flash', 'video/webm'],
-    validExtension: /\.(jpe?g|png|gif|pdf|swf|webm)$/i,
+    mimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/vnd.adobe.flash.movie', 'application/x-shockwave-flash', 'video/webm', 'video/mp4'],
+    validExtension: /\.(jpe?g|png|gif|pdf|swf|webm|mp4)$/i,
     typeFromExtension: {
       'jpg': 'image/jpeg',
       'jpeg': 'image/jpeg',
@@ -16970,7 +16969,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       'gif': 'image/gif',
       'pdf': 'application/pdf',
       'swf': 'application/vnd.adobe.flash.movie',
-      'webm': 'video/webm'
+      'webm': 'video/webm',
+      'mp4': 'video/mp4'
     },
     extensionFromType: {
       'image/jpeg': 'jpg',
@@ -16979,7 +16979,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       'application/pdf': 'pdf',
       'application/vnd.adobe.flash.movie': 'swf',
       'application/x-shockwave-flash': 'swf',
-      'video/webm': 'webm'
+      'video/webm': 'webm',
+      'video/mp4': 'mp4'
     },
     init() {
       let sc;
@@ -17104,7 +17105,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           QR.dialog();
         } catch (err) {
           delete QR.nodes;
-          Main$1.handleErrors({
+          Main.handleErrors({
             message: 'Quick Reply dialog creation crashed.',
             error: err
           });
@@ -17444,7 +17445,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     dragOver(e) {
       e.preventDefault();
       return e.dataTransfer.dropEffect = 'copy';
-    },
+    }, // cursor feedback
     dropFile(e) {
       // Let it only handle files from the desktop.
       if (!e.dataTransfer.files.length) {
@@ -17505,12 +17506,12 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
     handleUrl(urlDefault) {
       QR.open();
       QR.selected.preventAutoPost();
-      CrossOrigin$1.permission(function () {
+      CrossOrigin.permission(function () {
         const url = prompt('Enter a URL:', urlDefault);
         if (!url)
           return;
         QR.nodes.fileButton.focus();
-        CrossOrigin$1.file(url, function (blob) {
+        CrossOrigin.file(url, function (blob) {
           if (blob && !/^text\//.test(blob.type)) {
             QR.handleFiles([blob]);
           } else {
@@ -18131,7 +18132,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       seconds: 0,
       delays: {
         deletion: 60
-      },
+      }, // cooldown for deleting posts/files
       // set in setup
       maxDelay: 0,
       isSetup: false,
@@ -18395,7 +18396,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           QR.quote.call(post.nodes.post);
           const { isVideo } = post.file;
           const currentTime = post.file.fullImage?.currentTime || 0;
-          return CrossOrigin$1.file(post.file.url, function (blob) {
+          return CrossOrigin.file(post.file.url, function (blob) {
             if (!blob) {
               QR.error("Can't load file.");
             } else if (isVideo) {
@@ -19323,7 +19324,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       return cb();
     },
   };
-  var CrossOrigin$1 = CrossOrigin;
 
   var ImageCommon = {
     // Pause and mute video in preparation for removing the element from the document.
@@ -19378,12 +19378,12 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       const src = fileObj.url.split('/');
       let url = null;
       if ((g.SITE.software === 'yotsuba') && Conf['404 Redirect']) {
-        url = Redirect$1.to('file', {
+        url = Redirect.to('file', {
           boardID:  post.board.ID,
           filename: src[src.length - 1]
         });
       }
-      if (!url || !Redirect$1.securityCheck(url)) { url = null; }
+      if (!url || !Redirect.securityCheck(url)) { url = null; }
 
       if ((post.isDead || fileObj.isDead) && !ImageCommon.isFromArchive(file)) { return cb(url); }
 
@@ -19435,7 +19435,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       if (this.protocol === 'blob:') { return true; }
       e.preventDefault();
       const {href, download} = this;
-      return CrossOrigin$1.file(href, function(blob) {
+      return CrossOrigin.file(href, function(blob) {
         if (blob) {
           const a = $.el('a', {
             href: URL.createObjectURL(blob),
@@ -19527,7 +19527,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
 
     archive() {
       let match, urls;
-      if (!(urls = Redirect$1.report(g.BOARD.ID)).length) { return; }
+      if (!(urls = Redirect.report(g.BOARD.ID)).length) { return; }
 
       const form    = $('form');
       const types   = $.id('reportTypes');
@@ -19844,7 +19844,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       },
       comment: '.postMessage',
       spoiler: 's',
-      quotelink: ':not(pre) > .quotelink',
+      quotelink: ':not(pre) > .quotelink', // XXX https://github.com/4chan/4chan-JS/issues/77: 4chan currently creates quote links inside [code] tags; ignore them
       catalog: {
         board: '#threads',
         thread: '.thread',
@@ -19932,7 +19932,7 @@ $\
             } else if (match = location.search.match(/\bres=(\d+)/)) {
               $.ready(function () {
                 if (Conf['404 Redirect'] && ($.id('errmsg')?.textContent === 'Error: Specified thread does not exist.')) {
-                  return Redirect$1.navigate('thread', {
+                  return Redirect.navigate('thread', {
                     boardID: g.BOARD.ID,
                     postID: +match[1]
                   });
@@ -20478,7 +20478,7 @@ $\
         const s = (this.selectors = Object.create(this.selectors));
         s.boardFor = {index: '.page-container'};
         s.thread = 'div[id^="thread_"]';
-        return Main$1.mounted(cb);
+        return Main.mounted(cb);
       } else {
         return cb();
       }
@@ -20918,7 +20918,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       },
       ads(cb) {
         $.onExists(doc, '.adg-rects > .desktop', ad => $.onExists(ad, 'iframe', function () {
-          const url = Redirect$1.to('thread', { boardID: 'qa', threadID: 362590 });
+          const url = Redirect.to('thread', { boardID: 'qa', threadID: 362590 });
           cb($.el('li', h(hFragment, null,
             "To protect yourself from ",
             h("a", { href: url, target: "_blank" }, "malicious ads"),
@@ -21335,7 +21335,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       }
       $.get(itemsArchive, function (itemsArchive) {
         $.extend(Conf, itemsArchive);
-        Redirect$1.selectArchives();
+        Redirect.selectArchives();
         Settings.addArchiveTable(section);
       });
       const boardSelect = $('#archive-board-select', section);
@@ -21345,7 +21345,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         $('tbody > :not([hidden])', table).hidden = true;
         $(`tbody > .${this.value}`, table).hidden = false;
       });
-      $.on(updateArchives, 'click', () => Redirect$1.update(() => Settings.addArchiveTable(section)));
+      $.on(updateArchives, 'click', () => Redirect.update(() => Settings.addArchiveTable(section)));
       $.on(inputs.beepVolume, 'change', () => { ThreadUpdater.playBeep(false); });
       $.on(inputs.beepSource, 'change', () => { ThreadUpdater.playBeep(false); });
     },
@@ -21457,7 +21457,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         (selectedArchives[this.dataset.boardid] || (selectedArchives[this.dataset.boardid] = dict()))[this.dataset.type] = JSON.parse(this.value);
         $.set('selectedArchives', selectedArchives);
         Conf['selectedArchives'] = selectedArchives;
-        Redirect$1.selectArchives();
+        Redirect.selectArchives();
       });
     },
     boardnav() {
@@ -22177,7 +22177,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
 
     parseURL(url) {
       const siteID = Site.resolve(url);
-      return Main$1.parseURL(g.sites[siteID], url);
+      return Main.parseURL(g.sites[siteID], url);
     },
 
     set(hostname) {
@@ -22335,7 +22335,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       let external, nativeCatalog;
       if (Conf['External Catalog'] && (external = CatalogLinks.external(board))) {
         return external;
-      } else if (Index$1.enabledOn(board) && Conf[`Use ${meta.name} Catalog`]) {
+      } else if (Index.enabledOn(board) && Conf[`Use ${meta.name} Catalog`]) {
         return CatalogLinks.jsonIndex(board, '#catalog');
       } else if (nativeCatalog = Get.url('catalog', board)) {
         return nativeCatalog;
@@ -22345,7 +22345,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     },
 
     index(board=g.BOARD) {
-      if (Index$1.enabledOn(board)) {
+      if (Index.enabledOn(board)) {
         return CatalogLinks.jsonIndex(board, '#index');
       } else {
         return Get.url('index', board);
@@ -22356,7 +22356,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
   var Header = {
     init() {
       $.onExists(doc, 'body', () => {
-        if (!Main$1.isThisPageLegit()) {
+        if (!Main.isThisPageLegit()) {
           return;
         }
         $.add(this.bar, [this.noticesRoot, this.toggle]);
@@ -22430,7 +22430,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       $.on(d, 'CreateNotification', this.createNotification);
       this.setBoardList();
       $.onExists(doc, `${g.SITE.selectors.boardList} + *`, Header.generateFullBoardList);
-      Main$1.ready(function () {
+      Main.ready(function () {
         let footer;
         if ((g.SITE.software === 'yotsuba') && !(footer = $.id('boardNavDesktopFoot'))) {
           let absbot;
@@ -22640,7 +22640,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         }
       }
       if (/-archive/.test(t)) {
-        if (href = Redirect$1.to('board', { boardID })) {
+        if (href = Redirect.to('board', { boardID })) {
           a.href = href;
         } else {
           return a.firstChild; // Its text node.
@@ -23194,7 +23194,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             }
             load(i).call({ status: 200, response });
           } else {
-            CrossOrigin$1.ajax(url, { onloadend: load(i) });
+            CrossOrigin.ajax(url, { onloadend: load(i) });
           }
         }
       } else {
@@ -23341,7 +23341,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       }
     }
   };
-  var Redirect$1 = Redirect;
 
   class CatalogThreadNative {
     toString() { return this.ID; }
@@ -23628,7 +23627,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       $.rmClass(this.parentNode, 'error');
       $.addClass(this.parentNode, 'loading');
       const {index} = this.parentNode.dataset;
-      return CrossOrigin$1.binary(Get.postFromNode(this).files[+index].url, data => {
+      return CrossOrigin.binary(Get.postFromNode(this).files[+index].url, data => {
         $.rmClass(this.parentNode, 'loading');
         if (data != null) {
           const title = Metadata.parse(data);
@@ -23718,7 +23717,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         el: div,
         order: 60,
         open({ID, thread, board}) {
-          return !!Redirect$1.to('thread', {postID: ID, threadID: thread.ID, boardID: board.ID});
+          return !!Redirect.to('thread', {postID: ID, threadID: thread.ID, boardID: board.ID});
         },
         subEntries: []
       };
@@ -23749,7 +23748,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
 
       const open = type === 'post' ?
         function({ID, thread, board}) {
-          el.href = Redirect$1.to('thread', {postID: ID, threadID: thread.ID, boardID: board.ID});
+          el.href = Redirect.to('thread', {postID: ID, threadID: thread.ID, boardID: board.ID});
           return true;
         }
       :
@@ -23764,7 +23763,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             Filter.values(type, post)[0];
           // We want to parse the exact same stuff as the filter does already.
           if (!value) { return false; }
-          el.href = Redirect$1.to('search', {
+          el.href = Redirect.to('search', {
             boardID:  post.board.ID,
             type:     typeParam,
             value,
@@ -24104,7 +24103,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
 
       // Let 4chan's JS load the banner if enabled; otherwise, load it ourselves.
       if (g.BOARD.ID !== 'f') {
-        return Main$1.ready(() => $.queueTask(Banner.load));
+        return Main.ready(() => $.queueTask(Banner.load));
       }
     },
 
@@ -24238,7 +24237,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     init() {
       if ((g.SITE.software !== 'yotsuba') || !['index', 'thread', 'archive'].includes(g.VIEW)) { return; }
       BoardConfig.ready(this.initBoard);
-      return Main$1.ready(this.initReady);
+      return Main.ready(this.initReady);
     },
 
     initBoard() {
@@ -24581,7 +24580,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       if ('samachan.org' in Conf['siteProperties'] && !Conf['PSAseen'].includes('samachan')) {
         el = $.el('span',
           {innerHTML: "<a href=\"https://sushigirl.us/yakuza/res/776.html\" target=\"_blank\" rel=\"noopener\">Looking for a new home?<br>Some former Samachan users are regrouping on SushiChan.</a><br>(a message from 4chan X)"});
-        return Main$1.ready(function() {
+        return Main.ready(function() {
           new Notice('info', el);
           Conf['PSAseen'].push('samachan');
           return $.set('PSAseen', Conf['PSAseen']);});
@@ -24735,7 +24734,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     init() {
       if (g.SITE.software !== 'tinyboard') { return; }
       if (g.VIEW === 'thread') {
-        return Main$1.ready(() => $.global("initTinyBoard", { boardID: g.BOARD.ID, threadID: g.THREADID.toString() }));
+        return Main.ready(() => $.global("initTinyBoard", { boardID: g.BOARD.ID, threadID: g.THREADID.toString() }));
       }
     }
   };
@@ -24995,7 +24994,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
   const PassLink = {
     init() {
       if ((g.SITE.software !== 'yotsuba') || !Conf['Pass Link']) { return; }
-      return Main$1.ready(this.ready);
+      return Main.ready(this.ready);
     },
 
     ready() {
@@ -25386,7 +25385,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       const boardID  = m[1];
       const threadID = m[2];
       const postID   = link.hash.match(/^#[pq]?(\d+)$|$/)[1] || threadID;
-      if (Redirect$1.to('post', {boardID, postID})) {
+      if (Redirect.to('post', {boardID, postID})) {
         $.addClass(link, 'quotelink');
         $.extend(link.dataset, {boardID, threadID, postID});
         return this.nodes.archivelinks.push(link);
@@ -25441,8 +25440,8 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         }
 
       } else {
-        const redirect = Redirect$1.to('thread', {boardID, threadID: 0, postID});
-        const fetchable = Redirect$1.to('post', {boardID, postID});
+        const redirect = Redirect.to('thread', {boardID, threadID: 0, postID});
+        const fetchable = Redirect.to('post', {boardID, postID});
         if (redirect || fetchable) {
           // Replace the .deadlink span if we can redirect or fetch the post.
           a = $.el('a', {
@@ -25564,7 +25563,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       }
       Conf['customTitles'] = dict.clone({'4chan.org': {boards: {'qa': {'boardTitle': {orig: '/qa/ - Question & Answer', title: '/qa/ - 2D/Random'}}}}});
       Conf['boardConfig'] = {boards: dict()};
-      Conf['archives'] = Redirect$1.archives;
+      Conf['archives'] = Redirect.archives;
       Conf['selectedArchives'] = dict();
       Conf['cooldowns'] = dict();
       Conf['Index Sort'] = dict();
@@ -25683,7 +25682,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           let video;
           if ((g.SITE.software === 'yotsuba') && Conf['404 Redirect'] && g.SITE.is404?.()) {
             const pathname = location.pathname.split(/\/+/);
-            return Redirect$1.navigate('file', {
+            return Redirect.navigate('file', {
               boardID:  g.BOARD.ID,
               filename: pathname[pathname.length - 1]
             });
@@ -25844,9 +25843,9 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     initReady() {
       if (g.SITE.is404?.()) {
         if (g.VIEW === 'thread') {
-          ThreadWatcher$1.set404(g.BOARD.ID, g.THREADID, function() {
+          ThreadWatcher.set404(g.BOARD.ID, g.THREADID, function() {
             if (Conf['404 Redirect']) {
-              return Redirect$1.navigate('thread', {
+              return Redirect.navigate('thread', {
                 boardID:  g.BOARD.ID,
                 threadID: g.THREADID,
                 postID:   +location.hash.match(/\d+/)
@@ -25869,7 +25868,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       // Parse HTML or skip it and start building from JSON.
       if (g.VIEW === 'catalog') {
         return Main.initCatalog();
-      } else if (!Index$1.enabled) {
+      } else if (!Index.enabled) {
         if (g.SITE.awaitBoard) {
           return g.SITE.awaitBoard(Main.initThread);
         } else {
@@ -26240,11 +26239,11 @@ User agent: ${navigator.userAgent}\
       ['Delay Redirect on Post',    PostRedirect],
       ['Captcha Configuration',     CaptchaReplace],
       ['Image Host Rewriting',      ImageHost],
-      ['Redirect',                  Redirect$1],
+      ['Redirect',                  Redirect],
       ['Header',                    Header],
       ['Catalog Links',             CatalogLinks],
       ['Settings',                  Settings],
-      ['Index Generator',           Index$1],
+      ['Index Generator',           Index],
       ['Disable Autoplay',          AntiAutoplay],
       ['Announcement Hiding',       PSAHiding],
       ['Fourchan thingies',         Fourchan],
@@ -26268,7 +26267,7 @@ User agent: ${navigator.userAgent}\
       ['Post Jumper',               PostJumper],
       ['Pass Link',                 PassLink],
       ['Menu',                      Menu],
-      ['Index Generator (Menu)',    Index$1.menu],
+      ['Index Generator (Menu)',    Index.menu],
       ['Report Link',               ReportLink],
       ['Copy Text Link',            CopyTextLink],
       ['Thread Hiding (Menu)',      ThreadHiding.menu],
@@ -26307,8 +26306,8 @@ User agent: ${navigator.userAgent}\
       ['Quote Threading',           QuoteThreading],
       ['Thread Stats',              ThreadStats],
       ['Thread Updater',            ThreadUpdater],
-      ['Thread Watcher',            ThreadWatcher$1],
-      ['Thread Watcher (Menu)',     ThreadWatcher$1.menu],
+      ['Thread Watcher',            ThreadWatcher],
+      ['Thread Watcher (Menu)',     ThreadWatcher.menu],
       ['Mark New IPs',              MarkNewIPs],
       ['Index Navigation',          Nav],
       ['Keybinds',                  Keybinds],
@@ -26320,9 +26319,8 @@ User agent: ${navigator.userAgent}\
       ['Restore deleted posts from archive', RestoreDeletedFromArchive],
     ]
   };
-  var Main$1 = Main;
   $.ready(() => Main.init());
 
-  return Main$1;
+  return Main;
 
 })();

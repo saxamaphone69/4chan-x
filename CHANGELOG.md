@@ -3,6 +3,12 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.18.0 (2024-11-20)
+
+- The quick reply now supports mp4. [#124](https://github.com/TuxedoTako/4chan-xt/pull/124)
+- Updated the build to rollup 4, which removed the `$1` that was added for some variables, so the diff with the previous
+  version is bigger than necessary. Now there are no more `npm audit` vulnerabilities.
+
 ### 2.17.0 (2024-11-10)
 
 - Tweak stub-icon CSS to undo increased padding. [#117](https://github.com/TuxedoTako/4chan-xt/pull/117)
