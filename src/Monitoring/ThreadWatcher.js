@@ -104,7 +104,7 @@ var ThreadWatcher = {
           if (this.cb) { $.off(this.el, 'click', this.cb); }
           this.cb = function() {
             $.event('CloseMenu');
-            return ThreadWatcher.toggle(thread);
+            return ThreadWatcher.toggle(thread, true);
           };
           $.on(this.el, 'click', this.cb);
           return true;
@@ -167,8 +167,8 @@ var ThreadWatcher = {
   catalogNode() {
     if (ThreadWatcher.isWatched(this.thread)) { $.addClass(this.nodes.root, 'watched'); }
     return $.on(this.nodes.root, 'mousedown click', e => {
-      if ((e.button !== 0) || !e.altKey) { return; }
-      if (e.type === 'click') { ThreadWatcher.toggle(this.thread); }
+      if ((e.button !== 0) || !e.altKey) return;
+      if (e.type === 'click') ThreadWatcher.toggle(this.thread, true);
       return e.preventDefault();
     });
   }, // Also on mousedown to prevent highlighting thumbnail in Firefox.
@@ -206,6 +206,16 @@ var ThreadWatcher = {
       }
       $.event('CloseMenu');
     },
+    clear() {
+      if (!confirm("Delete ALL threads from watcher?")) return;
+      const ref = ThreadWatcher.getAll();
+      for (let i = 0, len = ref.length; i < len; i++) {
+        const { siteID, boardID, threadID } = ref[i];
+        ThreadWatcher.db.delete({ siteID, boardID, threadID });
+      }
+      ThreadWatcher.refresh(true);
+      $.event('CloseMenu');
+    },
     pruneDeads() {
       if ($.hasClass(this, 'disabled')) return;
       for (var {siteID, boardID, threadID, data} of ThreadWatcher.getAll()) {
@@ -213,7 +223,7 @@ var ThreadWatcher = {
           ThreadWatcher.db.delete({siteID, boardID, threadID});
         }
       }
-      ThreadWatcher.refresh();
+      ThreadWatcher.refresh(true);
       $.event('CloseMenu');
     },
     pruneReadDeads() {
@@ -223,7 +233,7 @@ var ThreadWatcher = {
           ThreadWatcher.db.delete({ siteID, boardID, threadID });
         }
       }
-      ThreadWatcher.refresh();
+      ThreadWatcher.refresh(true);
       $.event('CloseMenu');
     },
     dismiss() {
@@ -236,22 +246,24 @@ var ThreadWatcher = {
     },
     toggle() {
       const {thread} = Get.postFromNode(this);
-      ThreadWatcher.toggle(thread);
+      ThreadWatcher.toggle(thread, true);
     },
     rm() {
       const {siteID} = this.parentNode.dataset;
       const [boardID, threadID] = this.parentNode.dataset.fullID.split('.');
-      ThreadWatcher.rm(siteID, boardID, +threadID);
+      ThreadWatcher.rm(siteID, boardID, +threadID, undefined, true);
     },
     post(e) {
       const {boardID, threadID, postID} = e.detail;
       const cb = PostRedirect.delay();
       if (postID === threadID) {
         if (Conf['Auto Watch']) {
-          ThreadWatcher.addRaw(boardID, threadID, {}, cb);
+          ThreadWatcher.addRaw(boardID, threadID, {}, cb, true);
         }
       } else if (Conf['Auto Watch Reply']) {
-        ThreadWatcher.add((g.threads.get(boardID + '.' + threadID) || new Thread(threadID, g.boards[boardID] || new Board(boardID))), cb);
+        ThreadWatcher.add(
+          (g.threads.get(boardID + '.' + threadID) || new Thread(threadID, g.boards[boardID] || new Board(boardID))),
+          cb, true);
       }
     },
     onIndexUpdate(e) {
@@ -684,7 +696,7 @@ var ThreadWatcher = {
     return ThreadWatcher.refreshIcon();
   },
 
-  refresh() {
+  refresh(manual) {
     ThreadWatcher.build();
 
     g.threads.forEach(function(thread) {
@@ -701,7 +713,7 @@ var ThreadWatcher = {
     });
 
     if (Conf['Pin Watched Threads']) {
-      return $.event('SortIndex', {deferred: Conf['Index Mode'] !== 'catalog'});
+      return $.event('SortIndex', {deferred: !(manual && Conf['Index Mode'] === 'catalog')});
     }
   },
 
@@ -752,18 +764,18 @@ var ThreadWatcher = {
     return ThreadWatcher.db.extend({boardID, threadID, val: {isDead: true, isArchived: undefined, page: undefined, lastPage: undefined, unread: undefined, quotingYou: undefined}}, cb);
   },
 
-  toggle(thread) {
+  toggle(thread, manual) {
     const siteID   = g.SITE.ID;
     const boardID  = thread.board.ID;
     const threadID = thread.ID;
     if (ThreadWatcher.db.get({boardID, threadID})) {
-      return ThreadWatcher.rm(siteID, boardID, threadID);
+      return ThreadWatcher.rm(siteID, boardID, threadID, undefined, manual);
     } else {
-      return ThreadWatcher.add(thread);
+      return ThreadWatcher.add(thread, undefined, manual);
     }
   },
 
-  add(thread, cb) {
+  add(thread, cb, manual) {
     const data     = {};
     const siteID   = g.SITE.ID;
     const boardID  = thread.board.ID;
@@ -776,16 +788,16 @@ var ThreadWatcher = {
       data.isDead = true;
     }
     if (thread.OP) { data.excerpt = Get.threadExcerpt(thread); }
-    return ThreadWatcher.addRaw(boardID, threadID, data, cb);
+    return ThreadWatcher.addRaw(boardID, threadID, data, cb, manual);
   },
 
-  addRaw(boardID, threadID, data, cb) {
+  addRaw(boardID, threadID, data, cb, manual) {
     const oldData = ThreadWatcher.db.get({ boardID, threadID, defaultValue: dict() });
     delete oldData.last;
     delete oldData.modified;
     $.extend(oldData, data);
     ThreadWatcher.db.set({boardID, threadID, val: oldData}, cb);
-    ThreadWatcher.refresh();
+    ThreadWatcher.refresh(manual);
     const thread = {siteID: g.SITE.ID, boardID, threadID, data, force: true};
     if (Conf['Show Page'] && !data.isDead) {
       return ThreadWatcher.fetchBoard([thread]);
@@ -794,9 +806,9 @@ var ThreadWatcher = {
     }
   },
 
-  rm(siteID, boardID, threadID, cb) {
+  rm(siteID, boardID, threadID, cb, manual) {
     ThreadWatcher.db.delete({siteID, boardID, threadID}, cb);
-    return ThreadWatcher.refresh();
+    return ThreadWatcher.refresh(manual);
   },
 
   menu: {
@@ -827,68 +839,71 @@ var ThreadWatcher = {
           return true;
         }
       });
-      return $.on(entryEl, 'click', () => ThreadWatcher.toggle(g.threads.get(`${g.BOARD}.${g.THREADID}`)));
+      return $.on(entryEl, 'click', () => ThreadWatcher.toggle(g.threads.get(`${g.BOARD}.${g.THREADID}`), true));
     },
 
     addMenuEntries() {
-      const entries = [];
-
-      // `Open all` entry
-      entries.push({
-        text: 'Open all threads',
-        cb: ThreadWatcher.cb.openAll,
-        open() {
-          this.el.classList.toggle('disabled', !ThreadWatcher.list.firstElementChild);
-          return true;
-        }
-      });
-
-      // `Open Unread` entry
-      entries.push({
-        text: 'Open unread threads',
-        cb: ThreadWatcher.cb.openUnread,
-        open() {
-          this.el.classList.toggle('disabled', !$('.replies-unread', ThreadWatcher.list));
-          return true;
-        }
-      });
-
       const toggleDisabledDead = function () {
         this.el.classList.toggle('disabled', !$('.dead-thread', ThreadWatcher.list));
         return true;
       };
 
-      // `Open unread dead threads` entry
-      entries.push({
-        text: 'Open unread dead threads',
-        cb: ThreadWatcher.cb.openDeads,
-        open: toggleDisabledDead,
-      });
-
-      // `Prune all dead threads` entry
-      entries.push({
-        text: 'Prune all dead threads',
-        cb: ThreadWatcher.cb.pruneDeads,
-        open: toggleDisabledDead,
-      });
-
-      // `Prune read dead threads` entry
-      entries.push({
-        text: 'Prune read dead threads',
-        cb: ThreadWatcher.cb.pruneReadDeads,
-        open: toggleDisabledDead,
-      });
-
-      // `Dismiss posts quoting you` entry
-      entries.push({
-        text: 'Dismiss posts quoting you',
-        title: 'Unhighlight the thread watcher icon and threads until there are new replies quoting you.',
-        cb: ThreadWatcher.cb.dismiss,
-        open() {
-          this.el.classList.toggle('disabled', !$.hasClass(ThreadWatcher.shortcut, 'replies-quoting-you'));
-          return true;
-        }
-      });
+      const entries = [
+        // `Open all` entry
+        {
+          text: 'Open all threads',
+          cb: ThreadWatcher.cb.openAll,
+          open() {
+            this.el.classList.toggle('disabled', !ThreadWatcher.list.firstElementChild);
+            return true;
+          }
+        },
+        {
+          text: 'Clear all threads',
+          cb: ThreadWatcher.cb.clear,
+          open() {
+            this.el.classList.toggle('disabled', !ThreadWatcher.list.firstElementChild);
+            return true;
+          }
+        },
+        // `Open Unread` entry
+        {
+          text: 'Open unread threads',
+          cb: ThreadWatcher.cb.openUnread,
+          open() {
+            this.el.classList.toggle('disabled', !$('.replies-unread', ThreadWatcher.list));
+            return true;
+          }
+        },
+        // `Open unread dead threads` entry
+        {
+          text: 'Open unread dead threads',
+          cb: ThreadWatcher.cb.openDeads,
+          open: toggleDisabledDead,
+        },
+        // `Prune all dead threads` entry
+        {
+          text: 'Prune all dead threads',
+          cb: ThreadWatcher.cb.pruneDeads,
+          open: toggleDisabledDead,
+        },
+        // `Prune read dead threads` entry
+        {
+          text: 'Prune read dead threads',
+          cb: ThreadWatcher.cb.pruneReadDeads,
+          open: toggleDisabledDead,
+        },
+        // `Dismiss posts quoting you` entry
+        {
+          text: 'Dismiss posts quoting you',
+          title: 'Unhighlight the thread watcher icon and threads until there are new replies quoting you.',
+          cb: ThreadWatcher.cb.dismiss,
+          open() {
+            this.el.classList.toggle('disabled', !$.hasClass(ThreadWatcher.shortcut, 'replies-quoting-you'));
+            return true;
+          }
+        },
+      ];
 
       for (var {text, title, cb, open} of entries) {
         var entry = {
@@ -924,8 +939,10 @@ var ThreadWatcher = {
         entry.el.title += '\n[Remember Last Read Post is disabled.]';
       }
       $.on(input, 'change', $.cb.checked);
-      if (['Current Board', 'Show Page', 'Show Unread Count', 'Show Site Prefix'].includes(name)) { $.on(input, 'change', ThreadWatcher.refresh); }
-      if (['Show Page', 'Show Unread Count', 'Auto Update Thread Watcher'].includes(name)) { $.on(input, 'change', ThreadWatcher.fetchAuto); }
+      if (['Current Board', 'Show Page', 'Show Unread Count', 'Show Site Prefix'].includes(name))
+        $.on(input, 'change', () => ThreadWatcher.refresh());
+      if (['Show Page', 'Show Unread Count', 'Auto Update Thread Watcher'].includes(name))
+        $.on(input, 'change', ThreadWatcher.fetchAuto);
       return this.menu.addEntry(entry);
     }
   }

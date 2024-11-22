@@ -3,6 +3,17 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### Not released yet
+
+- Upstream came back, so I had to port those new features.
+  - Fix for unwanted sorting of catalog under certain settings. [ccd0#3212](https://github.com/ccd0/4chan-x/issues/3212),
+    7dfba22042d01fde1e762af68e92109d80d0164d
+  - Turn JS Whitelist functionality off by default. 419e90c38eddc65a5a32e4a17a8211b3157ae61e
+    - Better way of turning off JS Whitelist. 7df2750fadffe0b5cc441b21034563c95c8500bd
+    - Update documentation. 62e4ccf1e869ab4757fa2b9107d1a52b1890a1fc
+  - Fallback when XPCNativeWrapper is unavailable [ccd0#3430](https://github.com/ccd0/4chan-x/pull/3430)
+  - Add ability to clear whole thread watcher [ccd0#2926](https://github.com/ccd0/4chan-x/pull/2926)
+
 ### 2.18.0 (2024-11-20)
 
 - The quick reply now supports mp4. [#124](https://github.com/TuxedoTako/4chan-xt/pull/124)

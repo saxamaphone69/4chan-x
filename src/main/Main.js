@@ -209,7 +209,10 @@ var Main = {
       !SW.yotsuba.regexp.captcha.test(location.href) &&
       !$$('script:not([src])', d).filter(s => /this\[/.test(s.textContent)).length
     ) {
-      ($.getSync || $.get)({'jsWhitelist': Conf['jsWhitelist']}, ({jsWhitelist}) => $.addCSP(`script-src ${jsWhitelist.replace(/^#.*$/mg, '').replace(/[\s;]+/g, ' ').trim()}`));
+      ($.getSync || $.get)({'jsWhitelist': Conf['jsWhitelist']}, ({jsWhitelist}) => {
+        const parsedList = jsWhitelist.replace(/^#.*$/mg, '').replace(/[\s;]+/g, ' ').trim();
+        if (/\S/.test(parsedList)) $.addCSP(`script-src ${parsedList}`);
+      });
     }
 
     // Get saved values as items
