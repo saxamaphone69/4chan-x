@@ -14,6 +14,7 @@ New features include:
 - Hiding all posts from a poster ID in a thread
 - A manifest v3 version for chromium browsers dropping support for v2
 - A button to un-randomize a filename in the quick reply
+- Showing the reason a post was filtered in the stub
 
 The 4chan XT project is a migration of 4chan X from coffeescript to TypeScript/JavaScript. It is named XT both as a
 continuation of eXTended, and a T for TypeScript. The goals of this project is to first get a working bundle from js/ts
@@ -69,36 +70,6 @@ The simplest build is as easy as `npm install` `npm run build`, but there are so
 - the es 2020 target was chosen for optional chaining
 - @violentmonkey/types was chosen over @types/greasemonkey because @types/greasemonkey only declares the GM object,
   and not GM\_ functions
-
-## commits since this was forked
-
-<details>
-<summary>Click to expand</summary>
-
-- [x] 944b04210c119aedf8da1a8bcabaca9b80312118 Update archive list.
-  - [x] 59ee8c57792d0f82491756a077e25f506fd62994 Desuarchive removes /gif/
-  - [x] 402679e33a06dfbe0dc39ceba5c24fed761b6a19 desuarchive removes /wsg/ files
-  - [x] 86071184aa39b3585f06c1a4e2921c411ad8cf10 archived.moe adds /pw/ search, tokyochronos has hosting issues
-  - [x] 8a6392b1cf721ddfae6d8f4e3ec2566f15755370 add Eientei
-  - [x] 451a06f54b878ce433b0775858affefc71927fc7 alice.al domain change
-- [x] 2a8bf2adb0737ce7bb1e21f6b959e4c6e1de1bc7 Disable Javascript Whitelist on captcha iframe. #3292
-- [x] e9c1529da7844a42a1b40458c2c77b77e23ca537 Make QR post more like original form post. #3330
-- [x] d16062a8fac5c092c34310c7704ac3980494b6ef Merge remote-tracking branch '4chenz/master'
-  - [x] 8795b1c56dbdfb52a32ddb3ea80b549f0048dc7b Add Google Lens image search url
-- [x] f3f03f5e79fb5f26c0fd4406b2ab6796851ea471 Replace Google image search link with Google Lens.
-  - [x] c68a8afbdf30e3cbb35f0834b364f20600151adf Switch Google image search back to old version, thanks to https://boards.4channel.org/g/thread/91737566#p91789527
-- [x] aef984da1a6af4d0003b51e7f03bce252ac71dff Remove empty space from ads if they don't load. https://kissu.moe/b/res/7155#11052
-- [x] 19268975ea2d49a753624315b0928f27496aac02 Update Randomize Filename to match current 4chan format. https://boards.4channel.org/g/thread/91737566#p91784238
-- [x] 2a47dfd8ba724b17f5bc5f9214bea8ce8b469398 Catch errors due to "Restricted" selection. #2905
-- [x] 27957c25af5d182adc38f1e67a098ab338631ccd Release 4chan X v1.14.22.2.
-- [x] eb25d6e797a1673fd7cddb257fce04055383ec9b Update chrome-webstore-upload.
-- [x] 14e67e9a958633e37b4e4a6293cfa3a921c1eab0 Release 4chan X v1.14.22.3.
-- [x] 7295b21b73eb13ec53fdc61767ada341c2e13144 Avoid breaking sauce settings of people with links to original Google Images and Google Lens, provided they didn't already update to v1.14.22.3.
-- [x] 71873cd7b22a565c2a41fa24f63f7504152683eb Recognize JPEG files with .jfif extensions as images for purposes of Image Hover etc.; also recognize .avif and .jxl files as images.
-- [x] ea2462ecc47327c6f0c31348d95fd2b1b6447cb3 Release 4chan X v1.14.22.4.
-- [x] e31438f9a9907078508912fd4c4d44bf21ac773c Fix youtube /live embeds
-
-</details>
 
 ---
 

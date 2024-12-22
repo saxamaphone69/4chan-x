@@ -13,7 +13,7 @@ const settingsHtml = <div id="fourchanx-settings" class="dialog">
       <a class="export">Export</a>{separator}
       <a class="import">Import</a>{separator}
       <a class="reset">Reset Settings</a>{separator}
-      <input type="file" hidden />
+      <input type="file" hidden accept=".json,application/json" />
       <a href={meta.page} target="_blank">{meta.name}</a>{separator}
       <a href={meta.changelog} target="_blank">{g.VERSION}</a>{separator}
       <a href={meta.issues} target="_blank">Issues</a>{separator}

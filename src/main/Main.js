@@ -125,7 +125,10 @@ var Main = {
     if (doc && $.hasClass(doc, 'fourchan-x')) { return; }
     $.asap(docSet, function() {
       $.addClass(doc, 'fourchan-xt', 'fourchan-x', 'seaweedchan');
-      if ($.engine) { return $.addClass(doc, `ua-${$.engine}`); }
+      if ($.engine) $.addClass(doc, `ua-${$.engine}`);
+      BoardConfig.ready(() => {
+        if (g.BOARD?.config.ws_board != null) $.addClass(doc, g.BOARD.config.ws_board ? 'ws' : 'nws');
+      });
     });
     try {
       $.global(

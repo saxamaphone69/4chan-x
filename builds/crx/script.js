@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.18.0",
-    "date": "2024-11-20T18:50:00Z"
+    "version": "2.19.0",
+    "date": "2024-12-22T16:50:00Z"
   };
 
   var meta = {
@@ -1109,21 +1109,7 @@ current-archive-text:"Archive"]
       sjisPreview: false
     },
 
-    jsWhitelist: `\
-http://s.4cdn.org
-https://s.4cdn.org
-http://www.google.com
-https://www.google.com
-https://www.gstatic.com
-http://cdn.mathjax.org
-https://cdn.mathjax.org
-https://cdnjs.cloudflare.com
-https://hcaptcha.com
-https://*.hcaptcha.com
-'self'
-'unsafe-inline'
-'unsafe-eval'\
-`,
+    jsWhitelist: '',
 
     captchaLanguage: '',
 
@@ -1773,11 +1759,11 @@ https://*.hcaptcha.com
     }
   };
   $.ajax = (function () {
-    let pageXHR;
+    let pageXHR = XMLHttpRequest;
     if (window.wrappedJSObject && !XMLHttpRequest.wrappedJSObject) {
-      pageXHR = XPCNativeWrapper(window.wrappedJSObject.XMLHttpRequest);
-    } else {
-      pageXHR = XMLHttpRequest;
+      try {
+        pageXHR = XPCNativeWrapper(window.wrappedJSObject.XMLHttpRequest);
+      } catch (e) { }
     }
     return function (url, options = {}) {
       if (options.responseType == null) {
@@ -2497,7 +2483,7 @@ https://*.hcaptcha.com
         separator,
         h("a", { class: "reset" }, "Reset Settings"),
         separator,
-        h("input", { type: "file", hidden: true }),
+        h("input", { type: "file", hidden: true, accept: ".json,application/json" }),
         h("a", { href: meta.page, target: "_blank" }, meta.name),
         separator,
         h("a", { href: meta.changelog, target: "_blank" }, g.VERSION),
@@ -2781,7 +2767,7 @@ https://*.hcaptcha.com
   <legend>Javascript Whitelist</legend>
   <div>
     Sources from which Javascript is allowed to be loaded by <a href="http://content-security-policy.com/#source_list" target="_blank">Content Security Policy</a>.<br>
-    Lines starting with a <code>#</code> will be ignored.
+    Lines starting with a <code>#</code> will be ignored. Remove or comment out all lines to allow everything.
   </div>
   <textarea hidden name="jsWhitelist" class="field" spellcheck="false"></textarea>
 </fieldset>
@@ -3689,49 +3675,6 @@ audio.controls-added {
   content: var(--icon);
   font-size: 16px;
   line-height: 12px;
-}
-@media (min-width: 1300px) {
-  :root.sw-yotsuba.fixed:not(.centered-links) #header-bar {
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) #board-list {
-    flex: auto;
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list {
-    display: flex;
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) .hide-board-list-container {
-    flex: none;
-    margin-right: 5px;
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList {
-    flex: auto;
-    display: flex;
-    width: 0px; /* XXX Fixes Edge not shrinking the board list below default size when needed */
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > a,
-  :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > span:not(.space):not(.spacer) {
-    flex: none;
-    padding: .17em;
-    margin: -.17em -.32em;
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > span {
-    pointer-events: none;
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > span.space {
-    flex: 0 .63 .63em;
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) #full-board-list > .boardList > span.spacer {
-    flex: 0 .38 .38em;
-  }
-  :root.sw-yotsuba.fixed:not(.centered-links) #shortcuts {
-    float: initial;
-    flex: none;
-    display: flex;
-    align-items: center;
-  }
 }
 /* 4chan X link brackets */
 .brackets-wrap::before {
@@ -6233,7 +6176,7 @@ svg.icon {
     <button type="button" id="tex-preview-button" title="Preview TeX">T<sub>E</sub>X</button>
     <input name="name" data-name="name" list="list-name" placeholder="Name" class="field" size="1">
     <input name="email" data-name="email" list="list-email" placeholder="Options" class="field" size="1">
-    <input name="sub" data-name="sub" list="list-sub" placeholder="Subject" class="field" size="1">
+    <input name="sub" data-name="sub" list="list-sub" placeholder="Subject" class="field" size="1" maxlength="100">
   </div>
   <div class="textarea">
     <textarea data-name="com" placeholder="Comment" class="field"></textarea>
@@ -10430,7 +10373,7 @@ svg.icon {
             if (this.cb) { $.off(this.el, 'click', this.cb); }
             this.cb = function() {
               $.event('CloseMenu');
-              return ThreadWatcher.toggle(thread);
+              return ThreadWatcher.toggle(thread, true);
             };
             $.on(this.el, 'click', this.cb);
             return true;
@@ -10493,8 +10436,8 @@ svg.icon {
     catalogNode() {
       if (ThreadWatcher.isWatched(this.thread)) { $.addClass(this.nodes.root, 'watched'); }
       return $.on(this.nodes.root, 'mousedown click', e => {
-        if ((e.button !== 0) || !e.altKey) { return; }
-        if (e.type === 'click') { ThreadWatcher.toggle(this.thread); }
+        if ((e.button !== 0) || !e.altKey) return;
+        if (e.type === 'click') ThreadWatcher.toggle(this.thread, true);
         return e.preventDefault();
       });
     }, // Also on mousedown to prevent highlighting thumbnail in Firefox.
@@ -10532,6 +10475,16 @@ svg.icon {
         }
         $.event('CloseMenu');
       },
+      clear() {
+        if (!confirm("Delete ALL threads from watcher?")) return;
+        const ref = ThreadWatcher.getAll();
+        for (let i = 0, len = ref.length; i < len; i++) {
+          const { siteID, boardID, threadID } = ref[i];
+          ThreadWatcher.db.delete({ siteID, boardID, threadID });
+        }
+        ThreadWatcher.refresh(true);
+        $.event('CloseMenu');
+      },
       pruneDeads() {
         if ($.hasClass(this, 'disabled')) return;
         for (var {siteID, boardID, threadID, data} of ThreadWatcher.getAll()) {
@@ -10539,7 +10492,7 @@ svg.icon {
             ThreadWatcher.db.delete({siteID, boardID, threadID});
           }
         }
-        ThreadWatcher.refresh();
+        ThreadWatcher.refresh(true);
         $.event('CloseMenu');
       },
       pruneReadDeads() {
@@ -10549,7 +10502,7 @@ svg.icon {
             ThreadWatcher.db.delete({ siteID, boardID, threadID });
           }
         }
-        ThreadWatcher.refresh();
+        ThreadWatcher.refresh(true);
         $.event('CloseMenu');
       },
       dismiss() {
@@ -10562,22 +10515,24 @@ svg.icon {
       },
       toggle() {
         const {thread} = Get.postFromNode(this);
-        ThreadWatcher.toggle(thread);
+        ThreadWatcher.toggle(thread, true);
       },
       rm() {
         const {siteID} = this.parentNode.dataset;
         const [boardID, threadID] = this.parentNode.dataset.fullID.split('.');
-        ThreadWatcher.rm(siteID, boardID, +threadID);
+        ThreadWatcher.rm(siteID, boardID, +threadID, undefined, true);
       },
       post(e) {
         const {boardID, threadID, postID} = e.detail;
         const cb = PostRedirect.delay();
         if (postID === threadID) {
           if (Conf['Auto Watch']) {
-            ThreadWatcher.addRaw(boardID, threadID, {}, cb);
+            ThreadWatcher.addRaw(boardID, threadID, {}, cb, true);
           }
         } else if (Conf['Auto Watch Reply']) {
-          ThreadWatcher.add((g.threads.get(boardID + '.' + threadID) || new Thread(threadID, g.boards[boardID] || new Board(boardID))), cb);
+          ThreadWatcher.add(
+            (g.threads.get(boardID + '.' + threadID) || new Thread(threadID, g.boards[boardID] || new Board(boardID))),
+            cb, true);
         }
       },
       onIndexUpdate(e) {
@@ -11010,7 +10965,7 @@ svg.icon {
       return ThreadWatcher.refreshIcon();
     },
 
-    refresh() {
+    refresh(manual) {
       ThreadWatcher.build();
 
       g.threads.forEach(function(thread) {
@@ -11027,7 +10982,7 @@ svg.icon {
       });
 
       if (Conf['Pin Watched Threads']) {
-        return $.event('SortIndex', {deferred: Conf['Index Mode'] !== 'catalog'});
+        return $.event('SortIndex', {deferred: !(manual && Conf['Index Mode'] === 'catalog')});
       }
     },
 
@@ -11078,18 +11033,18 @@ svg.icon {
       return ThreadWatcher.db.extend({boardID, threadID, val: {isDead: true, isArchived: undefined, page: undefined, lastPage: undefined, unread: undefined, quotingYou: undefined}}, cb);
     },
 
-    toggle(thread) {
+    toggle(thread, manual) {
       const siteID   = g.SITE.ID;
       const boardID  = thread.board.ID;
       const threadID = thread.ID;
       if (ThreadWatcher.db.get({boardID, threadID})) {
-        return ThreadWatcher.rm(siteID, boardID, threadID);
+        return ThreadWatcher.rm(siteID, boardID, threadID, undefined, manual);
       } else {
-        return ThreadWatcher.add(thread);
+        return ThreadWatcher.add(thread, undefined, manual);
       }
     },
 
-    add(thread, cb) {
+    add(thread, cb, manual) {
       const data     = {};
       const siteID   = g.SITE.ID;
       const boardID  = thread.board.ID;
@@ -11102,16 +11057,16 @@ svg.icon {
         data.isDead = true;
       }
       if (thread.OP) { data.excerpt = Get.threadExcerpt(thread); }
-      return ThreadWatcher.addRaw(boardID, threadID, data, cb);
+      return ThreadWatcher.addRaw(boardID, threadID, data, cb, manual);
     },
 
-    addRaw(boardID, threadID, data, cb) {
+    addRaw(boardID, threadID, data, cb, manual) {
       const oldData = ThreadWatcher.db.get({ boardID, threadID, defaultValue: dict() });
       delete oldData.last;
       delete oldData.modified;
       $.extend(oldData, data);
       ThreadWatcher.db.set({boardID, threadID, val: oldData}, cb);
-      ThreadWatcher.refresh();
+      ThreadWatcher.refresh(manual);
       const thread = {siteID: g.SITE.ID, boardID, threadID, data, force: true};
       if (Conf['Show Page'] && !data.isDead) {
         return ThreadWatcher.fetchBoard([thread]);
@@ -11120,9 +11075,9 @@ svg.icon {
       }
     },
 
-    rm(siteID, boardID, threadID, cb) {
+    rm(siteID, boardID, threadID, cb, manual) {
       ThreadWatcher.db.delete({siteID, boardID, threadID}, cb);
-      return ThreadWatcher.refresh();
+      return ThreadWatcher.refresh(manual);
     },
 
     menu: {
@@ -11153,68 +11108,71 @@ svg.icon {
             return true;
           }
         });
-        return $.on(entryEl, 'click', () => ThreadWatcher.toggle(g.threads.get(`${g.BOARD}.${g.THREADID}`)));
+        return $.on(entryEl, 'click', () => ThreadWatcher.toggle(g.threads.get(`${g.BOARD}.${g.THREADID}`), true));
       },
 
       addMenuEntries() {
-        const entries = [];
-
-        // `Open all` entry
-        entries.push({
-          text: 'Open all threads',
-          cb: ThreadWatcher.cb.openAll,
-          open() {
-            this.el.classList.toggle('disabled', !ThreadWatcher.list.firstElementChild);
-            return true;
-          }
-        });
-
-        // `Open Unread` entry
-        entries.push({
-          text: 'Open unread threads',
-          cb: ThreadWatcher.cb.openUnread,
-          open() {
-            this.el.classList.toggle('disabled', !$('.replies-unread', ThreadWatcher.list));
-            return true;
-          }
-        });
-
         const toggleDisabledDead = function () {
           this.el.classList.toggle('disabled', !$('.dead-thread', ThreadWatcher.list));
           return true;
         };
 
-        // `Open unread dead threads` entry
-        entries.push({
-          text: 'Open unread dead threads',
-          cb: ThreadWatcher.cb.openDeads,
-          open: toggleDisabledDead,
-        });
-
-        // `Prune all dead threads` entry
-        entries.push({
-          text: 'Prune all dead threads',
-          cb: ThreadWatcher.cb.pruneDeads,
-          open: toggleDisabledDead,
-        });
-
-        // `Prune read dead threads` entry
-        entries.push({
-          text: 'Prune read dead threads',
-          cb: ThreadWatcher.cb.pruneReadDeads,
-          open: toggleDisabledDead,
-        });
-
-        // `Dismiss posts quoting you` entry
-        entries.push({
-          text: 'Dismiss posts quoting you',
-          title: 'Unhighlight the thread watcher icon and threads until there are new replies quoting you.',
-          cb: ThreadWatcher.cb.dismiss,
-          open() {
-            this.el.classList.toggle('disabled', !$.hasClass(ThreadWatcher.shortcut, 'replies-quoting-you'));
-            return true;
-          }
-        });
+        const entries = [
+          // `Open all` entry
+          {
+            text: 'Open all threads',
+            cb: ThreadWatcher.cb.openAll,
+            open() {
+              this.el.classList.toggle('disabled', !ThreadWatcher.list.firstElementChild);
+              return true;
+            }
+          },
+          {
+            text: 'Clear all threads',
+            cb: ThreadWatcher.cb.clear,
+            open() {
+              this.el.classList.toggle('disabled', !ThreadWatcher.list.firstElementChild);
+              return true;
+            }
+          },
+          // `Open Unread` entry
+          {
+            text: 'Open unread threads',
+            cb: ThreadWatcher.cb.openUnread,
+            open() {
+              this.el.classList.toggle('disabled', !$('.replies-unread', ThreadWatcher.list));
+              return true;
+            }
+          },
+          // `Open unread dead threads` entry
+          {
+            text: 'Open unread dead threads',
+            cb: ThreadWatcher.cb.openDeads,
+            open: toggleDisabledDead,
+          },
+          // `Prune all dead threads` entry
+          {
+            text: 'Prune all dead threads',
+            cb: ThreadWatcher.cb.pruneDeads,
+            open: toggleDisabledDead,
+          },
+          // `Prune read dead threads` entry
+          {
+            text: 'Prune read dead threads',
+            cb: ThreadWatcher.cb.pruneReadDeads,
+            open: toggleDisabledDead,
+          },
+          // `Dismiss posts quoting you` entry
+          {
+            text: 'Dismiss posts quoting you',
+            title: 'Unhighlight the thread watcher icon and threads until there are new replies quoting you.',
+            cb: ThreadWatcher.cb.dismiss,
+            open() {
+              this.el.classList.toggle('disabled', !$.hasClass(ThreadWatcher.shortcut, 'replies-quoting-you'));
+              return true;
+            }
+          },
+        ];
 
         for (var {text, title, cb, open} of entries) {
           var entry = {
@@ -11250,8 +11208,10 @@ svg.icon {
           entry.el.title += '\n[Remember Last Read Post is disabled.]';
         }
         $.on(input, 'change', $.cb.checked);
-        if (['Current Board', 'Show Page', 'Show Unread Count', 'Show Site Prefix'].includes(name)) { $.on(input, 'change', ThreadWatcher.refresh); }
-        if (['Show Page', 'Show Unread Count', 'Auto Update Thread Watcher'].includes(name)) { $.on(input, 'change', ThreadWatcher.fetchAuto); }
+        if (['Current Board', 'Show Page', 'Show Unread Count', 'Show Site Prefix'].includes(name))
+          $.on(input, 'change', () => ThreadWatcher.refresh());
+        if (['Show Page', 'Show Unread Count', 'Auto Update Thread Watcher'].includes(name))
+          $.on(input, 'change', ThreadWatcher.fetchAuto);
         return this.menu.addEntry(entry);
       }
     }
@@ -12411,18 +12371,17 @@ svg.icon {
     },
 
     catalogNode() {
-      return $.on(this.nodes.root, 'mousedown click', e => {
-        if ((e.button !== 0) || !e.shiftKey) { return; }
-        if (e.type === 'click') {
-          e.preventDefault();
-          if (Conf['MD5 Quick Filter in the Catalog'] && e.target.classList.contains('catalog-thumb')) {
-            Filter.quickFilterMD5.call(this.thread.OP);
-          } else {
-            Index.toggleHide(this.thread);
-          }
+      return $.on(this.nodes.root, 'click', e => {
+        if ((e.button !== 0) || !e.shiftKey) return;
+        e.preventDefault();
+        getSelection().removeAllRanges();
+        if (Conf['MD5 Quick Filter in the Catalog'] && e.target.classList.contains('catalog-thumb')) {
+          Filter.quickFilterMD5.call(this.thread.OP);
+        } else {
+          Index.toggleHide(this.thread);
         }
       });
-    }, // Also on mousedown to prevent highlighting text.
+    },
 
     toggleHide(thread) {
       if (Index.showHiddenThreads) {
@@ -25276,7 +25235,10 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       if (doc && $.hasClass(doc, 'fourchan-x')) { return; }
       $.asap(docSet, function() {
         $.addClass(doc, 'fourchan-xt', 'fourchan-x', 'seaweedchan');
-        if ($.engine) { return $.addClass(doc, `ua-${$.engine}`); }
+        if ($.engine) $.addClass(doc, `ua-${$.engine}`);
+        BoardConfig.ready(() => {
+          if (g.BOARD?.config.ws_board != null) $.addClass(doc, g.BOARD.config.ws_board ? 'ws' : 'nws');
+        });
       });
       try {
         $.global(
@@ -25360,7 +25322,10 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         !SW.yotsuba.regexp.captcha.test(location.href) &&
         !$$('script:not([src])', d).filter(s => /this\[/.test(s.textContent)).length
       ) {
-        ($.getSync || $.get)({'jsWhitelist': Conf['jsWhitelist']}, ({jsWhitelist}) => $.addCSP(`script-src ${jsWhitelist.replace(/^#.*$/mg, '').replace(/[\s;]+/g, ' ').trim()}`));
+        ($.getSync || $.get)({'jsWhitelist': Conf['jsWhitelist']}, ({jsWhitelist}) => {
+          const parsedList = jsWhitelist.replace(/^#.*$/mg, '').replace(/[\s;]+/g, ' ').trim();
+          if (/\S/.test(parsedList)) $.addCSP(`script-src ${parsedList}`);
+        });
       }
 
       // Get saved values as items

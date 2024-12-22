@@ -3,8 +3,18 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
-### Not released yet
+### 2.19.0 (2024-12-22)
 
+- Removed the css for the header for widths above 1300px, because it was preventing long custom navigation lists from
+  wrapping. [#120](https://github.com/TuxedoTako/4chan-xt/issues/120) I don't know what the purpose was of the different
+  style, the commit where that was added isn't really descriptive: c396db49b9d8fe1becad2fd9c8b29e88ead7b587? So let me
+  know if I broke something.
+- Limit subject input to 100 characters. [#128](https://github.com/TuxedoTako/4chan-xt/issues/128)
+- Added ws and nsw classes for work safe and not work safe boards.
+  [#129](https://github.com/TuxedoTako/4chan-xt/issues/129)
+- Using shift click to hide a post no longer selects half the page.
+  [#131](https://github.com/TuxedoTako/4chan-xt/issues/131)
+- The file select dialog for the settings import will only show json files.
 - Upstream came back, so I had to port those new features.
   - Fix for unwanted sorting of catalog under certain settings. [ccd0#3212](https://github.com/ccd0/4chan-x/issues/3212),
     7dfba22042d01fde1e762af68e92109d80d0164d
