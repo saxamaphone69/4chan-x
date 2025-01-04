@@ -378,11 +378,6 @@ var Main = {
     $.addStyle(CSS.sub(CSS.boards), 'fourchanx-css');
     Main.bgColorStyle = $.el('style', {id: 'fourchanx-bgcolor-css'});
 
-    let keyboard = false;
-    $.on(d, 'mousedown', () => keyboard = false);
-    $.on(d, 'keydown', function(e) { if (e.keyCode === 9) { return keyboard = true; } }); // tab
-    window.addEventListener('focus', (() => doc.classList.toggle('keyboard-focus', keyboard)), true);
-
     return Main.setClass();
   },
 
