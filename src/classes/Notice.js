@@ -3,11 +3,6 @@ import { d } from "../globals/globals";
 import $ from "../platform/$";
 import { SECOND } from "../platform/helpers";
 
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/main/docs/suggestions.md
- */
 export default class Notice {
   constructor(type, content, timeout, onclose) {
     this.add = this.add.bind(this);
@@ -15,7 +10,7 @@ export default class Notice {
     this.timeout = timeout;
     this.onclose = onclose;
     this.el = $.el('div',
-      {innerHTML: "<a href=\"javascript:;\" class=\"close\" title=\"Close\">✕</a><div class=\"message\"></div>"});
+      { innerHTML: '<a href="javascript:;" class="close" title="Close">✕</a><div class="message"></div>' });
     this.el.style.opacity = 0;
     this.setType(type);
     $.on(this.el.firstElementChild, 'click', this.close);
@@ -28,11 +23,11 @@ export default class Notice {
   }
 
   setType(type) {
-    return this.el.className = `notification ${type}`;
+    this.el.className = `notification ${type}`;
   }
 
   add() {
-    if (this.closed) { return; }
+    if (this.closed) return;
     if (d.hidden) {
       $.on(d, 'visibilitychange', this.add);
       return;
@@ -41,13 +36,21 @@ export default class Notice {
     $.add(Header.noticesRoot, this.el);
     this.el.clientHeight; // force reflow
     this.el.style.opacity = 1;
-    if (this.timeout) { return setTimeout(this.close, this.timeout * SECOND); }
+    if (this.timeout) { this.timeoutId = setTimeout(this.close, this.timeout * SECOND); }
   }
 
   close() {
+    if (this.timeoutId) clearTimeout(this.timeoutId);
     this.closed = true;
     $.off(d, 'visibilitychange', this.add);
     $.rm(this.el);
-    return this.onclose?.();
+    this.onclose?.();
+  }
+
+  resetTimer() {
+    if (this.timeout) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = setTimeout(this.close, this.timeout * SECOND);
+    }
   }
 }

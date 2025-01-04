@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.19.0",
-    "date": "2024-12-22T16:50:00Z"
+    "version": "2.20.0",
+    "date": "2025-01-04T18:12:00Z"
   };
 
   var meta = {
@@ -1723,9 +1723,9 @@ current-archive-text:"Archive"]
     }
     var cb = function () {
       $.off(d, 'DOMContentLoaded', cb);
-      return fc();
+      fc();
     };
-    return $.on(d, 'DOMContentLoaded', cb);
+    $.on(d, 'DOMContentLoaded', cb);
   };
   $.formData = function (form) {
     if (form instanceof HTMLFormElement) {
@@ -1881,15 +1881,16 @@ current-archive-text:"Archive"]
   $.onExists = function (root, selector, cb) {
     let el;
     if (el = $(selector, root)) {
-      return cb(el);
+      cb(el);
+      return;
     }
     var observer = new MutationObserver(function () {
       if (el = $(selector, root)) {
         observer.disconnect();
-        return cb(el);
+        cb(el);
       }
     });
-    return observer.observe(root, { childList: true, subtree: true });
+    observer.observe(root, { childList: true, subtree: true });
   };
   $.addStyle = function (css, id, test = 'head') {
     const style = $.el('style', { textContent: css });
@@ -2668,7 +2669,7 @@ current-archive-text:"Archive"]
   <div><input name="time" class="field" spellcheck="false">: <span class="time-preview"></span></div>
   <div>Supported <a href="http://man7.org/linux/man-pages/man1/date.1.html" target="_blank">format specifiers</a>:</div>
   <div>Day: <code>%a</code>, <code>%A</code>, <code>%d</code>, <code>%e</code></div>
-  <div>Month: <code>%m</code>, <code>%b</code>, <code>%B</code></div>
+  <div>Month: <code>%m</code>, <code>%b</code>, <code>%B</code>, <code>%n</code> (Not zero padded)</div>
   <div>Year: <code>%y</code>, <code>%Y</code></div>
   <div>Hour: <code>%k</code>, <code>%H</code>, <code>%l</code>, <code>%I</code>, <code>%p</code>, <code>%P</code></div>
   <div>Minute: <code>%M</code></div>
@@ -3333,9 +3334,6 @@ a[href="javascript:;"] {
 }
 body.hasDropDownNav{
   margin-top: 5px;
-}
-:root:not(.keyboard-focus) a {
-  outline: none;
 }
 .painted {
   border-radius: 3px;
@@ -7971,7 +7969,7 @@ svg.icon {
         $.on(el, 'loadedmetadata', () => ImageExpand.completeExpand(post));
       }
       if (Conf['Enable sound posts'] && Conf['Allow Sound']) {
-        const soundUrlMatch = file.name.match(/\[sound=([^\]]+)]/);
+        const soundUrlMatch = file.name.match(/\[sound=([^\]]+)]/i);
         if (soundUrlMatch) {
           let src = decodeURIComponent(soundUrlMatch[1]);
           if (!src.startsWith('http'))
@@ -14665,6 +14663,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       k() { return this.getHours(); },
       l() { return (this.getHours() % 12) || 12; },
       m() { return Time.zeroPad(this.getMonth() + 1); },
+      n() { return this.getMonth() + 1; },
       M() { return Time.zeroPad(this.getMinutes()); },
       p() {
         let formatter = Time.formatterCache.get('p');
@@ -18679,7 +18678,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         this.originalName = file.name;
         this.file = await this.validateFile(file);
         this.originalName = file.name;
-        if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f') && (!this.file.name.includes('[sound='))) {
+        if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f') && (!this.file.name.toLowerCase().includes('[sound='))) {
           this.randomizeName(false);
         } else {
           this.filename = this.file.name;
@@ -21745,15 +21744,16 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       if (notice) {
         notice.filters.push(filter);
         notice.posts.push(origin);
-        return $('span', notice.el).textContent = `${notice.filters.length} MD5s filtered.`;
+        $('span', notice.el).textContent = `${notice.filters.length} MD5s filtered.`;
+        notice.resetTimer();
       } else {
         const msg = $.el('div', { innerHTML: "<span>MD5 filtered.</span> [<a href=\"javascript:;\">show</a>] [<a href=\"javascript:;\">undo</a>]" });
-        notice = (Filter.quickFilterMD5.notice = new Notice('info', msg, undefined, () => delete Filter.quickFilterMD5.notice));
+        notice = (Filter.quickFilterMD5.notice = new Notice('info', msg, 10, () => delete Filter.quickFilterMD5.notice));
         notice.filters = [filter];
         notice.posts = [origin];
         const links = $$('a', msg);
         $.on(links[0], 'click', Filter.quickFilterCB.show.bind(notice));
-        return $.on(links[1], 'click', Filter.quickFilterCB.undo.bind(notice));
+        $.on(links[1], 'click', Filter.quickFilterCB.undo.bind(notice));
       }
     },
     quickFilterCB: {
@@ -21864,7 +21864,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         this.set(hostname);
         cb();
       }
-      return $.onExists(doc, 'body', () => {
+      $.onExists(doc, 'body', () => {
         for (var software in SW) {
           var changes;
           if (changes = SW[software].detect?.()) {
@@ -22682,7 +22682,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       this.timeout = timeout;
       this.onclose = onclose;
       this.el = $.el('div',
-        {innerHTML: "<a href=\"javascript:;\" class=\"close\" title=\"Close\">✕</a><div class=\"message\"></div>"});
+        { innerHTML: '<a href="javascript:;" class="close" title="Close">✕</a><div class="message"></div>' });
       this.el.style.opacity = 0;
       this.setType(type);
       $.on(this.el.firstElementChild, 'click', this.close);
@@ -22695,11 +22695,11 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     }
 
     setType(type) {
-      return this.el.className = `notification ${type}`;
+      this.el.className = `notification ${type}`;
     }
 
     add() {
-      if (this.closed) { return; }
+      if (this.closed) return;
       if (d.hidden) {
         $.on(d, 'visibilitychange', this.add);
         return;
@@ -22708,14 +22708,22 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       $.add(Header.noticesRoot, this.el);
       this.el.clientHeight; // force reflow
       this.el.style.opacity = 1;
-      if (this.timeout) { return setTimeout(this.close, this.timeout * SECOND); }
+      if (this.timeout) { this.timeoutId = setTimeout(this.close, this.timeout * SECOND); }
     }
 
     close() {
+      if (this.timeoutId) clearTimeout(this.timeoutId);
       this.closed = true;
       $.off(d, 'visibilitychange', this.add);
       $.rm(this.el);
-      return this.onclose?.();
+      this.onclose?.();
+    }
+
+    resetTimer() {
+      if (this.timeout) {
+        clearTimeout(this.timeoutId);
+        this.timeoutId = setTimeout(this.close, this.timeout * SECOND);
+      }
     }
   }
 
@@ -25332,8 +25340,8 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       const items = dict();
       for (key in Conf) { items[key] = undefined; }
       items['previousversion'] = undefined;
-      return ($.getSync || $.get)(items, function(items) {
-        return $.asap(docSet, function() {
+      ($.getSync || $.get)(items, function(items) {
+        $.asap(docSet, function() {
 
           // Don't hide the local storage warning behind a settings panel.
           if ($.cantSet) ; else if ((items.previousversion == null)) {
@@ -25354,7 +25362,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
             Conf[key] = items[key] ?? val;
           }
 
-          return Site.init(Main.initFeatures);
+          Site.init(Main.initFeatures);
         });
       });
     },
@@ -25482,11 +25490,6 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       $.addStyle(CSS.sub(CSS.boards), 'fourchanx-css');
       Main.bgColorStyle = $.el('style', {id: 'fourchanx-bgcolor-css'});
 
-      let keyboard = false;
-      $.on(d, 'mousedown', () => keyboard = false);
-      $.on(d, 'keydown', function(e) { if (e.keyCode === 9) { return keyboard = true; } }); // tab
-      window.addEventListener('focus', (() => doc.classList.toggle('keyboard-focus', keyboard)), true);
-
       return Main.setClass();
     },
 
@@ -25601,16 +25604,16 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
 
       // Parse HTML or skip it and start building from JSON.
       if (g.VIEW === 'catalog') {
-        return Main.initCatalog();
+        Main.initCatalog();
       } else if (!Index.enabled) {
         if (g.SITE.awaitBoard) {
-          return g.SITE.awaitBoard(Main.initThread);
+          g.SITE.awaitBoard(Main.initThread);
         } else {
-          return Main.initThread();
+          Main.initThread();
         }
       } else {
         Main.expectInitFinished = true;
-        return $.event('4chanXInitFinished');
+        $.event('4chanXInitFinished');
       }
     },
 
@@ -25641,16 +25644,18 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           g.SITE.parseThreadMetadata?.(threads[0]);
         }
 
-        Main.callbackNodes('Thread', threads);
-        return Main.callbackNodesDB('Post', posts, function() {
-          for (var post of posts) { QuoteThreading.insert(post); }
-          Main.expectInitFinished = true;
-          return $.event('4chanXInitFinished');
-        });
+        setTimeout(() => {
+          Main.callbackNodes('Thread', threads);
+          Main.callbackNodesDB('Post', posts, function() {
+            for (var post of posts) QuoteThreading.insert(post);
+            Main.expectInitFinished = true;
+            $.event('4chanXInitFinished');
+          });
+        }, 0);
 
       } else {
         Main.expectInitFinished = true;
-        return $.event('4chanXInitFinished');
+        $.event('4chanXInitFinished');
       }
     },
 
@@ -25710,7 +25715,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       Main.parseThreads(threadRoots, threads, posts, errors);
       if (errors.length) { Main.handleErrors(errors); }
       Main.callbackNodes('Thread', threads);
-      return Main.callbackNodesDB('Post', posts, () => $.event('PostsInserted', null, records[0].target));
+      Main.callbackNodesDB('Post', posts, () => $.event('PostsInserted', null, records[0].target));
     },
 
     addPosts(records) {
@@ -25746,7 +25751,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         }
       }
       if (errors.length) { Main.handleErrors(errors); }
-      return Main.callbackNodesDB('Post', posts, function() {
+      Main.callbackNodesDB('Post', posts, function() {
         for (thread of threads) {
           $.event('PostsInserted', null, thread.nodes.root);
         }
@@ -25839,10 +25844,10 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           if (cb) { cb(); }
           return;
         }
-        return setTimeout(softTask, 0);
+        setTimeout(softTask, 0);
       };
 
-      return softTask();
+      softTask();
     },
 
     handleErrors(errors) {
