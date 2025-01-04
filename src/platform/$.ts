@@ -26,9 +26,9 @@ $.ready = function(fc) {
   }
   var cb = function() {
     $.off(d, 'DOMContentLoaded', cb);
-    return fc();
+    fc();
   };
-  return $.on(d, 'DOMContentLoaded', cb);
+  $.on(d, 'DOMContentLoaded', cb);
 };
 
 $.formData = function(form) {
@@ -183,15 +183,16 @@ $.asap = function(test, cb) {
 $.onExists = function(root, selector, cb) {
   let el;
   if (el = $(selector, root)) {
-    return cb(el);
+    cb(el);
+    return;
   }
   var observer = new MutationObserver(function() {
     if (el = $(selector, root)) {
       observer.disconnect();
-      return cb(el);
+      cb(el);
     }
   });
-  return observer.observe(root, {childList: true, subtree: true});
+  observer.observe(root, {childList: true, subtree: true});
 };
 
 $.addStyle = function(css, id, test='head') {

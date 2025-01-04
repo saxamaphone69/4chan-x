@@ -222,8 +222,8 @@ var Main = {
     const items = dict();
     for (key in Conf) { items[key] = undefined; }
     items['previousversion'] = undefined;
-    return ($.getSync || $.get)(items, function(items) {
-      return $.asap(docSet, function() {
+    ($.getSync || $.get)(items, function(items) {
+      $.asap(docSet, function() {
 
         // Don't hide the local storage warning behind a settings panel.
         if ($.cantSet) {
@@ -248,7 +248,7 @@ var Main = {
           Conf[key] = items[key] ?? val;
         }
 
-        return Site.init(Main.initFeatures);
+        Site.init(Main.initFeatures);
       });
     });
   },
@@ -497,16 +497,16 @@ var Main = {
 
     // Parse HTML or skip it and start building from JSON.
     if (g.VIEW === 'catalog') {
-      return Main.initCatalog();
+      Main.initCatalog();
     } else if (!Index.enabled) {
       if (g.SITE.awaitBoard) {
-        return g.SITE.awaitBoard(Main.initThread);
+        g.SITE.awaitBoard(Main.initThread);
       } else {
-        return Main.initThread();
+        Main.initThread();
       }
     } else {
       Main.expectInitFinished = true;
-      return $.event('4chanXInitFinished');
+      $.event('4chanXInitFinished');
     }
   },
 
@@ -537,16 +537,18 @@ var Main = {
         g.SITE.parseThreadMetadata?.(threads[0]);
       }
 
-      Main.callbackNodes('Thread', threads);
-      return Main.callbackNodesDB('Post', posts, function() {
-        for (var post of posts) { QuoteThreading.insert(post); }
-        Main.expectInitFinished = true;
-        return $.event('4chanXInitFinished');
-      });
+      setTimeout(() => {
+        Main.callbackNodes('Thread', threads);
+        Main.callbackNodesDB('Post', posts, function() {
+          for (var post of posts) QuoteThreading.insert(post);
+          Main.expectInitFinished = true;
+          $.event('4chanXInitFinished');
+        });
+      }, 0);
 
     } else {
       Main.expectInitFinished = true;
-      return $.event('4chanXInitFinished');
+      $.event('4chanXInitFinished');
     }
   },
 
@@ -606,7 +608,7 @@ var Main = {
     Main.parseThreads(threadRoots, threads, posts, errors);
     if (errors.length) { Main.handleErrors(errors); }
     Main.callbackNodes('Thread', threads);
-    return Main.callbackNodesDB('Post', posts, () => $.event('PostsInserted', null, records[0].target));
+    Main.callbackNodesDB('Post', posts, () => $.event('PostsInserted', null, records[0].target));
   },
 
   addPosts(records) {
@@ -642,7 +644,7 @@ var Main = {
       }
     }
     if (errors.length) { Main.handleErrors(errors); }
-    return Main.callbackNodesDB('Post', posts, function() {
+    Main.callbackNodesDB('Post', posts, function() {
       for (thread of threads) {
         $.event('PostsInserted', null, thread.nodes.root);
       }
@@ -735,10 +737,10 @@ var Main = {
         if (cb) { cb(); }
         return;
       }
-      return setTimeout(softTask, 0);
+      setTimeout(softTask, 0);
     };
 
-    return softTask();
+    softTask();
   },
 
   handleErrors(errors) {

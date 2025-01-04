@@ -3,6 +3,12 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### Not released yet
+
+- Changed the init script to allow for a reflow between the loading of the custom style a.o., and parsing the thread.
+  This should lessen the flash on page load.
+- Added a new option in the date format for a month number without zero padding: `%n`.
+
 ### 2.19.0 (2024-12-22)
 
 - Removed the css for the header for widths above 1300px, because it was preventing long custom navigation lists from
