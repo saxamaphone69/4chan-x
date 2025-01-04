@@ -2141,7 +2141,7 @@ class post {
 
       this.file = await this.validateFile(file);
       this.originalName = file.name;
-      if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f') && (!this.file.name.includes('[sound='))) {
+      if (Conf['Randomize Filename'] && (g.BOARD.ID !== 'f') && (!this.file.name.toLowerCase().includes('[sound='))) {
         this.randomizeName(false);
       } else {
         this.filename = this.file.name;
