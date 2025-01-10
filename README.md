@@ -23,7 +23,7 @@ files, and then gradually convert js files to ts and add types as needed.
 ## Install
 
 This fork is distributed through [GitHub releases](https://github.com/TuxedoTako/4chan-xt/releases) and [Greasy Fork](https://greasyfork.org/scripts/489508-4chan-xt).
-There are known issues with updating user scripts through Github: [#34](https://github.com/TuxedoTako/4chan-xt/issues/34)
+There are known issues with updating user scripts through GitHub: [#34](https://github.com/TuxedoTako/4chan-xt/issues/34)
 [violentmonkey#1673](https://github.com/violentmonkey/violentmonkey/issues/1673), but Greasy Fork doesn't allow the
 minified version. Automatic updates are supported for the user script version, but not the Chrome extension.
 
