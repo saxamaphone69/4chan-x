@@ -31,8 +31,9 @@ var Header = {
     this.menu = new UI.Menu('header');
 
     const menuButton = $.el('span',
-      {className: 'menu-button'});
-    $.extend(menuButton, {innerHTML: "<i></i>"});
+      {className: 'menu-button'}
+    );
+    Icon.set(menuButton, 'caretDown', 'Menu');
 
     const box = UI.checkbox;
 

@@ -92,6 +92,7 @@ var Settings = {
     $.add($('.sections-list', dialog), links);
     if (openSection !== 'none') { (sectionToOpen ? sectionToOpen : links[0]).click(); }
 
+    Icon.set($('.close', dialog), 'xmark');
     $.on($('.close', dialog), 'click', Settings.close);
     $.on(window, 'beforeunload', Settings.close);
     $.on(dialog, 'click', () => {

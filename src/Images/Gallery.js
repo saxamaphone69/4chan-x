@@ -114,6 +114,13 @@ var Gallery = {
       return nodes.menu.toggle(e, this, g);
     });
 
+    Icon.set(menuButton, 'caretDown');
+    Icon.set($('.gal-start', dialog), 'play');
+    Icon.set($('.gal-stop', dialog), 'stop');
+    Icon.set($('.gal-close', dialog), 'xmark');
+    Icon.set($('.gal-prev', dialog), 'caretLeft');
+    Icon.set($('.gal-next', dialog), 'caretRight');
+
     for (var entry of Gallery.menu.createSubEntries()) {
       entry.order = 0;
       nodes.menu.addEntry(entry);

@@ -10,6 +10,7 @@ import CrossOrigin from '../platform/CrossOrigin';
 import { dict } from '../platform/helpers';
 import EmbeddingPage from './Embedding/Embed.html';
 import EmbedFxTwitter from './Embedding/FxTwitter';
+import Icon from '../Icons/icon';
 
 /*
  * decaffeinate suggestions:
@@ -132,6 +133,8 @@ var Embedding = {
     $.on($('.jump',  Embedding.dialog), 'click', function() {
       if (doc.contains(Embedding.lastEmbed)) { return Header.scrollTo(Embedding.lastEmbed); }
     });
+    Icon.set($('.jump',  Embedding.dialog), 'arrowRightLong');
+    Icon.set($('.close', Embedding.dialog), 'xmark');
     return $.add(d.body, Embedding.dialog);
   },
 

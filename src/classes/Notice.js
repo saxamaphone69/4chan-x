@@ -2,6 +2,7 @@ import Header from "../General/Header";
 import { d } from "../globals/globals";
 import $ from "../platform/$";
 import { SECOND } from "../platform/helpers";
+import Icon from '../Icons/icon';
 
 export default class Notice {
   constructor(type, content, timeout, onclose) {
@@ -13,6 +14,7 @@ export default class Notice {
       { innerHTML: '<a href="javascript:;" class="close" title="Close">✕</a><div class="message"></div>' });
     this.el.style.opacity = 0;
     this.setType(type);
+    Icon.set(this.el.firstElementChild, 'xmark');
     $.on(this.el.firstElementChild, 'click', this.close);
     if (typeof content === 'string') {
       content = $.tn(content);

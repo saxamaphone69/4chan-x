@@ -9,6 +9,7 @@ import Menu from "../Menu/Menu";
 import $ from "../platform/$";
 import { dict } from "../platform/helpers";
 import Recursive from "./Recursive";
+import Icon from '../Icons/icon';
 
 /** Used in DataBoards data */
 interface HideOptions {
@@ -276,10 +277,10 @@ var PostHiding = {
       textContent: type === 'hide' ? '➖︎' : '➕︎',
     });
     const a = $.el('a', {
-      className: `${type}-reply-button`,
+      className: `${type}-post-button ${type}-reply-button`,
       href:      'javascript:;'
-    }
-    );
+    });
+    Icon.set(span, type === 'hide' ? 'minus' : 'plus');
     $.add(a, span);
     $.on(a, 'click', PostHiding.toggle);
     return a;

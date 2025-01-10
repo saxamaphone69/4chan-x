@@ -9,6 +9,7 @@ import Menu from "../Menu/Menu";
 import $ from "../platform/$";
 import $$ from "../platform/$$";
 import { dict } from "../platform/helpers";
+import Icon from '../Icons/icon';
 
 /*
  * decaffeinate suggestions:
@@ -195,11 +196,16 @@ var ThreadHiding = {
   },
 
   makeButton(thread, type) {
+    const span = $.el('span', {
+      className: 'stub-icon',
+      textContent: type === 'hide' ? '➖︎' : '➕︎',
+    });
     const a = $.el('a', {
-      className: `${type}-thread-button`,
+      className: `${type}-post-button ${type}-thread-button`,
       href:      'javascript:;'
     });
-    $.add(a, $.el('span', { className: 'stub-icon', textContent: type === 'hide' ? '➖︎' : '➕︎' }));
+    Icon.set(span, type === 'hide' ? 'minus' : 'plus');
+    $.add(a, span);
     a.dataset.fullID = thread.fullID;
     $.on(a, 'click', ThreadHiding.toggle);
     return a;
