@@ -897,6 +897,9 @@ var QR = {
     Icon.set(nodes.view, 'eye');
     Icon.set(nodes.restoreNameButton, 'undo');
     Icon.set(nodes.splitPost, 'scissors');
+    Icon.set(nodes.close, 'xmark');
+    Icon.set(nodes.dumpButton, 'squarePlus');
+    Icon.set(nodes.addPost, 'plus');
   },
 
   flags() {
@@ -1814,6 +1817,7 @@ class post {
       '<label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label>' +
       '<span id="qr-preview-comment"></span><br /><span id="qr-preview-name"></span>'
     });
+    Icon.set($('.remove', el), 'xmark');
 
     const [rm, spoiler, span, /*br*/, spanFileName] = el.childNodes as NodeListOf<HTMLElement>;
 

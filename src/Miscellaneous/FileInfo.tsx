@@ -87,7 +87,7 @@ var FileInfo = {
       return <a href={this.file.url} download={this.file.name} class="download-button">{Icon.raw('download')}</a>;
     },
     f() {
-      return { innerHTML: "<a href=\"javascript:;\" class=\"quick-filter-md5\">✕</a>", [isEscaped]: true };
+      return <a href="javascript:;" class="quick-filter-md5">{Icon.raw('xmark')}</a>;
     },
     p() { return { innerHTML: ((this.file.isSpoiler) ? "Spoiler, " : ""), [isEscaped]: true }; },
     s() { return { innerHTML: E(this.file.size), [isEscaped]: true }; },

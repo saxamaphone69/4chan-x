@@ -55,6 +55,7 @@ var ThreadWatcher = {
 
     Icon.set(this.refreshButton, 'refresh');
     Icon.set(this.menuButton, 'caretDown');
+    Icon.set(this.closeButton, 'xmark');
 
     $.on(d, 'QRPostSuccessful',   this.cb.post);
     $.on(sc, 'click', this.toggleWatcher);
@@ -599,6 +600,7 @@ var ThreadWatcher = {
       textContent: '✕',
       href: 'javascript:;'
     });
+    Icon.set(x, 'xmark');
     $.on(x, 'click', ThreadWatcher.cb.rm);
 
     let {excerpt, isArchived} = data;

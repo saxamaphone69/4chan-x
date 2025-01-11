@@ -140,6 +140,7 @@ var Index = {
     this.setupSearch();
     $.on(this.searchInput, 'input', this.onSearchInput);
     $.on($('#index-search-clear', this.navLinks), 'click', this.clearSearch);
+    Icon.set($('#index-search-clear', this.navLinks), 'xmark');
 
     // Hidden threads toggle
     this.hideLabel = $('#hidden-label', this.navLinks);
