@@ -1914,11 +1914,11 @@ a:only-of-type > .remove {
 }
 #add-post {
   cursor: pointer;
-  font-size: 2em;
+  font-size: 1.5em;
   position: absolute;
   bottom: 20px;
   right: 10px;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% - .75em));
 }
 .textarea {
   position: relative;

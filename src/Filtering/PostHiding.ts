@@ -274,13 +274,12 @@ var PostHiding = {
   makeButton(post, type) {
     const span = $.el('span', {
       className: 'stub-icon',
-      textContent: type === 'hide' ? '➖︎' : '➕︎',
     });
     const a = $.el('a', {
       className: `${type}-post-button ${type}-reply-button`,
       href:      'javascript:;'
     });
-    Icon.set(span, type === 'hide' ? 'minus' : 'plus');
+    Icon.set(span, type === 'hide' ? 'squareMinus' : 'squarePlus');
     $.add(a, span);
     $.on(a, 'click', PostHiding.toggle);
     return a;

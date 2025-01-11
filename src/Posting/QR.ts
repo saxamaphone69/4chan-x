@@ -1813,11 +1813,10 @@ class post {
       href: 'javascript:;'
     }) as HTMLAnchorElement;
     $.extend(el, {
-      innerHTML: '<a class="remove" title="Remove">✕</a>' +
+      innerHTML: `<a class="remove" title="Remove">${Icon.get('xmark')}</a>` +
       '<label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label>' +
       '<span id="qr-preview-comment"></span><br /><span id="qr-preview-name"></span>'
     });
-    Icon.set($('.remove', el), 'xmark');
 
     const [rm, spoiler, span, /*br*/, spanFileName] = el.childNodes as NodeListOf<HTMLElement>;
 

@@ -24,8 +24,8 @@ import { svgPathData as scissorsSvg, width as scissorsW, height as scissorsH } f
 import { svgPathData as xmarkSvg, width as xmarkW, height as xmarkH } from "@fas/faXmark";
 import { svgPathData as arrowRightLongSvg, width as arrowRightLongW, height as arrowRightLongH } from "@fas/faArrowRightLong";
 import { svgPathData as plusSvg, width as plusW, height as plusH } from "@fas/faPlus";
-import { svgPathData as minusSvg, width as minusW, height as minusH } from "@fas/faMinus";
-import { svgPathData as squarePlusSvg, width as squarePlusW, height as squarePlusH } from "@fas/faSquarePlus";
+import { svgPathData as squarePlusSvg, width as squarePlusW, height as squarePlusH } from "@fa/faSquarePlus";
+import { svgPathData as squareMinusSvg, width as squareMinusW, height as squareMinusH } from "@fa/faSquareMinus";
 import { svgPathData as playSvg, width as playW, height as playH } from "@fas/faPlay";
 import { svgPathData as stopSvg, width as stopW, height as stopH } from "@fas/faStop";
 
@@ -60,8 +60,8 @@ const icons = {
    xmark:           toSvg(xmarkSvg, xmarkW, xmarkH),
    arrowRightLong:  toSvg(arrowRightLongSvg, arrowRightLongW, arrowRightLongH),
    plus:            toSvg(plusSvg, plusW, plusH),
-   minus:           toSvg(minusSvg, minusW, minusH),
    squarePlus:      toSvg(squarePlusSvg, squarePlusW, squarePlusH),
+   squareMinus:     toSvg(squareMinusSvg, squareMinusW, squareMinusH),
    play:            toSvg(playSvg, playW, playH),
    stop:            toSvg(stopSvg, stopW, stopH)
 } as const;

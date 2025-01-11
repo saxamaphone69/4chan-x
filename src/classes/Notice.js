@@ -10,11 +10,11 @@ export default class Notice {
     this.close = this.close.bind(this);
     this.timeout = timeout;
     this.onclose = onclose;
-    this.el = $.el('div',
-      { innerHTML: '<a href="javascript:;" class="close" title="Close">✕</a><div class="message"></div>' });
+    this.el = $.el('div', {
+      innerHTML: `<a href="javascript:;" class="close" title="Close">${Icon.get('xmark')}</a><div class="message"></div>`
+    });
     this.el.style.opacity = 0;
     this.setType(type);
-    Icon.set(this.el.firstElementChild, 'xmark');
     $.on(this.el.firstElementChild, 'click', this.close);
     if (typeof content === 'string') {
       content = $.tn(content);

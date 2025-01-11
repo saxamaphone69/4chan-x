@@ -128,13 +128,15 @@ var Embedding = {
   ready() {
     if (!Main.isThisPageLegit()) { return; }
     $.addClass(Embedding.dialog, 'empty');
-    $.on($('.close', Embedding.dialog), 'click',     Embedding.closeFloat);
+    const close = $('.close', Embedding.dialog);
+    const jump = $('.jump', Embedding.dialog)
+    $.on(close, 'click',     Embedding.closeFloat);
     $.on($('.move',  Embedding.dialog), 'mousedown', Embedding.dragEmbed);
-    $.on($('.jump',  Embedding.dialog), 'click', function() {
-      if (doc.contains(Embedding.lastEmbed)) { return Header.scrollTo(Embedding.lastEmbed); }
+    $.on(jump, 'click', function() {
+      if (doc.contains(Embedding.lastEmbed)) return Header.scrollTo(Embedding.lastEmbed);
     });
-    Icon.set($('.jump',  Embedding.dialog), 'arrowRightLong');
-    Icon.set($('.close', Embedding.dialog), 'xmark');
+    Icon.set(jump, 'arrowRightLong');
+    Icon.set(close, 'xmark');
     return $.add(d.body, Embedding.dialog);
   },
 

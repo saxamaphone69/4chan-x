@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.20.0",
-    "date": "2025-01-04T18:12:00Z"
+    "version": "2.21.0",
+    "date": "2025-01-11T19:00:00Z"
   };
 
   var meta = {
@@ -3546,8 +3546,8 @@ audio.controls-added {
 .fixed #header-bar {
   right: 0;
   left: 0;
-  padding: 3px 4px 4px;
-  font-size: 12px;
+  padding: 4px;
+  font-size: 13px;
 }
 .fixed.top-header #header-bar {
   top: 0;
@@ -3570,13 +3570,6 @@ audio.controls-added {
 :root.centered-links #header-bar {
   text-align: center;
 }
-#custom-board-list {
-  font-size: 13px;
-  vertical-align: middle;
-}
-#full-board-list {
-  vertical-align: middle;
-}
 :root.centered-links #custom-board-list {
   position: relative;
   left: 150px;
@@ -3588,9 +3581,8 @@ audio.controls-added {
   box-shadow: 0 -1px 2px rgba(0, 0, 0, .15);
   border-top-width: 1px;
 }
-.fixed.bottom-header #header-bar .menu-button i {
-  border-top: none;
-  border-bottom: 6px solid;
+.fixed.bottom-header #header-bar .menu-button .xt-icon {
+  transform: rotate(180deg) translateY(-.125em);
 }
 .fixed #header-bar.autohide:not(:hover) {
   box-shadow: none;
@@ -3624,7 +3616,7 @@ audio.controls-added {
 .fixed.bottom-header #header-bar #scroll-marker {
   bottom: 100%;
 }
-#board-list a, #shortcuts a:not(.entry) {
+#board-list a {
   text-decoration: none;
   padding: 1px;
 }
@@ -3638,22 +3630,22 @@ audio.controls-added {
 #shortcuts {
   float: right;
   display: flex;
+  gap: 4px;
+}
+#shortcuts .xt-icon {
+  font-size: 14px;
 }
 :root.autohiding-scrollbar #shortcuts {
   margin-right: 12px;
-}
-.shortcut {
-  margin-left: 3px;
-  vertical-align: middle;
 }
 :root.shortcut-icons .native-settings {
   font-size: 0;
   color: transparent;
   display: inline-block;
   vertical-align: top;
-  height: 12px;
+  height: 14px;
   width: 14px;
-  background: url('//s.4cdn.org/image/favicon.ico') 0px -1px no-repeat;
+  background: url('//s.4cdn.org/image/favicon.ico') -1px -1px no-repeat;
 }
 #navbotright,
 #navtopright {
@@ -3665,14 +3657,6 @@ audio.controls-added {
 .current,
 :root.sw-yotsuba div#boardNavDesktopFoot a.current {
   font-weight: bold;
-}
-:root.shortcut-icons #header-bar .icon-shortcut {
-  font-size: 0;
-}
-:root.shortcut-icons #header-bar .icon-shortcut a::before {
-  content: var(--icon);
-  font-size: 16px;
-  line-height: 12px;
 }
 /* 4chan X link brackets */
 .brackets-wrap::before {
@@ -3710,6 +3694,10 @@ audio.controls-added {
   max-width: 100%;
   position: relative;
   transition: all .25s ease-in-out;
+  padding: 7px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
 }
 .notification.error {
   background-color: hsla(0, 100%, 38%, .9);
@@ -3727,11 +3715,7 @@ audio.controls-added {
   color: white;
 }
 .notification > .close {
-  font-size: 11px;
-  padding: 7px;
-  top: 0px;
-  right: 5px;
-  position: absolute;
+  order: 1;
 }
 .message {
   box-sizing: border-box;
@@ -3981,10 +3965,8 @@ div[data-checked="false"] > .suboption-list {
 }
 #index-search-clear {
   color: gray;
-  display: inline-block;
   position: relative;
-  left: -1em;
-  width: 0;
+  left: -1.5em;
 }
 #index-search::-webkit-search-cancel-button {
   display: none;
@@ -4115,7 +4097,7 @@ div[data-checked="false"] > .suboption-list {
   vertical-align: text-top;
   padding-left: 2px;
 }
-.catalog-stats > .menu-button > svg.icon {
+.catalog-stats > .menu-button > .icon {
   height: 10px;
 }
 .catalog-stats {
@@ -4358,9 +4340,6 @@ textarea.copy-text-element {
   overflow-x: hidden;
   overflow-y: auto;
 }
-#thread-watcher .refresh {
-  padding: 0px 3px;
-}
 :root.fixed-watcher #thread-watcher {
   position: fixed;
 }
@@ -4373,6 +4352,9 @@ textarea.copy-text-element {
 }
 #thread-watcher > .move {
   padding-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
 #watched-threads > div {
   padding-left: 3px;
@@ -4403,10 +4385,7 @@ textarea.copy-text-element {
   text-decoration: none;
 }
 #thread-watcher .move > .close {
-  position: absolute;
-  right: 0px;
-  top: 0px;
-  padding: 0px 4px;
+  margin-left: auto;
 }
 .watch-thread-link {
   width: 18px;
@@ -4469,8 +4448,7 @@ textarea.copy-text-element {
 }
 .quotelink.forwardlink,
 .backlink.forwardlink {
-  text-decoration: none;
-  border-bottom: 1px dashed;
+  text-decoration: underline dashed;
 }
 .filtered {
   text-decoration: underline line-through;
@@ -4786,16 +4764,6 @@ $site$thread[hidden] + hr {
   overflow-y: auto;
   overflow-x: hidden;
 }
-#qrtab {
-  border-radius: 3px 3px 0 0;
-}
-#qrtab {
-  margin-bottom: 1px;
-}
-#qr .close {
-  float: right;
-  padding: 0 3px;
-}
 .qr-link-container {
   text-align: center;
   margin: 16px 0;
@@ -4883,9 +4851,17 @@ input.field.tripped:not(:hover):not(:focus) {
   margin: 0px;
   padding: 2px 4px 3px;
 }
-#qr label input[type="checkbox"] {
-  position: relative;
-  top: 2px;
+#qr > .move {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#qr > .move label {
+  display: inline-flex;
+  align-items: center;
+}
+#qr > .move .close {
+  order: 2;
 }
 
 /* Recaptcha v2 */
@@ -5217,11 +5193,11 @@ a:only-of-type > .remove {
 }
 #add-post {
   cursor: pointer;
-  font-size: 2em;
+  font-size: 1.5em;
   position: absolute;
   bottom: 20px;
   right: 10px;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% - .75em));
 }
 .textarea {
   position: relative;
@@ -5259,20 +5235,11 @@ a:only-of-type > .remove {
 
 /* Menu */
 .menu-button {
-  display: inline-block;
   position: relative;
   cursor: pointer;
 }
-#header-bar .menu-button i {
-  border-top:   6px solid;
-  border-right: 4px solid transparent;
-  border-left:  4px solid transparent;
-  display: inline-block;
-  margin: 2px;
-  vertical-align: middle;
-}
 .postInfo > .menu-button {
-  margin: 0 5px;
+  margin: 0 4px;
 }
 #menu {
   position: fixed;
@@ -5444,28 +5411,15 @@ a:only-of-type > .remove {
   cursor: pointer;
   opacity: 0.7;
   background-color: rgba(0, 0, 0, 0.3);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  color: #fff;
 }
 .gal-prev:hover,
 .gal-next:hover {
   opacity: 1;
-}
-.gal-prev::after,
-.gal-next::after {
-  position: absolute;
-  top: 48.6%;
-  transform: translateY(-50%);
-  display: inline-block;
-  border-top: 11px solid transparent;
-  border-bottom: 11px solid transparent;
-  content: "";
-}
-.gal-prev::after {
-  border-right: 12px solid #fff;
-  right: 5px;
-}
-.gal-next::after {
-  border-left: 12px solid #fff;
-  right: 3px;
 }
 .gal-image {
   flex: 1 0 auto;
@@ -5510,7 +5464,7 @@ a:only-of-type > .remove {
   height: 100%;
 }
 .gal-buttons {
-  font-size: 2em;
+  font-size: 1.5em;
   margin-right: 3px;
   padding-left: 7px;
   padding-right: 7px;
@@ -5525,31 +5479,9 @@ a:only-of-type > .remove {
   color: #ffffff;
   text-shadow: 0px 0px 1px #000000;
 }
-.gal-buttons i {
-  display: inline-block;
-  margin: 2px;
-  position: relative;
-}
-.gal-start i {
-  border-left:   10px solid;
-  border-top:    6px solid transparent;
-  border-bottom: 6px solid transparent;
-  bottom: 1px;
-}
-.gal-stop i {
-  border: 5px solid;
-  bottom: 2px;
-}
 .gal-buttons.gal-playing > .gal-start,
 .gal-buttons:not(.gal-playing) > .gal-stop {
   display: none;
-}
-.gal-buttons .menu-button i {
-  border-top:   10px solid;
-  border-right:  6px solid transparent;
-  border-left:   6px solid transparent;
-  bottom: 2px;
-  vertical-align: baseline;
 }
 .gal-labels {
   position: fixed;
@@ -5631,34 +5563,14 @@ a:only-of-type > .remove {
   text-decoration: underline;
 }
 
-@keyframes spin {
-  0% {transform:rotate(0deg);}
-  100% {transform:rotate(359deg);}
-}
-
-.spin > .icon {
-  animation:spin 2s infinite linear;
+.spin > .xt-icon {
+  animation: spin 2s infinite linear;
 }
 
 /* To not scroll posts behind the header */
 div.post {
   overflow: auto;
   scroll-margin-top: 30px;
-}
-
-.file svg.icon {
-  height: 12px;
-}`;
-
-  var supports = `/* XXX Moved to end of stylesheet to avoid breaking whole stylesheet in Maxthon. */
-@supports (text-decoration-style: dashed) or (-moz-text-decoration-style: dashed) {
-  .quotelink.forwardlink,
-  .backlink.forwardlink {
-    text-decoration: underline;
-    -moz-text-decoration-style: dashed;
-    text-decoration-style: dashed;
-    border-bottom: none;
-  }
 }`;
 
   var tomorrow = `:root.tomorrow {
@@ -5798,31 +5710,22 @@ div.post {
 `).join(''));
 
   var iconCss = `/* Icons */
-svg.icon {
-  height: 14px;
-
-  /* resolve conflict with catalog css */
-  position: static;
-  width: auto;
-}
-:root.shortcut-icons #shortcuts .shortcut {
-  padding-top: 0;
-  padding-bottom: 0;
-  display: flex;
-  height: 14px;
-  min-width: 16px;
+.xt-icon {
+  height: 1em;
+  width: 1em;
+  display: inline-flex;
+  vertical-align: -.125em;
 }
 :root.shortcut-icons #shortcuts .icon--alt-text,
-:root:not(.shortcut-icons) .shortcut svg {
+:root:not(.shortcut-icons) .shortcut .xt-icon {
   display: none;
 }
 :root.shortcut-icons .shortcut.brackets-wrap::before,
-:root.shortcut-icons .shortcut.brackets-wrap::after{
+:root.shortcut-icons .shortcut.brackets-wrap::after {
   display: none;
 }
 @keyframes spin {
-  0% {transform:rotate(0deg);}
-  100% {transform:rotate(359deg);}
+  100% {transform:rotate(1turn)}
 }`;
 
   var fxTwitterCss = `:root {
@@ -5988,7 +5891,7 @@ svg.icon {
     { name: "youtube", data: linkifyYoutube },
   ];
   const CSS = {
-    boards: mainCSS + icons$1(faIcons) + supports,
+    boards: mainCSS + icons$1(faIcons),
     report,
     www,
     sub: function (css) {
@@ -6035,106 +5938,123 @@ svg.icon {
     }
   };
 
-  // Image
-  var svgPathData$i = 'M448 80c8.8 0 16 7.2 16 16V415.8l-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3V96c0-8.8 7.2-16 16-16H448zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z';
-  var width$i = 512;var height$i = 512;
+  const ImageSvg = 'M448 80c8.8 0 16 7.2 16 16V415.8l-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3V96c0-8.8 7.2-16 16-16H448zM64 32C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V96c0-35.3-28.7-64-64-64H64zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z';
+  const ImageW = 512, ImageH = 512;
 
-  // Eye
-  var svgPathData$h = 'M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z';
-  var width$h = 576;var height$h = 512;
+  const EyeSvg = 'M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z';
+  const EyeW = 576, EyeH = 512;
 
-  // UpRightAndDownLeftFromCenter
-  var svgPathData$g = 'M344 0H488c13.3 0 24 10.7 24 24V168c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39-87 87c-9.4 9.4-24.6 9.4-33.9 0l-32-32c-9.4-9.4-9.4-24.6 0-33.9l87-87L327 41c-6.9-6.9-8.9-17.2-5.2-26.2S334.3 0 344 0zM168 512H24c-13.3 0-24-10.7-24-24V344c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39 87-87c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8z';
-  var width$g = 512;var height$g = 512;
+  const UpRightAndDownLeftFromCenterSvg = 'M344 0H488c13.3 0 24 10.7 24 24V168c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39-87 87c-9.4 9.4-24.6 9.4-33.9 0l-32-32c-9.4-9.4-9.4-24.6 0-33.9l87-87L327 41c-6.9-6.9-8.9-17.2-5.2-26.2S334.3 0 344 0zM168 512H24c-13.3 0-24-10.7-24-24V344c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39 87-87c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8z';
+  const UpRightAndDownLeftFromCenterW = 512, UpRightAndDownLeftFromCenterH = 512;
 
-  // Comment
-  var svgPathData$f = 'M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9c.1-.2 .2-.3 .3-.5z';
-  var width$f = 512;var height$f = 512;
+  const CommentSvg = 'M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9c.1-.2 .2-.3 .3-.5z';
+  const CommentW = 512, CommentH = 512;
 
-  // Rotate
-  var svgPathData$e = 'M142.9 142.9c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5c0 0 0 0 0 0H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8zM16 312v7.6 .7V440c0 9.7 5.8 18.5 14.8 22.2s19.3 1.7 26.2-5.2l41.6-41.6c87.6 86.5 228.7 86.2 315.8-1c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.2 62.2-162.7 62.5-225.3 1L185 329c6.9-6.9 8.9-17.2 5.2-26.2s-12.5-14.8-22.2-14.8H48.4h-.7H40c-13.3 0-24 10.7-24 24z';
-  var width$e = 512;var height$e = 512;
+  const RotateSvg = 'M142.9 142.9c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5c0 0 0 0 0 0H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1C73.2 122 55.6 150.7 44.8 181.4c-5.9 16.7 2.9 34.9 19.5 40.8s34.9-2.9 40.8-19.5c7.7-21.8 20.2-42.3 37.8-59.8zM16 312v7.6 .7V440c0 9.7 5.8 18.5 14.8 22.2s19.3 1.7 26.2-5.2l41.6-41.6c87.6 86.5 228.7 86.2 315.8-1c24.4-24.4 42.1-53.1 52.9-83.7c5.9-16.7-2.9-34.9-19.5-40.8s-34.9 2.9-40.8 19.5c-7.7 21.8-20.2 42.3-37.8 59.8c-62.2 62.2-162.7 62.5-225.3 1L185 329c6.9-6.9 8.9-17.2 5.2-26.2s-12.5-14.8-22.2-14.8H48.4h-.7H40c-13.3 0-24 10.7-24 24z';
+  const RotateW = 512, RotateH = 512;
 
-  // Wrench
-  var svgPathData$d = 'M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
-  var width$d = 512;var height$d = 512;
+  const WrenchSvg = 'M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
+  const WrenchW = 512, WrenchH = 512;
 
-  // Bolt
-  var svgPathData$c = 'M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z';
-  var width$c = 448;var height$c = 512;
+  const BoltSvg = 'M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z';
+  const BoltW = 448, BoltH = 512;
 
-  // Pencil
-  var svgPathData$b = 'M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z';
-  var width$b = 512;var height$b = 512;
+  const PencilSvg = 'M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z';
+  const PencilW = 512, PencilH = 512;
 
-  // Clipboard
-  var svgPathData$a = 'M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z';
-  var width$a = 384;var height$a = 512;
+  const ClipboardSvg = 'M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM112 192H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z';
+  const ClipboardW = 384, ClipboardH = 512;
 
-  // Clock
-  var svgPathData$9 = 'M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z';
-  var width$9 = 512;var height$9 = 512;
+  const ClockSvg = 'M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z';
+  const ClockW = 512, ClockH = 512;
 
-  // Link
-  var svgPathData$8 = 'M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z';
-  var width$8 = 640;var height$8 = 512;
+  const LinkSvg = 'M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z';
+  const LinkW = 640, LinkH = 512;
 
-  // Shuffle
-  var svgPathData$7 = 'M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160H352c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96h32V64c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V416H352c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8h32V320c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z';
-  var width$7 = 512;var height$7 = 512;
+  const ShuffleSvg = 'M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V160H352c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96h32V64c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6V416H352c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H96c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8h32V320c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z';
+  const ShuffleW = 512, ShuffleH = 512;
 
-  // RotateLeft
-  var svgPathData$6 = 'M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z';
-  var width$6 = 512;var height$6 = 512;
+  const RotateLeftSvg = 'M48.5 224H40c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H48.5z';
+  const RotateLeftW = 512, RotateLeftH = 512;
 
-  // Download
-  var svgPathData$5 = 'M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
-  var width$5 = 512;var height$5 = 512;
+  const DownloadSvg = 'M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V274.7l-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7V32zM64 352c-35.3 0-64 28.7-64 64v32c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V416c0-35.3-28.7-64-64-64H346.5l-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352H64zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z';
+  const DownloadW = 512, DownloadH = 512;
 
-  // BookOpen
-  var svgPathData$4 = 'M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5V78.6c0-4.2-1.6-8.4-5-11C247.4 52 202.4 32 144 32C93.5 32 46.3 45.3 18.1 56.1C6.8 60.5 0 71.7 0 83.8V454.1c0 11.9 12.8 20.2 24.1 16.5C55.6 460.1 105.5 448 144 448c33.9 0 79 14 105.6 23.5zm76.8 0C353 462 398.1 448 432 448c38.5 0 88.4 12.1 119.9 22.6c11.3 3.8 24.1-4.6 24.1-16.5V83.8c0-12.1-6.8-23.3-18.1-27.6C529.7 45.3 482.5 32 432 32c-58.4 0-103.4 20-123 35.6c-3.3 2.6-5 6.8-5 11V456c0 11.4 11.7 19.3 22.4 15.5z';
-  var width$4 = 576;var height$4 = 512;
+  const BookOpenSvg = 'M249.6 471.5c10.8 3.8 22.4-4.1 22.4-15.5V78.6c0-4.2-1.6-8.4-5-11C247.4 52 202.4 32 144 32C93.5 32 46.3 45.3 18.1 56.1C6.8 60.5 0 71.7 0 83.8V454.1c0 11.9 12.8 20.2 24.1 16.5C55.6 460.1 105.5 448 144 448c33.9 0 79 14 105.6 23.5zm76.8 0C353 462 398.1 448 432 448c38.5 0 88.4 12.1 119.9 22.6c11.3 3.8 24.1-4.6 24.1-16.5V83.8c0-12.1-6.8-23.3-18.1-27.6C529.7 45.3 482.5 32 432 32c-58.4 0-103.4 20-123 35.6c-3.3 2.6-5 6.8-5 11V456c0 11.4 11.7 19.3 22.4 15.5z';
+  const BookOpenW = 576, BookOpenH = 512;
 
-  // DownLeftAndUpRightToCenter
-  var svgPathData$3 = 'M439 7c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H296c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39L439 7zM72 272H216c13.3 0 24 10.7 24 24V440c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39L73 505c-9.4 9.4-24.6 9.4-33.9 0L7 473c-9.4-9.4-9.4-24.6 0-33.9l87-87L55 313c-6.9-6.9-8.9-17.2-5.2-26.2s12.5-14.8 22.2-14.8z';
-  var width$3 = 512;var height$3 = 512;
+  const DownLeftAndUpRightToCenterSvg = 'M439 7c9.4-9.4 24.6-9.4 33.9 0l32 32c9.4 9.4 9.4 24.6 0 33.9l-87 87 39 39c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8H296c-13.3 0-24-10.7-24-24V72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2l39 39L439 7zM72 272H216c13.3 0 24 10.7 24 24V440c0 9.7-5.8 18.5-14.8 22.2s-19.3 1.7-26.2-5.2l-39-39L73 505c-9.4 9.4-24.6 9.4-33.9 0L7 473c-9.4-9.4-9.4-24.6 0-33.9l87-87L55 313c-6.9-6.9-8.9-17.2-5.2-26.2s12.5-14.8 22.2-14.8z';
+  const DownLeftAndUpRightToCenterW = 512, DownLeftAndUpRightToCenterH = 512;
 
-  // Heart
-  var svgPathData$2 = 'M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z';
-  var width$2 = 512;var height$2 = 512;
+  const HeartSvg = 'M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z';
+  const HeartW = 512, HeartH = 512;
 
-  // CaretDown
-  var svgPathData$1 = 'M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z';
-  var width$1 = 320;var height$1 = 512;
+  const CaretRightSvg = 'M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z';
+  const CaretRightW = 256, CaretRightH = 512;
 
-  // Scissors
-  var svgPathData = 'M256 192l-39.5-39.5c4.9-12.6 7.5-26.2 7.5-40.5C224 50.1 173.9 0 112 0S0 50.1 0 112s50.1 112 112 112c14.3 0 27.9-2.7 40.5-7.5L192 256l-39.5 39.5c-12.6-4.9-26.2-7.5-40.5-7.5C50.1 288 0 338.1 0 400s50.1 112 112 112s112-50.1 112-112c0-14.3-2.7-27.9-7.5-40.5L499.2 76.8c7.1-7.1 7.1-18.5 0-25.6c-28.3-28.3-74.1-28.3-102.4 0L256 192zm22.6 150.6L396.8 460.8c28.3 28.3 74.1 28.3 102.4 0c7.1-7.1 7.1-18.5 0-25.6L342.6 278.6l-64 64zM64 112a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm48 240a48 48 0 1 1 0 96 48 48 0 1 1 0-96z';
-  var width = 512;var height = 512;
+  const CaretLeftSvg = 'M9.4 278.6c-12.5-12.5-12.5-32.8 0-45.3l128-128c9.2-9.2 22.9-11.9 34.9-6.9s19.8 16.6 19.8 29.6l0 256c0 12.9-7.8 24.6-19.8 29.6s-25.7 2.2-34.9-6.9l-128-128z';
+  const CaretLeftW = 256, CaretLeftH = 512;
+
+  const CaretDownSvg = 'M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z';
+  const CaretDownW = 320, CaretDownH = 512;
+
+  const ScissorsSvg = 'M256 192l-39.5-39.5c4.9-12.6 7.5-26.2 7.5-40.5C224 50.1 173.9 0 112 0S0 50.1 0 112s50.1 112 112 112c14.3 0 27.9-2.7 40.5-7.5L192 256l-39.5 39.5c-12.6-4.9-26.2-7.5-40.5-7.5C50.1 288 0 338.1 0 400s50.1 112 112 112s112-50.1 112-112c0-14.3-2.7-27.9-7.5-40.5L499.2 76.8c7.1-7.1 7.1-18.5 0-25.6c-28.3-28.3-74.1-28.3-102.4 0L256 192zm22.6 150.6L396.8 460.8c28.3 28.3 74.1 28.3 102.4 0c7.1-7.1 7.1-18.5 0-25.6L342.6 278.6l-64 64zM64 112a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm48 240a48 48 0 1 1 0 96 48 48 0 1 1 0-96z';
+  const ScissorsW = 512, ScissorsH = 512;
+
+  const XmarkSvg = 'M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z';
+  const XmarkW = 384, XmarkH = 512;
+
+  const ArrowRightLongSvg = 'M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l370.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z';
+  const ArrowRightLongW = 512, ArrowRightLongH = 512;
+
+  const PlusSvg = 'M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z';
+  const PlusW = 448, PlusH = 512;
+
+  const SquarePlusSvg = 'M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM200 344V280H136c-13.3 0-24-10.7-24-24s10.7-24 24-24h64V168c0-13.3 10.7-24 24-24s24 10.7 24 24v64h64c13.3 0 24 10.7 24 24s-10.7 24-24 24H248v64c0 13.3-10.7 24-24 24s-24-10.7-24-24z';
+  const SquarePlusW = 448, SquarePlusH = 512;
+
+  const SquareMinusSvg = 'M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H384c8.8 0 16-7.2 16-16V96c0-8.8-7.2-16-16-16H64zM0 96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V416c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V96zM152 232H296c13.3 0 24 10.7 24 24s-10.7 24-24 24H152c-13.3 0-24-10.7-24-24s10.7-24 24-24z';
+  const SquareMinusW = 448, SquareMinusH = 512;
+
+  const PlaySvg = 'M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z';
+  const PlayW = 384, PlayH = 512;
+
+  const StopSvg = 'M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z';
+  const StopW = 384, StopH = 512;
 
   const toSvg = (svgPathData, width, height) => {
-    return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 ${width} ${height}">` +
+    return `<svg xmlns="http://www.w3.org/2000/svg" class="xt-icon" viewBox="0 0 ${width} ${height}">` +
       `<path d="${svgPathData}" fill="currentColor" /></svg>`;
   };
   const icons = {
-    image: toSvg(svgPathData$i, width$i, height$i),
-    eye: toSvg(svgPathData$h, width$h, height$h),
-    expand: toSvg(svgPathData$g, width$g, height$g),
-    comment: toSvg(svgPathData$f, width$f, height$f),
-    refresh: toSvg(svgPathData$e, width$e, height$e),
-    wrench: toSvg(svgPathData$d, width$d, height$d),
-    bolt: toSvg(svgPathData$c, width$c, height$c),
-    link: toSvg(svgPathData$8, width$8, height$8),
-    pencil: toSvg(svgPathData$b, width$b, height$b),
-    clipboard: toSvg(svgPathData$a, width$a, height$a),
-    clock: toSvg(svgPathData$9, width$9, height$9),
-    shuffle: toSvg(svgPathData$7, width$7, height$7),
-    undo: toSvg(svgPathData$6, width$6, height$6),
-    download: toSvg(svgPathData$5, width$5, height$5),
-    bookOpen: toSvg(svgPathData$4, width$4, height$4),
-    shrink: toSvg(svgPathData$3, width$3, height$3),
-    heart: toSvg(svgPathData$2, width$2, height$2),
-    caretDown: toSvg(svgPathData$1, width$1, height$1),
-    scissors: toSvg(svgPathData, width, height)
+    image: toSvg(ImageSvg, ImageW, ImageH),
+    eye: toSvg(EyeSvg, EyeW, EyeH),
+    expand: toSvg(UpRightAndDownLeftFromCenterSvg, UpRightAndDownLeftFromCenterW, UpRightAndDownLeftFromCenterH),
+    comment: toSvg(CommentSvg, CommentW, CommentH),
+    refresh: toSvg(RotateSvg, RotateW, RotateH),
+    wrench: toSvg(WrenchSvg, WrenchW, WrenchH),
+    bolt: toSvg(BoltSvg, BoltW, BoltH),
+    link: toSvg(LinkSvg, LinkW, LinkH),
+    pencil: toSvg(PencilSvg, PencilW, PencilH),
+    clipboard: toSvg(ClipboardSvg, ClipboardW, ClipboardH),
+    clock: toSvg(ClockSvg, ClockW, ClockH),
+    shuffle: toSvg(ShuffleSvg, ShuffleW, ShuffleH),
+    undo: toSvg(RotateLeftSvg, RotateLeftW, RotateLeftH),
+    download: toSvg(DownloadSvg, DownloadW, DownloadH),
+    bookOpen: toSvg(BookOpenSvg, BookOpenW, BookOpenH),
+    shrink: toSvg(DownLeftAndUpRightToCenterSvg, DownLeftAndUpRightToCenterW, DownLeftAndUpRightToCenterH),
+    heart: toSvg(HeartSvg, HeartW, HeartH),
+    caretRight: toSvg(CaretRightSvg, CaretRightW, CaretRightH),
+    caretLeft: toSvg(CaretLeftSvg, CaretLeftW, CaretLeftH),
+    caretDown: toSvg(CaretDownSvg, CaretDownW, CaretDownH),
+    scissors: toSvg(ScissorsSvg, ScissorsW, ScissorsH),
+    xmark: toSvg(XmarkSvg, XmarkW, XmarkH),
+    arrowRightLong: toSvg(ArrowRightLongSvg, ArrowRightLongW, ArrowRightLongH),
+    plus: toSvg(PlusSvg, PlusW, PlusH),
+    squarePlus: toSvg(SquarePlusSvg, SquarePlusW, SquarePlusH),
+    squareMinus: toSvg(SquareMinusSvg, SquareMinusW, SquareMinusH),
+    play: toSvg(PlaySvg, PlayW, PlayH),
+    stop: toSvg(StopSvg, StopW, StopH)
   };
   var Icon = {
     /** Sets an icon in an HTML element */
@@ -8990,12 +8910,12 @@ svg.icon {
     makeButton(post, type) {
       const span = $.el('span', {
         className: 'stub-icon',
-        textContent: type === 'hide' ? '➖︎' : '➕︎',
       });
       const a = $.el('a', {
-        className: `${type}-reply-button`,
+        className: `${type}-post-button ${type}-reply-button`,
         href: 'javascript:;'
       });
+      Icon.set(span, type === 'hide' ? 'squareMinus' : 'squarePlus');
       $.add(a, span);
       $.on(a, 'click', PostHiding.toggle);
       return a;
@@ -10322,6 +10242,7 @@ svg.icon {
 
       Icon.set(this.refreshButton, 'refresh');
       Icon.set(this.menuButton, 'caretDown');
+      Icon.set(this.closeButton, 'xmark');
 
       $.on(d, 'QRPostSuccessful',   this.cb.post);
       $.on(sc, 'click', this.toggleWatcher);
@@ -10866,6 +10787,7 @@ svg.icon {
         textContent: '✕',
         href: 'javascript:;'
       });
+      Icon.set(x, 'xmark');
       $.on(x, 'click', ThreadWatcher.cb.rm);
 
       let {excerpt, isArchived} = data;
@@ -12215,6 +12137,7 @@ svg.icon {
       this.setupSearch();
       $.on(this.searchInput, 'input', this.onSearchInput);
       $.on($('#index-search-clear', this.navLinks), 'click', this.clearSearch);
+      Icon.set($('#index-search-clear', this.navLinks), 'xmark');
 
       // Hidden threads toggle
       this.hideLabel = $('#hidden-label', this.navLinks);
@@ -13488,11 +13411,15 @@ svg.icon {
     },
 
     makeButton(thread, type) {
+      const span = $.el('span', {
+        className: 'stub-icon',
+      });
       const a = $.el('a', {
-        className: `${type}-thread-button`,
+        className: `${type}-post-button ${type}-thread-button`,
         href:      'javascript:;'
       });
-      $.add(a, $.el('span', { className: 'stub-icon', textContent: type === 'hide' ? '➖︎' : '➕︎' }));
+      Icon.set(span, type === 'hide' ? 'squareMinus' : 'squarePlus');
+      $.add(a, span);
       a.dataset.fullID = thread.fullID;
       $.on(a, 'click', ThreadHiding.toggle);
       return a;
@@ -13977,15 +13904,28 @@ svg.icon {
       $.on(nodes.next,  'click', cb.click);
       $.on(nodes.name,  'click', ImageCommon.download);
 
-      $.on($('.gal-prev',  dialog), 'click', cb.prev);
-      $.on($('.gal-next',  dialog), 'click', cb.next);
-      $.on($('.gal-start', dialog), 'click', cb.start);
-      $.on($('.gal-stop',  dialog), 'click', cb.stop);
-      $.on($('.gal-close', dialog), 'click', cb.close);
+      const prev =  $('.gal-prev',  dialog);
+      const next =  $('.gal-next',  dialog);
+      const start = $('.gal-start', dialog);
+      const stop =  $('.gal-stop',  dialog);
+      const close = $('.gal-close', dialog);
+
+      $.on(prev,  'click', cb.prev);
+      $.on(next,  'click', cb.next);
+      $.on(start, 'click', cb.start);
+      $.on(stop,  'click', cb.stop);
+      $.on(close, 'click', cb.close);
 
       $.on(menuButton, 'click', function(e) {
         return nodes.menu.toggle(e, this, g);
       });
+
+      Icon.set(menuButton, 'caretDown');
+      Icon.set(start, 'play');
+      Icon.set(stop, 'stop');
+      Icon.set(close, 'xmark');
+      Icon.set(prev, 'caretLeft');
+      Icon.set(next, 'caretRight');
 
       for (var entry of Gallery.menu.createSubEntries()) {
         entry.order = 0;
@@ -14958,13 +14898,16 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         return;
       }
       $.addClass(Embedding.dialog, 'empty');
-      $.on($('.close', Embedding.dialog), 'click', Embedding.closeFloat);
+      const close = $('.close', Embedding.dialog);
+      const jump = $('.jump', Embedding.dialog);
+      $.on(close, 'click', Embedding.closeFloat);
       $.on($('.move', Embedding.dialog), 'mousedown', Embedding.dragEmbed);
-      $.on($('.jump', Embedding.dialog), 'click', function () {
-        if (doc.contains(Embedding.lastEmbed)) {
+      $.on(jump, 'click', function () {
+        if (doc.contains(Embedding.lastEmbed))
           return Header.scrollTo(Embedding.lastEmbed);
-        }
       });
+      Icon.set(jump, 'arrowRightLong');
+      Icon.set(close, 'xmark');
       return $.add(d.body, Embedding.dialog);
     },
     closeFloat() {
@@ -17527,6 +17470,9 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       Icon.set(nodes.view, 'eye');
       Icon.set(nodes.restoreNameButton, 'undo');
       Icon.set(nodes.splitPost, 'scissors');
+      Icon.set(nodes.close, 'xmark');
+      Icon.set(nodes.dumpButton, 'squarePlus');
+      Icon.set(nodes.addPost, 'plus');
     },
     flags() {
       const select = $.el('select', {
@@ -18364,7 +18310,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         href: 'javascript:;'
       });
       $.extend(el, {
-        innerHTML: '<a class="remove" title="Remove">✕</a>' +
+        innerHTML: `<a class="remove" title="Remove">${Icon.get('xmark')}</a>` +
           '<label class="qr-preview-spoiler"><input type="checkbox"> Spoiler</label>' +
           '<span id="qr-preview-comment"></span><br /><span id="qr-preview-name"></span>'
       });
@@ -20517,7 +20463,10 @@ $\
         return h("a", { href: this.file.url, download: this.file.name, class: "download-button" }, Icon.raw('download'));
       },
       f() {
-        return { innerHTML: "<a href=\"javascript:;\" class=\"quick-filter-md5\">✕</a>", [isEscaped]: true };
+        return {
+          innerHTML: `<a href="javascript:;" class="quick-filter-md5">${Icon.get('xmark')}</a>`,
+          [isEscaped]: true,
+        };
       },
       p() { return { innerHTML: ((this.file.isSpoiler) ? "Spoiler, " : ""), [isEscaped]: true }; },
       s() { return { innerHTML: E(this.file.size), [isEscaped]: true }; },
@@ -20589,6 +20538,7 @@ $\
       if (openSection !== 'none') {
         (sectionToOpen ? sectionToOpen : links[0]).click();
       }
+      Icon.set($('.close', dialog), 'xmark');
       $.on($('.close', dialog), 'click', Settings.close);
       $.on(window, 'beforeunload', Settings.close);
       $.on(dialog, 'click', () => {
@@ -22094,7 +22044,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       });
       this.menu = new UI.Menu('header');
       const menuButton = $.el('span', { className: 'menu-button' });
-      $.extend(menuButton, { innerHTML: "<i></i>" });
+      Icon.set(menuButton, 'caretDown', 'Menu');
       const box = UI.checkbox;
       const barFixedToggler = box('Fixed Header', 'Fixed Header');
       const headerToggler = box('Header auto-hide', 'Auto-hide header');
@@ -22681,8 +22631,9 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       this.close = this.close.bind(this);
       this.timeout = timeout;
       this.onclose = onclose;
-      this.el = $.el('div',
-        { innerHTML: '<a href="javascript:;" class="close" title="Close">✕</a><div class="message"></div>' });
+      this.el = $.el('div', {
+        innerHTML: `<a href="javascript:;" class="close" title="Close">${Icon.get('xmark')}</a><div class="message"></div>`
+      });
       this.el.style.opacity = 0;
       this.setType(type);
       $.on(this.el.firstElementChild, 'click', this.close);
