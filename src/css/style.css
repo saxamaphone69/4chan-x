@@ -415,7 +415,7 @@ audio.controls-added {
   max-width: 100%;
   position: relative;
   transition: all .25s ease-in-out;
-  padding: 7px;
+  padding: 6px 5px 6px 20px;
   display: flex;
   gap: 5px;
   align-items: center;
@@ -439,8 +439,9 @@ audio.controls-added {
   order: 1;
 }
 .message {
+  overflow-wrap: break-word;
   box-sizing: border-box;
-  padding: 6px 20px;
+  padding: 0 5px;
   max-height: 200px;
   width: 100%;
   overflow: auto;
