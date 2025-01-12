@@ -799,7 +799,9 @@ const Config = {
 
     filesize: '',
 
-    MD5: ''
+    MD5: '',
+
+    aspectratio: ''
   },
 
   sauces: `\
