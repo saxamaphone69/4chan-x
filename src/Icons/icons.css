@@ -1,12 +1,12 @@
 /* Icons */
-.xt-icon {
+.icon {
   height: 1em;
   width: 1em;
   display: inline-flex;
   vertical-align: -.125em;
 }
 :root.shortcut-icons #shortcuts .icon--alt-text,
-:root:not(.shortcut-icons) .shortcut .xt-icon {
+:root:not(.shortcut-icons) .shortcut .icon {
   display: none;
 }
 :root.shortcut-icons .shortcut.brackets-wrap::before,

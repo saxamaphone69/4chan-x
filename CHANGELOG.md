@@ -3,6 +3,11 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.21.1 (2025-01-12)
+
+- Reverted change from the `icon` to `xt-icon` CSS class to fix the interaction the icons have with other user scripts
+  like StyleChan.
+
 ### 2.21.0 (2025-01-11)
 
 - Convert various Unicode characters to SVG icons. [#141](https://github.com/TuxedoTako/4chan-xt/pull/141)

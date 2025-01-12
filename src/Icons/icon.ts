@@ -31,7 +31,7 @@ import { svgPathData as stopSvg, width as stopW, height as stopH } from "@fas/fa
 
 
 const toSvg = (svgPathData: string, width: string | number, height: string | number) => {
-  return `<svg xmlns="http://www.w3.org/2000/svg" class="xt-icon" viewBox="0 0 ${width} ${height}">` +
+  return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 ${width} ${height}">` +
     `<path d="${svgPathData}" fill="currentColor" /></svg>`;
 }
 

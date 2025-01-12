@@ -302,7 +302,7 @@ audio.controls-added {
   box-shadow: 0 -1px 2px rgba(0, 0, 0, .15);
   border-top-width: 1px;
 }
-.fixed.bottom-header #header-bar .menu-button .xt-icon {
+.fixed.bottom-header #header-bar .menu-button .icon {
   transform: rotate(180deg) translateY(-.125em);
 }
 .fixed #header-bar.autohide:not(:hover) {
@@ -353,7 +353,7 @@ audio.controls-added {
   display: flex;
   gap: 4px;
 }
-#shortcuts .xt-icon {
+#shortcuts .icon {
   font-size: 14px;
 }
 :root.autohiding-scrollbar #shortcuts {
@@ -2284,7 +2284,7 @@ a:only-of-type > .remove {
   text-decoration: underline;
 }
 
-.spin > .xt-icon {
+.spin > .icon {
   animation: spin 2s infinite linear;
 }
 

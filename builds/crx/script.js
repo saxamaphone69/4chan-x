@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.21.0",
-    "date": "2025-01-11T19:00:00Z"
+    "version": "2.21.1",
+    "date": "2025-01-12T12:14:45:00Z"
   };
 
   var meta = {
@@ -3581,7 +3581,7 @@ audio.controls-added {
   box-shadow: 0 -1px 2px rgba(0, 0, 0, .15);
   border-top-width: 1px;
 }
-.fixed.bottom-header #header-bar .menu-button .xt-icon {
+.fixed.bottom-header #header-bar .menu-button .icon {
   transform: rotate(180deg) translateY(-.125em);
 }
 .fixed #header-bar.autohide:not(:hover) {
@@ -3632,7 +3632,7 @@ audio.controls-added {
   display: flex;
   gap: 4px;
 }
-#shortcuts .xt-icon {
+#shortcuts .icon {
   font-size: 14px;
 }
 :root.autohiding-scrollbar #shortcuts {
@@ -5563,7 +5563,7 @@ a:only-of-type > .remove {
   text-decoration: underline;
 }
 
-.spin > .xt-icon {
+.spin > .icon {
   animation: spin 2s infinite linear;
 }
 
@@ -5710,14 +5710,14 @@ div.post {
 `).join(''));
 
   var iconCss = `/* Icons */
-.xt-icon {
+.icon {
   height: 1em;
   width: 1em;
   display: inline-flex;
   vertical-align: -.125em;
 }
 :root.shortcut-icons #shortcuts .icon--alt-text,
-:root:not(.shortcut-icons) .shortcut .xt-icon {
+:root:not(.shortcut-icons) .shortcut .icon {
   display: none;
 }
 :root.shortcut-icons .shortcut.brackets-wrap::before,
@@ -6023,7 +6023,7 @@ div.post {
   const StopW = 384, StopH = 512;
 
   const toSvg = (svgPathData, width, height) => {
-    return `<svg xmlns="http://www.w3.org/2000/svg" class="xt-icon" viewBox="0 0 ${width} ${height}">` +
+    return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 ${width} ${height}">` +
       `<path d="${svgPathData}" fill="currentColor" /></svg>`;
   };
   const icons = {
