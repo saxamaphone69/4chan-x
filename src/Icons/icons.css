@@ -1,9 +1,13 @@
 /* Icons */
-.icon {
+svg.icon {
   height: 1em;
   width: 1em;
   display: inline-flex;
   vertical-align: -.125em;
+}
+/* Override catalog.css */
+:root.catalog svg.icon {
+  position: static;
 }
 :root.shortcut-icons #shortcuts .icon--alt-text,
 :root:not(.shortcut-icons) .shortcut .icon {
