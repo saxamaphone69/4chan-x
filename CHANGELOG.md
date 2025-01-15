@@ -3,6 +3,15 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### 2.21.2 (2025-01-15)
+
+- Fix notification padding. [#146](https://github.com/TuxedoTako/4chan-xt/issues/146),
+  [#147](https://github.com/TuxedoTako/4chan-xt/pull/147)
+- Fix shortcuts getting squished in the non-4chan-XT catalog. [#148](https://github.com/TuxedoTako/4chan-xt/issues/148),
+  [#149](https://github.com/TuxedoTako/4chan-xt/pull/149)
+- Fix not being able to clear keybinds with backspace.
+  [Greasy Fork comment](https://greasyfork.org/en/scripts/489508-4chan-xt/discussions/274072)
+
 ### 2.21.1 (2025-01-12)
 
 - Reverted change from the `icon` to `xt-icon` CSS class to fix the interaction the icons have with other user scripts

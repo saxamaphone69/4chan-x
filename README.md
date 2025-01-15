@@ -47,6 +47,15 @@ feature, see upstream 4chan X's [privacy documentation](https://github.com/ccd0/
 
 ## Install
 
+To run an user script, you need an user script manager like Violentmonkey
+\([Chrome](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag),
+[Firefox](https://addons.mozilla.org/firefox/addon/violentmonkey/),
+[Edge](https://microsoftedge.microsoft.com/addons/detail/eeagobfjdenkkddmbclomhiblgggliao)), or tampermonkey
+\([Chrome](https://chrome.google.com/webstore/detail/dhdgffkkebhmkfjojejmpbldmpobfkfo),
+[Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/),
+[Edge](https://microsoftedge.microsoft.com/addons/detail/iikmkjmpaadaobahmlepeloendndfphd),
+[Safari](https://apps.apple.com/app/tampermonkey/id6738342400)).
+
 This fork is distributed through [GitHub releases](https://github.com/TuxedoTako/4chan-xt/releases) and [Greasy Fork](https://greasyfork.org/scripts/489508-4chan-xt).
 There are known issues with updating user scripts through GitHub: [#34](https://github.com/TuxedoTako/4chan-xt/issues/34)
 [violentmonkey#1673](https://github.com/violentmonkey/violentmonkey/issues/1673), but Greasy Fork doesn't allow the

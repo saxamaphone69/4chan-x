@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         4chan XT
-// @version      2.21.1
+// @version      2.21.2
 // @minGMVer     1.14
 // @minFFVer     74
 // @namespace    4chan-XT
@@ -169,8 +169,8 @@
   'use strict';
 
   var version = {
-    "version": "2.21.1",
-    "date": "2025-01-12T12:14:45:00Z"
+    "version": "2.21.2",
+    "date": "2025-01-15T18:18:10:00Z"
   };
 
   var meta = {
@@ -3844,7 +3844,7 @@ audio.controls-added {
   max-width: 100%;
   position: relative;
   transition: all .25s ease-in-out;
-  padding: 7px;
+  padding: 6px 5px 6px 20px;
   display: flex;
   gap: 5px;
   align-items: center;
@@ -3868,8 +3868,9 @@ audio.controls-added {
   order: 1;
 }
 .message {
+  overflow-wrap: break-word;
   box-sizing: border-box;
-  padding: 6px 20px;
+  padding: 0 5px;
   max-height: 200px;
   width: 100%;
   overflow: auto;
@@ -5860,11 +5861,15 @@ div.post {
 `).join(''));
 
   var iconCss = `/* Icons */
-.icon {
+svg.icon {
   height: 1em;
   width: 1em;
   display: inline-flex;
   vertical-align: -.125em;
+}
+/* Override catalog.css */
+:root.catalog svg.icon {
+  position: static;
 }
 :root.shortcut-icons #shortcuts .icon--alt-text,
 :root:not(.shortcut-icons) .shortcut .icon {
@@ -21461,14 +21466,13 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       });
     },
     keybind(e) {
-      let key;
-      if (e.keyCode === 9) {
-        return;
-      } // tab
+      if (e.keyCode === 9)
+        return; // tab
       e.preventDefault();
       e.stopPropagation();
-      if (!(key = Keybinds.keyCode(e)))
-        return;
+      const key = Keybinds.keyCode(e);
+      if (key == null)
+        return; // empty string is backspace
       this.value = key;
       $.cb.value.call(this);
     }

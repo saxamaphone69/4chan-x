@@ -859,11 +859,11 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
   },
 
   keybind(e) {
-    let key;
-    if (e.keyCode === 9) { return; } // tab
+    if (e.keyCode === 9) return; // tab
     e.preventDefault();
     e.stopPropagation();
-    if (!(key = Keybinds.keyCode(e))) return;
+    const key = Keybinds.keyCode(e);
+    if (key == null) return; // empty string is backspace
     this.value = key;
     $.cb.value.call(this);
   }
