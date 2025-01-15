@@ -897,6 +897,7 @@ var QR = {
     Icon.set(nodes.view, 'eye');
     Icon.set(nodes.restoreNameButton, 'undo');
     Icon.set(nodes.splitPost, 'scissors');
+    Icon.set(nodes.fileRM, 'xmark');
     Icon.set(nodes.close, 'xmark');
     Icon.set(nodes.dumpButton, 'squarePlus');
     Icon.set(nodes.addPost, 'plus');
