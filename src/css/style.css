@@ -2010,7 +2010,7 @@ a:only-of-type > .remove {
   right: -7px;
 }
 .left .menu-indicator > .icon {
-  transform: rotoate(180deg);
+  transform: rotate(180deg);
 }
 .submenu {
   display: none;
