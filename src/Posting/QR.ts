@@ -436,6 +436,7 @@ var QR = {
     :
       value;
     status.disabled = disabled || false;
+    return status.disabled;
   },
 
   openPost() {

@@ -497,7 +497,10 @@ $.oneItemSugar = fn => (function(key, val, cb) {
   } else {
     return fn(key, val);
   }
-}) as ((key: string, value: any, callback?: (() => void)) => void) | ((key: any, value: any) => void);
+}) as (
+  ((key: string, value: any, callback?: (() => void)) => void) &
+  ((values: Record<string, any>, callback?: (() => void)) => void)
+);
 
 $.syncing = dict();
 

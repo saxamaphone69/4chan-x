@@ -829,6 +829,8 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     }
   },
 
+  keyBindInputs: (dict() as Record<string, HTMLInputElement>),
+
   keybinds(section) {
     let key;
     $.extend(section, { innerHTML: KeybindsPage });
@@ -836,7 +838,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
 
     const tbody  = $('tbody', section);
     const items  = dict();
-    const inputs = dict();
+    const inputs = Settings.keyBindInputs;
     for (key in Config.hotkeys) {
       var arr = Config.hotkeys[key];
       var tr = $.el('tr',
@@ -856,6 +858,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         inputs[key].value = val;
       }
     });
+    $.on($('#reset-keys', section), 'click', Settings.resetKeybinds);
   },
 
   keybind(e) {
@@ -866,6 +869,18 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
     if (key == null) return; // empty string is backspace
     this.value = key;
     $.cb.value.call(this);
-  }
+  },
+
+  resetKeybinds() {
+    if (!confirm('Are you sure you want to reset the keybinds?')) return;
+
+    const defaults = Object.fromEntries(Object.entries(Config.hotkeys).map(([key, value]) => [key, value[0]]));
+    $.set(defaults, () => {
+      Object.assign(Conf, defaults);
+      for (const [key, value] of Object.entries(defaults)) {
+        Settings.keyBindInputs[key].value = value;
+      }
+    });
+  },
 };
 export default Settings;

@@ -148,7 +148,6 @@ export default function EmbedFxTwitter(a: HTMLAnchorElement): HTMLElement {
     async function renderReplies(tweet) {
       const replies = [];
       let depth = 0;
-      console.log('im in render reply', tweet);
       while (tweet.replying_to && tweet.replying_to_status && depth < maxReplies) {
         const replyUrl = `${Conf.fxtUrl}/${tweet.replying_to}/status/${tweet.replying_to_status}`;
         try {

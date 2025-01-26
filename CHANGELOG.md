@@ -3,12 +3,17 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
-### Not released yet
+### 2.22.0 (2025-01-26)
 
+- Convert a few more things into icons. [#150](https://github.com/TuxedoTako/4chan-xt/issues/150)
 - Implement FxTwitter improvements based on
   [saxamaphone69's comment](https://github.com/TuxedoTako/4chan-xt/issues/60#issuecomment-2600724308).
   - Replies now load, so the setting for the number of replies to load isn't useless anymore.
   - Community notes are shown.
+- Added button in the keybind settings to reset them to the defaults.
+  [#151](https://github.com/TuxedoTako/4chan-xt/issues/151)
+- Allow multiple actions for one keybind.
+  [Requested on Greasy Fork](https://greasyfork.org/nl/scripts/489508-4chan-xt/discussions/274093)
 
 ### 2.21.2 (2025-01-15)
 

@@ -85,8 +85,8 @@
   'use strict';
 
   var version = {
-    "version": "2.21.2",
-    "date": "2025-01-15T18:18:10:00Z"
+    "version": "2.22.0",
+    "date": "2025-01-26T18:15:00Z"
   };
 
   var meta = {
@@ -2816,7 +2816,8 @@ current-archive-text:"Archive"]
 <div>Press <kbd>Backspace</kbd> to disable a keybind.</div>
 <table><tbody>
   <tr><th>Actions</th><th>Keybinds</th></tr>
-</tbody></table>`;
+</tbody></table>
+<button type="button" id="reset-keys">Reset keybinds</button>`;
 
   var FilterSelectPage = `<select name="filter">
   <option value="guide">Guide</option>
@@ -4639,7 +4640,6 @@ input[name="Default Volume"] {
 
 /* Index/Reply Navigation */
 #navlinks {
-  font-size: 16px;
   top: 25px;
   right: 10px;
 }
@@ -5227,11 +5227,10 @@ a:only-of-type > .remove {
 #file-n-submit .row.space {
   justify-content: space-between;
 }
-#file-n-submit a {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 1px 3px 0 3px;
+#file-n-submit > .row.space > .row {
+  align-items: center;
+  gap: 6px;
+  padding: 0 3px;
 }
 
 /* Menu */
@@ -5265,9 +5264,6 @@ a:only-of-type > .remove {
   text-shadow: none;
   font-size: 10pt;
 }
-.left>.entry.has-submenu {
-  padding-right: 17px !important;
-}
 .entry input[type="checkbox"],
 .entry input[type="radio"] {
   margin: 0px;
@@ -5277,7 +5273,8 @@ a:only-of-type > .remove {
 .entry input[type="number"] {
   width: 4.5em;
 }
-.entry.has-shortcut-text {
+.entry.has-shortcut-text,
+.entry.has-submenu {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -5287,19 +5284,13 @@ a:only-of-type > .remove {
   font-size: 70%;
   margin-left: 5px;
 }
-.has-submenu::after {
-  content: "";
-  border-left: .5em solid;
-  border-top: .3em solid transparent;
-  border-bottom: .3em solid transparent;
-  display: inline-block;
-  margin: .3em;
-  position: absolute;
-  right: 3px;
+.menu-indicator {
+  pointer-events: none;
+  position: relative;
+  right: -7px;
 }
-.left .has-submenu::after {
-  border-left: 0;
-  border-right: .5em solid;
+.left .menu-indicator > .icon {
+  transform: rotate(180deg);
 }
 .submenu {
   display: none;
@@ -5550,12 +5541,6 @@ a:only-of-type > .remove {
   font-size: 0;
 }
 
-/* PostJumper */
-.postJumper > .prev,
-.postJumper > .next {
-  font-size: 120%;
-}
-
 /* PSA */
 .fcx-announcement {
   text-align: center;
@@ -5739,39 +5724,47 @@ svg.icon {
 }
 
 .fxt-card {
-  color: var(--xt-fxt-fg, #000);
-  background-color: var(--xt-fxt-bg, #000);
+  background-color: var(--xt-fxt-bg, #D6DAF0);
   padding: 16px;
-  border: 1px solid var(--xt-fxt-border);
+  border: 1px solid var(--xt-fxt-border, #B7C5D9);
   border-radius: 12px;
-  width: 400px;
-  display: flex;
-  flex-direction: column;
   gap: 8px;
-
-  white-space: pre-line;
-  word-break: break-word;
+  width: 550px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  grid-template-rows: max-content max-content max-content;
+  grid-template-areas:
+    "meta meta"
+    "content content"
+    "stats stats"
 }
 .fxt-meta {
   display: flex;
   flex-direction: row;
   gap: 8px;
+  grid-area: meta;
 }
 .fxt-meta_profile {
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 8px;
+}
+.fxt-meta_avatar {
+  display: flex;
+  align-items: center;
 }
 .fxt-meta_profile img {
   height: 48px;
   width: 48px;
   aspect-ratio: 1;
   border-radius: 100%;
-  overflow: hidden;
+  background-color: var(--xt-fxt-border, #B7C5D9);
 }
 .fxt-meta_author {
   display: flex;
   flex-direction: column;
+  flex-wrap: nowrap;
 }
 .fxt-meta_author_username {
   font-weight: bold;
@@ -5788,7 +5781,17 @@ svg.icon {
   align-items: center;
   gap: 4px;
 }
-
+.fxt-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  grid-area: content;
+}
+.fxt-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 .fxt-poll {
   display: flex;
   flex-direction: column;
@@ -5814,7 +5817,7 @@ svg.icon {
   margin-right: 6px;
   z-index: 1;
 }
-.fxt-choice .bar {
+.fxt-choice .fxt-bar {
   position: absolute;
   top: 0;
   left: 0;
@@ -5835,39 +5838,134 @@ svg.icon {
   border-radius: 4px;
   overflow: hidden;
 }
-.fxt-media :is(img, video) {
+.fxt-media_container {
+  --maxHeightMedia: 300px;
+}
+.fxt-media_container :is(img, video) {
   display: block;
-  max-width: 100%;
+  width: 100%;
   height: 100%;
+  max-height: var(--maxHeightMedia);
+  max-width: none;
   object-fit: contain;
   object-position: center;
 }
 .fxt-media_container {
   display: grid;
-  gap: 0;
-  grid-template-columns: 1fr;
-}
-.fxt-media_container.fxt-media-multiple {
   gap: 4px;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: auto;
+  grid-auto-flow: dense;
+  aspect-ratio: 16 / 9;
 }
-
-.fxt-quote {
-  border: 1px solid var(--xt-fxt-border);
-  border-radius: 12px;
-  overflow: hidden;
+.fxt-media_container .fxt-media:only-child {
+  grid-column: span 2 / auto;
+  grid-row: span 2 / auto;
 }
-.fxt-quote .fxt-meta_profile img {
+.fxt-media_contains_3 .fxt-media:first-child {
+  grid-row: span 2 / auto;
+}
+.fxt-media_contains_3 .fxt-media :is(img, video) {
+  max-height: calc(var(--maxHeightMedia) / 2);
+}
+.fxt-media_contains_3 .fxt-media:first-child :is(img, video) {
+  max-height: calc(var(--maxHeightMedia) + 4px);
+  /* weird spacing even though img/video has block... */
+}
+.fxt-media_video {
+  background-color: #000;
+}
+.fxt-tweet-quote {
+  width: fit-content;
+  padding: 8px;
+}
+.fxt-tweet-quote .fxt-meta_profile img {
   height: 24px;
   width: 24px;
 }
-
-.fxt-quote .fxt-meta {
+.fxt-tweet-quote .fxt-meta_author {
+  font-size: 80%;
+}
+.fxt-tweet-quote .fxt-meta {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 8px;
   padding: 4px;
+}
+.fxt-community_note {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--xt-fxt-border, #B7C5D9);
+  border-radius: .25rem;
+}
+.fxt-community_note-header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .25rem .5rem;
+  background-color: var(--xt-fxt-border, #B7C5D9);
+}
+.fxt-community_note-text {
+  padding: .5rem;
+  white-space: pre-wrap;
+}
+.fxt-tweet-reply {
+  grid-template-areas:
+    "meta meta"
+    "line content"
+    "line stats"
+}
+.fxt-tweet-reply::before {
+  grid-area: line;
+  content: '';
+  display: block;
+  background-color: var(--xt-fxt-border, #B7C5D9);
+  height: calc(100% + 18px);
+  width: 5px;
+  margin: auto;
+  position: relative;
+  top: -5px;
+}
+.fxt-stats {
+  grid-area: stats;
+}
+.fxt-reply_container>.fxt-tweet-reply,
+.fxt-reply_container+.fxt-tweet-original {
+  border: 0;
+  border-radius: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.fxt-reply_container>.fxt-tweet-reply:first-child {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  border: 1px solid var(--xt-fxt-border, #B7C5D9);
+  border-bottom: 0;
+}
+.fxt-reply_container>.fxt-tweet-reply:not(:first-child) {
+  border: 1px solid var(--xt-fxt-border, #B7C5D9);
+  border-top: 0;
+  border-bottom: 0;
+}
+.fxt-reply_container+.fxt-tweet-original {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  border: 1px solid var(--xt-fxt-border, #B7C5D9);
+  border-top: 0;
+}
+.fxt-text_translated-label,
+.fxt-stats {
+  color: var(--xt-dead-link);
+}
+.fxt-card:is(.warning, .loading) {
+  display: flex;
+}
+.fxt-card_container {
+  max-block-size: 90dvh;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+  width: fit-content;
 }`;
 
   // cSpell:ignore installGentoo, webfont
@@ -6027,6 +6125,12 @@ svg.icon {
   const StopSvg = 'M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z';
   const StopW = 384, StopH = 512;
 
+  const ArrowUpLongSvg = 'M214.6 9.4c-12.5-12.5-32.8-12.5-45.3 0l-128 128c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 109.3V480c0 17.7 14.3 32 32 32s32-14.3 32-32V109.3l73.4 73.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-128-128z';
+  const ArrowUpLongW = 384, ArrowUpLongH = 512;
+
+  const ArrowDownLongSvg = 'M169.4 502.6c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 402.7 224 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 370.7L86.6 329.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128z';
+  const ArrowDownLongW = 384, ArrowDownLongH = 512;
+
   const toSvg = (svgPathData, width, height) => {
     return `<svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 ${width} ${height}">` +
       `<path d="${svgPathData}" fill="currentColor" /></svg>`;
@@ -6059,7 +6163,9 @@ svg.icon {
     squarePlus: toSvg(SquarePlusSvg, SquarePlusW, SquarePlusH),
     squareMinus: toSvg(SquareMinusSvg, SquareMinusW, SquareMinusH),
     play: toSvg(PlaySvg, PlayW, PlayH),
-    stop: toSvg(StopSvg, StopW, StopH)
+    stop: toSvg(StopSvg, StopW, StopH),
+    arrowUpLong: toSvg(ArrowUpLongSvg, ArrowUpLongW, ArrowUpLongH),
+    arrowDownLong: toSvg(ArrowDownLongSvg, ArrowDownLongW, ArrowDownLongH)
   };
   var Icon = {
     /** Sets an icon in an HTML element */
@@ -7184,6 +7290,11 @@ svg.icon {
         for (var subEntry of subEntries) {
           this.parseEntry(subEntry);
         }
+        const span = $.el('span',
+          {className: 'menu-indicator'}
+        );
+        Icon.set(span, 'caretRight');
+        $.add(el, span);
       }
     };
     Menu$1.initClass();
@@ -7417,14 +7528,19 @@ svg.icon {
         {id: 'navlinks'});
       const prev = $.el('a', {
         textContent: '▲',
+        className: 'navlinks-navlink navlink-prev',
         href: 'javascript:;'
       }
       );
       const next = $.el('a', {
         textContent: '▼',
+        className: 'navlinks-navlink navlink-next',
         href: 'javascript:;'
       }
       );
+
+      Icon.set(prev, 'arrowUpLong');
+      Icon.set(next, 'arrowDownLong');
 
       $.on(prev, 'click', this.prev);
       $.on(next, 'click', this.next);
@@ -14630,6 +14746,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
   function EmbedFxTwitter(a) {
     const el = $.el('div', { innerHTML: '<blockquote class="twitter-tweet">Loading&hellip;</blockquote>' });
     const shouldTranslate = Conf.fxtLang ? `/${Conf.fxtLang}` : '';
+    const maxReplies = +Conf.fxtMaxReplies;
     CrossOrigin.cachePromise(`${Conf.fxtUrl}/${a.dataset.uid}${shouldTranslate}`).then(async (req) => {
       if (req.status === 404) {
         el.textContent = '404: tweet not found';
@@ -14637,24 +14754,6 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       }
       const { tweet } = req.response;
       // console.log(tweet);
-      async function getReplies(tweet) {
-        if (!tweet?.replying_to_status) {
-          return [];
-        }
-        const max_replies = +Conf.fxtMaxReplies;
-        let replies = [];
-        replies.push(tweet);
-        for (let i = 0; i < max_replies; i++) {
-          const replyReq = await CrossOrigin.cachePromise(`https://api.fxtwitter.com/${replies[i].replying_to}/status/${replies[i].replying_to_status}${shouldTranslate}`);
-          const replyRes = replyReq.response;
-          replies.push(replyRes.tweet);
-          if (!replyRes.tweet?.replying_to_status) {
-            break;
-          }
-        }
-        return replies;
-      }
-      const replies = (+Conf.fxtMaxReplies) === 0 ? [] : await getReplies(tweet);
       function renderMedia(tweet) {
         return tweet.media?.all?.map(media => {
           switch (media.type) {
@@ -14686,11 +14785,11 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         });
         return h("div", { class: "fxt-poll" },
           ...tweet.poll.choices.map((choice, index) => h("div", { class: `fxt-choice ${index === maxChoiceIndex ? 'highlight' : ''}` },
-            h("span", { class: "choice_label" }, choice.label),
-            h("span", { class: "choice_percentage" },
+            h("span", { class: "fxt-choice_label" }, choice.label),
+            h("span", { class: "fxt-choice_percentage" },
               choice.percentage,
               "%"),
-            h("div", { class: "bar", style: `width: ${choice.percentage}%` }))),
+            h("div", { class: "fxt-bar", style: `width: ${choice.percentage}%` }))),
           h("div", { class: "total-votes" },
             tweet.poll.total_votes.toLocaleString(),
             " votes"));
@@ -14709,7 +14808,8 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       function renderMeta(tweet) {
         return h("div", { class: "fxt-meta" },
           h("a", { class: "fxt-meta_profile", href: tweet.author.url, title: tweet.author.description, target: "_blank", referrerpolicy: "no-referrer" },
-            h("img", { src: tweet.author.avatar_url, referrerpolicy: "no-referrer" }),
+            h("div", { class: "fxt-meta_avatar" },
+              h("img", { src: tweet.author.avatar_url, referrerpolicy: "no-referrer" })),
             h("div", { class: "fxt-meta_author" },
               h("span", { class: "fxt-meta_author_username" }, tweet.author.name),
               h("span", { class: "fxt-meta_author_account" },
@@ -14727,62 +14827,105 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         result.push(inputText.slice(endLast));
         return result;
       }
-      function renderQuote(tweet, renderNested = false) {
-        const quote_nested = (tweet?.quote && renderNested) ? renderQuote(tweet.quote, false) : '';
-        const quote_poll = (tweet?.poll) ? renderPoll(tweet) : '';
-        const quote_translation = renderTranslation(tweet);
-        const media = tweet.media?.all ? renderMedia(tweet) : [];
-        return h("div", { class: "fxt-quote" },
-          renderMeta(tweet),
-          h("div", { class: "fxt-text", lang: tweet.lang },
-            ...renderText(tweet.text),
-            quote_translation),
-          h("div", { class: `fxt-media_container ${tweet.media?.all?.length > 1 ? 'fxt-media-multiple' : ''}` },
-            quote_poll,
-            ...media),
-          quote_nested);
-      }
-      let repliesJsx = [];
-      if (replies.length > 1) {
-        repliesJsx.push({ innerHTML: "<em>Replying To</em><br/>", [isEscaped]: true });
-        for (let i = replies.length - 1; i > 0; i--) {
-          repliesJsx.push(renderQuote(replies[i], true));
+      function renderCommunityNote(note) {
+        const content = [];
+        let i = 0;
+        if (note.entities) {
+          for (const entity of note.entities) {
+            if (entity.ref.url) {
+              if (i < entity.fromIndex)
+                content.push(...renderText(note.text.slice(i, entity.fromIndex)));
+              content.push(h("a", { href: entity.ref.url, target: "_blank", referrerpolicy: "no-referrer" }, note.text.slice(entity.fromIndex, entity.toIndex)));
+              i = entity.toIndex;
+            }
+          }
         }
+        if (i < note.text.length - 1)
+          content.push(...renderText(note.text.slice(i)));
+        return h("div", { class: "fxt-community_note" },
+          h("div", { class: "fxt-community_note-header" }, "Community Note"),
+          h("div", { class: "fxt-community_note-text" }, ...content));
       }
-      const media = renderMedia(tweet);
-      const quote = (tweet?.quote) ? renderQuote(tweet.quote) : '';
-      const poll = (tweet?.poll) ? renderPoll(tweet) : '';
-      const created_at = renderDate(tweet);
-      const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
-      const innerHTML = h("article", { class: "fxt-card" },
-        renderMeta(tweet),
-        h("div", { class: "fxt-text", lang: tweet.lang },
-          ...renderText(tweet.text),
-          translation),
-        h("div", { class: `fxt-media_container ${tweet.media?.all?.length > 1 ? 'fxt-media-multiple' : ''}` },
-          poll,
-          ...media),
-        quote,
-        h("div", { class: "fxt-stats" },
-          h("div", { class: "fxt-stats_time" }, created_at),
-          h("div", { class: "fxt-stats_meta" },
-            h("span", { class: "fxt-likes" },
-              Icon.raw("comment"),
-              tweet.replies.toLocaleString()),
-            h("span", { class: "fxt-reposts" },
-              Icon.raw("shuffle"),
-              tweet.retweets.toLocaleString()),
-            h("span", { class: "fxt-replies" },
-              Icon.raw("heart"),
-              tweet.likes.toLocaleString()))));
-      el.innerHTML = innerHTML.innerHTML;
+      async function renderQuote(quote) {
+        return h("div", { class: "fxt-quote_container" }, await renderTweet(quote, 'quote'));
+      }
+      async function renderReplies(tweet) {
+        const replies = [];
+        let depth = 0;
+        while (tweet.replying_to && tweet.replying_to_status && depth < maxReplies) {
+          const replyUrl = `${Conf.fxtUrl}/${tweet.replying_to}/status/${tweet.replying_to_status}`;
+          try {
+            const replyData = await CrossOrigin.cachePromise(replyUrl);
+            tweet = replyData.response.tweet;
+            const replyHTML = await renderTweet(tweet, 'reply');
+            replies.unshift(replyHTML);
+            depth++;
+          } catch (error) {
+            console.error(`Error fetching/rendering reply tweet: ${error.message}`);
+            console.log(tweet);
+            const url = `${Conf.fxtUrl}/${tweet.replying_to}/status/${tweet.replying_to_status}`;
+            return h("div", { class: "fxt-reply_container" },
+              h("article", { class: "fxt-card fxt-tweet-reply" },
+                h("div", { class: "fxt-content warning" },
+                  "Failed trying to load ",
+                  h("a", { href: url, target: "_blank", referrerpolicy: "no-referrer" }, url),
+                  h("br", null),
+                  "This tweet has probably been deleted or removed.",
+                  h("br", null),
+                  "This also breaks the reply chain, so you may want to view the original tweet.")));
+          }
+        }
+        return h("div", { class: "fxt-reply_container" }, ...replies);
+      }
+      async function renderTweet(tweet, type) {
+        const media = renderMedia(tweet);
+        const quote = (tweet?.quote) ? await renderQuote(tweet.quote) : '';
+        const poll = (tweet?.poll) ? renderPoll(tweet) : '';
+        const created_at = renderDate(tweet);
+        const translation = (shouldTranslate) ? renderTranslation(tweet) : '';
+        const note = tweet.community_note ? renderCommunityNote(tweet.community_note) : '';
+        return h("article", { class: `fxt-card fxt-tweet-${type}` },
+          renderMeta(tweet),
+          h("div", { class: "fxt-content" },
+            h("div", { class: "fxt-text", lang: tweet.lang },
+              ...renderText(tweet.text),
+              translation),
+            (media.length || poll) &&
+              h("div", { class: `fxt-media_container ${tweet.media?.all?.length > 1 ? 'fxt-media-multiple' : ''}` },
+                poll,
+                ...media),
+            note,
+            quote),
+          h("div", { class: "fxt-stats" },
+            h("div", { class: "fxt-stats_time" }, created_at),
+            h("div", { class: "fxt-stats_meta" },
+              h("span", { class: "fxt-likes" },
+                Icon.raw("comment"),
+                tweet.replies.toLocaleString()),
+              h("span", { class: "fxt-reposts" },
+                Icon.raw("shuffle"),
+                tweet.retweets.toLocaleString()),
+              h("span", { class: "fxt-replies" },
+                Icon.raw("heart"),
+                tweet.likes.toLocaleString()))));
+      }
+      async function renderFullTweet(tweet) {
+        const mainTweetHTML = await renderTweet(tweet, 'original');
+        const repliesHTML = tweet.replying_to ? await renderReplies(tweet) : '';
+        return h(hFragment, null,
+          repliesHTML,
+          mainTweetHTML);
+      }
+      const rendered = await renderFullTweet(tweet);
+      el.innerHTML = rendered.innerHTML;
       for (const textEl of el.getElementsByClassName('fxt-text')) {
         Linkify.process(textEl);
       }
       el.style.resize = null;
-      el.style.height = 'fit-content';
-      el.style.width = 'fit-content';
-      el.style.overflow = 'auto';
+      el.classList.add('fxt-card_container');
+      el.style.height = null;
+      el.style.width = null;
+      el.style.overflow = null;
     });
     return el;
   }
@@ -15925,265 +16068,264 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
         threadRoot = Nav.getThread();
         thread = Get.threadFromRoot(threadRoot);
       }
-      switch (key) {
-        // QR & Options
-        case Conf['Toggle board list']:
-          if (!Conf['Custom Board Navigation']) { return; }
-          Header.toggleBoardList();
-          break;
-        case Conf['Toggle header']:
-          Header.toggleBarVisibility();
-          break;
-        case Conf['Open empty QR']:
-          if (!QR.postingIsEnabled) { return; }
-          Keybinds.qr();
-          break;
-        case Conf['Open QR']:
-          if (!QR.postingIsEnabled || !threadRoot) { return; }
-          Keybinds.qr(threadRoot);
-          break;
-        case Conf['Open settings']:
-          Settings.open();
-          break;
-        case Conf['Close']:
-          if (Settings.dialog) {
-            Settings.close();
-          } else if ((notifications = $$('.notification')).length) {
-            for (var notification of notifications) {
-              $('.close', notification).click();
-            }
-          } else if (QR.nodes?.preview) {
-            QR.closePreview();
-          } else if (QR.nodes && !(QR.nodes.el.hidden || (window.getComputedStyle(QR.nodes.form).display === 'none'))) {
-            if (Conf['Persistent QR']) {
-              QR.hide();
-            } else {
-              QR.close();
-            }
-          } else if (Embedding.lastEmbed) {
-            Embedding.closeFloat();
+      let hasAction = false;
+      // QR & Options
+      if (key === Conf['Toggle board list'] && Conf['Custom Board Navigation']) {
+        Header.toggleBoardList();
+        hasAction = true;
+      }
+      if (key === Conf['Toggle header']) {
+        Header.toggleBarVisibility();
+        hasAction = true;
+      }
+      if (key === Conf['Open empty QR'] && QR.postingIsEnabled) {
+        Keybinds.qr();
+        hasAction = true;
+      }
+      if (key === Conf['Open QR'] && QR.postingIsEnabled && threadRoot) {
+        Keybinds.qr(threadRoot);
+        hasAction = true;
+      }
+      if (key === Conf['Open settings']) {
+        Settings.open();
+        hasAction = true;
+      }
+      if (key === Conf['Close']) {
+        if (Settings.dialog) {
+          Settings.close();
+        } else if ((notifications = $$('.notification')).length) {
+          for (var notification of notifications) {
+            $('.close', notification).click();
+          }
+        } else if (QR.nodes?.preview) {
+          QR.closePreview();
+        } else if (QR.nodes && !(QR.nodes.el.hidden || (window.getComputedStyle(QR.nodes.form).display === 'none'))) {
+          if (Conf['Persistent QR']) {
+            QR.hide();
           } else {
-            return;
+            QR.close();
           }
+        } else if (Embedding.lastEmbed) {
+          Embedding.closeFloat();
+        }
+        hasAction = true;
+      }
+      if (key === Conf['Spoiler tags'] && target.nodeName === 'TEXTAREA') {
+        Keybinds.tags('spoiler', target);
+        hasAction = true;
+      }
+      if (key === Conf['Code tags'] && target.nodeName === 'TEXTAREA') {
+        Keybinds.tags('code', target);
+        hasAction = true;
+      }
+      if (key === Conf['Eqn tags'] && target.nodeName === 'TEXTAREA') {
+        Keybinds.tags('eqn', target);
+        hasAction = true;
+      }
+      if (key === Conf['Math tags'] && target.nodeName === 'TEXTAREA') {
+        Keybinds.tags('math', target);
+        hasAction = true;
+      }
+      if (key === Conf['SJIS tags'] && target.nodeName === 'TEXTAREA') {
+        Keybinds.tags('sjis', target);
+        hasAction = true;
+      }
+      if (key === Conf['Toggle sage'] && QR.nodes && !QR.nodes.el.hidden) {
+        Keybinds.sage();
+        hasAction = true;
+      }
+      if (key === Conf['Toggle Cooldown'] && QR.nodes && !QR.nodes.el.hidden
+        && $.hasClass(QR.nodes.fileSubmit, 'custom-cooldown')) {
+        QR.toggleCustomCooldown();
+        hasAction = true;
+      }
+      if (key === Conf['Post from URL'] && QR.postingIsEnabled) {
+        QR.handleUrl('');
+        hasAction = true;
+      }
+      if (key === Conf['Add new post'] && QR.postingIsEnabled) {
+        QR.addPost();
+        hasAction = true;
+      }
+      if (key === Conf['Submit QR'] && QR.nodes && !QR.nodes.el.hidden && QR.status()) {
+        QR.submit();
+        hasAction = true;
+      }
+      // Index/Thread related
+      if (key === Conf['Update']) {
+        switch (g.VIEW) {
+          case 'thread':
+            if (ThreadUpdater.enabled) ThreadUpdater.update();
+            hasAction = true;
           break;
-        case Conf['Spoiler tags']:
-          if (target.nodeName !== 'TEXTAREA') { return; }
-          Keybinds.tags('spoiler', target);
-          break;
-        case Conf['Code tags']:
-          if (target.nodeName !== 'TEXTAREA') { return; }
-          Keybinds.tags('code', target);
-          break;
-        case Conf['Eqn tags']:
-          if (target.nodeName !== 'TEXTAREA') { return; }
-          Keybinds.tags('eqn', target);
-          break;
-        case Conf['Math tags']:
-          if (target.nodeName !== 'TEXTAREA') { return; }
-          Keybinds.tags('math', target);
-          break;
-        case Conf['SJIS tags']:
-          if (target.nodeName !== 'TEXTAREA') { return; }
-          Keybinds.tags('sjis', target);
-          break;
-        case Conf['Toggle sage']:
-          if (!QR.nodes || !!QR.nodes.el.hidden) { return; }
-          Keybinds.sage();
-          break;
-        case Conf['Toggle Cooldown']:
-          if (!QR.nodes || !!QR.nodes.el.hidden || !$.hasClass(QR.nodes.fileSubmit, 'custom-cooldown')) { return; }
-          QR.toggleCustomCooldown();
-          break;
-        case Conf['Post from URL']:
-          if (!QR.postingIsEnabled) { return; }
-          QR.handleUrl('');
-          break;
-        case Conf['Add new post']:
-          if (!QR.postingIsEnabled) { return; }
-          QR.addPost();
-          break;
-        case Conf['Submit QR']:
-          if (!QR.nodes || !!QR.nodes.el.hidden) { return; }
-          if (!QR.status()) { QR.submit(); }
-          break;
-        // Index/Thread related
-        case Conf['Update']:
-          switch (g.VIEW) {
-            case 'thread':
-              if (!ThreadUpdater.enabled) { return; }
-              ThreadUpdater.update();
-              break;
-            case 'index':
-              if (!Index.enabled) { return; }
-              Index.update();
-              break;
-            default:
-              return;
-          }
-          break;
-        case Conf['Watch']:
-          if (!ThreadWatcher.enabled || !thread) { return; }
-          ThreadWatcher.toggle(thread);
-          break;
-        case Conf['Update thread watcher']:
-          if (!ThreadWatcher.enabled) { return; }
-          ThreadWatcher.buttonFetchAll();
-          break;
-        case Conf['Toggle thread watcher']:
-          if (!ThreadWatcher.enabled) { return; }
-          ThreadWatcher.toggleWatcher();
-          break;
-        case Conf['Toggle threading']:
-          if (!QuoteThreading.ready) { return; }
-          QuoteThreading.toggleThreading();
-          break;
-        case Conf['Mark thread read']:
-          if ((g.VIEW !== 'index') || !thread || !UnreadIndex.enabled) { return; }
-          UnreadIndex.markRead.call(threadRoot);
-          break;
-        // Images
-        case Conf['Expand image']:
-          if (!ImageExpand.enabled || !threadRoot) { return; }
-          var post = Get.postFromNode(Keybinds.post(threadRoot));
-          if (post.file) { ImageExpand.toggle(post); }
-          break;
-        case Conf['Expand images']:
-          if (!ImageExpand.enabled) { return; }
-          ImageExpand.cb.toggleAll();
-          break;
-        case Conf['Open Gallery']:
-          if (!Gallery.enabled) { return; }
-          Gallery.cb.toggle();
-          break;
-        case Conf['fappeTyme']:
-          if (!FappeTyme.nodes?.fappe) { return; }
-          FappeTyme.toggle('fappe');
-          break;
-        case Conf['werkTyme']:
-          if (!FappeTyme.nodes?.werk) { return; }
-          FappeTyme.toggle('werk');
-          break;
-        // Board Navigation
-        case Conf['Front page']:
-          if (Index.enabled) {
-            Index.userPageNav(1);
-          } else {
-            location.href = `/${g.BOARD}/`;
-          }
-          break;
-        case Conf['Open front page']:
-          $.open(`${location.origin}/${g.BOARD}/`);
-          break;
-        case Conf['Next page']:
-          if ((g.VIEW !== 'index') || !!g.SITE.isOnePage?.(g.BOARD)) { return; }
-          if (Index.enabled) {
-            if (!['paged', 'infinite'].includes(Conf['Index Mode'])) { return; }
-            $('.next button', Index.pagelist).click();
-          } else {
-            $(g.SITE.selectors.nav.next)?.click();
-          }
-          break;
-        case Conf['Previous page']:
-          if ((g.VIEW !== 'index') || !!g.SITE.isOnePage?.(g.BOARD)) { return; }
-          if (Index.enabled) {
-            if (!['paged', 'infinite'].includes(Conf['Index Mode'])) { return; }
-            $('.prev button', Index.pagelist).click();
-          } else {
-            $(g.SITE.selectors.nav.prev)?.click();
-          }
-          break;
-        case Conf['Search form']:
-          if (g.VIEW !== 'index') { return; }
-          var searchInput = Index.enabled ?
-            Index.searchInput
-          : g.SITE.selectors.searchBox ?
-            $(g.SITE.selectors.searchBox)
-          :
-            undefined;
-          if (!searchInput) { return; }
+          case 'index':
+            if (Index.enabled) Index.update();
+            hasAction = true;
+        }
+      }
+      if (key === Conf['Watch'] && ThreadWatcher.enabled && thread) {
+        ThreadWatcher.toggle(thread);
+        hasAction = true;
+      }
+      if (key === Conf['Update thread watcher'] && ThreadWatcher.enabled) {
+        ThreadWatcher.buttonFetchAll();
+        hasAction = true;
+      }
+      if (key === Conf['Toggle thread watcher'] && ThreadWatcher.enabled) {
+        ThreadWatcher.toggleWatcher();
+        hasAction = true;
+      }
+      if (key === Conf['Toggle threading'] && QuoteThreading.ready) {
+        QuoteThreading.toggleThreading();
+        hasAction = true;
+      }
+      if (key === Conf['Mark thread read'] && g.VIEW === 'index' && thread && UnreadIndex.enabled) {
+        UnreadIndex.markRead.call(threadRoot);
+        hasAction = true;
+      }
+      // Images
+      if (key === Conf['Expand image'] && ImageExpand.enabled && threadRoot) {
+        var post = Get.postFromNode(Keybinds.post(threadRoot));
+        if (post.file) {
+          ImageExpand.toggle(post);
+          hasAction = true;
+        }
+      }
+      if (key === Conf['Expand images'] && ImageExpand.enabled) {
+        ImageExpand.cb.toggleAll();
+        hasAction = true;
+      }
+      if (key === Conf['Open Gallery'] && Gallery.enabled) {
+        Gallery.cb.toggle();
+        hasAction = true;
+      }
+      if (key === Conf['fappeTyme'] && FappeTyme.nodes?.fappe) {
+        FappeTyme.toggle('fappe');
+        hasAction = true;
+      }
+      if (key === Conf['werkTyme'] && FappeTyme.nodes?.werk) {
+        FappeTyme.toggle('werk');
+        hasAction = true;
+      }
+      // Board Navigation
+      if (key === Conf['Front page']) {
+        if (Index.enabled) {
+          Index.userPageNav(1);
+        } else {
+          location.href = `/${g.BOARD}/`;
+        }
+        hasAction = true;
+      }
+      if (key === Conf['Open front page']) {
+        $.open(`${location.origin}/${g.BOARD}/`);
+        hasAction = true;
+      }
+      if (key === Conf['Next page'] && g.VIEW === 'index' && !g.SITE.isOnePage?.(g.BOARD)) {
+        if (Index.enabled) {
+          if (!['paged', 'infinite'].includes(Conf['Index Mode'])) { return; }
+          $('.next button', Index.pagelist).click();
+        } else {
+          $(g.SITE.selectors.nav.next)?.click();
+        }
+        hasAction = true;
+      }
+      if (key === Conf['Previous page'] && g.VIEW === 'index' && !g.SITE.isOnePage?.(g.BOARD)) {
+        if (Index.enabled) {
+          if (!['paged', 'infinite'].includes(Conf['Index Mode'])) { return; }
+          $('.prev button', Index.pagelist).click();
+        } else {
+          $(g.SITE.selectors.nav.prev)?.click();
+        }
+        hasAction = true;
+      }
+      if (key === Conf['Search form'] && g.VIEW === 'index') {
+        var searchInput = Index.enabled ?
+          Index.searchInput
+        : g.SITE.selectors.searchBox ?
+          $(g.SITE.selectors.searchBox)
+        :
+          undefined;
+        if (searchInput) {
           Header.scrollToIfNeeded(searchInput);
           searchInput.focus();
-          break;
-        case Conf['Paged mode']:
-          if (!Index.enabledOn(g.BOARD)) { return; }
-          location.href = g.VIEW === 'index' ? '#paged' : `/${g.BOARD}/#paged`;
-          break;
-        case Conf['Infinite scrolling mode']:
-          if (!Index.enabledOn(g.BOARD)) { return; }
-          location.href = g.VIEW === 'index' ? '#infinite' : `/${g.BOARD}/#infinite`;
-          break;
-        case Conf['All pages mode']:
-          if (!Index.enabledOn(g.BOARD)) { return; }
-          location.href = g.VIEW === 'index' ? '#all-pages' : `/${g.BOARD}/#all-pages`;
-          break;
-        case Conf['Open catalog']:
-          if (!(catalog = CatalogLinks.catalog())) { return; }
-          location.href = catalog;
-          break;
-        case Conf['Cycle sort type']:
-          if (!Index.enabled) { return; }
-          Index.cycleSortType();
-          break;
-        // Thread Navigation
-        case Conf['Next thread']:
-          if ((g.VIEW !== 'index') || !threadRoot) { return; }
-          Nav.scroll(+1);
-          break;
-        case Conf['Previous thread']:
-          if ((g.VIEW !== 'index') || !threadRoot) { return; }
-          Nav.scroll(-1);
-          break;
-        case Conf['Expand thread']:
-          if ((g.VIEW !== 'index') || !threadRoot) { return; }
-          ExpandThread.toggle(thread);
-          // Keep thread from moving off screen when contracted.
-          Header.scrollTo(threadRoot);
-          break;
-        case Conf['Open thread']:
-          if ((g.VIEW !== 'index') || !threadRoot) { return; }
-          Keybinds.open(thread);
-          break;
-        case Conf['Open thread tab']:
-          if ((g.VIEW !== 'index') || !threadRoot) { return; }
-          Keybinds.open(thread, true);
-          break;
-        // Reply Navigation
-        case Conf['Next reply']:
-          if (!threadRoot) { return; }
-          Keybinds.hl(+1, threadRoot);
-          break;
-        case Conf['Previous reply']:
-          if (!threadRoot) { return; }
-          Keybinds.hl(-1, threadRoot);
-          break;
-        case Conf['Deselect reply']:
-          if (!threadRoot) { return; }
-          Keybinds.hl(0, threadRoot);
-          break;
-        case Conf['Hide']:
-          if (!thread || !ThreadHiding.db) { return; }
-          Header.scrollTo(threadRoot);
-          ThreadHiding.toggle(thread);
-          break;
-        case Conf['Quick Filter MD5']:
-          if (!threadRoot) { return; }
-          post = Keybinds.post(threadRoot);
-          Keybinds.hl(+1, threadRoot);
-          Filter.quickFilterMD5.call(post, e);
-          break;
-        case Conf['Previous Post Quoting You']:
-          if (!threadRoot || !QuoteYou.db) { return; }
-          QuoteYou.cb.seek('preceding');
-          break;
-        case Conf['Next Post Quoting You']:
-          if (!threadRoot || !QuoteYou.db) { return; }
-          QuoteYou.cb.seek('following');
-          break;
-        default:
-          return;
+          hasAction = true;
+        }
       }
-      e.preventDefault();
-      return e.stopPropagation();
+      if (key === Conf['Paged mode'] && Index.enabledOn(g.BOARD)) {
+        location.href = g.VIEW === 'index' ? '#paged' : `/${g.BOARD}/#paged`;
+      }
+      if (key === Conf['Infinite scrolling mode'] && Index.enabledOn(g.BOARD)) {
+        location.href = g.VIEW === 'index' ? '#infinite' : `/${g.BOARD}/#infinite`;
+      }
+      if (key === Conf['All pages mode'] && Index.enabledOn(g.BOARD)) {
+        location.href = g.VIEW === 'index' ? '#all-pages' : `/${g.BOARD}/#all-pages`;
+      }
+      if (key === Conf['Open catalog'] && (catalog = CatalogLinks.catalog())) {
+        location.href = catalog;
+      }
+      if (key === Conf['Cycle sort type'] && Index.enabled) {
+        Index.cycleSortType();
+        hasAction = true;
+      }
+      // Thread Navigation
+      if (key === Conf['Next thread'] && g.VIEW === 'index' && threadRoot) {
+        Nav.scroll(+1);
+        hasAction = true;
+      }
+      if (key === Conf['Previous thread'] && g.VIEW === 'index' && threadRoot) {
+        Nav.scroll(-1);
+        hasAction = true;
+      }
+      if (key === Conf['Expand thread'] && g.VIEW === 'index' && threadRoot) {
+        ExpandThread.toggle(thread);
+        // Keep thread from moving off screen when contracted.
+        Header.scrollTo(threadRoot);
+        hasAction = true;
+      }
+      if (key === Conf['Open thread'] && g.VIEW === 'index' && threadRoot) {
+        Keybinds.open(thread);
+        hasAction = true;
+      }
+      if (key === Conf['Open thread tab'] && g.VIEW === 'index' && threadRoot) {
+        Keybinds.open(thread, true);
+        hasAction = true;
+      }
+      // Reply Navigation
+      if (key === Conf['Next reply'] && threadRoot) {
+        Keybinds.hl(+1, threadRoot);
+        hasAction = true;
+      }
+      if (key === Conf['Previous reply'] && threadRoot) {
+        Keybinds.hl(-1, threadRoot);
+        hasAction = true;
+      }
+      if (key === Conf['Deselect reply'] && threadRoot) {
+        Keybinds.hl(0, threadRoot);
+        hasAction = true;
+      }
+      if (key === Conf['Hide'] && thread && ThreadHiding.db) {
+        Header.scrollTo(threadRoot);
+        ThreadHiding.toggle(thread);
+        hasAction = true;
+      }
+      if (key === Conf['Quick Filter MD5'] && threadRoot) {
+        post = Keybinds.post(threadRoot);
+        Keybinds.hl(+1, threadRoot);
+        Filter.quickFilterMD5.call(post, e);
+        hasAction = true;
+      }
+      if (key === Conf['Previous Post Quoting You'] && threadRoot && QuoteYou.db) {
+        QuoteYou.cb.seek('preceding');
+        hasAction = true;
+      }
+      if (key === Conf['Next Post Quoting You'] && threadRoot && QuoteYou.db) {
+        QuoteYou.cb.seek('following');
+        hasAction = true;
+      }
+      if (hasAction) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     },
 
     keyCode(e) {
@@ -17024,6 +17166,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
           :
             value;
       status.disabled = disabled || false;
+      return status.disabled;
     },
     openPost() {
       QR.open();
@@ -17475,6 +17618,7 @@ aero|asia|biz|cat|com|coop|dance|info|int|jobs|mobi|moe|museum|name|net|org|post
       Icon.set(nodes.view, 'eye');
       Icon.set(nodes.restoreNameButton, 'undo');
       Icon.set(nodes.splitPost, 'scissors');
+      Icon.set(nodes.fileRM, 'xmark');
       Icon.set(nodes.close, 'xmark');
       Icon.set(nodes.dumpButton, 'squarePlus');
       Icon.set(nodes.addPost, 'plus');
@@ -21209,13 +21353,14 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         input.reportValidity();
       }
     },
+    keyBindInputs: dict(),
     keybinds(section) {
       let key;
       $.extend(section, { innerHTML: KeybindsPage });
       $('.warning', section).hidden = Conf['Keybinds'];
       const tbody = $('tbody', section);
       const items = dict();
-      const inputs = dict();
+      const inputs = Settings.keyBindInputs;
       for (key in Config.hotkeys) {
         var arr = Config.hotkeys[key];
         var tr = $.el('tr', { innerHTML: `<td>${arr[1]}</td><td><input class="field"></td>` });
@@ -21233,6 +21378,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
           inputs[key].value = val;
         }
       });
+      $.on($('#reset-keys', section), 'click', Settings.resetKeybinds);
     },
     keybind(e) {
       if (e.keyCode === 9)
@@ -21244,7 +21390,18 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         return; // empty string is backspace
       this.value = key;
       $.cb.value.call(this);
-    }
+    },
+    resetKeybinds() {
+      if (!confirm('Are you sure you want to reset the keybinds?'))
+        return;
+      const defaults = Object.fromEntries(Object.entries(Config.hotkeys).map(([key, value]) => [key, value[0]]));
+      $.set(defaults, () => {
+        Object.assign(Conf, defaults);
+        for (const [key, value] of Object.entries(defaults)) {
+          Settings.keyBindInputs[key].value = value;
+        }
+      });
+    },
   };
 
   var Filter = {
@@ -24180,6 +24337,8 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
       if (!Conf['Unique ID and Capcode Navigation'] || !['index', 'thread'].includes(g.VIEW)) { return; }
 
       this.buttons = this.makeButtons();
+      Icon.set(this.buttons.firstChild, 'arrowUpLong');
+      Icon.set(this.buttons.lastChild, 'arrowDownLong');
 
       return Callbacks.Post.push({
         name: 'Post Jumper',
@@ -24318,6 +24477,7 @@ Enable it on boards.${location.hostname.split('.')[1]}.org in your browser's pri
         textContent: '➖︎',
       }
       ));
+      Icon.set(btn, 'squareMinus');
       $.on(btn, 'click', PSAHiding.toggle);
       if (psa.firstChild?.tagName === 'HR') {
         $.after(psa.firstChild, btn);
