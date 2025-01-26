@@ -2046,21 +2046,16 @@ a:only-of-type > .remove {
   display: none;
 }
 #embedding {
-  padding: 1px 4px 1px 4px;
+  padding: 1px 4px;
   position: fixed;
 }
 #embedding.empty {
   display: none;
 }
-#embedding > div:first-child {
+#embedding > .move {
   display: flex;
-}
-#embedding .move {
-  flex: 1;
-}
-#embedding .jump {
-  margin: -1px 4px;
-  text-decoration: none;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 /* Gallery */
