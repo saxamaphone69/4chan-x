@@ -3,6 +3,13 @@
 4chan XT uses a different user script namespace than 4chan X, so to migrate you need to export settings from 4chan X,
 and import them in XT.
 
+### Not released yet
+
+- Implement FxTwitter improvements based on
+  [saxamaphone69's comment](https://github.com/TuxedoTako/4chan-xt/issues/60#issuecomment-2600724308).
+  - Replies now load, so the setting for the number of replies to load isn't useless anymore.
+  - Community notes are shown.
+
 ### 2.21.2 (2025-01-15)
 
 - Fix notification padding. [#146](https://github.com/TuxedoTako/4chan-xt/issues/146),
