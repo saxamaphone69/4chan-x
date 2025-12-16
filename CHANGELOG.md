@@ -4,6 +4,9 @@
 
 ### v1.14.23
 
+**v1.14.23.2** *(2025-12-16)* - [[Userscript](https://raw.githubusercontent.com/ccd0/4chan-x/1.14.23.2/builds/4chan-X-noupdate.user.js)] [[Chrome extension](https://raw.githubusercontent.com/ccd0/4chan-x/1.14.23.2/builds/4chan-X-noupdate.crx)]
+- Update for change in how 'Verification not required' message is displayed.
+
 **v1.14.23.1** *(2024-11-20)* - [[Userscript](https://raw.githubusercontent.com/ccd0/4chan-x/1.14.23.1/builds/4chan-X-noupdate.user.js)] [[Chrome extension](https://raw.githubusercontent.com/ccd0/4chan-x/1.14.23.1/builds/4chan-X-noupdate.crx)]
 - (saxamaphone69) Fix dead documentation link.
 - (youcmd) Recognize Youtube stream links.
